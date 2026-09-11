@@ -1,0 +1,104 @@
+{
+ "W": 320,
+ "H": 844,
+ "idleCollapsed": {
+  "island": 62,
+  "islandBottom": 834,
+  "fullHeight": 134,
+  "choices": "Body, Workouts, Health",
+  "title": "Explore",
+  "meta": "Body · Workouts · Health",
+  "metaOpacity": "1.00",
+  "timer": null
+ },
+ "idleExpanded": {
+  "island": 134,
+  "islandBottom": 834,
+  "fullHeight": 134,
+  "choices": "Body, Workouts, Health",
+  "title": "Explore",
+  "meta": "Body · Workouts · Health",
+  "metaOpacity": "0.00",
+  "timer": null
+ },
+ "frames": "opening 93 | opening 124 | opening 132 | opening 134 | reversed 97 | reversed 73 | reversed 65 | reversed 63 | reopening 92 | reopening 118 | reopening 131 | reopening 133 | closing 97 | closing 73 | closing 65 | closing 63 | closing 62",
+ "activeRunning": {
+  "island": 246,
+  "islandBottom": 834,
+  "fullHeight": 246,
+  "choices": "Body, Workouts, Health",
+  "title": "Walking",
+  "meta": "29:58 remaining",
+  "metaOpacity": "1.00",
+  "timer": "00:01"
+ },
+ "activePaused": {
+  "island": 246,
+  "islandBottom": 834,
+  "fullHeight": 246,
+  "choices": "Body, Workouts, Health",
+  "title": "Walking",
+  "meta": "Paused",
+  "metaOpacity": "1.00",
+  "timer": "00:01"
+ },
+ "activeHours": {
+  "island": 246,
+  "islandBottom": 834,
+  "fullHeight": 246,
+  "choices": "Body, Workouts, Health",
+  "title": "Walking",
+  "meta": "Target reached",
+  "metaOpacity": "1.00",
+  "timer": "3:12:34"
+ },
+ "chooser": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "rows": "68,68,68,68",
+  "title": "Workouts",
+  "start": 0
+ },
+ "setupWalking": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "title": "Walking",
+  "start": 559
+ },
+ "setupWalkingTime": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "title": "Walking",
+  "start": 632
+ },
+ "validation": {
+  "error": "Enter a weight from 20 to 350 kg, or leave it empty.",
+  "errorBottom": 593,
+  "startTop": 609
+ },
+ "setupRunning": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "title": "Running",
+  "start": 559
+ },
+ "setupCycling": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "title": "Cycling",
+  "start": 559
+ },
+ "setupStrength": {
+  "overflow": false,
+  "scrollHeight": 744,
+  "clientHeight": 744,
+  "title": "Strength",
+  "start": 483
+ },
+ "errors": []
+}

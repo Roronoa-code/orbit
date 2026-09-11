@@ -1,0 +1,14 @@
+{
+ "authorisation": "Standing rule from the user, 11 September 2026: \"from now on once done install on phone and push to github\"",
+ "device": "192.168.0.210:38347, model SM-S938B",
+ "time": "2026-09-11 22:09:41",
+ "command": "adb -s 192.168.0.210:38347 install -r dist/Orbit.apk",
+ "result": "Success (streamed install, app data kept)",
+ "build": "android/build/20260911-220922",
+ "apkSha256": "a46d13622c86c2e4245ec5f266cde2d68e2796b17efc1e6c04a975e811319807",
+ "installedSha256": "a46d13622c86c2e4245ec5f266cde2d68e2796b17efc1e6c04a975e811319807",
+ "installedMatchesBuild": true,
+ "previousApk": {"sha256": "843ab25a6824d0ab4cb33a3ba273bec80343c1628024a629c8367a60f05d276e", "build": "android/build/20260911-213518", "backup": "verification/launcher-workout/phone/phone-before.apk"},
+ "launched": false,
+ "otherDevices": "BYZL25052900310864 not touched"
+}

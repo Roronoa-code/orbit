@@ -1,7 +1,7 @@
 {
   "width": 390,
-  "frostHeightMin": 289,
-  "frostHeightMax": 289,
+  "frostHeightMin": 246,
+  "frostHeightMax": 246,
   "stableTargets": [
     {
       "id": "live-timer",

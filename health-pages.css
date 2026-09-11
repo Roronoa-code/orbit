@@ -9,7 +9,7 @@
 .has-activity .live-icon{position:relative;color:#cdbaff}
 .has-activity .live-meta{letter-spacing:0}
 .has-activity .live-chevron{width:16px}
-.live-session-controls button{min-height:46px;font-size:12px}
+.live-session-controls button{min-height:48px;font-size:13px}
 .live-session-controls #live-pause{background:#c1abef;color:#20182d;border-color:transparent}
 .health-page{position:absolute;inset:30px 0 0;z-index:22;background:#0a0a0c;display:flex;flex-direction:column;min-height:0}
 .health-page[hidden]{display:none}
@@ -59,14 +59,17 @@
 .is-ready>.selection-pill{transition:transform 360ms cubic-bezier(.2,.8,.2,1),width 360ms cubic-bezier(.2,.8,.2,1),height 220ms ease}
 .health-note{font-size:10px;line-height:1.7;color:#b7b7c1;margin:15px 5px}
 .health-error{font-size:11px;color:#ffc0c8;line-height:1.5}
-.workout-intro{padding:16px 10px 23px}
-.workout-intro h2,.workout-setup h2{font-size:31px;font-weight:450;line-height:1.16;letter-spacing:-1.1px;margin-top:10px}
 .health-eyebrow{font-size:11px;color:#b9b9c4;letter-spacing:.25px}
-.workout-kinds{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 20px}
-.workout-kinds button{position:relative;padding:20px;border:0;border-radius:25px;background:#202023;text-align:left;min-height:161px}
-.workout-kinds .workout-glyph{width:62px;height:62px;color:#cbbaff;margin-bottom:20px}
-.workout-kinds button>span{font-size:14px;float:none;color:#f4f4f6}
-.workout-kinds button>small{position:absolute;right:22px;bottom:23px;font-size:16px;color:#b7a6d9}
+/* The chooser is one surface of four rows; each whole row is the activity's setup button. */
+.workout-start{margin:4px 0 16px}
+.workout-start-title{margin:0 4px 10px;font-size:16px;font-weight:500;color:#ece9f2}
+.workout-kinds{border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c}
+.workout-kinds button{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:10px 14px;border:0;background:none;text-align:left;color:inherit;transition:background-color 160ms ease}
+.workout-kinds button+button:before{content:"";position:absolute;top:0;left:54px;right:14px;height:1px;background:#ffffff0f}
+.workout-kinds .workout-glyph{width:28px;height:28px;color:#cbbaff}
+.workout-kinds strong{display:block;font-size:15px;font-weight:500;color:#f4f4f6}
+.workout-kinds small{display:block;margin-top:3px;font-size:12px;letter-spacing:0;color:#a9a5b3}
+.workout-kinds button:active{background:#ffffff0a}
 .workout-kinds button:disabled{opacity:.4}
 .workout-week{padding:20px 22px}
 .workout-week .tile-value{margin:8px 0 0}
@@ -84,19 +87,34 @@
 .workout-history li small{display:block;margin-top:5px}
 .workout-focus .health-scroll{display:flex;flex-direction:column}
 .workout-focus .health-content{flex:1;display:flex;flex-direction:column}
-.workout-setup{flex:1;padding:5px 9px 0}
-.workout-art{height:120px;display:flex;align-items:center;justify-content:center;color:#cbbaff}
-.workout-art .workout-glyph{width:96px;height:96px}
-.workout-setup h2{font-size:35px}
-.workout-setup form{margin-top:24px}
-.workout-setup fieldset{display:flex;gap:8px;border:0;padding:0;margin:0;flex-wrap:wrap}
-.workout-setup legend{font-size:11px;color:#b9b9c4;margin-bottom:12px}
-.workout-setup fieldset label{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#242427;border-radius:17px;flex:1;white-space:nowrap;font-size:11px}
-.workout-setup input[type=radio]{accent-color:#b69cff;width:15px;height:15px;margin:0}
-.target-minutes{display:flex;align-items:center;justify-content:space-between;margin-top:13px;background:#202023;padding:12px 16px;border-radius:17px;font-size:12px}
-.target-minutes input{background:none;border:0;border-bottom:1px solid #aaa1bb50;color:inherit;width:95px;text-align:right;font-size:22px;min-height:40px}
-
-.workout-primary{display:flex;justify-content:space-between;align-items:center;border:0;border-radius:30px;background:#b69cff;color:#18131f;padding:18px 25px;width:100%;min-height:62px;font-size:15px;margin-top:17px}
+/* Setup is one configuration flow under the header title: a short intro row, one panel of settings, help, then Start. */
+.health-page[data-workout-screen=setup] .health-scroll{padding-inline:16px}
+.workout-setup{flex:1;padding:0 0 8px}
+.workout-setup-intro{display:flex;align-items:center;gap:12px;min-height:44px;margin:0 0 16px}
+.workout-setup-intro .workout-glyph{width:28px;height:28px;color:#cbbaff}
+.workout-setup-intro p{font-size:13px;line-height:1.4;color:#aeaab7}
+.setup-panel{padding:16px;border-radius:24px;background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c}
+.setup-target{min-width:0;margin:0;padding:0;border:0}
+.setup-target legend{float:left;width:100%;margin:0 0 8px;padding:0;font-size:12px;color:#aeaab7}
+.setup-segments{clear:both;position:relative;isolation:isolate;display:grid;grid-template-columns:1fr 1fr;height:56px;padding:4px;border-radius:18px;background:#0000004d;box-shadow:inset 0 1px 2px #0000008c,inset 0 -1px 0 #ffffff0d}
+.setup-segments label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;border-radius:14px;font-size:14px;color:#b4b0bd;white-space:nowrap;cursor:pointer;transition:color 200ms ease}
+.setup-segments input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;pointer-events:none}
+.setup-segments label:has(input:checked){color:#f4f0fb}
+.setup-segments label:has(input:focus-visible){outline:2px solid #d1c2ff;outline-offset:-2px}
+.setup-capsule{position:absolute;z-index:0;top:4px;left:4px;width:calc(50% - 4px);height:48px;border-radius:14px;background:linear-gradient(180deg,#bca4ff42,#b69cff24);box-shadow:inset 0 1px 0 #efe6ff33,inset 0 0 0 1px #c6b3ff24;transition:transform 220ms cubic-bezier(.2,.8,.2,1)}
+.setup-segments:has(input[value=time]:checked) .setup-capsule{transform:translateX(100%)}
+.target-minutes{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff0f;font-size:14px;color:#ece9f1}
+.setup-field{display:flex;align-items:center;gap:6px;flex:none;width:112px;min-height:48px;padding:0 12px;border-radius:14px;background:#0000004d;box-shadow:inset 0 1px 2px #0000008c,inset 0 -1px 0 #ffffff0d}
+.setup-field:focus-within{box-shadow:inset 0 1px 2px #0000008c,0 0 0 2px #d1c2ff99}
+.setup-field input{flex:1;min-width:0;width:100%;height:46px;padding:0;border:0;background:none;color:#f3eff7;font-size:20px;text-align:right;font-variant-numeric:tabular-nums;appearance:textfield;-moz-appearance:textfield}
+.setup-field input:focus-visible{outline:none}
+.setup-field input::-webkit-inner-spin-button,.setup-field input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.setup-field small{flex:none;font-size:12px;letter-spacing:0;color:#aaa6b4}
+.setup-help{margin:16px 2px 0;font-size:12px;line-height:1.5;color:#aaa6b4}
+.workout-setup .health-error{margin:16px 2px 0}
+.workout-setup .health-error:empty{display:none}
+.workout-primary{display:flex;justify-content:center;align-items:center;width:100%;min-height:56px;margin-top:16px;padding:0 20px;border:0;border-radius:20px;background:#b69cff;color:#18131f;font-size:16px;font-weight:500;transition:transform 140ms ease,filter 140ms ease}
+.workout-primary:active{transform:scale(.985);filter:brightness(.95)}
 .workout-live{display:flex;flex-direction:column;flex:1;padding:9px 8px 4px;text-align:center}
 .workout-dot-play{display:block;width:130px;height:56px;margin:0 auto 5px;border:0;border-radius:30px;background:none;padding:0;color:#cbbaff}
 .workout-dot-play svg{width:100%;height:100%;fill:currentColor}
@@ -148,8 +166,8 @@
 .countdown-stages i{display:block;width:7px;height:7px;background:#39343f;border-radius:50%;transition:background 120ms}
 .countdown-stages i.lit{background:#bda3ff}
 .workout-countdown button{border:0;border-radius:25px;min-height:48px;padding:12px 40px;background:#29292e}
-@media(max-width:360px){.health-scroll{padding-inline:11px}.health-grid .health-tile{padding:15px}.health-tile h2{font-size:13px}.workout-intro h2{font-size:34px}.workout-kinds button{padding:18px}.workout-setup fieldset label{padding:12px 10px;font-size:10px}}
-@media(forced-colors:active){.health-tile,.workout-kinds button{border:1px solid CanvasText;background:Canvas}.mini-plot{forced-color-adjust:none}}
+@media(max-width:360px){.health-scroll{padding-inline:11px}.health-grid .health-tile{padding:15px}.health-tile h2{font-size:13px}.setup-segments label{font-size:13px}.activity-choice{font-size:12px}}
+@media(forced-colors:active){.health-tile,.workout-kinds,.setup-panel{border:1px solid CanvasText;background:Canvas}.mini-plot{forced-color-adjust:none}.tracking-option input{appearance:auto;-webkit-appearance:auto}.tracking-option input:before{display:none}}
 
 .details-body[hidden],.target-minutes[hidden]{display:none}
 .health-page{contain:layout paint}
@@ -218,7 +236,7 @@
 /* A square box, centred and clipped by the page, shows the same crop as before and can shrink uniformly into the small cover. */
 .music-cover img{position:relative;flex:none;height:67%;aspect-ratio:1;min-width:100%;object-fit:cover;object-position:center 28%;display:block;mask-image:linear-gradient(#000 40%,#000b 64%,transparent);transform-origin:0 0;will-change:transform,opacity}
 .music-bottom{padding:0 8px 8px}
-.music-access{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;width:100%;margin-top:12px;background:none;border:0;color:#bbb8c3;font-size:12px}
+.music-access{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;margin-top:16px;background:none;border:0;color:#bbb8c3;font-size:13px}
 .timer-focused.has-music .workout-time-focus{min-height:clamp(225px,39dvh,365px);justify-content:flex-end;padding-bottom:24px}
 .timer-focused.has-music .timer-dial{width:min(100%,260px);height:96px}
 .timer-focused.has-music #focus-time-dots{height:82px;filter:drop-shadow(0 2px 12px #0009)}
@@ -264,12 +282,13 @@
 @media(forced-colors:active){.health-page.music-focus{background:Canvas}.health-page.music-focus:before,.health-page.music-focus:after{display:none}.music-focus .target-remaining,.timer-focused #timer-label,.timer-focused .timer-tap-hint{color:CanvasText}.timer-focused #focus-time-dots{display:none}.timer-focused .session-time .matrix-reading{display:block;height:64px}.music-focus .session-actions button{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
 
 /* A workout uses one reading, then compact groups for the supporting facts. */
-.tracking-option,.workout-weight{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:72px;padding:14px 2px;border-bottom:1px solid #ffffff13;font-size:13px}
-.tracking-option{margin-top:14px}
-.tracking-option small,.workout-weight small{display:block;font-size:10px;color:#b2adbb;margin-top:6px}
-.tracking-option input{width:21px;height:21px;accent-color:#b69cff;flex-shrink:0}
-.workout-weight>span:last-child{white-space:nowrap;color:#b6afc1}
-.workout-weight input{background:none;color:#f1edf5;border:0;border-bottom:1px solid #ffffff20;width:76px;text-align:right;min-height:44px;font-size:21px}
+.tracking-option,.workout-weight{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff0f;font-size:14px;color:#ece9f1}
+.tracking-option>span>small,.workout-weight>span:first-child>small{display:block;margin-top:3px;font-size:12px;letter-spacing:0;color:#a9a5b3}
+/* The GPS option is a real checkbox drawn as a switch; its whole row is the label. */
+.tracking-option input{appearance:none;-webkit-appearance:none;position:relative;flex:none;width:44px;height:26px;margin:0;border-radius:13px;background:#ffffff24;box-shadow:inset 0 1px 2px #0006;cursor:pointer;transition:background-color 200ms ease}
+.tracking-option input:before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#c9c5d1;box-shadow:0 1px 3px #0008;transition:transform 200ms cubic-bezier(.2,.8,.2,1),background-color 200ms ease}
+.tracking-option input:checked{background:#9f87e0}
+.tracking-option input:checked:before{transform:translateX(18px);background:#fff}
 .workout-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:0}
 .workout-stat{min-width:0;padding:15px 2px 14px;border-bottom:1px solid #ffffff0b}
 .workout-stat:nth-child(even){padding-left:18px}
@@ -372,6 +391,11 @@
 
 /* The open launcher is one drag surface: a vertical move over its shortcuts belongs to the shell. */
 .live-island-body{touch-action:none}
+/* Expanded idle Explore: the destinations are visible above it, so the subtitle fades and the title settles to the row's centre.
+   Both follow the shell's own progress; a live workout keeps its status line. */
+.live-island:not(.has-activity) .live-title{transform:translateY(calc(var(--island-open,0)*8px));will-change:transform}
+.live-island:not(.has-activity) .live-meta{opacity:calc(1 - var(--island-open,0)*1.4);will-change:opacity}
+.live-title,.live-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* One frosted material for Orbit's raised surfaces and controls: a charcoal tint over visible diffusion, a rim that
    catches light along the top edge, and a soft drop that lifts it off the page. Used for containers and controls only. */
 .health-page,.live-island{--glass-tint:linear-gradient(180deg,#2a2a31b3,#1b1b21c2 55%,#1d1d23cc);--glass-blur:blur(22px) saturate(1.12);--glass-rim:linear-gradient(170deg,#ffffff3d,#ffffff12 26%,#ffffff06 55%,#ffffff12);--glass-lift:inset 0 1px 0 #ffffff12,0 20px 36px -24px #000,0 3px 10px -6px #000c}

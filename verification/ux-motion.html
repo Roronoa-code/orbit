@@ -21,7 +21,7 @@ const api=()=>w().__ux;
 let previewRaw;
 function expose(){
   if(api())return;
-  const script=doc().createElement('script');script.textContent='window.__ux={Health,MusicPlayer,WorkoutFocus,setLiveOpen,setDeckExpanded,cyclePeriod,changeMetric,inspectBar,islands,get period(){return days}};';doc().head.append(script);
+  const script=doc().createElement('script');script.textContent='window.__ux={Health,MusicPlayer,WorkoutFocus,setLiveOpen,setDeckExpanded,cyclePeriod,changeMetric,inspectBar,islands,updateLiveBar,get period(){return days}};';doc().head.append(script);
 }
 document.querySelector('#narrow').onclick=()=>live.style.width='320px';document.querySelector('#wide').onclick=()=>live.style.width='390px';
 document.querySelector('#reset').onclick=()=>{if(previewRaw!==undefined){if(previewRaw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,previewRaw);previewRaw=undefined}w().location.reload();result.textContent='Preview reset.'};
@@ -40,7 +40,14 @@ document.querySelector('#run').onclick=async()=>{
     const reversing=box(shell).height;api().setLiveOpen(false);check(Math.abs(box(shell).height-reversing)<.3,'Reversal must preserve shell position');await wait(120);const closing=box(shell).height;
     api().setLiveOpen(true);check(Math.abs(box(shell).height-closing)<.3,'Reopening must continue from the displayed shell');await wait(900);
     check(Math.abs(box(bar).bottom-bottom)<.3,'The live bar bottom must remain anchored');check(!q('#live-choices').inert,'Expanded controls must be usable');check(q('#live-bar')===bar,'Live bar identity must survive expansion');
-    measurements.liveBar={closedHeight:closed,intermediateHeight:opening,expandedHeight:box(shell).height};checks.push('Live bar shell-first growth, reversal and fixed bottom');api().setLiveOpen(false);await wait(850);
+    measurements.liveBar={closedHeight:closed,intermediateHeight:opening,expandedHeight:box(shell).height};checks.push('Live bar shell-first growth, reversal and fixed bottom');
+    // Compact idle launcher: one rail of shortcuts, icon beside label, measured from content; the Explore subtitle fades when open.
+    const idleHeight=box(shell).height,choiceButtons=[...doc().querySelectorAll('.activity-choice')],centreY=n=>(box(n).top+box(n).bottom)/2;
+    check(Math.abs(closed-62)<.6&&Math.abs(idleHeight-134)<4&&Math.abs(api().islands.live.fullHeight-idleHeight)<1,'Expanded idle launcher must measure about 134 px from its content: '+idleHeight);
+    check(choiceButtons.map(b=>b.textContent.trim()).join()==='Body,Workouts,Health'&&choiceButtons.every(b=>b.scrollWidth<=b.clientWidth+1&&Math.abs(box(b).height-52)<.6&&Math.abs(centreY(b.querySelector('svg'))-centreY(b))<2&&Math.abs(box(b.querySelector('svg')).width-22)<.6),'Shortcuts must be 52 px rows with a 22 px icon beside a fitting label');
+    check(Number(style(q('#live-meta')).opacity)<.05&&box(q('#live-choices .activity-choices')).bottom<=box(bar).top,'Expanded Explore must fade its repeated subtitle and keep the rail above the row');
+    measurements.idleLauncher={collapsed:closed,expanded:idleHeight};
+    api().setLiveOpen(false);await wait(850);check(Number(style(q('#live-meta')).opacity)>.99&&Math.abs(box(shell).height-62)<.6,'Collapsed Explore must keep its subtitle and 62 px row');
     // The launcher shell follows a finger up and back down from anywhere on it, including over a shortcut.
     const drag=async(target,from,to,{steps=8,hold=0}={})=>{const x=box(target).left+box(target).width/2,touch=y=>new (w().Touch)({identifier:7,target,clientX:x,clientY:y}),fire=(type,y)=>target.dispatchEvent(new (w().TouchEvent)(type,{touches:type==='touchend'?[]:[touch(y)],changedTouches:[touch(y)],cancelable:true,bubbles:true}));fire('touchstart',from);for(let i=1;i<=steps;i++){await nextFrame();fire('touchmove',from+(to-from)*i/steps)}if(hold)await wait(hold);fire('touchend',to)};
     const barTop=box(bar).top;await drag(bar,barTop+30,barTop-100);await wait(900);check(api().islands.live.open&&box(shell).height>closed+40,'Swiping up on the live bar must grow the launcher');
@@ -97,13 +104,47 @@ document.querySelector('#run').onclick=async()=>{
     await wait(650);const activeBounds=box(shell),actionsBounds=box(q('#live-session-controls')),navBounds=box(q('.activity-choices'));
     check(actionsBounds.top>=activeBounds.top&&navBounds.bottom<=box(bar).top,'All active-workout actions and navigation must fit inside the expanded shell');
     check(['none','normal'].includes(w().getComputedStyle(q('.live-icon'),'::after').content)&&['none','normal'].includes(w().getComputedStyle(q('.live-meta'),'::before').content),'The live bar must have no duplicate status dots');
-    check(style(q('.activity-choice')).transform==='matrix(1, 0, 0, 1, 0, 0)','Navigation icons must retain their normal size');measurements.activeLiveBar={height:activeBounds.height,controlsInsideShell:true,noStatusDots:true};checks.push('Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots');api().setLiveOpen(false);await wait(850);
+    check(style(q('.activity-choice')).transform==='matrix(1, 0, 0, 1, 0, 0)','Navigation icons must retain their normal size');measurements.activeLiveBar={height:activeBounds.height,controlsInsideShell:true,noStatusDots:true};checks.push('Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots');
+    // Active layout: rail, then Pause and Finish side by side, then a full-width Open workout; the status line stays.
+    const pauseBox=box(q('#live-pause')),finishBox=box(q('#live-session-controls [data-session="finish"]')),openBox=box(q('#live-open-workout'));
+    check(Math.abs(activeBounds.height-246)<6&&Math.abs(api().islands.live.fullHeight-activeBounds.height)<1,'Active launcher must measure about 246 px from its content: '+activeBounds.height);
+    check(navBounds.bottom<=pauseBox.top&&Math.abs(pauseBox.top-finishBox.top)<.6&&pauseBox.height>47.5&&openBox.top>=pauseBox.bottom-.5&&openBox.height>47.5&&Math.abs(openBox.width-(finishBox.right-pauseBox.left))<1&&q('#live-open-workout').textContent.trim()==='Open workout','Active actions must sit in order: rail, Pause and Finish, full-width Open workout: '+JSON.stringify({nav:navBounds.bottom,pauseTop:pauseBox.top,finishTop:finishBox.top,pauseH:pauseBox.height,openTop:openBox.top,openH:openBox.height,openW:openBox.width,span:finishBox.right-pauseBox.left,text:q('#live-open-workout').textContent}));
+    check(Number(style(q('#live-meta')).opacity)>.99&&q('#live-meta').textContent.length>0,'An active workout must keep its status line when open');
+    api().Health.state.active.elapsed=3*3600000+754000;api().updateLiveBar();const liveTimer=q('#live-timer');
+    check(/^\d+:\d\d:\d\d$/.test(liveTimer.textContent)&&liveTimer.scrollWidth<=liveTimer.clientWidth+1&&box(liveTimer).height<40&&box(liveTimer).right<=box(q('.live-chevron')).left+1&&box(q('.live-copy')).right<=box(liveTimer).left+1&&Math.abs(box(bar).height-62)<.6,'An hours-long elapsed time must stay on one line inside the row: '+liveTimer.textContent);
+    q('#live-pause').click();check(api().Health.live().paused&&q('#live-pause').textContent==='Resume','Launcher Pause must pause');q('#live-pause').click();check(!api().Health.live().paused&&q('#live-pause').textContent==='Pause','Launcher Resume must resume');
+    q('#live-open-workout').click();await wait(400);check(api().Health.page==='workouts'&&!api().islands.live.open,'Open workout must open the workout page');api().Health.close();await wait(300);
+    checks.push('Compact active launcher: measured height, action order, status line, hours-long timer, pause/resume/open');api().setLiveOpen(false);await wait(850);
     api().Health.open('workouts');q('[data-timer-focus]').click();await wait(1000);
     const canvas=q('#focus-time-dots'),time=q('#session-time'),timer=q('.timer-dial'),center=box(time),player=q('.workout-music');q('[data-session="pause"]').click();await wait(750);
     check(q('#focus-time-dots')===canvas&&q('.timer-dial')===timer&&q('.workout-music')===player,'Pause must preserve the complete timer and player');check(Math.abs(Number(style(time).opacity)-.62)<.02,'Paused time must darken');const paused=box(time),reading=time.dataset.reading;
     check(paused.width<center.width&&paused.width>center.width*.95,'Paused time must shrink only slightly');check(Math.abs((paused.left+paused.right)-(center.left+center.right))<.4,'Pause must keep the clock centered');await wait(1100);check(time.dataset.reading===reading,'Paused time must stay fixed');
     q('[data-session="resume"]').click();await wait(450);check(q('#focus-time-dots')===canvas&&Number(style(time).opacity)>.99,'Resume must restore the same clock');check(Math.abs(box(time).width-center.width)<.5,'Resume must restore the original reading size');checks.push('Pause/resume preserves the clock, freezes time and eases brightness/size');
-    api().Health.action('finish');api().Health.close();await wait(230);check(doc().documentElement.scrollWidth<=doc().documentElement.clientWidth+1,'No horizontal page overflow');
+    api().Health.close();await wait(300);api().setLiveOpen(true);await wait(900);q('#live-session-controls [data-session="finish"]').click();await wait(300);
+    check(api().Health.live()===null&&q('#live-session-controls').hidden,'Launcher Finish & save must finish the workout');api().setLiveOpen(false);await wait(700);
+    // Shared chooser and setup: four rows on one surface; each setup has one title, no illustration, GPS only outdoors.
+    api().Health.open('workouts');await wait(400);const rows=[...doc().querySelectorAll('.workout-kinds [data-setup]')];
+    check(rows.map(r=>r.dataset.setup).join()==='Walking,Running,Cycling,Strength'&&rows.every(r=>box(r).height>67.5&&r.parentElement===rows[0].parentElement)&&q('.workout-start-title').textContent==='Start a session'&&!doc().querySelector('.workout-kinds small')?.textContent.includes('↗'),'The chooser must be one surface of four rows');
+    for(const kind of ['Walking','Running','Cycling','Strength']){
+      q(`[data-setup="${kind}"]`).click();await wait(420);
+      check(q('#health-page').dataset.workoutScreen==='setup'&&q('#health-title').textContent===kind&&!q('.workout-art')&&!q('.workout-setup h2')&&q('.workout-setup-intro').textContent.includes('Choose a target'),kind+' setup must have one title and no illustration');
+      check(Boolean(q('#workout-track'))===(kind!=='Strength')&&q('.workout-primary').textContent.trim()==='Start '+kind.toLowerCase(),kind+' setup must offer GPS only outdoors');
+      const scroller=q('#health-scroll'),panel=box(q('.setup-panel'));const outside=[...doc().querySelectorAll('.setup-segments label,.setup-field,.tracking-option input')].filter(n=>n.getClientRects().length).filter(n=>box(n).right>panel.right+.5||box(n).left<panel.left-.5).map(n=>n.className||n.id||n.tagName);
+      check(scroller.scrollWidth<=scroller.clientWidth+1&&!outside.length,kind+' setup must not clip or overflow: '+JSON.stringify({scrollWidth:scroller.scrollWidth,clientWidth:scroller.clientWidth,outside}));
+      if(kind==='Walking'){
+        const pickTarget=value=>q(`input[name="target"][value="${value}"]`).closest('label').click();
+        pickTarget('time');await wait(320);check(!q('#target-options').hidden&&!q('#target-minutes').disabled&&q('#target-minutes').value==='30','Time target must reveal a 30-minute duration');
+        check(Math.abs(box(q('.setup-capsule')).left-box(q('input[name="target"][value="time"]').closest('label')).left)<1,'The capsule must move under Time target');
+        q('#target-minutes').value='45';pickTarget('open');await wait(320);check(q('#target-options').hidden&&q('#target-minutes').disabled,'Open workout must hide and disable the duration');
+        pickTarget('time');await wait(320);check(q('#target-minutes').value==='45','Switching back must keep the entered duration');
+        q('#workout-weight').value='10';q('.workout-primary').click();check(q('#workout-weight').validity.rangeUnderflow&&!q('.workout-countdown'),'A weight below 20 kg must be rejected');
+        q('#workout-weight').value='';q('.workout-primary').click();await wait(200);check(q('.workout-countdown')&&q('#workout-count').textContent==='3','A blank weight must be allowed and start the countdown');
+        q('[data-cancel-countdown]').click();await wait(400);check(q('#health-page').dataset.workoutScreen==='setup'&&q('#target-minutes').value==='45'&&!api().Health.state.active,'Cancelling the countdown must return to setup with the target kept');
+      }
+      api().Health.close();await wait(400);
+    }
+    checks.push('Shared chooser rows; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel');
+    api().Health.close();await wait(230);check(doc().documentElement.scrollWidth<=doc().documentElement.clientWidth+1,'No horizontal page overflow');
     result.textContent=JSON.stringify({status:'PASS',width:doc().documentElement.clientWidth,checks,measurements},null,2);
   }catch(error){result.textContent=error.stack}
   finally{try{if(raw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,raw);w().location.reload()}finally{button.disabled=false}}
