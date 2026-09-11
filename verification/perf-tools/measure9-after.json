@@ -1,0 +1,69 @@
+{
+ "label": "after",
+ "throttle": 4,
+ "results": {
+  "drag-1-first": {
+   "firstMoveToFirstFrameMs": 33,
+   "firstFrameContentShiftPx": 0,
+   "fingerTravelAtFirstFramePx": 22,
+   "frames": 62,
+   "maxGapMs": 18.3,
+   "gapsOver20Ms": 0,
+   "firstGaps": [
+    15.3,
+    16.6,
+    16.9,
+    17,
+    15.9,
+    17.5,
+    16.1,
+    16.3
+   ],
+   "layoutMsFirst": 0.6,
+   "layoutMsMedian": 0.4,
+   "longTasks": []
+  },
+  "drag-2-repeat": {
+   "firstMoveToFirstFrameMs": 22.7,
+   "firstFrameContentShiftPx": 0,
+   "fingerTravelAtFirstFramePx": 22,
+   "frames": 61,
+   "maxGapMs": 18.2,
+   "gapsOver20Ms": 0,
+   "firstGaps": [
+    16.9,
+    16.2,
+    16.9,
+    16.8,
+    16.1,
+    17.5,
+    15.8,
+    17.8
+   ],
+   "layoutMsFirst": 0.6,
+   "layoutMsMedian": 0.3,
+   "longTasks": []
+  },
+  "drag-3-after-period-change": {
+   "firstMoveToFirstFrameMs": 39.9,
+   "firstFrameContentShiftPx": 12.4,
+   "fingerTravelAtFirstFramePx": 22,
+   "frames": 81,
+   "maxGapMs": 18.2,
+   "gapsOver20Ms": 0,
+   "firstGaps": [
+    16.6,
+    16.1,
+    17,
+    16.6,
+    17.1,
+    17.1,
+    15.8,
+    17.2
+   ],
+   "layoutMsFirst": 0.3,
+   "layoutMsMedian": 0.4,
+   "longTasks": []
+  }
+ }
+}

@@ -1,0 +1,93 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Orbit interaction verification</title>
+<style>
+body{margin:20px;background:#17171b;color:#eee;font:14px system-ui,sans-serif}
+button{padding:10px 16px;margin:0 7px 12px 0}main{display:flex;gap:24px;align-items:flex-start}
+iframe{width:390px;height:844px;border:0;flex:none;zoom:.8}pre{white-space:pre-wrap;max-width:660px;min-width:330px}
+p{max-width:780px;color:#bdb8c6}
+</style>
+<h1>Orbit interaction checks</h1>
+<p>Tests use the local demonstration history and a temporary browser workout. Saved state is restored afterward. The year view leaves dates without measurements blank.</p>
+<button id="run">Run interaction checks</button><button id="year">Preview Body year</button><button id="home">Preview scrolling edge</button><button id="active">Preview active live bar</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button><button id="reset">Reset preview</button>
+<main><iframe id="live" title="Orbit interaction test phone" src="../index.html?ux-motion-check"></iframe><pre id="result">Ready.</pre></main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result'),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const key='orbit-workouts-v1',doc=()=>live.contentDocument,w=()=>live.contentWindow,q=s=>doc().querySelector(s),style=n=>w().getComputedStyle(n),box=n=>n.getBoundingClientRect();
+const check=(value,message)=>{if(!value)throw Error(message)};
+const nextFrame=()=>new Promise(resolve=>w().requestAnimationFrame(resolve));
+async function intermediateOpacity(node){for(let i=0;i<30;i++){await nextFrame();const opacity=Number(style(node).opacity);if(opacity>0&&opacity<1)return opacity}throw Error('The element never rendered an intermediate opacity: '+node.className)}
+const api=()=>w().__ux;
+let previewRaw;
+function expose(){
+  if(api())return;
+  const script=doc().createElement('script');script.textContent='window.__ux={Health,MusicPlayer,WorkoutFocus,setLiveOpen,setDeckExpanded,cyclePeriod,changeMetric,inspectBar,islands,get period(){return days}};';doc().head.append(script);
+}
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';document.querySelector('#wide').onclick=()=>live.style.width='390px';
+document.querySelector('#reset').onclick=()=>{if(previewRaw!==undefined){if(previewRaw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,previewRaw);previewRaw=undefined}w().location.reload();result.textContent='Preview reset.'};
+function preserve(){expose();if(previewRaw===undefined)previewRaw=w().localStorage.getItem(key)}
+document.querySelector('#year').onclick=async()=>{preserve();api().Health.open('body');await wait(500);q('[data-body-range="365"]').click();q('.body-timeline').scrollIntoView({block:'center'});result.textContent='Year preview. The available 90 demonstration dates occupy their actual place in the year; earlier dates stay empty.'};
+document.querySelector('#home').onclick=async()=>{preserve();api().Health.close();await wait(220);api().setDeckExpanded(true);await wait(850);q('#deck-scroll').scrollTop=135;result.textContent='Scrolling edge preview. Scroll cards beneath the globe; the leading edge fades into the continuous background.'};
+document.querySelector('#active').onclick=async()=>{preserve();if(!api().Health.state.active)api().Health.action('start','Walking');api().Health.close();await wait(220);api().setLiveOpen(true);result.textContent='Active live bar preview. One growing surface contains its controls. Tap the bottom row to open or close it.'};
+document.querySelector('#run').onclick=async()=>{
+  const raw=w().localStorage.getItem(key),button=document.querySelector('#run'),checks=[],measurements={};button.disabled=true;
+  try{
+    check(!JSON.parse(raw||'{"active":null}').active,'Use an isolated origin with no active workout');expose();result.textContent='Checking…';
+    api().Health.close();api().setDeckExpanded(false);api().setLiveOpen(false);await wait(900);
+    const bar=q('#live-bar'),shell=q('#live-island .island-surface'),closed=box(shell).height,bottom=box(bar).bottom;
+    api().setLiveOpen(true);check(Math.abs(box(shell).height-closed)<.3,'Opening must start from the existing shell');await wait(90);
+    await nextFrame();const opening=box(shell).height;check(opening>closed+3&&opening<api().islands.live.fullHeight*.9,`Live shell must pass through intermediate heights: closed=${closed}, current=${opening}, target=${api().islands.live.fullHeight}, value=${api().islands.live.height.value}, hidden=${doc().hidden}`);check(Number(style(q('#live-choices')).opacity)<.7,'Contents must follow shell growth');
+    const reversing=box(shell).height;api().setLiveOpen(false);check(Math.abs(box(shell).height-reversing)<.3,'Reversal must preserve shell position');await wait(120);const closing=box(shell).height;
+    api().setLiveOpen(true);check(Math.abs(box(shell).height-closing)<.3,'Reopening must continue from the displayed shell');await wait(900);
+    check(Math.abs(box(bar).bottom-bottom)<.3,'The live bar bottom must remain anchored');check(!q('#live-choices').inert,'Expanded controls must be usable');check(q('#live-bar')===bar,'Live bar identity must survive expansion');
+    measurements.liveBar={closedHeight:closed,intermediateHeight:opening,expandedHeight:box(shell).height};checks.push('Live bar shell-first growth, reversal and fixed bottom');api().setLiveOpen(false);await wait(850);
+    // The launcher shell follows a finger up and back down from anywhere on it, including over a shortcut.
+    const drag=async(target,from,to,{steps=8,hold=0}={})=>{const x=box(target).left+box(target).width/2,touch=y=>new (w().Touch)({identifier:7,target,clientX:x,clientY:y}),fire=(type,y)=>target.dispatchEvent(new (w().TouchEvent)(type,{touches:type==='touchend'?[]:[touch(y)],changedTouches:[touch(y)],cancelable:true,bubbles:true}));fire('touchstart',from);for(let i=1;i<=steps;i++){await nextFrame();fire('touchmove',from+(to-from)*i/steps)}if(hold)await wait(hold);fire('touchend',to)};
+    const barTop=box(bar).top;await drag(bar,barTop+30,barTop-100);await wait(900);check(api().islands.live.open&&box(shell).height>closed+40,'Swiping up on the live bar must grow the launcher');
+    await drag(bar,barTop+20,barTop+100,{steps:12,hold:150});await wait(900);check(!api().islands.live.open&&Math.abs(box(shell).height-closed)<.5,'A slow downward swipe from the bar row must return the launcher to its closed shape');
+    await drag(bar,barTop+30,barTop-100);await wait(900);const shortcut=q('[data-activity="body"]'),shortcutTop=box(shortcut).top;await drag(shortcut,shortcutTop+10,shortcutTop+110,{steps:10});shortcut.dispatchEvent(new (w().MouseEvent)('click',{bubbles:true,cancelable:true,detail:1}));await wait(900);
+    check(!api().islands.live.open&&Math.abs(box(shell).height-closed)<.5&&!api().Health.page,'Swiping down over a shortcut must close the launcher without opening its page');
+    await drag(bar,barTop+30,barTop-100);await wait(900);await drag(bar,barTop+20,barTop+56,{steps:3});await wait(900);check(!api().islands.live.open&&Math.abs(box(shell).height-closed)<.5,'A short flick down from the bar row must close the launcher');
+    await drag(bar,barTop+20,barTop+90,{steps:6});await wait(700);check(!api().islands.live.open&&Math.abs(box(shell).height-closed)<.5,'A downward pull must never open the launcher');
+    check(q('#live-title').textContent==='Explore'&&![...doc().querySelectorAll('.activity-choice')].some(choice=>choice.textContent.trim()===q('#live-title').textContent),'The launcher must not repeat a shortcut name');
+    checks.push('Launcher follows the finger both ways, closes from anywhere on it and is named apart from its shortcuts');
+    const globe=q('#orb-canvas'),period=api().period;api().cyclePeriod();await intermediateOpacity(q('.hero-copy'));
+    check(api().period!==period&&q('#orb-canvas')===globe,'Period switch must retain the globe');
+    const beforeReverse=style(q('.hero-copy')).opacity;api().cyclePeriod();check(Math.abs(Number(style(q('.hero-copy')).opacity)-Number(beforeReverse))<.1,'Rapid period changes must continue the displayed fade');await wait(520);
+    api().changeMetric(1);await wait(70);check(Number(style(q('.hero-copy')).opacity)<1,'Metric change must animate the reading');check(q('#orb-canvas')===globe,'Metric switch must retain the globe');checks.push('Globe and reading transitions survive rapid input');
+    // The stack starts from rest at the edge of the touch slop; hit testing, focus and its scroller change only while it rests.
+    await wait(500);const stack=q('#stack-open'),content=q('#period-content'),stackTop=box(stack).top+40,contentTop=box(content).top,cards=[...doc().querySelectorAll('.stack-card')];
+    const touchAt=y=>new (w().Touch)({identifier:8,target:stack,clientX:box(stack).left+100,clientY:y}),fireStack=(type,y)=>stack.dispatchEvent(new (w().TouchEvent)(type,{touches:type==='touchend'?[]:[touchAt(y)],changedTouches:[touchAt(y)],cancelable:true,bubbles:true}));
+    fireStack('touchstart',stackTop);await nextFrame();fireStack('touchmove',stackTop-12);await nextFrame();await nextFrame();const firstShift=contentTop-box(content).top;check(firstShift>0&&firstShift<=5,'The stack must start moving from rest at the edge of the touch slop: '+firstShift);
+    for(let i=1;i<=10;i++){await nextFrame();fireStack('touchmove',stackTop-12-i*14)}fireStack('touchend',stackTop-152);await nextFrame();
+    check(cards.length===4&&cards.every(card=>card.inert)&&!q('#panel-deck').classList.contains('is-scrollable'),'The moving stack must keep its resting structure until it settles');await wait(1000);
+    check(cards.every(card=>!card.inert)&&q('#panel-deck').classList.contains('is-scrollable'),'The settled stack must become scrollable and interactive');api().setDeckExpanded(false);await wait(1000);
+    check(cards.every(card=>card.inert)&&!q('#panel-deck').classList.contains('is-scrollable'),'The folded stack must return to its resting structure');measurements.stackDrag={firstFrameShiftPx:+firstShift.toFixed(2)};
+    checks.push('Stack drag starts from rest; its structure changes only while it rests');
+    api().setDeckExpanded(true);await wait(900);check(Number(style(q('#bar-tip')).opacity)===0,'Default chart badge must stay out of the way');q('#bar-range').value=5;q('#bar-range').dispatchEvent(new (w().Event)('input',{bubbles:true}));await wait(180);
+    check(Number(style(q('#bar-tip')).opacity)>.9,'Chart inspection must show its value');await wait(1900);check(Number(style(q('#bar-tip')).opacity)===0,'Chart badge must fade after inspection');check(q('#bar-range').getAttribute('aria-valuetext'),'Selected reading must remain accessible');
+    q('#deck-scroll').scrollTop=150;await nextFrame();check(parseFloat(q('#deck-scroll').style.getPropertyValue('--deck-edge'))>0,'Scrolled deck must soften its leading edge');check(style(q('#deck-scroll')).maskImage.includes('linear-gradient'),'Leading edge must use a continuous fade');checks.push('Temporary chart value and intentional scroll fade');
+    api().Health.open('body');await wait(260);const picker=q('.body-metric-picker'),ring=q('[data-mix-dot="0"]'),muscle=q('[data-body-metric="muscle"]'),pill=q('.body-metric-picker .selection-pill'),left=box(pill).left;
+    muscle.click();check(q('.body-metric-picker')===picker&&q('[data-mix-dot="0"]')===ring,'Body selection must preserve controls and ring');await wait(85);
+    const mid=box(pill).left;check(mid>left+.5&&mid<box(muscle).left-.1,'Body selection pill must slide between tabs');await wait(400);check(Math.abs(box(pill).left-box(muscle).left)<.5,'Selection pill must finish under the chosen tab');
+    const year=q('[data-body-range="365"]');year.click();check(q('[data-body-range="365"]')===year,'Range controls must retain their identity');await wait(420);
+    check(q('#body-range-start').textContent.includes('2024')&&q('#body-range-end').textContent.includes('2025'),'Year axis must cover a full year');check(q('#body-coverage').textContent.startsWith('90 '),'Year view must include all90 available demo records');check(q('#body-gap').textContent==='No earlier measurements','Missing early history must be explicit');check(Number(q('#body-line').getAttribute('d').match(/^M([\d.]+)/)[1])>210,'Ninety days must occupy their actual place within a year');
+    q('#body-scrub').value=0;q('#body-scrub').dispatchEvent(new (w().Event)('input',{bubbles:true}));check(q('#body-date').textContent.includes('Jun'),'Scrubbing missing history must select an existing date');check(Number(q('#body-scrub').value)>270,'Scrubber must align with the recorded date, not invent earlier readings');
+    checks.push('Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps');measurements.body={firstPlotX:Number(q('#body-line').getAttribute('d').match(/^M([\d.]+)/)[1]),coverage:q('#body-coverage').textContent};
+    api().Health.action('start','Strength');api().Health.close();await wait(300);api().setLiveOpen(true);
+    for(let i=0;i<24;i++){await nextFrame();check(style(q('#live-island')).overflow==='hidden'&&style(q('#live-choices')).overflow==='hidden','Live controls must remain clipped within the growing shell');if(Number(style(q('#live-choices')).opacity)>.1)check(box(q('#live-pause')).top>=box(shell).top,'Workout actions must enter inside the shell')}
+    await wait(650);const activeBounds=box(shell),actionsBounds=box(q('#live-session-controls')),navBounds=box(q('.activity-choices'));
+    check(actionsBounds.top>=activeBounds.top&&navBounds.bottom<=box(bar).top,'All active-workout actions and navigation must fit inside the expanded shell');
+    check(['none','normal'].includes(w().getComputedStyle(q('.live-icon'),'::after').content)&&['none','normal'].includes(w().getComputedStyle(q('.live-meta'),'::before').content),'The live bar must have no duplicate status dots');
+    check(style(q('.activity-choice')).transform==='matrix(1, 0, 0, 1, 0, 0)','Navigation icons must retain their normal size');measurements.activeLiveBar={height:activeBounds.height,controlsInsideShell:true,noStatusDots:true};checks.push('Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots');api().setLiveOpen(false);await wait(850);
+    api().Health.open('workouts');q('[data-timer-focus]').click();await wait(1000);
+    const canvas=q('#focus-time-dots'),time=q('#session-time'),timer=q('.timer-dial'),center=box(time),player=q('.workout-music');q('[data-session="pause"]').click();await wait(750);
+    check(q('#focus-time-dots')===canvas&&q('.timer-dial')===timer&&q('.workout-music')===player,'Pause must preserve the complete timer and player');check(Math.abs(Number(style(time).opacity)-.62)<.02,'Paused time must darken');const paused=box(time),reading=time.dataset.reading;
+    check(paused.width<center.width&&paused.width>center.width*.95,'Paused time must shrink only slightly');check(Math.abs((paused.left+paused.right)-(center.left+center.right))<.4,'Pause must keep the clock centered');await wait(1100);check(time.dataset.reading===reading,'Paused time must stay fixed');
+    q('[data-session="resume"]').click();await wait(450);check(q('#focus-time-dots')===canvas&&Number(style(time).opacity)>.99,'Resume must restore the same clock');check(Math.abs(box(time).width-center.width)<.5,'Resume must restore the original reading size');checks.push('Pause/resume preserves the clock, freezes time and eases brightness/size');
+    api().Health.action('finish');api().Health.close();await wait(230);check(doc().documentElement.scrollWidth<=doc().documentElement.clientWidth+1,'No horizontal page overflow');
+    result.textContent=JSON.stringify({status:'PASS',width:doc().documentElement.clientWidth,checks,measurements},null,2);
+  }catch(error){result.textContent=error.stack}
+  finally{try{if(raw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,raw);w().location.reload()}finally{button.disabled=false}}
+};
+</script>

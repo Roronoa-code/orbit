@@ -1,0 +1,145 @@
+<!doctype html><meta charset="utf-8"><title>Orbit navigation and live activity verification</title>
+<style>body{margin:24px;background:#17171b;color:#eee;font:14px system-ui}button{padding:10px 18px;margin:0 8px 14px 0}#live{flex:0 0 auto;width:390px;height:844px;border:0}main{display:flex;gap:24px}pre{white-space:pre-wrap;max-width:620px}</style>
+<button id="run">Check pages, live activity and motion</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button>
+<main><iframe id="live" src="../index.html?navigation-review"></iframe><pre id="result">Ready</pre></main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result');
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';
+document.querySelector('#wide').onclick=()=>live.style.width='390px';
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+document.querySelector('#run').onclick=async()=>{
+ const w=live.contentWindow,q=s=>live.contentDocument.querySelector(s),frames=[],store={getItem:k=>live.contentWindow.localStorage.getItem(k),setItem:(k,v)=>live.contentWindow.localStorage.setItem(k,v),removeItem:k=>live.contentWindow.localStorage.removeItem(k)};
+ const savedWorkouts=store.getItem('orbit-workouts-v1'),savedGoal=store.getItem('orbit-steps-goal-v1');
+ const rect=s=>{const r=q(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right,width:r.width}};
+ const check=(v,message)=>{if(!v)throw Error(message)},openCards=()=>q('#stack-open').click(),closeCards=()=>q('#live-bar').click();
+ const reload=()=>new Promise(resolve=>{live.addEventListener('load',resolve,{once:true});live.contentWindow.location.reload()});
+ let recording=false;
+ try{
+  result.textContent='Checking...';
+  check(!JSON.parse(savedWorkouts||'{"active":null}').active,'Use an isolated verification origin with no active workout');
+  if(!q('#health-page').hidden)q('#health-back').click();
+  if(q('#more').getAttribute('aria-expanded')==='true')q('#more').click();
+  if(q('#live-bar').getAttribute('aria-expanded')==='true')q('#live-bar').click();
+  if(q('#stack-open').hidden)closeCards();await wait(700);q('#back').click();
+  check(!q('.periods')&&!q('[data-days]'),'Separate time controls must be removed');
+  const initial=rect('#orb-canvas'),canvas=q('#orb-canvas');
+  check(live.contentDocument.elementFromPoint(w.innerWidth/2,initial.bottom-20)?.closest('#orb-button'),'Folded deck intercepts lower orb');
+  for(const expected of ['Steps','Heart rate','Sleep','Intake']){
+   check(q('.masthead h1').textContent===expected,'Metric order changed');
+   for(const period of ['Today','Last 7 days','Last 30 days']){
+    check(q('#orb-period').textContent===period,'Orb period cycle is wrong');
+    const groups=[...live.contentDocument.querySelectorAll('.facts .metric')].map(node=>node.getBoundingClientRect()),folded=rect('.facts');
+    check(groups.length===4&&Math.abs(groups[0].top-groups[1].top)<1&&groups[2].top>=groups[0].bottom+10,'Summary must keep two clear columns');
+    check(groups.every(r=>r.left>=folded.left&&r.right<=folded.right&&r.bottom<=folded.top+146),'Folded summary clips data');
+    for(const node of live.contentDocument.querySelectorAll('.facts .metric p'))check(node.scrollWidth<=node.clientWidth+1,'Summary value overflows its column');
+    q('#orb-button').click();check(q('.masthead h1').textContent===expected,'Tap must not change metric');
+   }
+   q('#orb-button').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));await wait(200);
+  }
+  const sample=t=>{frames.push({t,orb:rect('#orb-canvas'),hero:rect('.hero'),card:rect('.facts'),cardLayout:q('.facts').offsetHeight});if(recording)w.requestAnimationFrame(sample)};
+  recording=true;w.requestAnimationFrame(sample);openCards();await wait(700);
+  check(rect('#orb-canvas').top<initial.top,'Orb must move upward');
+  check(rect('.facts').bottom<rect('.hourly').top,'Expanded cards overlap');
+  closeCards();await wait(130);openCards();await wait(130);closeCards();await wait(700);recording=false;
+  check(Math.abs(rect('#orb-canvas').top-initial.top)<.1,'Reversal must return to start');
+  check(frames.every(f=>Math.abs(f.hero.height-frames[0].hero.height)<.1&&Math.abs(f.cardLayout-frames[0].cardLayout)<.1),'Motion must retain fixed layout');
+  check(canvas===q('#orb-canvas'),'Canvas must remain mounted');
+  check(frames.every(f=>f.card.top-f.orb.bottom>=0),'Orb overlaps cards');
+  openCards();await wait(700);q('#deck-scroll').scrollTop=10000;await wait(50);
+  check(rect('.comparison').bottom<=rect('#live-bar').top-5,'Last card must clear the floating dock');check(rect('#deck-scroll').bottom>=rect('#live-bar').bottom,'Content viewport must continue behind the frost');
+  closeCards();await wait(700);check(q('#deck-scroll').scrollTop===0,'Collapse must reset scroll');
+  const anchor=rect('#more'),surface=q('#utility-island .island-surface');
+  q('#more').click();await wait(90);const middle=rect('#utility-island .island-surface');
+  check(Math.abs(middle.width-q('#utility-island').clientWidth)<1,'Utility must open at its final size');
+  check(Math.abs(middle.top-anchor.top)<.1&&Math.abs(middle.right-anchor.right)<.1,'Utility must stay attached to its circle');
+  await wait(650);check(!q('dialog'),'No modal dialogs');
+  check(w.getComputedStyle(q('#more')).borderTopWidth==='0px','Dot button must not leave an extra outlined circle');
+  check(w.getComputedStyle(q('#utility-island .island-frost')).transform==='none','Frost layer must not stretch');
+  q('#edit-goal').click();await wait(700);check(!q('#goal-dialog').hidden,'Goal editor must open in place');
+  const expectedGoal=q('#goal-input').value;q('#goal-form').requestSubmit();await wait(700);
+  check(q('#utility-body').inert&&store.getItem('orbit-steps-goal-v1')===expectedGoal,'Same goal must save and close');
+  q('#date-button').click();await wait(700);q('#date-prev').click();q('#date-form').requestSubmit();await wait(700);
+  check(q('#utility-body').inert&&q('#date-button').textContent.includes('7'),'Date selection must apply');q('#back').click();
+  q('#more').click();await wait(650);q('#open-about').click();await wait(650);check(!q('#about').hidden,'About must open inline');
+  q('#more').click();await wait(650);q('#more').click();await wait(90);q('#more').click();await wait(700);
+  check(q('#utility-body').inert&&Math.abs(rect('#utility-island .island-surface').width-40)<.1,'Mid-opening close must return to circle');
+  check(surface===q('#utility-island .island-surface'),'Utility surface must remain mounted');
+  check(!q('#stack-close')&&!q('.dot-value'),'Extra arrow and scattered dot text must be gone');
+  const pages=[];
+  for(const key of ['body','workouts','overview']){
+   const dockTop=rect('#live-bar').top;q('#live-bar').click();await wait(250);check(Math.abs(rect('#live-bar').top-dockTop)<1,'Launcher must keep dock in place');q('[data-activity="'+key+'"]').click();await wait(100);check(!q('#health-page').style.clipPath&&!q('.surface-snapshot'),'Page must use a simple fade without shape masks or copies');await wait(250);
+   check(!q('#health-page').hidden&&q('#live-choices').inert,'Circle must open a full page');
+   check(rect('#health-page').height>600&&rect('#health-page').top<100,'Page must fill the screen');
+   check(!q('.health-history'),'Old log-first presentation must be removed');
+   check(q('#live-island').inert&&q('.hero').inert,'Home must be inert under the open page');
+   if(key==='body'){
+    for(const field of ['weight','muscle','fat','fatMass','lean']){
+     q('[data-body-metric="'+field+'"]').click();
+     check(q('[data-body-metric="'+field+'"]').getAttribute('aria-pressed')==='true','Body selection missing');
+     const range=q('#body-scrub');range.value='0';range.dispatchEvent(new w.Event('input',{bubbles:true}));
+     check(!q('#body-value').textContent.includes('NaN')&&range.getAttribute('aria-valuetext').includes(q('#body-value').textContent.trim()),'Body scrub must expose exact value');
+    }
+    q('[data-body-range="7"]').click();check(q('#body-scrub').max==='6','Seven-day range wrong');
+    q('[data-body-range="30"]').click();check(q('#body-scrub').max==='29','Thirty-day range wrong');
+    q('[data-body-metric="weight"]').click();q('[data-next-body]').click();check(q('[data-body-metric="muscle"]').getAttribute('aria-pressed')==='true','Centre must cycle body measurements');
+    q('#body-scrub').value='0';q('#body-scrub').dispatchEvent(new w.Event('input',{bubbles:true}));
+    const bodyDate=q('#body-date').textContent;q('[data-body-step="1"]').click();check(q('#body-date').textContent!==bodyDate,'Next body date must update');
+    q('[data-body-step="-1"]').click();check(q('#body-date').textContent===bodyDate,'Previous body date must restore reading');
+    check(q('#body-value svg circle')&&q('[data-next-body]').getAttribute('aria-label').includes(q('#body-value').textContent.trim()),'Body dots need an accessible exact value');
+   }
+   if(key==='overview'){
+    check(!q('#health-content [data-metric]')&&!q('.activity-hero'),'Health must not repeat Home metrics');
+    check(q('.oxygen-tile')&&q('.oxygen-tile').clientHeight<240,'Oxygen must be a compact tile');
+    q('.oxygen-tile summary').click();await wait(750);check(q('.oxygen-tile').open,'Oxygen detail does not open inline');q('.oxygen-tile summary').click();await wait(750);check(!q('.oxygen-tile').open,'Oxygen must collapse completely');
+    q('.oxygen-tile summary').click();await wait(750);const oxygenDays=[...live.contentDocument.querySelectorAll('[data-oxygen-day]')];check(oxygenDays.length===7,'Oxygen date strip missing');oxygenDays[0].click();check(oxygenDays[0].getAttribute('aria-pressed')==='true'&&q('#oxygen-date').textContent.includes('%'),'Oxygen date selection must update');q('.oxygen-tile summary').click();await wait(750);
+   }
+   q('#health-scroll').scrollTop=100000;await wait(30);
+   check(rect('#health-content').bottom<=rect('#health-scroll').bottom+1,'Last page content is unreachable');
+   check(q('#health-content').scrollWidth<=q('#health-scroll').clientWidth,'Page content overflows horizontally');
+   pages.push({key,title:q('#health-title').textContent});q('#health-back').click();await wait(700);
+   check(q('#health-page').hidden&&q('.masthead h1').textContent==='Steps','Back must restore dashboard');
+  }
+  // Sleep totals open real timed demo intervals, with the selected stage and cross-midnight clock labels.
+  q('#orb-button').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));q('#orb-button').dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
+  check(q('.masthead h1').textContent==='Sleep','Sleep metric not selected');openCards();await wait(900);
+  check(!q('#bar-marker'),'Selected bar dot must be removed');
+  q('[data-sleep-stage="light"]').click();await wait(900);check(q('#health-title').textContent==='Your night'&&q('#night-scrub'),'Sleep summary must open night timeline');
+  check(q('#night-selection').textContent.includes('22:40')&&q('#night-selection').textContent.includes('23:25'),'Light stage must expose exact start and end');
+  for(const stage of ['deep','rem','awake','light']){q('[data-night-stage="'+stage+'"]').click();check(q('[data-night-stage="'+stage+'"]').getAttribute('aria-pressed')==='true','Sleep stage tap must select matching interval');const blocks=[...live.contentDocument.querySelectorAll('[data-night-segment]')];check(blocks.filter(n=>n.getAttribute('opacity')==='1').length===blocks.filter(n=>n.dataset.nightStageName===stage).length,'Selecting a sleep stage must highlight all its intervals');check(blocks.filter(n=>n.dataset.nightStageName!==stage).every(n=>Number(n.getAttribute('opacity'))<.5),'Other stages must fade back')}
+  const night=q('#night-scrub');night.value=night.max;night.dispatchEvent(new w.Event('input',{bubbles:true}));check(q('#night-selection').textContent.includes('09:30'),'Last interval must show morning end time');
+  q('[data-night-part="-1"]').click();check(q('#night-selection').textContent.includes('REM'),'Previous interval must move through the night');
+  q('[data-night-date="-1"]').click();check(q('#night-scrub').max!=='659','Changing nights must load that night timing');q('[data-night-date="1"]').click();check(q('#night-scrub').max==='659','Returning must restore the correct night');
+  q('#health-back').click();await wait(750);check(q('.masthead h1').textContent==='Sleep'&&q('#stack-open').hidden,'Back must preserve Sleep and the open cards');closeCards();await wait(750);q('#back').click();
+  q('#live-bar').click();await wait(700);q('[data-activity="workouts"]').click();
+  q('[data-setup="Walking"]').click();await wait(750);q('#workout-setup-form').requestSubmit();await wait(1000);
+  check(q('#workout-count')&&q('#countdown-dots'),'Interactive countdown missing');
+  const dotPixels=q('#countdown-dots').getContext('2d').getImageData(0,0,q('#countdown-dots').width,q('#countdown-dots').height).data;
+  check(dotPixels.some((v,i)=>i%4===3&&v>0),'Countdown particles must actually render');q('[data-cancel-countdown]').click();
+  await wait(2400);check(!JSON.parse(store.getItem('orbit-workouts-v1')||'{"active":null}').active,'Cancelled countdown must not start');
+  q('input[value="time"]').click();await wait(750);q('#target-minutes').value='1';q('#workout-setup-form').requestSubmit();await wait(4400);
+  check(q('#session-time').textContent!=='00:00','Active timer does not advance');
+  check(JSON.parse(store.getItem('orbit-workouts-v1')).active.targetMs===60000,'Time target not saved');
+  check(q('#session-time .matrix-reading circle'),'Timer must use dot matrix');
+  q('[data-timer-mode="remaining"]').click();check(q('#timer-label').textContent==='Remaining'&&q('#session-time').getAttribute('aria-label').startsWith('Remaining:'),'Remaining time mode must update visible and accessible labels');
+  q('[data-timer-mode="elapsed"]').click();check(q('#timer-label').textContent==='Duration','Elapsed mode must restore');
+  q('[data-timer-focus]').click();check(w.getComputedStyle(q('.workout-unconnected')).display==='none','Focus must hide secondary readings');q('[data-timer-focus]').click();check(w.getComputedStyle(q('.workout-unconnected')).display!=='none','Focus must restore details');await wait(500);
+  check(rect('.session-actions').bottom<=rect('#health-scroll').bottom,'Live controls must stay reachable: '+JSON.stringify({actions:rect('.session-actions'),viewport:rect('#health-scroll')}));
+  q('#health-content [data-session="pause"]').click();const paused=q('#session-time').textContent;await wait(1250);
+  check(q('#session-time').textContent===paused,'Paused timer advances');q('#health-content [data-session="resume"]').click();await wait(1250);
+  check(q('#session-time').textContent!==paused,'Resume does not restart timer');q('#health-back').click();await wait(700);
+  check(q('#live-title').textContent==='Walking'&&q('#live-timer').textContent.length>=5,'Home live bar must show current workout');
+  await reload();await wait(700);check(q('#live-title').textContent==='Walking'&&q('#live-timer').textContent.length>=5,'Live activity must survive reload');
+  q('#live-bar').click();await wait(700);check(!q('#live-session-controls').hidden,'Expanded activity controls missing');
+  q('#live-pause').click();check(q('#live-pause').textContent==='Resume','Inline pause does not update');
+  q('#live-session-controls [data-session="finish"]').click();await wait(700);
+  check(q('#live-title').textContent==='Health'&&q('#live-session-controls').hidden,'Finishing must restore idle launcher');
+  const saved=JSON.parse(store.getItem('orbit-workouts-v1'));
+  check(saved.history.length===JSON.parse(savedWorkouts||'{"history":[]}').history.length+1&&saved.history[0].targetMs===60000,'Completed workout and target not saved');
+  q('#live-bar').click();await wait(700);
+  check(live.contentDocument.documentElement.scrollWidth<=live.clientWidth,'Horizontal overflow');
+  const gaps=frames.slice(1).map((f,i)=>f.t-frames[i].t);
+  result.textContent=JSON.stringify({status:'PASS',width:live.clientWidth,frames:frames.length,maxFrameGapMs:Math.max(...gaps),minimumOrbToCardGap:Math.min(...frames.map(f=>f.card.top-f.orb.bottom)),allPeriodsAndMetrics:true,fixedLayout:true,pages,liveStartPauseResumeFinish:true,liveSurvivesReload:true,scrollToLastCard:true,inlineForms:true,noDialogs:true,interruptible:true},null,2);
+ }catch(error){recording=false;result.textContent='FAIL: '+error.message;throw error}
+ finally{for(const [key,value] of [['orbit-workouts-v1',savedWorkouts],['orbit-steps-goal-v1',savedGoal]]){if(value===null)store.removeItem(key);else store.setItem(key,value)}await reload()}
+};
+</script>

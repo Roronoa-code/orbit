@@ -1,0 +1,54 @@
+﻿[
+    {
+        "file":  "index.html",
+        "sha256":  "44419784559F467B7F36B6F5D12964981F36C2E3946F5760A5DCCAAEEE49EDAA"
+    },
+    {
+        "file":  "health-pages.css",
+        "sha256":  "4088948D267A92A8A9850FF9C1B22BA98265C5F908C6B39EF8EBA31FC85FC076"
+    },
+    {
+        "file":  "health-pages.js",
+        "sha256":  "C9A918328FC78CB6EEC9B020359E7A4FA2DE9E1FF0F138BE97D3FCB40405DB7A"
+    },
+    {
+        "file":  "workout-focus.js",
+        "sha256":  "2EC2B50F07FDBD169F932D5D6952436C34673425D476F27CD41A6A307B4E3DA6"
+    },
+    {
+        "file":  "surface-motion.js",
+        "sha256":  "681E13D6DF45FD21084ABE13A13FD06676B515C3B0E2E310B5ACA71431161493"
+    },
+    {
+        "file":  "signal-orb.js",
+        "sha256":  "847E99C3D1E2B26CFEC68B7C2EC5FC0D24441BB51C18CF9AD3C563F8AB22A71E"
+    },
+    {
+        "file":  "HANDOFF.md",
+        "sha256":  "AC2FAF0D8AEDBE73B2D41D5B330F9C66277947C17D0271732B7342AAB00B742C"
+    },
+    {
+        "file":  "README.md",
+        "sha256":  "7D6062A96AFF203E11F2DEA2602BF3C6635E42D1D9708832ED468127A60E8385"
+    },
+    {
+        "file":  "verification\\check.cjs",
+        "sha256":  "4481A3C077FBBB8C1281F2F139A65D3E064174C16546998506C1D808E9579593"
+    },
+    {
+        "file":  "verification\\ux-motion.html",
+        "sha256":  "C6BD42F5EADA1ADF4C0A4973557D2A100B4B1CCCC0386DD9AA78293FC6ACE29D"
+    },
+    {
+        "file":  "verification\\focus-music.html",
+        "sha256":  "8EB92D907B76ABBB50A80734F2B45F7AD2FDC8A913434A4EBFE820F4BEEF3197"
+    },
+    {
+        "file":  "verification\\perf-result.json",
+        "sha256":  "A13F629042E362875EF6FBF8D917788CB965C2E1CBA70EDD96A999F406C4908D"
+    },
+    {
+        "file":  "verification\\run-rendered-checks.cjs",
+        "sha256":  "D755A235A867E29359856BAFA57BED7FC13781AF856F4ECC51A9F712ECE77EA9"
+    }
+]

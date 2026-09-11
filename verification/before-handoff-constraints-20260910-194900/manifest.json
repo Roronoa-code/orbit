@@ -1,0 +1,18 @@
+[
+  {
+    "file": "HANDOFF.md",
+    "sha256": "04e338952bfcbeabfebf4749d64558ac5f4bfdd602273a957ad02f25c14f87e6"
+  },
+  {
+    "file": "README.md",
+    "sha256": "479124588748afd0df613b7b54aacc0de7029538a648db7fb356d19cdb583b08"
+  },
+  {
+    "file": "PRODUCT-STRUCTURE.md",
+    "sha256": "36255bcf4a1e038486daf44b535850b6f411263d8976125865d84598e76346a4"
+  },
+  {
+    "file": "verification/seven-ux-result.json",
+    "sha256": "cc044bad60789f126a64f056d2dbdd52729b47c9a95eb8693d4072d4f0b4c865"
+  }
+]

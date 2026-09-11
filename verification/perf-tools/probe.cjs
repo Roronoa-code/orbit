@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{const b=await chromium.launch({headless:true});const c=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:3,isMobile:true,hasTouch:true});const p=await c.newPage();
+p.on('pageerror',e=>console.log('pageerror',e.message));
+await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html?perf-audit');await p.waitForSelector('#live-bar');await sleep(1200);
+const info=await p.evaluate(()=>{const folds=typeof shellFolds!=='undefined'?shellFolds.map(f=>f?f.playState+'@'+f.currentTime:null):'undefined';const anims=document.getAnimations().map(a=>(a.effect.target?.className||a.effect.target?.id||'?')+(a.effect.pseudoElement||'')+':'+a.playState);
+ window.__props=new Map();const orig=CSSStyleDeclaration.prototype.setProperty;CSSStyleDeclaration.prototype.setProperty=function(n,v,pr){window.__props.set(n,(window.__props.get(n)||0)+1);return orig.call(this,n,v,pr)};
+ return {folds,anims:anims.slice(0,12),animCount:anims.length}});
+console.log(JSON.stringify(info));
+await p.click('#stack-open');await sleep(900);await p.evaluate(()=>document.querySelector('#live-bar').click());await sleep(900);
+console.log('setProperty counts during cycle:',JSON.stringify(await p.evaluate(()=>Object.fromEntries(window.__props))));
+await b.close()})().catch(e=>{console.error(e);process.exitCode=1});

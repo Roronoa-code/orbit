@@ -1,0 +1,28 @@
+{
+ "baseline": {
+  "deck-open-close-x2": {
+   "busyPct": 23.9,
+   "styleMs": 156.7,
+   "layoutMs": 37.2,
+   "layouts": 138,
+   "mainMs": 190.5,
+   "rasterMs": 169.8,
+   "compositorMs": 278.6,
+   "vizMs": 2819,
+   "drawAndSwap": 172,
+   "rasterTasks": 512
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 23.1,
+   "styleMs": 133.7,
+   "layoutMs": 23.5,
+   "layouts": 108,
+   "mainMs": 160.6,
+   "rasterMs": 207.4,
+   "compositorMs": 112.6,
+   "vizMs": 1821.5,
+   "drawAndSwap": 168,
+   "rasterTasks": 562
+  }
+ }
+}

@@ -1,0 +1,293 @@
+{
+ "W": 390,
+ "H": 844,
+ "rects": {
+  ".workout-live-top": [
+   22,
+   109,
+   346,
+   59
+  ],
+  ".timer-dial": [
+   95,
+   186,
+   200,
+   188
+  ],
+  "#session-time": [
+   117,
+   248,
+   156,
+   63
+  ],
+  ".workout-unconnected": [
+   22,
+   426,
+   346,
+   234
+  ],
+  ".workout-music": [
+   22,
+   670,
+   346,
+   64
+  ],
+  ".music-bottom": [
+   22,
+   670,
+   346,
+   64
+  ],
+  ".music-thumb": [
+   30,
+   678,
+   48,
+   48
+  ],
+  ".music-heading": [
+   90,
+   685,
+   124,
+   35
+  ],
+  ".music-heading>div": [
+   90,
+   685,
+   124,
+   35
+  ],
+  ".music-heading h2": [
+   90,
+   685,
+   124,
+   18
+  ],
+  ".music-heading p": [
+   90,
+   704,
+   124,
+   15
+  ],
+  ".music-controls": [
+   226,
+   678,
+   136,
+   48
+  ],
+  ".session-actions": [
+   22,
+   746,
+   346,
+   66
+  ],
+  "#health-page": [
+   0,
+   30,
+   390,
+   814
+  ],
+  ".health-page-head": [
+   0,
+   30,
+   390,
+   70
+  ],
+  ".music-cover img": [
+   -78,
+   30,
+   545,
+   545
+  ]
+ },
+ "range": 341.88,
+ "held": {
+  "up0.1": {
+   "h2": [
+    84,
+    214
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 212
+  },
+  "up0.25": {
+   "h2": [
+    75,
+    213
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 191
+  },
+  "up0.5": {
+   "h2": [
+    60,
+    212
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 156
+  },
+  "up0.75": {
+   "h2": [
+    45,
+    211
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 120
+  },
+  "up0.9": {
+   "h2": [
+    36,
+    210
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 99
+  },
+  "up1": {
+   "h2": [
+    30,
+    210
+   ],
+   "column": [
+    90,
+    214
+   ],
+   "firstControlLeft": 85
+  },
+  "down0.9": {
+   "h2": [
+    36,
+    303
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 99
+  },
+  "down0.75": {
+   "h2": [
+    45,
+    300
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 120
+  },
+  "down0.5": {
+   "h2": [
+    60,
+    293
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 156
+  },
+  "down0.25": {
+   "h2": [
+    75,
+    287
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 191
+  },
+  "down0.1": {
+   "h2": [
+    84,
+    283
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 212
+  },
+  "down0": {
+   "h2": [
+    90,
+    280
+   ],
+   "column": [
+    30,
+    306
+   ],
+   "firstControlLeft": 226
+  }
+ },
+ "focusRects": {
+  ".timer-dial": [
+   65,
+   440,
+   260,
+   96
+  ],
+  "#session-time": [
+   65,
+   445,
+   260,
+   82
+  ],
+  ".music-heading": [
+   30,
+   560,
+   330,
+   50
+  ],
+  ".music-heading h2": [
+   30,
+   560,
+   276,
+   26
+  ],
+  ".music-heading p": [
+   30,
+   589,
+   276,
+   21
+  ],
+  ".music-controls": [
+   30,
+   670,
+   330,
+   64
+  ],
+  ".music-timeline": [
+   30,
+   621,
+   330,
+   43
+  ],
+  ".session-actions": [
+   22,
+   742,
+   346,
+   70
+  ],
+  ".music-cover img": [
+   -78,
+   30,
+   545,
+   545
+  ]
+ }
+}

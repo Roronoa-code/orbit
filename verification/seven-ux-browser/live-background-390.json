@@ -1,0 +1,23 @@
+{
+  "width": 390,
+  "frostHeightMin": 289,
+  "frostHeightMax": 289,
+  "stableTargets": [
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    }
+  ],
+  "maximumPixelChange": 0
+}

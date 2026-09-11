@@ -1,0 +1,32 @@
+<!doctype html><meta charset="utf-8"><title>Orbit motion verification</title>
+<style>body{margin:24px;background:#17171b;color:#eee;font:14px system-ui}button{padding:10px 18px;margin:0 8px 14px 0}#live{width:390px;height:844px;border:0}main{display:flex;gap:24px}pre{white-space:pre-wrap;max-width:600px}#strip{display:flex;flex-wrap:wrap;gap:12px}.frame{width:156px;height:365px;overflow:hidden}.frame iframe{width:390px;height:844px;border:0;transform:scale(.4);transform-origin:0 0}.frame span{display:block;height:24px}</style>
+<button id="run">Record open, reverse and close</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button>
+<main><iframe id="live" src="../index.html?motion-review"></iframe><pre id="result">Ready</pre></main><div id="strip"></div>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result'),strip=document.querySelector('#strip');
+document.querySelector('#narrow').onclick=()=>{live.style.width='320px';live.contentWindow.dispatchEvent(new Event('resize'))};
+document.querySelector('#wide').onclick=()=>{live.style.width='390px';live.contentWindow.dispatchEvent(new Event('resize'))};
+document.querySelector('#run').onclick=async()=>{
+  strip.replaceChildren();result.textContent='Recording every animation frame…';
+  const w=live.contentWindow,d=w.document,bar=d.querySelector('#live-bar'),svg=d.querySelector('#globe svg'),dots=[...svg.querySelectorAll('.particles circle')];
+  const rect=selector=>{const r=d.querySelector(selector).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};
+  const frames=[];let start,lastPhase=-1;
+  const captures=[0,80,160,280,480,900,1300,1460,1620,2100,2600,3400],saved=new Set();
+  const sample=now=>{
+    start??=now;const t=now-start;
+    const phase=t<1250?0:t<1460?1:t<1620?2:3;
+    if(phase!==lastPhase){bar.click();lastPhase=phase}
+    if(t>500&&t<530)d.querySelector('#period-7').click();
+    if(t>800&&t<830)d.querySelector('#period-30').click();
+    const row={t,orb:rect('#globe svg'),hero:rect('.hero'),card:rect('.facts'),period:rect('.periods'),progress:parseFloat(d.querySelector('#panel-deck').style.getPropertyValue('--deck-progress'))};frames.push(row);
+    for(const mark of captures)if(t>=mark&&!saved.has(mark)){
+      saved.add(mark);const tile=document.createElement('div');tile.className='frame';const label=document.createElement('span');label.textContent=Math.round(t)+' ms';tile.append(label);
+      const frame=document.createElement('iframe');frame.setAttribute('aria-hidden','true');frame.tabIndex=-1;frame.srcdoc='<style>'+d.querySelector('style').textContent+'</style><style>*,*:before,*:after{transition:none!important;animation:none!important}.phone{margin:0!important;border:0!important;padding:0!important}.screen{height:844px!important}.copy-label{display:none!important}</style>'+d.querySelector('body>svg').outerHTML+d.querySelector('.phone').outerHTML;
+      tile.append(frame);strip.append(tile);
+    }
+    if(t<3600){requestAnimationFrame(sample);return}
+    const gaps=frames.slice(1).map((f,i)=>f.t-frames[i].t),normal=frames.slice(1).filter((f,i)=>f.t-frames[i].t<25);
+    result.textContent=JSON.stringify({frames:frames.length,maxFrameGapMs:Math.max(...gaps),sameOrb:svg===d.querySelector('#globe svg'),sameParticles:dots.every((dot,i)=>dot===svg.querySelectorAll('.particles circle')[i]),start:frames[0],opened:frames.find(f=>f.t>=1100),end:frames.at(-1),maxNormalFrameOrbTravel:Math.max(...normal.map(f=>Math.abs(f.orb.top-frames[frames.indexOf(f)-1].orb.top))),minimumOrbToPeriodGap:Math.min(...frames.map(f=>f.period.top-f.orb.bottom)),horizontalOverflow:d.documentElement.scrollWidth>live.clientWidth},null,2);
+  };requestAnimationFrame(sample);
+};
+</script>

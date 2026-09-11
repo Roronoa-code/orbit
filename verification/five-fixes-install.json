@@ -1,0 +1,16 @@
+{
+  "installedAt": "2026-09-11T03:09:50",
+  "requestedBy": "User supplied the ADB address in reply to 'Want me to install it?'",
+  "device": "SM-S938B / 192.168.0.210:44875",
+  "package": "com.mani.orbit",
+  "method": "adb -s 192.168.0.210:44875 install -r (data kept; firstInstallTime unchanged 2026-09-09 20:57:51)",
+  "build": "android/build/20260911-030125",
+  "localSha256": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "installedSha256": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "match": true,
+  "previousInstalledSha256": "5eec8e21feee715220995be14b76c16ba003a4e572677a01ce944be8c20503dc",
+  "previousApkBackup": "verification/five-fixes-phone/phone-before.apk",
+  "installedApkCopy": "verification/five-fixes-phone/phone-after.apk",
+  "launched": false,
+  "otherDevice": "BYZL25052900310864 (cm01_se) was connected and not addressed"
+}

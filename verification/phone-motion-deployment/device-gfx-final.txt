@@ -1,0 +1,193 @@
+Applications Graphics Acceleration Info:
+Uptime: 62873749 Realtime: 106204891
+
+** Graphics info for pid 19563 [com.mani.orbit] **
+
+Stats since: 62869832797994ns
+Total frames rendered: 314
+Janky frames: 18 (5.73%)
+Janky frames (legacy): 17 (5.41%)
+50th percentile: 7ms
+90th percentile: 10ms
+95th percentile: 11ms
+99th percentile: 26ms
+Number Missed Vsync: 0
+Number High input latency: 453
+Number Slow UI thread: 0
+Number Slow bitmap uploads: 0
+Number Slow issue draw commands: 18
+Number Frame deadline missed: 18
+Number Frame deadline missed (legacy): 7
+HISTOGRAM: 5ms=69 6ms=42 7ms=87 8ms=42 9ms=38 10ms=17 11ms=10 12ms=1 13ms=4 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 26ms=1 27ms=0 28ms=0 29ms=0 30ms=0 31ms=0 32ms=0 34ms=1 36ms=0 38ms=0 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=0 61ms=0 65ms=0 69ms=0 73ms=0 77ms=1 81ms=0 85ms=1 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 3ms
+90th gpu percentile: 4ms
+95th gpu percentile: 5ms
+99th gpu percentile: 9ms
+GPU HISTOGRAM: 1ms=0 2ms=11 3ms=259 4ms=25 5ms=9 6ms=5 7ms=1 8ms=0 9ms=3 10ms=1 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (Vulkan)
+Memory policy:
+  Max surface area: 4492800
+  Max resource usage: 215.65MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 0.00 bytes (1 entry)
+  Glyph Count: 0 
+Total CPU memory usage:
+  0 bytes, 0.00 bytes (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    TextBlobCache: 0.00 bytes (1 entry)
+Total GPU memory usage:
+  0 bytes, 0.00 bytes (0.00 bytes is purgeable)
+Pipeline Cache: inactive
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+0xb40000745b9e8a20 |  4416.00 KiB | 1472 (1472) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9ea0d0 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9eb150 |  2240.00 KiB | 1280 (1280) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9eb4c0 |  2880.00 KiB | 1280 (1280) x  576 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9ebba0 |  1584.00 KiB |  730 ( 768) x  528 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9ec070 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9eccd0 |  3696.00 KiB | 1344 (1344) x  704 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9ed5c0 |  2576.00 KiB | 1472 (1472) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9ed7d0 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9eee80 |  3200.00 KiB | 1280 (1280) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f03d0 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f05e0 |  2208.00 KiB | 1472 (1472) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f17c0 |  3200.00 KiB | 1280 (1280) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f1c90 |  1920.00 KiB |  736 ( 768) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f2840 |  2576.00 KiB | 1472 (1472) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f3a20 |  2208.00 KiB | 1472 (1472) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f3e40 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f49f0 |  1920.00 KiB |  736 ( 768) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f5390 |  2880.00 KiB | 1280 (1280) x  576 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f5700 |  3696.00 KiB | 1344 (1344) x  704 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f5860 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f5e90 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f6200 |  2240.00 KiB | 1280 (1280) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f6410 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f7330 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f87d0 |  2016.00 KiB | 1344 (1344) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f9590 |  1632.00 KiB | 1088 (1088) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9f9e80 |  2560.00 KiB | 1280 (1280) x  512 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9fa6c0 |  1280.00 KiB | 1280 (1280) x  256 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9fbc10 |  3024.00 KiB | 1344 (1344) x  576 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9fbed0 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9fc500 |  1584.00 KiB |  730 ( 768) x  528 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745b9fcf50 |  2208.00 KiB | 1472 (1472) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba09fa0 | 17940.00 KiB | 1440 (1472) x 3120 |      1 |        1 | 0x10000b00 | VRI[MainActivity]@42b14fd#0(BLAST Consumer)0
+0xb40000745ba1c270 | 17940.00 KiB | 1440 (1472) x 3120 |      1 |        1 | 0x10000b00 | VRI[MainActivity]@42b14fd#0(BLAST Consumer)0
+0xb40000745ba1c690 | 17940.00 KiB | 1440 (1472) x 3120 |      1 |        1 | 0x10000b00 | VRI[MainActivity]@42b14fd#0(BLAST Consumer)0
+0xb40000745ba1f4a0 | 17940.00 KiB | 1440 (1472) x 3120 |      1 |        1 | 0x10000b00 | VRI[MainActivity]@42b14fd#0(BLAST Consumer)0
+0xb40000745ba2cc80 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2ce90 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2d570 |  2016.00 KiB | 1344 (1344) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2dd00 |  1920.00 KiB |  736 ( 768) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2e120 |  2016.00 KiB | 1344 (1344) x  384 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2e540 |  2576.00 KiB | 1472 (1472) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2e5f0 |  4416.00 KiB | 1472 (1472) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba2f880 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba30430 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba306f0 |  4416.00 KiB | 1472 (1472) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba30f30 |  4416.00 KiB | 1472 (1472) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba31a30 |  2304.00 KiB |  736 ( 768) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba31ae0 |  3360.00 KiB | 1344 (1344) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba32480 |  4416.00 KiB | 1472 (1472) x  768 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba32e20 |  2352.00 KiB | 1344 (1344) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba33ea0 |  1584.00 KiB |  730 ( 768) x  528 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba37860 |   144.00 KiB |  192 ( 192) x  192 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba41f70 |  3360.00 KiB | 1344 (1344) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba44f90 |  1104.00 KiB | 1472 (1472) x  192 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba48a00 |  3360.00 KiB | 1344 (1344) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba49be0 |  3696.00 KiB | 1344 (1344) x  704 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba4c730 |  2944.00 KiB | 1472 (1472) x  512 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba4cc00 |  3200.00 KiB | 1280 (1280) x  640 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba62cb0 |  2240.00 KiB | 1280 (1280) x  448 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba64410 |  1280.00 KiB | 1280 (1280) x  256 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+0xb40000745ba68c40 |  2560.00 KiB | 1280 (1280) x  512 |      1 |        1 | 0x10000300 | AHardwareBuffer pid [19563]
+Total allocated by GraphicBufferAllocator (estimate): 221440.00 KB
+Imported gralloc buffers:
++ name:AHardwareBuffer pid [19563], id:114967, size:2368.00KiB, w/h:1344x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114966, size:2592.00KiB, w/h:1472x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114963, size:1112.00KiB, w/h:1472x192, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114962, size:3720.00KiB, w/h:1344x704, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114961, size:3220.00KiB, w/h:1280x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114959, size:3220.00KiB, w/h:1280x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114958, size:3720.00KiB, w/h:1344x704, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114956, size:3380.00KiB, w/h:1344x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114953, size:1288.00KiB, w/h:1280x256, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114951, size:2576.00KiB, w/h:1280x512, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114949, size:2256.00KiB, w/h:1280x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114948, size:3380.00KiB, w/h:1344x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114946, size:2256.00KiB, w/h:1280x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114945, size:2576.00KiB, w/h:1280x512, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114943, size:2028.00KiB, w/h:1344x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114937, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114936, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114934, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114939, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114957, size:3220.00KiB, w/h:1280x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114928, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114926, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114955, size:2256.00KiB, w/h:1280x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114952, size:2900.00KiB, w/h:1280x576, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114944, size:3044.00KiB, w/h:1344x576, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114947, size:3380.00KiB, w/h:1344x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114922, size:4440.00KiB, w/h:1472x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114923, size:1932.00KiB, w/h:736x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114921, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114917, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114916, size:1932.00KiB, w/h:736x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114915, size:4440.00KiB, w/h:1472x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114913, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114912, size:1644.00KiB, w/h:1088x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114910, size:2592.00KiB, w/h:1472x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114924, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114964, size:2900.00KiB, w/h:1280x576, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114940, size:1596.00KiB, w/h:730x528, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114918, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114908, size:2220.00KiB, w/h:1472x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114938, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:VRI[MainActivity]@42b14fd#0(BLAST Consumer)0, id:114880, size:18040.00KiB, w/h:1440x3120, usage: 0x10000b00, req fmt:1, fourcc/mod:0/0, dataspace: 0x8810000, compressed: true
++ name:AHardwareBuffer pid [19563], id:114914, size:2028.00KiB, w/h:1344x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114909, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114960, size:3720.00KiB, w/h:1344x704, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:VRI[MainActivity]@42b14fd#0(BLAST Consumer)0, id:114882, size:18040.00KiB, w/h:1440x3120, usage: 0x10000b00, req fmt:1, fourcc/mod:0/0, dataspace: 0x8810000, compressed: true
++ name:AHardwareBuffer pid [19563], id:114950, size:1288.00KiB, w/h:1280x256, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114954, size:148.00KiB, w/h:192x192, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114942, size:2220.00KiB, w/h:1472x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114884, size:2220.00KiB, w/h:1472x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114930, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114941, size:2028.00KiB, w/h:1344x384, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114935, size:2316.00KiB, w/h:736x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114920, size:1932.00KiB, w/h:736x640, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114911, size:4440.00KiB, w/h:1472x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114965, size:2960.00KiB, w/h:1472x512, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114888, size:4440.00KiB, w/h:1472x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114887, size:1596.00KiB, w/h:730x528, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114883, size:1596.00KiB, w/h:730x528, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114919, size:4440.00KiB, w/h:1472x768, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:AHardwareBuffer pid [19563], id:114886, size:2592.00KiB, w/h:1472x448, usage: 0x10000300, req fmt:1, fourcc/mod:0/0, dataspace: 0x0, compressed: true
++ name:VRI[MainActivity]@42b14fd#0(BLAST Consumer)0, id:114879, size:18040.00KiB, w/h:1440x3120, usage: 0x10000b00, req fmt:1, fourcc/mod:0/0, dataspace: 0x8810000, compressed: true
++ name:VRI[MainActivity]@42b14fd#0(BLAST Consumer)0, id:114881, size:18040.00KiB, w/h:1440x3120, usage: 0x10000b00, req fmt:1, fourcc/mod:0/0, dataspace: 0x8810000, compressed: true
+Total imported by gralloc: 222736.00KiB
+
+Profile data in ms:
+
+	com.mani.orbit/com.mani.orbit.MainActivity/android.view.ViewRootImpl@aa863f0 (visibility=0)
+View hierarchy:
+
+  com.mani.orbit/com.mani.orbit.MainActivity/android.view.ViewRootImpl@aa863f0
+  6 views, 13.11 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 6
+Total RenderNode     : 13.11 kB (used) / 40.98 kB (capacity)
+
+Total STB frames rendered : 0
+  ProcessConfig={1.0 234mcc20mnc [en_GB] ldltr sw384dp w384dp h832dp 600dpi nrml long compactNeeded hdr widecg port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1440, 3120) mAppBounds=Rect(0, 0 - 1440, 3120) mMaxBounds=Rect(0, 0 - 1440, 3120) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=off mOverlappingWithCutout=false} as.4 s.1018 fontWeightAdjustment=0 fv=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}
+  Application ResourcesConfig={1.0 234mcc20mnc [en_GB] ldltr sw384dp w384dp h832dp 600dpi nrml long compactNeeded hdr widecg port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1440, 3120) mAppBounds=Rect(0, 0 - 1440, 3120) mMaxBounds=Rect(0, 0 - 1440, 3120) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=off mOverlappingWithCutout=false} as.4 s.1018 fontWeightAdjustment=0 fv=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}

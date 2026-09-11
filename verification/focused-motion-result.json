@@ -1,0 +1,31 @@
+{
+  "revision": "Samsung icons, hero-only matrix text, surface motion and Now Bar presentation",
+  "verifiedAt": "2026-09-10T01:52:41.764281+01:00",
+  "nodeChecks": "PASS, including root-surface reversal and reduced motion",
+  "browserFinal390": {
+    "status": "PASS",
+    "frames": 276,
+    "pageChecks": [
+      "Body",
+      "Workouts",
+      "Health"
+    ],
+    "countdownAndTimer": true,
+    "storageReload": true,
+    "surfaceOpensAndCloses": true
+  },
+  "browser320": "PASS before the final text-fade sequencing refinement; geometry and workflows unchanged by that refinement",
+  "apkBuild": "PASS; signature verified",
+  "install": "adb install -r succeeded on Samsung SM-S938B at 192.168.0.210:38797",
+  "installedApkSha256": "f6335931a6c4d1c385dc13730965b7b4f44884d4f64fb27a92ff99918b4a1282",
+  "physicalStatus": "User confirmed prior walking flow and supplied actual Now Bar screenshot. New icon/spacing/motion appearance is installed for user review; no new phone UI or workout session was operated.",
+  "sourceSha256": {
+    "index.html": "092934e62bcc7e9aa18148504c522ae0b7017a31ef4ce283ca59d922589a9776",
+    "health-pages.js": "121f1c92f5b65fa262a8f588ac29597a5279a50bbc7555c6ab502ecafcb80572",
+    "health-pages.css": "828248c9c93cfaac756be12ad1e65361fcc2f19f5ee10b00a62e9d64e0a94b99",
+    "surface-motion.js": "d82ffcf46f3ea69b879ec47455f4447e260af79bb42263727fcf16b731a831b4",
+    "android/src/com/mani/orbit/WorkoutSession.java": "6bb891155d499bc7d233238bba3587b90015d8004d9cf78547575ccc033ea0c5",
+    "android/res/drawable/orbit_icon.xml": "a57556f15862792f90968e55482454098ff32e66b26c12019f643f4a5775df52",
+    "dist/Orbit.apk": "f6335931a6c4d1c385dc13730965b7b4f44884d4f64fb27a92ff99918b4a1282"
+  }
+}

@@ -1,0 +1,201 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Orbit recorded workout verification</title>
+<style>
+  body{margin:20px;background:#17171b;color:#eee;font:14px system-ui,sans-serif}
+  button{padding:10px 18px;margin:0 8px 14px 0}
+  main{display:flex;gap:24px;align-items:flex-start}
+  iframe{width:390px;height:844px;border:0;flex:0 0 auto;zoom:.78}
+  pre{white-space:pre-wrap;max-width:680px;min-width:360px}
+  .note{max-width:720px;color:#bdb8c6}
+</style>
+<h1>Recorded workout verification</h1>
+<p class="note">The embedded app runs against an isolated OrbitWorkouts fixture. GPS points and saved sessions exist only in this verification page.</p>
+<button id="run">Run workout checks</button>
+<button id="preview">Preview recorded workout</button>
+<button id="narrow">Use 320 px</button>
+<button id="wide">Use 390 px</button>
+<button id="reset">Reset test preview</button>
+<main>
+  <iframe id="live" title="Orbit workout test phone" src="../index.html?workout-details-check"></iframe>
+  <pre id="result">Ready. Fixture data is confined to this page.</pre>
+</main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result'),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const key='orbit-workouts-v1';
+let savedRaw,fixtureState,bridge;
+const frameReady=()=>live.contentDocument?.readyState==='complete'?Promise.resolve():new Promise(resolve=>live.addEventListener('load',resolve,{once:true}));
+const doc=()=>live.contentDocument,win=()=>live.contentWindow;
+const q=(selector,root=doc())=>root.querySelector(selector),qa=(selector,root=doc())=>[...root.querySelectorAll(selector)];
+const text=selector=>q(selector)?.textContent.trim()||'';
+const check=(value,message)=>{if(!value)throw Error(message)};
+const raw=value=>JSON.stringify(value);
+function expose(){
+  if(win().__workoutVerificationExposed)return;
+  const script=doc().createElement('script');
+  script.textContent='window.Health=Health;window.WorkoutDetails=WorkoutDetails;window.SleepTimeline=SleepTimeline;window.WorkoutFocus=WorkoutFocus;window.MusicPlayer=MusicPlayer;window.__workoutVerificationExposed=true;';
+  doc().head.append(script);
+}
+function points(){return[
+  {lat:51.5000,lon:-0.1200,elapsedMs:0,altitudeM:48,speedMps:2.5,breakBefore:false},
+  {lat:51.5020,lon:-0.1200,elapsedMs:450000,altitudeM:null,speedMps:null,breakBefore:false},
+  {lat:51.5050,lon:-0.1180,elapsedMs:900000,altitudeM:67,speedMps:4.5,breakBefore:true},
+]}
+function gpsMetrics(state,withPoints){return{state,distanceM:withPoints?2500:0,speedMps:withPoints?2500/900:null,maxSpeedMps:withPoints?4.5:0,accuracyM:withPoints?6:null,altitudeMinM:withPoints?48:null,altitudeMaxM:withPoints?67:null,points:withPoints?points():[]}}
+function oldRecord(){const ended=Date.now()-86400000;return{kind:'Walking',startedAt:ended-420000,endedAt:ended,elapsed:420000,targetMs:0,weightKg:0,trackLocation:false}}
+function previewRecord(){const ended=Date.now()-1800000;return{kind:'Running',startedAt:ended-900000,endedAt:ended,elapsed:900000,totalMs:930000,targetMs:1800000,weightKg:80,trackLocation:true,metrics:gpsMetrics('tracking',true)}}
+function makeBridge(state){
+  const snapshot=()=>raw(state.store);
+  return {
+    read(){state.calls.push({name:'read'});return snapshot()},
+    write(value){state.calls.push({name:'write'});try{state.store=JSON.parse(value);return true}catch{return false}},
+    start(kind,targetMs,trackLocation,weightKg){
+      state.calls.push({name:'start',kind,targetMs,trackLocation,weightKg});
+      state.elapsed=900000;state.total=930000;
+      state.store.active={kind,startedAt:Date.now(),elapsed:state.elapsed,resumedAt:Date.now(),targetMs,weightKg,trackLocation,metrics:gpsMetrics('permission',false)};
+      return snapshot();
+    },
+    action(name,kind,targetMs){
+      state.calls.push({name,kind,targetMs});
+      const active=state.store.active;if(!active)return snapshot();
+      if(name==='pause'){active.elapsed=state.elapsed;active.resumedAt=null}
+      else if(name==='resume')active.resumedAt=Date.now();
+      else if(name==='finish'){
+        const finished={...active,resumedAt:undefined,endedAt:Date.now(),elapsed:state.elapsed,totalMs:state.total,targetMs:active.targetMs||0};
+        state.store={active:null,history:[finished,...state.store.history]};
+      }
+      return snapshot();
+    },
+    elapsedMs(){return state.elapsed},
+    totalMs(){return state.total},
+    notificationStatus(){return 'disabled'},
+    enableTracking(){
+      state.calls.push({name:'enableTracking'});
+      if(state.store.active)state.store.active.metrics=gpsMetrics('tracking',true);
+      return true;
+    },
+    enableNotifications(){state.calls.push({name:'enableNotifications'});return true},
+  };
+}
+function installFixture(store){
+  if(savedRaw===undefined)savedRaw=win().localStorage.getItem(key);
+  fixtureState={store,elapsed:900000,total:930000,calls:[]};
+  bridge=makeBridge(fixtureState);win().OrbitWorkouts=bridge;
+  win().Health.refresh();
+  return fixtureState;
+}
+function restoreFrame(){
+  if(!win())return;
+  delete win().OrbitWorkouts;
+  if(savedRaw!==undefined){if(savedRaw===null)win().localStorage.removeItem(key);else win().localStorage.setItem(key,savedRaw)}
+  savedRaw=undefined;fixtureState=null;bridge=null;
+  win().location.reload();
+}
+async function openWorkouts(){win().Health.open('workouts');await wait(260)}
+function click(selector){const node=q(selector);check(node,'Missing '+selector);node.click();return node}
+function contextMenu(node){const event=new win().Event('contextmenu',{bubbles:true,cancelable:true});node.dispatchEvent(event);return event}
+function finishResult(){return q('#workout-record-body')}
+async function runChecks(){
+  result.textContent='Checking…';
+  let state;
+  try{
+    await frameReady();expose();state=installFixture({active:null,history:[oldRecord()]});await openWorkouts();
+    check(q('[data-setup="Running"]'),'Running setup is missing');click('[data-setup="Running"]');await wait(240);
+
+    const weight=q('#workout-weight');
+    check(weight&&!weight.required,'Weight must remain optional');
+    check(q('.tracking-option')?.textContent.includes('Track outdoors'),'Outdoors setup label is missing');
+    check(q('#workout-track')?.checked===true,'Outdoors must be selected for this fixture');
+    check(contextMenu(q('.screen')).defaultPrevented,'The app screen must block context menus');
+    check(!contextMenu(weight).defaultPrevented,'Weight input must allow its native text interaction');
+    check((win().getComputedStyle(weight).userSelect||'').includes('text'),'Weight input must allow text selection');
+    weight.value='10';click('#workout-setup-form button[type="submit"]');
+    check(weight.validity.rangeUnderflow,'Native weight range validation must reject values below 20 kg');
+    check(text('#workout-error')==='','Native weight validation should run before the custom submit guard');
+    check(state.calls.every(call=>call.name!=='start'),'Invalid weight must not reach native start');
+    weight.value='80';click('input[name="target"][value="time"]');await wait(210);q('#target-minutes').value='0';click('#workout-setup-form button[type="submit"]');
+    check(q('#target-minutes').validity.rangeUnderflow,'Native target range validation must reject values below one minute');
+    check(text('#workout-error')==='','Native target validation should run before the custom submit guard');
+    check(state.calls.every(call=>call.name!=='start'),'Invalid target must not reach native start');
+    q('#target-minutes').value='30';
+    click('#workout-setup-form button[type="submit"]');
+    check(q('.workout-countdown'),'A valid start must show the countdown');
+    check(text('#workout-count')==='3','Countdown must start at three');
+    check(state.calls.every(call=>call.name!=='start'),'Countdown must finish before native start');
+    await wait(3600);
+    check(state.store.active&&q('.workout-live'),'Countdown must create an active workout');
+    const startCall=state.calls.find(call=>call.name==='start');
+    check(startCall?.kind==='Running'&&startCall.targetMs===1800000&&startCall.trackLocation===true&&startCall.weightKg===80,'Native start arguments must include target, outdoors and weight');
+
+    const retry=q('[data-tracking]');check(retry,'Permission state must expose a GPS retry');
+    check(retry.getBoundingClientRect().height>=44,'GPS retry must have a 44 px tap target');
+    check(state.calls.filter(call=>call.name==='enableTracking').length===0,'GPS retry must not call native before press');
+    click('[data-tracking]');check(state.calls.filter(call=>call.name==='enableTracking').length===1,'GPS retry must call native once when pressed');
+    win().Health.refresh();await wait(80);
+    check(text('[data-workout-value="distance"] dd>span')==='2.50','Distance must be calculated from the recorded reading');
+    check(text('[data-workout-value="average-pace"] dd>span')==='06:00','Average pace must use active time');
+    check(text('[data-workout-value="average-speed"] dd>span')==='10.0','Average speed must use active time');
+    check(text('[data-workout-value="energy-estimate"] dd>span')==='158','Energy must use weight, MET and active minutes');
+
+    const timer=q('.timer-dial'),music=q('.workout-music');click('[data-timer-focus]');await wait(240);
+    check(q('.timer-dial')===timer&&q('.workout-music')===music,'Focusing must preserve timer and music nodes');
+    check(!music.hidden,'Focused timer must show music');
+    state.store.active.metrics.distanceM=2501;win().Health.refresh();await wait(80);
+    check(q('.timer-dial')===timer&&q('.workout-music')===music,'Native metric refresh must not remount focused timer or music');
+    click('[data-timer-focus]');await wait(180);click('[data-workout-detail="active"]');await wait(260);
+    const activeDetails=finishResult();check(activeDetails,'All details must open the active record');
+    for(const label of ['Active','Total','Paused','Target'])check(activeDetails.textContent.includes(label),label+' must be visible in active details');
+    check(q('[data-workout-chart="route"]')?.getAttribute('aria-pressed')==='true','Route must be the default chart');
+
+    let chart=q('.workout-record-chart');check(chart&&!/NaN|Infinity/.test(chart.innerHTML),'Route chart must be finite');
+    click('[data-workout-chart="speed"]');chart=q('.workout-record-chart');check(chart.querySelector('svg')&&!/NaN|Infinity/.test(chart.innerHTML),'Speed chart must render finite values');
+    click('[data-workout-chart="altitude"]');chart=q('.workout-record-chart');check(chart.querySelector('svg')&&!/NaN|Infinity/.test(chart.innerHTML),'Elevation chart must render finite values');
+    click('[data-workout-chart="route"]');
+    const fullPoints=state.store.active.metrics.points;
+    state.store.active.metrics.points=[fullPoints[0]];win().Health.refresh();await wait(80);
+    check(text('.workout-chart-empty').includes('route appears'),'Missing route data must have an explicit state');
+    state.store.active.metrics.points=fullPoints;win().Health.refresh();await wait(80);
+    check(q('.workout-record-chart svg'),'Restored route data must render');
+
+    click('#health-back');await wait(260);check(q('[data-session="pause"]'),'Back must return to live workout controls');
+    check(q('[data-session="pause"]').getBoundingClientRect().height>=44&&q('[data-session="finish"]').getBoundingClientRect().height>=44,'Session controls must have 44 px tap targets');
+    click('[data-session="pause"]');check(state.store.active.resumedAt===null&&q('[data-session="resume"]'),'Pause must persist native state');
+    click('[data-session="resume"]');check(state.store.active.resumedAt!==null&&q('[data-session="pause"]'),'Resume must persist native state');
+    click('[data-session="finish"]');await wait(300);
+    check(state.store.active===null&&state.store.history.length===2,'Finish must save the record and clear the active session');
+    check(finishResult()?.textContent.includes('Workout saved'),'Finished record must show saved status');
+    check(finishResult()?.textContent.includes('Active')&&finishResult()?.textContent.includes('Total')&&finishResult()?.textContent.includes('Paused')&&finishResult()?.textContent.includes('Target'),'Finished detail must keep time breakdown');
+    check(state.store.history.some(record=>!Object.hasOwn(record,'metrics')),'Metric-less old history must remain preserved');
+
+    click('#health-back');await wait(260);const history=q('.workout-history');check(history,'Back must return to workout history');
+    click('.workout-history summary');await wait(240);const rows=qa('.workout-history li button');check(rows.length===2,'Saved and old history rows must both remain');
+    const old=rows.find(row=>row.textContent.includes('Walking'));check(old,'Metric-less old history row is missing');old.click();await wait(260);check(finishResult()&&!q('.workout-route-group'),'Old history without metrics must open a time-only summary');
+    click('#health-back');await wait(260);click('.workout-history summary');await wait(220);
+    const newest=qa('.workout-history li button').find(row=>row.textContent.includes('Running'));check(newest,'New completed history row is missing');newest.click();await wait(260);check(finishResult()?.textContent.includes('Workout saved'),'History row must reopen completed summary');
+
+    for(const width of [320,390]){
+      live.style.width=width+'px';await wait(100);
+      check(doc().documentElement.scrollWidth<=win().innerWidth+1,'Finished detail overflows horizontally at '+width+' px');
+      check(!/NaN|Infinity/.test(q('#health-content').innerHTML),'Finished detail has non-finite output at '+width+' px');
+    }
+    live.style.width='390px';
+    check(q('#health-back').getBoundingClientRect().height>=44,'Health back must have a 44 px tap target');
+    check(qa('[data-workout-chart]').every(node=>node.getBoundingClientRect().height>=40),'Chart tabs must remain tappable');
+
+    win().Health.open('sleep');await wait(260);const scrub=q('#night-scrub');check(scrub&&!q('#night-cursor'),'Sleep view must use the existing scrubber without a cursor overlay');
+    scrub.value='120';scrub.dispatchEvent(new win().Event('input',{bubbles:true}));
+    const highlighted=qa('[data-night-segment]').filter(node=>node.getAttribute('stroke')==='#fff5');
+    check(highlighted.length===1,'Sleep scrub must retain one highlighted interval');
+    check(qa('[data-night-stage]').some(node=>node.getAttribute('aria-pressed')==='true'),'Sleep scrub must retain the active stage');
+    check(!q('#night-cursor'),'Sleep scrub must not create a night cursor');
+
+    result.textContent=JSON.stringify({status:'PASS',fixture:'OrbitWorkouts only; GPS and history data are verification-page local',checks:['validation and invalid setup inputs','outdoors start, optional weight and countdown','distance, pace, speed and MET energy','GPS permission retry and metric refresh identity','active and completed time details','route, speed, elevation and missing data states','pause, resume, finish, back and history reopening','metric-less history compatibility','320 px and 390 px finite/no-overflow detail','44 px controls','context menu and input selection','sleep scrub highlight without night cursor']},null,2);
+  }catch(error){result.textContent='FAIL: '+error.stack}
+  finally{restoreFrame()}
+}
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';
+document.querySelector('#wide').onclick=()=>live.style.width='390px';
+document.querySelector('#run').onclick=runChecks;
+document.querySelector('#preview').onclick=async()=>{try{await frameReady();expose();installFixture({active:null,history:[previewRecord()]});await openWorkouts();click('.workout-history summary');await wait(220);const row=qa('.workout-history li button')[0];check(row,'Preview record is missing');row.click();await wait(260);result.textContent='Preview only. Recorded workout and GPS points are fixture data in this verification page.'}catch(error){result.textContent='FAIL: '+error.stack}};
+document.querySelector('#reset').onclick=()=>{restoreFrame();result.textContent='Preview reset. Fixture data was removed from the child page.'};
+</script>

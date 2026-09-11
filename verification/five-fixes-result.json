@@ -1,0 +1,66 @@
+{
+  "updated": "2026-09-11T03:15",
+  "status": "Built, verified and installed on the phone at the user's request (2026-09-11 03:09; installed hash matched; data kept; not launched)",
+  "build": "android/build/20260911-030125",
+  "apkSha256": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "supersedes": "5eec8e21feee715220995be14b76c16ba003a4e572677a01ce944be8c20503dc",
+  "installedOnPhone": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "install": "verification/five-fixes-install.json",
+  "requests": {
+    "launcherSwipeDown": "Swiping the launcher down did not return it to its closed shape",
+    "bodyIcon": "Body launcher icon did not match the other icons",
+    "launcherName": "The idle bar said Health, repeating the Health shortcut above it",
+    "firstStackSwipe": "The first swipe up from the first card was laggy at the start",
+    "workoutMusic": "No way back from the full-screen music view to the workout page with the music smaller"
+  },
+  "rootCauses": {
+    "launcherSwipeDown": "Only the bottom bar row accepted a drag; it needed 90 px on a fixed 180 px scale, which the edge-hugging row cannot give; touches over the open launcher's shortcuts were ignored; the drag sign followed the first direction, so a downward pull could open it",
+    "firstStackSwipe": "Opening toggled card inert, the deck scroller's pointer-events/touch-action, its edge mask and its overflow; each re-recorded all four frosted shells, the grain tile and the deck background. A tap did this on the first moving frame, a swipe at release. Charts could also render on the first moving frame, and the stack jumped the 8 px touch slop"
+  },
+  "changes": [
+    "index.html: the whole open launcher is a drag surface; shell follows the finger 1:1 with its growth; up grows, down shrinks; drags never press shortcuts (capture-phase click guard); a downward pull on the bar of the open stack folds the stack only",
+    "index.html: Body icon is an outline figure; idle bar is Explore / Body · Workouts · Health with a grid icon",
+    "index.html + health-pages.css: #period-content always hit-testable and .deck-scroll touch-action constant; inert, the edge mask and overflow move to .is-scrollable via settleDeckStructure() once the stack rests",
+    "index.html: charts flush at touch-down; deck and launcher drags start from the edge of the touch slop",
+    "workout-focus.js + health-pages.js + health-pages.css: player stays mounted on the workout view as a small row (192 px cover copy shown at 48 px); cover/title opens focus; header chevron (#health-minimize, focus only) returns; page artwork fades out and back; dial yields height with music so Pause/Finish stay on screen; animated player exit removed",
+    "verification: check.cjs, ux-motion.html, focus-music.html updated; perf-tools measure8-11 added; visualdiff accepts js:/jsfile: and ORBIT_HIDE_ORB"
+  ],
+  "method": "Playwright + Chromium 1243, 390x844 @3x, 4x CPU throttle, touch events through CDP; headless software raster, so numbers are relative",
+  "measurements": {
+    "tapOpen": {
+      "before": "First moving frame 6.1-6.5 ms (normal 3-5 ms) and all four shells, the grain tile and the deck background re-recorded at 88-103 ms after input; raster 26.9-27.1 ms",
+      "after": "No extra work at the start; the one structure change and repaint happen when the stack has settled (610-659 ms, nothing moving); raster 24.0-25.1 ms"
+    },
+    "flickOpen": {
+      "before": "10.7-11.9 ms frame plus the full repaint at release (295-326 ms); raster 16.8-18.8 ms",
+      "after": "No heavy frame and no repaint within 700 ms; raster 13.1-13.6 ms"
+    },
+    "dragStartShiftForA12pxMovePx": {"after": 3.55, "beforeCalculated": 10.6},
+    "firstMoveToFirstFrameMs": {"before": {"first": 33.7, "repeat": 20.2, "afterPeriodChange": 44.5}, "after": {"first": 33.0, "repeat": 22.7, "afterPeriodChange": 39.9}},
+    "repaintsPerTapCycle": {"shells": "4 each, now at rest instead of motion start", "deckBackground": {"before": 8, "after": 5}},
+    "files": "verification/perf-tools/measure8-baseline.json, measure9-baseline.json, measure9-after.json, measure11-baseline.json, measure11-after.json"
+  },
+  "visualDiff": {
+    "orbHiddenBothTrees_oldLabelRestored": {"folded": "0 px", "midFold": "152 px (0.012%), none >40 levels", "open": "0 px", "launcherOpen": "0 px"},
+    "orbHiddenBothTrees_oldLabelAndOldMaskTiming": {"folded": "0 px", "midFold": "0 px", "open": "0 px", "launcherOpen": "0 px"},
+    "orbVisible": "mid 0.062-0.075%, open 0.133-0.134%: orb dots leaving the masked box once the globe moves (also the residual of the previous pass)",
+    "note": "The remaining mid-fold difference is the scroll-edge mask now applied at rest; with the deck unscrolled it only changes rounding",
+    "files": "verification/perf-visual-diff/"
+  },
+  "checks": {
+    "nodeModel": "PASS",
+    "workoutDetailsModel": "PASS",
+    "rendered": ["ux-motion-390", "ux-motion-320", "focus-music-390", "focus-music-320", "workout-details-390", "workout-details-320"],
+    "liveBackground": "PASS (frost size range 0 px, timer-only mutations, 0 px background change)",
+    "native": "PASS",
+    "apkSignature": "v3 PASS",
+    "bundledPage": "assets/index.html in the installed APK contains the new code"
+  },
+  "backups": ["verification/before-five-fixes-20260911-021144", "verification/five-fixes-phone/phone-before.apk"],
+  "limits": [
+    "Headless measurements are relative; a phone-GPU first-use cost (first raster or shader compile) cannot be reproduced here",
+    "Confirm on the phone by feel and a fresh read-only dumpsys gfxinfo after use",
+    "The small player was verified with a browser music fixture, not the phone's media session",
+    "Installed with adb install -r at the user's request; the app was not launched and no phone UI was operated"
+  ]
+}

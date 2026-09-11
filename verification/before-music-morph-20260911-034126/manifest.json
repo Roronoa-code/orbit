@@ -1,0 +1,46 @@
+﻿[
+    {
+        "file":  "index.html",
+        "sha256":  "CD1F5ACBB75478F2F1020C08854BE88D6811CA4553F5981A8B04D92C48500023"
+    },
+    {
+        "file":  "health-pages.css",
+        "sha256":  "0CCEC76C62155242485406758E6D0A035232F6921F137D863752FDAAC5D85BFD"
+    },
+    {
+        "file":  "health-pages.js",
+        "sha256":  "BAF0CD930D1940D15DD2DBAC8DB9A589F09F4FEEF8E9E12389707C3EEF4230A8"
+    },
+    {
+        "file":  "workout-focus.js",
+        "sha256":  "1155EB22C8A4362945EFB0343FDF0A7A7D7B7BDB50FF52030431007B93C16076"
+    },
+    {
+        "file":  "HANDOFF.md",
+        "sha256":  "ABEF22C45B370D4EE45B036B3E08920650B8975A9F6B55CC1C46454708D50E97"
+    },
+    {
+        "file":  "README.md",
+        "sha256":  "A832F1FCB204DF4476A27A68DEF0DEFF6ECDA66387B726DB0D885266F58B0B50"
+    },
+    {
+        "file":  "android\\src\\com\\mani\\orbit\\WorkoutNotification.java",
+        "sha256":  "F3DA44D6899E7A9A814693A536B6381A167C7E76995A2D53B47F739BE3FFE2FE"
+    },
+    {
+        "file":  "android\\res\\drawable\\workout_notification.xml",
+        "sha256":  "2187F4BABA42B247801D5D2535A7BDC1CB480B37795883933EDF14ED5B71FEFA"
+    },
+    {
+        "file":  "verification\\focus-music.html",
+        "sha256":  "D90B6C2E1A8C0E1359E5E4CC8E1FE36D4A6001A6DF4BF4328AECDE57103D29BE"
+    },
+    {
+        "file":  "verification\\ux-motion.html",
+        "sha256":  "9EEC71105DEA858B4C2547865A801247392B3C2EF55EA603B45B0A442723D747"
+    },
+    {
+        "file":  "verification\\check.cjs",
+        "sha256":  "B956125D7121D18DD1708B1C5F2B3F69CB150CA3D52F46E07FE7BE7E6250AD3F"
+    }
+]

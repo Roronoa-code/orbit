@@ -1,0 +1,65 @@
+Applications Graphics Acceleration Info:
+Uptime: 61285346 Realtime: 104611244
+
+** Graphics info for pid 31176 [com.mani.orbit] **
+
+Stats since: 60908158228898ns
+Total frames rendered: 11408
+Janky frames: 7119 (62.40%)
+Janky frames (legacy): 4255 (37.30%)
+50th percentile: 14ms
+90th percentile: 19ms
+95th percentile: 26ms
+99th percentile: 81ms
+Number Missed Vsync: 392
+Number High input latency: 7192
+Number Slow UI thread: 266
+Number Slow bitmap uploads: 0
+Number Slow issue draw commands: 7118
+Number Frame deadline missed: 7119
+Number Frame deadline missed (legacy): 2606
+HISTOGRAM: 5ms=38 6ms=98 7ms=335 8ms=427 9ms=599 10ms=913 11ms=863 12ms=841 13ms=899 14ms=1259 15ms=1187 16ms=734 17ms=1320 18ms=532 19ms=284 20ms=197 21ms=124 22ms=71 23ms=53 24ms=27 25ms=24 26ms=31 27ms=22 28ms=17 29ms=15 30ms=10 31ms=11 32ms=14 34ms=25 36ms=15 38ms=21 40ms=9 42ms=21 44ms=12 46ms=10 48ms=37 53ms=34 57ms=27 61ms=32 65ms=21 69ms=42 73ms=23 77ms=18 81ms=15 85ms=15 89ms=16 93ms=12 97ms=8 101ms=15 105ms=4 109ms=5 113ms=3 117ms=1 121ms=2 125ms=6 129ms=4 133ms=1 150ms=7 200ms=1 250ms=1 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 8ms
+90th gpu percentile: 12ms
+95th gpu percentile: 14ms
+99th gpu percentile: 16ms
+GPU HISTOGRAM: 1ms=94 2ms=589 3ms=918 4ms=747 5ms=1227 6ms=491 7ms=996 8ms=1013 9ms=3173 10ms=313 11ms=611 12ms=260 13ms=253 14ms=316 15ms=245 16ms=62 17ms=37 18ms=19 19ms=9 20ms=8 21ms=4 22ms=2 23ms=7 24ms=3 25ms=2 4950ms=9
+
+Pipeline=Skia (Vulkan)
+Memory policy:
+  Max surface area: 4492800
+  Max resource usage: 215.65MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 1)
+CPU Caches:
+  Glyph Cache: 0.00 bytes (1 entry)
+  Glyph Count: 0 
+Total CPU memory usage:
+  0 bytes, 0.00 bytes (0.00 bytes is purgeable)
+GPU Caches:
+  Other:
+    TextBlobCache: 0.00 bytes (1 entry)
+Total GPU memory usage:
+  0 bytes, 0.00 bytes (0.00 bytes is purgeable)
+Pipeline Cache: inactive
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+Total allocated by GraphicBufferAllocator (estimate): 0.00 KB
+
+Profile data in ms:
+
+	com.mani.orbit/com.mani.orbit.MainActivity/android.view.ViewRootImpl@d146433 (visibility=8)
+View hierarchy:
+
+  com.mani.orbit/com.mani.orbit.MainActivity/android.view.ViewRootImpl@d146433
+  6 views, 10.44 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 6
+Total RenderNode     : 10.44 kB (used) / 10.44 kB (capacity)
+
+Total STB frames rendered : 0
+  ProcessConfig={1.0 234mcc20mnc [en_GB] ldltr sw384dp w384dp h832dp 600dpi nrml long compactNeeded hdr widecg port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1440, 3120) mAppBounds=Rect(0, 0 - 1440, 3120) mMaxBounds=Rect(0, 0 - 1440, 3120) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=off mOverlappingWithCutout=false} as.4 s.1009 fontWeightAdjustment=0 fv=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}
+  Application ResourcesConfig={1.0 234mcc20mnc [en_GB] ldltr sw384dp w384dp h832dp 600dpi nrml long compactNeeded hdr widecg port night finger -keyb/v/h -nav/h winConfig={ mBounds=Rect(0, 0 - 1440, 3120) mAppBounds=Rect(0, 0 - 1440, 3120) mMaxBounds=Rect(0, 0 - 1440, 3120) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0 mStageConfig=undefined mEmbedActivityMode=undefined mPopOver=off mOverlappingWithCutout=false} as.4 s.1009 fontWeightAdjustment=0 fv=0 bf=-1 bts=0 cst=1.0 nightDim=0 themeSeq=0}

@@ -1,0 +1,236 @@
+{
+ "baseline": {
+  "deck-open-close-x2": {
+   "busyPct": 44.9,
+   "styleMs": 833.4,
+   "layoutMs": 3.6,
+   "layouts": 6,
+   "mainMs": 856.5,
+   "rasterMs": 2439.3,
+   "compositorMs": 287.7,
+   "vizMs": 2921.8,
+   "drawAndSwap": 171,
+   "rasterTasks": 2190
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 29.2,
+   "styleMs": 248.8,
+   "layoutMs": 35.4,
+   "layouts": 167,
+   "mainMs": 276.3,
+   "rasterMs": 366.3,
+   "compositorMs": 124.4,
+   "vizMs": 2026.6,
+   "drawAndSwap": 171,
+   "rasterTasks": 990
+  }
+ },
+ "no-card-clip": {
+  "deck-open-close-x2": {
+   "busyPct": 46.1,
+   "styleMs": 860.5,
+   "layoutMs": 2.5,
+   "layouts": 6,
+   "mainMs": 886.7,
+   "rasterMs": 2438.5,
+   "compositorMs": 306.6,
+   "vizMs": 3189,
+   "drawAndSwap": 173,
+   "rasterTasks": 2166
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 29.5,
+   "styleMs": 245.2,
+   "layoutMs": 37.2,
+   "layouts": 167,
+   "mainMs": 276.6,
+   "rasterMs": 357.1,
+   "compositorMs": 124.9,
+   "vizMs": 2700.9,
+   "drawAndSwap": 171,
+   "rasterTasks": 992
+  }
+ },
+ "no-card-shell": {
+  "deck-open-close-x2": {
+   "busyPct": 36.1,
+   "styleMs": 721.2,
+   "layoutMs": 2.5,
+   "layouts": 6,
+   "mainMs": 741.3,
+   "rasterMs": 211.1,
+   "compositorMs": 243.7,
+   "vizMs": 2489,
+   "drawAndSwap": 170,
+   "rasterTasks": 1070
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 27.4,
+   "styleMs": 233.8,
+   "layoutMs": 32.8,
+   "layouts": 167,
+   "mainMs": 258.8,
+   "rasterMs": 363.4,
+   "compositorMs": 110.4,
+   "vizMs": 1606.6,
+   "drawAndSwap": 171,
+   "rasterTasks": 992
+  }
+ },
+ "static-card-children": {
+  "deck-open-close-x2": {
+   "busyPct": 43.2,
+   "styleMs": 803.9,
+   "layoutMs": 2.6,
+   "layouts": 6,
+   "mainMs": 829.5,
+   "rasterMs": 2505.9,
+   "compositorMs": 280.4,
+   "vizMs": 3029.1,
+   "drawAndSwap": 169,
+   "rasterTasks": 2382
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 27.5,
+   "styleMs": 230.9,
+   "layoutMs": 33.8,
+   "layouts": 168,
+   "mainMs": 259.8,
+   "rasterMs": 363.5,
+   "compositorMs": 112.8,
+   "vizMs": 2047.7,
+   "drawAndSwap": 169,
+   "rasterTasks": 1000
+  }
+ },
+ "no-facts-frost": {
+  "deck-open-close-x2": {
+   "busyPct": 41.7,
+   "styleMs": 786.8,
+   "layoutMs": 1.6,
+   "layouts": 6,
+   "mainMs": 810.4,
+   "rasterMs": 2334.5,
+   "compositorMs": 276.7,
+   "vizMs": 2168.9,
+   "drawAndSwap": 172,
+   "rasterTasks": 2152
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 26.4,
+   "styleMs": 225.2,
+   "layoutMs": 31.5,
+   "layouts": 168,
+   "mainMs": 250.1,
+   "rasterMs": 361,
+   "compositorMs": 103.4,
+   "vizMs": 1238,
+   "drawAndSwap": 170,
+   "rasterTasks": 998
+  }
+ },
+ "no-live-frost": {
+  "deck-open-close-x2": {
+   "busyPct": 41.2,
+   "styleMs": 771,
+   "layoutMs": 2.8,
+   "layouts": 6,
+   "mainMs": 792.7,
+   "rasterMs": 2360.8,
+   "compositorMs": 275.4,
+   "vizMs": 2145.6,
+   "drawAndSwap": 173,
+   "rasterTasks": 2146
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 27.1,
+   "styleMs": 231.1,
+   "layoutMs": 33,
+   "layouts": 168,
+   "mainMs": 259.2,
+   "rasterMs": 375.3,
+   "compositorMs": 112.7,
+   "vizMs": 988,
+   "drawAndSwap": 170,
+   "rasterTasks": 1000
+  }
+ },
+ "short-live-frost": {
+  "deck-open-close-x2": {
+   "busyPct": 43.5,
+   "styleMs": 810,
+   "layoutMs": 2.1,
+   "layouts": 6,
+   "mainMs": 832.5,
+   "rasterMs": 2413.1,
+   "compositorMs": 280.5,
+   "vizMs": 2703.5,
+   "drawAndSwap": 170,
+   "rasterTasks": 2216
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 30.1,
+   "styleMs": 249.1,
+   "layoutMs": 37.1,
+   "layouts": 166,
+   "mainMs": 281.3,
+   "rasterMs": 345,
+   "compositorMs": 132.7,
+   "vizMs": 1479.8,
+   "drawAndSwap": 171,
+   "rasterTasks": 984
+  }
+ },
+ "fixed-live-body": {
+  "deck-open-close-x2": {
+   "busyPct": 51.9,
+   "styleMs": 940.8,
+   "layoutMs": 2.3,
+   "layouts": 6,
+   "mainMs": 967.3,
+   "rasterMs": 2421.4,
+   "compositorMs": 316,
+   "vizMs": 3099.5,
+   "drawAndSwap": 170,
+   "rasterTasks": 2138
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 30.8,
+   "styleMs": 266.3,
+   "layoutMs": 37.8,
+   "layouts": 167,
+   "mainMs": 303,
+   "rasterMs": 377.9,
+   "compositorMs": 130.9,
+   "vizMs": 1979.8,
+   "drawAndSwap": 170,
+   "rasterTasks": 988
+  }
+ },
+ "no-utility-frost": {
+  "deck-open-close-x2": {
+   "busyPct": 46.3,
+   "styleMs": 857,
+   "layoutMs": 2.1,
+   "layouts": 6,
+   "mainMs": 880,
+   "rasterMs": 2435.3,
+   "compositorMs": 299,
+   "vizMs": 2743.9,
+   "drawAndSwap": 173,
+   "rasterTasks": 2212
+  },
+  "live-bar-open-close-x2": {
+   "busyPct": 30.5,
+   "styleMs": 257.9,
+   "layoutMs": 38,
+   "layouts": 167,
+   "mainMs": 288.9,
+   "rasterMs": 377.1,
+   "compositorMs": 120.7,
+   "vizMs": 1881.7,
+   "drawAndSwap": 169,
+   "rasterTasks": 992
+  }
+ }
+}

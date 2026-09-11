@@ -1,0 +1,102 @@
+[
+  {
+    "path": "health-pages.css",
+    "sha256": "733F4087E068AC32B559D8479400EBF104DB088048D09D0A645236E9D0EBE424"
+  },
+  {
+    "path": "health-pages.js",
+    "sha256": "7C20B03C6084D7F431CE0C6D46E84C8842D8868D717EFD3DA1D11D6925930A95"
+  },
+  {
+    "path": "hero-dots.js",
+    "sha256": "8215E6A0102E2D629B5FA5575305D50A656D0AD7E4D6D5032B61494F2B8D8624"
+  },
+  {
+    "path": "index.html",
+    "sha256": "FBF8ED9F4B1D540775C1C420D8F143745D4458AB476E330AA0FC4E24AFF23BA2"
+  },
+  {
+    "path": "PRODUCT-STRUCTURE.md",
+    "sha256": "E6EB4E94E3668CFFA3F6F4C329F238679C2B1FB89123233105C00E219A263050"
+  },
+  {
+    "path": "README.md",
+    "sha256": "B8D4300D5E087C7816C84C62DEC3B8E0522FBBE7BE5C13374FA1874BE102CF29"
+  },
+  {
+    "path": "sleep-timeline.js",
+    "sha256": "CBD4571E796E61C8284519A93C0636FAE8B50AD9A221DCA28E41DB8A4B662B21"
+  },
+  {
+    "path": "surface-motion.js",
+    "sha256": "13DC7656C7D3DBF8EB3F0CEA5CBACA0FDDACF416245C6B7017DEADD89C98CBC6"
+  },
+  {
+    "path": "workout-focus.js",
+    "sha256": "133DB7BD1DA25873B29AF4FCA3A96AA48776FBCF2FCA825B90FEB18ACC288692"
+  },
+  {
+    "path": "android\\src\\com\\mani\\orbit\\MainActivity.java",
+    "sha256": "5E3D15B438FB7B9D7AE073F7F053923283D41126F8B6F9F9C2D1C5F9E43E0DEB"
+  },
+  {
+    "path": "android\\src\\com\\mani\\orbit\\MusicSession.java",
+    "sha256": "0FF315F8FDE855BAA8E00592CB55209166D16325DA0A5A31AD37B3FFD110091C"
+  },
+  {
+    "path": "android\\src\\com\\mani\\orbit\\WorkoutSession.java",
+    "sha256": "6BB891155D499BC7D233238BBA3587B90015D8004D9CF78547575CCC033EA0C5"
+  },
+  {
+    "path": "android\\res\\drawable\\orbit_icon.xml",
+    "sha256": "A57556F15862792F90968E55482454098FF32E66B26C12019F643F4A5775DF52"
+  },
+  {
+    "path": "android\\res\\drawable\\workout_cycling.png",
+    "sha256": "219A5BC8279CCC2BA5AFA0D62E5A5C4242820F08D1BDBAB32405CC9DA4EBEAB8"
+  },
+  {
+    "path": "android\\res\\drawable\\workout_notification.xml",
+    "sha256": "2187F4BABA42B247801D5D2535A7BDC1CB480B37795883933EDF14ED5B71FEFA"
+  },
+  {
+    "path": "android\\res\\drawable\\workout_running.png",
+    "sha256": "D2F079C3A47E729529F583FF4F4C002669336907BC72F3E5A54DA842B876210D"
+  },
+  {
+    "path": "android\\res\\drawable\\workout_strength.png",
+    "sha256": "83002A26F374575E2580355280E2D4D372E53BD4BF04411C0459CC11CCE751D4"
+  },
+  {
+    "path": "android\\res\\drawable\\workout_walking.png",
+    "sha256": "4F11570014AED3308673F98DB3B26A0222EE78C19ADB3019B63EA67B9AAC40FB"
+  },
+  {
+    "path": "android\\res\\values\\styles.xml",
+    "sha256": "850A47851EE149881957907E5D2A487E20AB447A060C6802BB89FBE313651692"
+  },
+  {
+    "path": "android\\AndroidManifest.xml",
+    "sha256": "3D75BA2A1E9177F5693CA6BA89596916520A61FE9D6B306771DE5582C5305828"
+  },
+  {
+    "path": "android\\build.py",
+    "sha256": "E6564EA01A5873D9A159F4267A5DFEC70BEE063F30F46CFC8D631F87223EF9F4"
+  },
+  {
+    "path": "dist\\Orbit.apk",
+    "sha256": "1F105C17E207A9080C39CF5660E7E958400B87905217561BDCB3E7668B7B053F"
+  },
+  {
+    "path": "verification\\check.cjs",
+    "sha256": "4B1EF2ED62E0CC83A6AEAA3C582DCE9FCCDE1DFEC1C4B55172881EB6CCCBF06F"
+  },
+  {
+    "path": "verification\\motion-review.html",
+    "sha256": "B33FF9ACE2D798E59E0B9F79A175D951742CC03E089F60F7198BB4DD19B66B09"
+  },
+  {
+    "path": "verification\\focus-music.html",
+    "sha256": "AAF6B6D403C42AD1CB2B35608CC07DB6618F6F6114C10D9173252CE8D8CD7D99"
+  }
+]

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mani.orbit" android:versionCode="1" android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <application android:label="Orbit" android:icon="@drawable/orbit_icon" android:theme="@style/OrbitTheme" android:allowBackup="false" android:usesCleartextTraffic="false" android:enableOnBackInvokedCallback="true">
+        <service android:name="com.mani.orbit.MusicSession$Access" android:label="Orbit music controls" android:exported="true" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
+            <meta-data android:name="android.service.notification.default_filter_types" android:value="ongoing" />
+            <meta-data android:name="android.service.notification.disabled_filter_types" android:value="conversations|alerting|silent" />
+        </service>
+        <service android:name="com.mani.orbit.WorkoutTrackingService" android:label="Orbit workout location" android:exported="false" android:foregroundServiceType="location" />
+        <receiver android:name="com.mani.orbit.WorkoutSession$Actions" android:exported="false" />
+        <activity android:name="com.mani.orbit.MainActivity" android:exported="true" android:launchMode="singleTop" android:configChanges="keyboardHidden|orientation|screenSize|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

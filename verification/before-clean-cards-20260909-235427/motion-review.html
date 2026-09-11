@@ -1,0 +1,71 @@
+<!doctype html><meta charset="utf-8"><title>Orbit inline motion verification</title>
+<style>body{margin:24px;background:#17171b;color:#eee;font:14px system-ui}button{padding:10px 18px;margin:0 8px 14px 0}#live{width:390px;height:844px;border:0}main{display:flex;gap:24px}pre{white-space:pre-wrap;max-width:620px}</style>
+<button id="run">Check inline surfaces and motion</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button>
+<main><iframe id="live" src="../index.html?inline-review"></iframe><pre id="result">Ready</pre></main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result');
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';
+document.querySelector('#wide').onclick=()=>live.style.width='390px';
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+document.querySelector('#run').onclick=async()=>{
+ const w=live.contentWindow,d=w.document,q=s=>d.querySelector(s),bar=q('#live-bar'),canvas=q('#orb-canvas'),frames=[];
+ const rect=s=>{const r=q(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right,width:r.width}};
+ const check=(v,message)=>{if(!v)throw Error(message)},openCards=()=>bar.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowUp',bubbles:true}));
+ let recording=false;
+ try{
+  result.textContent='Checking...';
+  if(q('#more').getAttribute('aria-expanded')==='true')q('#more').click();
+  if(bar.getAttribute('aria-expanded')==='true')bar.click();await wait(700);
+  q('#back').click();q('#period-1').click();const initial=rect('#orb-canvas');
+  check(d.elementFromPoint(w.innerWidth/2,initial.bottom-20)?.closest('#orb-button'),'Folded deck intercepts lower orb');
+  const sample=t=>{frames.push({t,orb:rect('#orb-canvas'),hero:rect('.hero'),card:rect('.facts'),cardLayout:q('.facts').offsetHeight,period:rect('.periods')});if(recording)w.requestAnimationFrame(sample)};
+  recording=true;w.requestAnimationFrame(sample);openCards();await wait(700);
+  check(rect('#orb-canvas').top<initial.top,'Orb must move upward');
+  check(rect('.facts').bottom<rect('.hourly').top,'Expanded cards overlap');
+  bar.click();await wait(130);openCards();await wait(130);bar.click();await wait(700);recording=false;
+  check(Math.abs(rect('#orb-canvas').top-initial.top)<.1,'Reversal must return to start');
+  check(frames.every(f=>Math.abs(f.hero.height-frames[0].hero.height)<.1&&Math.abs(f.cardLayout-frames[0].cardLayout)<.1),'Motion must retain fixed page/card layout');
+  check(canvas===q('#orb-canvas'),'Canvas must remain mounted');
+  check(frames.every(f=>f.period.top-f.orb.bottom>=0),'Orb overlaps period control');
+  openCards();await wait(700);q('#deck-scroll').scrollTop=10000;await wait(50);
+  check(rect('.comparison').bottom<=rect('#deck-scroll').bottom+1,'Last card is unreachable');
+  bar.click();await wait(700);check(q('#deck-scroll').scrollTop===0,'Collapse must reset scroll');
+  const anchor=rect('#more'),surface=q('#utility-island .island-surface');
+  q('#more').click();await wait(90);const middle=rect('#utility-island .island-surface');
+  check(middle.width>40&&middle.width<301,'Utility must have an intermediate shell');
+  check(Math.abs(middle.top-anchor.top)<.1&&Math.abs(middle.right-anchor.right)<.1,'Utility must stay attached to its circle');
+  await wait(650);const utilityOpen=rect('#utility-island .island-surface');check(!q('dialog'),'No modal dialogs');
+  check(w.getComputedStyle(q('#more')).borderTopWidth==='0px','Dot button must not leave an extra outlined circle');
+  check(w.getComputedStyle(q('#utility-island .island-frost')).transform==='none','Frost layer must not stretch with the shell');
+  check(w.getComputedStyle(q('.metric')).borderRightWidth==='0px','Metric groups must not use divider lines');
+  check(w.getComputedStyle(q('#edit-goal')).borderBottomWidth==='0px'&&w.getComputedStyle(q('#edit-goal')).boxShadow==='none','Menu rows must not use divider lines');
+  const pause=q('#toggle-motion'),beforePause=pause.getAttribute('aria-pressed');pause.click();check(pause.getAttribute('aria-pressed')!==beforePause&&pause.querySelector('svg'),'Motion toggle must retain its icon and state');pause.click();
+  q('#edit-goal').click();await wait(700);check(!q('#goal-dialog').hidden,'Goal editor must open in place');
+  const saved=w.localStorage.getItem('orbit-steps-goal-v1');q('#goal-form').requestSubmit();await wait(700);
+  check(q('#utility-body').inert,'Saving must collapse utility');check(w.localStorage.getItem('orbit-steps-goal-v1')===saved,'Same goal must preserve value');
+  q('#date-button').click();await wait(700);q('#date-prev').click();q('#date-form').requestSubmit();await wait(700);
+  check(q('#utility-body').inert&&q('#date-button').textContent.includes('7'),'Date selection must apply');q('#back').click();
+  q('#more').click();await wait(650);q('#open-about').click();await wait(650);check(!q('#about').hidden,'About must open inline');
+  q('#more').click();await wait(650);q('#more').click();await wait(90);q('#more').click();await wait(700);
+  check(q('#utility-body').inert&&Math.abs(rect('#utility-island .island-surface').width-40)<.1,'Mid-opening close must return to circle');
+  check(surface===q('#utility-island .island-surface'),'Utility surface must remain mounted');
+  bar.click();await wait(700);const liveSurface=q('#live-island .island-surface'),activities=[];
+  check(!q('#live-choices').inert,'Activity choices must open');
+  for(const key of ['body','workouts','oxygen']){
+   q('[data-activity="'+key+'"]').click();await wait(700);
+   check(!q('#activity-detail').hidden,'Selected activity has no details');check(q('[data-activity="'+key+'"]').getAttribute('aria-pressed')==='true','Activity selection state is wrong');
+   const shell=rect('#live-island .island-surface');check(rect('#activity-detail').bottom<=shell.bottom+1,'Activity content escapes shell');
+   const header=rect('#live-bar'),period=rect('.periods'),overlapTop=Math.max(header.top,period.top),overlapBottom=Math.min(header.bottom,period.bottom);
+   check(Math.abs(header.top-shell.top)<1,'Live header detaches from shell');
+   if(overlapBottom>overlapTop)check(d.elementFromPoint(w.innerWidth/2,(overlapTop+overlapBottom)/2)?.closest('#live-bar'),'Period buttons cover the activity header');
+   activities.push({key,title:q('#live-title').textContent,height:shell.height});
+  }
+  bar.click();await wait(100);bar.click();await wait(100);bar.click();await wait(700);
+  check(q('#live-choices').inert&&Math.abs(rect('#live-island .island-surface').height-62)<.1,'Live island must collapse to its bar');
+  check(liveSurface===q('#live-island .island-surface'),'Live surface must remain mounted');
+  check(d.documentElement.scrollWidth<=live.clientWidth,'Horizontal overflow');
+  const gaps=frames.slice(1).map((f,i)=>f.t-frames[i].t);
+  result.textContent=JSON.stringify({status:'PASS',width:live.clientWidth,frames:frames.length,maxFrameGapMs:Math.max(...gaps),minimumOrbToPeriodGap:Math.min(...frames.map(f=>f.period.top-f.orb.bottom)),fixedLayout:true,utilityAnchor:anchor,utilityIntermediate:middle,utilityOpen,activities,scrollToLastCard:true,inlineForms:true,noDialogs:true,interruptible:true},null,2);
+ }catch(error){recording=false;result.textContent='FAIL: '+error.message;throw error}
+};
+</script>

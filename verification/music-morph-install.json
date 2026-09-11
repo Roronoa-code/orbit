@@ -1,0 +1,16 @@
+{
+  "installedAt": "2026-09-11T04:14:44",
+  "requestedBy": "User: 'once done i want you to update the app on my phone'",
+  "device": "SM-S938B / 192.168.0.210:44875",
+  "package": "com.mani.orbit",
+  "method": "adb -s 192.168.0.210:44875 install -r (data kept; firstInstallTime unchanged 2026-09-09 20:57:51)",
+  "build": "android/build/20260911-041135",
+  "localSha256": "a81b137d20403325dbd3e2236b68c22d5cfc96cb827d9d78ff51c21b62636337",
+  "installedSha256": "a81b137d20403325dbd3e2236b68c22d5cfc96cb827d9d78ff51c21b62636337",
+  "match": true,
+  "previousInstalledSha256": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "previousApkBackup": "verification/music-morph-phone/phone-before.apk",
+  "installedApkCopy": "verification/music-morph-phone/phone-after.apk",
+  "launched": false,
+  "otherDevice": "BYZL25052900310864 (cm01_se) was connected and not addressed"
+}

@@ -1,0 +1,129 @@
+/* Quiet charcoal surfaces; one large visual per page. */
+.live-timer{font-size:26px;font-weight:650;letter-spacing:-1px;line-height:1;white-space:nowrap;flex-shrink:0}
+.live-timer[hidden]{display:none}
+.has-activity .live-icon{position:relative;color:#cdbaff}
+.has-activity .live-icon:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#cbb6ff;bottom:0;right:0}
+.has-activity.is-paused .live-icon:after{background:#aaa5b2}
+.has-activity .live-meta{letter-spacing:0}
+.has-activity .live-chevron{width:16px}
+.live-session-controls button{min-height:48px!important;font-size:13px!important}
+.live-session-controls #live-pause{background:#b69cff;color:#18131f}
+.screen.is-detail .panel-deck{visibility:hidden;pointer-events:none}
+.health-page{position:absolute;inset:30px 0 0;z-index:22;background:#0a0a0c;display:flex;flex-direction:column;min-height:0}
+.health-page[hidden]{display:none}
+.health-page-head{display:flex;align-items:center;flex-shrink:0;padding:14px 17px 12px;gap:12px}
+.health-page-head .icon-button{width:44px;height:44px;background:#242427}
+.health-page h1{font-size:25px;letter-spacing:-.7px}
+.health-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior-y:contain;padding:0 14px 28px;scrollbar-width:none}
+.health-source{margin:0 6px 16px;font-size:10px;color:#adadb5}
+.health-tile{border:0;border-radius:25px;background:#202023;padding:21px;margin:0 0 9px;min-width:0}
+.health-tile h2{font-size:15px;letter-spacing:-.2px;font-weight:500}
+.health-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.health-section-head>span{font-size:10px;color:#babac3}
+.health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.health-grid .health-tile{margin:0;padding:18px;overflow:hidden}
+.health-tile-button{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;width:100%;text-align:left;color:inherit;cursor:pointer}
+.health-tile-button:active{background:#2b2934}
+.health-tile small{color:#b9b9c2;font-size:10px;letter-spacing:0}
+.dot-value{background:radial-gradient(circle,#f4f4f6 1px,transparent 1.25px) 0 0/3px 3px;background-clip:text;-webkit-background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.activity-track{position:relative;width:100%;display:block;background:none;border:0;padding:0;margin:24px 0 22px}
+.activity-track>svg{width:100%;height:auto}
+.activity-track>span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.activity-track strong{font-size:46px;line-height:1.2;letter-spacing:-1.6px;font-weight:650}
+.activity-track small{font-size:10px;margin-top:5px}
+.activity-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.activity-facts>span{display:flex;flex-direction:column}
+.activity-facts>span+span{border-left:1px solid #ffffff13;padding-left:13px}
+.activity-facts strong{font-size:20px;font-weight:500;line-height:1.4}
+.activity-facts small{font-size:9px;white-space:nowrap}
+.tile-value{font-size:31px;font-weight:500;line-height:1.3;margin:12px 0 0;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.tile-value>small{font-size:11px;margin-left:5px;letter-spacing:0}
+.mini-plot{width:100%;height:68px;margin:12px 0 2px}
+.tile-art{height:94px;width:100%;display:flex;justify-content:space-between;align-items:center;color:#c9b5ff}
+.tile-art>svg{width:65px;height:65px}
+.round-arrow{background:#34323b;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-size:17px}
+.oxygen-tile summary,.workout-history summary{cursor:pointer;list-style:none}
+.oxygen-tile summary::-webkit-details-marker,.workout-history summary::-webkit-details-marker{display:none}
+.oxygen-dots{height:82px;display:flex;justify-content:center;align-items:center;white-space:pre;color:#82828d;font-size:25px;letter-spacing:4px}
+.oxygen-dots b{color:#e9e9ee;font-size:30px;font-weight:400}
+.oxygen-tile summary>small{display:flex;justify-content:space-between}
+.oxygen-detail{font-size:11px;line-height:1.8;color:#c8c8d1;margin-top:14px}
+.compact-tile{min-height:133px}
+.compact-tile .tile-value{font-size:25px;margin:12px 0 6px}
+.body-hero{padding:22px}
+.segmented{display:flex;border-radius:20px;background:#121215;padding:3px}
+.segmented button{background:none;border:0;border-radius:20px;min-height:38px;min-width:42px;font-size:10px;color:#bdbdc5}
+.segmented button[aria-pressed=true]{background:#45404f;color:#f5f1ff}
+.health-number{font-size:76px;line-height:1.3;letter-spacing:-3px;margin:20px 0 0}
+.health-number>span{font-size:16px;letter-spacing:0;color:#bcbcc6;background:none;-webkit-text-fill-color:#bcbcc6}
+.body-change{font-size:14px;color:#c4b0ff;margin:0 0 25px}
+.body-change>span{font-size:10px;color:#b7b7c1;margin-left:4px}
+.body-chart .mini-plot{height:150px;margin-top:6px}
+.body-chart input{width:100%;height:30px;margin:0;accent-color:#b69cff;cursor:ew-resize}
+.body-chart figcaption{display:flex;justify-content:space-between;font-size:10px;color:#b7b7c1;margin-top:4px}
+.body-chart output{color:#e3d9ff}
+.body-metrics .health-tile{border:1px solid transparent;padding:18px;min-height:116px}
+.body-metrics .selected{border-color:#b69cff80;background:#2a2634}
+.body-metrics .tile-value{margin-top:14px}
+.health-note{font-size:10px;line-height:1.7;color:#b7b7c1;margin:15px 5px}
+.health-error{font-size:11px;color:#ffc0c8;line-height:1.5}
+.workout-intro{padding:16px 10px 23px}
+.workout-intro h2,.workout-setup h2{font-size:39px;font-weight:450;line-height:1.16;letter-spacing:-1.7px;margin-top:10px}
+.health-eyebrow{font-size:11px;color:#b9b9c4;letter-spacing:.25px}
+.workout-kinds{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 20px}
+.workout-kinds button{position:relative;padding:20px;border:0;border-radius:25px;background:#202023;text-align:left;min-height:161px}
+.workout-kinds svg{width:62px;height:62px;color:#cbbaff;margin-bottom:20px}
+.workout-kinds button>span{font-size:14px;float:none;color:#f4f4f6}
+.workout-kinds button>small{position:absolute;right:22px;bottom:23px;font-size:16px;color:#b7a6d9}
+.workout-kinds button:disabled{opacity:.4}
+.workout-week{padding:20px 22px}
+.workout-week .tile-value{margin:8px 0 0}
+.week-bars{display:flex;justify-content:space-between;gap:8px;height:77px;margin-top:6px}
+.week-bars>span{display:flex;flex:1;flex-direction:column;justify-content:flex-end;align-items:center;gap:10px}
+.week-bars i{display:block;width:9px;border-radius:5px;background:#b69cff}
+.workout-history{padding:20px 22px}
+.workout-history summary{display:flex;align-items:center;gap:12px}
+.workout-history summary>span:first-child{flex:1}
+.workout-history summary h2{font-size:13px}
+.workout-history summary small{display:block;margin-top:5px}
+.workout-history strong{font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
+.workout-history ol{padding:0;list-style:none;margin:12px 0 0}
+.workout-history li{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:16px 0;border-top:1px solid #ffffff14;font-size:12px}
+.workout-history li small{display:block;margin-top:5px}
+.workout-focus .health-scroll{display:flex;flex-direction:column}
+.workout-focus #health-content{flex:1;display:flex;flex-direction:column}
+.workout-setup{flex:1;padding:5px 9px 0}
+.workout-art{height:120px;display:flex;align-items:center;justify-content:center;color:#cbbaff}
+.workout-art svg{width:96px;height:96px}
+.workout-setup h2{font-size:35px}
+.workout-setup form{margin-top:24px}
+.workout-setup fieldset{display:flex;gap:8px;border:0;padding:0;margin:0;flex-wrap:wrap}
+.workout-setup legend{font-size:11px;color:#b9b9c4;margin-bottom:12px}
+.workout-setup fieldset label{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#242427;border-radius:17px;flex:1;white-space:nowrap;font-size:11px}
+.workout-setup input[type=radio]{accent-color:#b69cff;width:15px;height:15px;margin:0}
+.target-minutes{display:flex;align-items:center;justify-content:space-between;margin-top:13px;background:#202023;padding:12px 16px;border-radius:17px;font-size:12px}
+.target-minutes input{background:none;border:0;border-bottom:1px solid #aaa1bb50;color:inherit;width:95px;text-align:right;font-size:22px;min-height:40px}
+.workout-setup form:has(input[value=open]:checked) .target-minutes{display:none}
+.workout-primary{display:flex;justify-content:space-between;align-items:center;border:0;border-radius:30px;background:#b69cff;color:#18131f;padding:18px 25px;width:100%;min-height:62px;font-size:15px;margin-top:17px}
+.workout-live{display:flex;flex-direction:column;flex:1;padding:15px 10px 4px;text-align:center}
+.workout-live-top svg{width:56px;height:56px;color:#cbbaff;margin:0 auto 10px}
+.workout-time-focus{display:flex;flex:1;min-height:220px;justify-content:center;flex-direction:column;padding:32px 0}
+.workout-time-focus>p:first-child{font-size:12px;color:#b9b9c4}
+.session-time{display:block;font-size:74px;letter-spacing:-4px;line-height:1.5;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;margin:0}
+.target-remaining{font-size:11px;color:#b9b9c4;margin-top:10px}
+.workout-live progress{width:85%;height:5px;margin:13px auto 0;border:0;border-radius:5px;accent-color:#b69cff}
+.workout-live progress::-webkit-progress-bar{background:#33313a;border-radius:5px}
+.workout-live progress::-webkit-progress-value{background:#b69cff;border-radius:5px}
+.workout-unconnected{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
+.workout-unconnected>span{background:#202023;border-radius:22px;padding:18px 20px;font-size:11px;color:#b9b9c4}
+.workout-unconnected strong{display:block;font-weight:400;font-size:29px;color:#e3e3e9;margin-top:8px}
+.session-actions{display:flex;gap:10px;margin-top:12px}
+.session-actions button{border:0;border-radius:33px;background:#252529;min-height:66px;font-size:16px;flex:1;text-align:center}
+.session-actions button:first-child{background:#b69cff;color:#18131f}
+.notification-enable{background:none;border:0;min-height:44px;font-size:11px;color:#cbbaff;margin-top:8px}
+.workout-countdown{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:450px}
+.workout-countdown>p{font-size:14px;color:#b9b9c4}
+.workout-countdown output{font-size:200px;line-height:1.5;font-weight:600}
+.workout-countdown button{border:0;border-radius:25px;min-height:48px;padding:12px 40px;background:#29292e}
+@media(max-width:360px){.health-scroll{padding-inline:11px}.health-grid .health-tile{padding:15px}.health-tile h2{font-size:13px}.activity-track strong{font-size:40px}.activity-facts small{font-size:8px}.health-number{font-size:65px}.session-time{font-size:62px}.workout-intro h2{font-size:34px}.workout-kinds button{padding:18px}.workout-setup fieldset label{padding:12px 10px;font-size:10px}}
+@media(forced-colors:active){.health-tile,.workout-kinds button{border:1px solid CanvasText;background:Canvas}.dot-value{background:none;color:CanvasText}.mini-plot,.activity-track svg{forced-color-adjust:none}.body-metrics .selected{border:2px solid Highlight}}

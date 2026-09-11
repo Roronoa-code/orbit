@@ -1,0 +1,74 @@
+[
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\accent.html",
+    "Hash": "DDBFE7F077F165DE539CD3EDEBCD5D02E81914D0A0C81719723E9185FD0CD81C"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\app.js",
+    "Hash": "4A9697817B2CC58A4385C66D88D968D57B16B3EB840699E0227FF6FA1378E568"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\atmosphere.html",
+    "Hash": "39C6AAD03565107E2066AB592FAB375DEFB2B55B99F5882D0C51FC034FABAF7D"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\charts.js",
+    "Hash": "16A556E9E47DBAF4344E82E8D6181A62E2B2F59DA7D68E6B4472A88E68A67856"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\check-motion.mjs",
+    "Hash": "9DE3BC2FC788E3FC2CEBE9905F3FCA1665013D1FAA56A98B7ED6D457A0D73687"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\check.cjs",
+    "Hash": "99001F82906538A4BC06BEC4B34B22D17D16D555446738B9EE4C1624B795D5C6"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\data.js",
+    "Hash": "8FAD01BF2042EC7FA876CD598937A8A4826C8CA779560E147F28ADDB1CC8D741"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\details.js",
+    "Hash": "145D1099D040DA71BCE6BA960B9E88320076F0727EC593FE6444E45489A972B8"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\food.js",
+    "Hash": "2D18A5DEA827DB85D814AB80B12FF054651FD7C7E8EE0FE071035B79F1B7464C"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\index.html",
+    "Hash": "D9154D142790B13144990DAE7B80E0253F84222083DD4D6A4FD8E396687C934D"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\orb.js",
+    "Hash": "24C4C3B4171ED50D616232BB999F90950CCF4701F5A17E497E0D01509D8A4D3F"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\original-hashes.json",
+    "Hash": "DFC5FA8E00F42E4B99A7DB553E1B029F6426A13F06C850C54394BFF23FBB5C46"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\sleep.js",
+    "Hash": "A43A048A4B22CE752D69595F52C1287441C0AE4B37F7DF63C4B35C353DB92745"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\style.css",
+    "Hash": "00C6422F079BD2B368EE954D2FBAC6638AA0EC1778182DA408EDC06AA259E999"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\trends.js",
+    "Hash": "57B8914DBE52A1ADF676D02E0AB6621D998E29F977C80936CDE27CA3E782C0DC"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\VERIFICATION.md",
+    "Hash": "73F42129427A1BF3B3DF3DA1D5437DFA3FA3F13BC2AC5468F3F353928D0BD4A2"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\assets\\Manrope.ttf",
+    "Hash": "D0639BE45D0AF36E798172419D7BD173C4BD4F29E2B76CBB69DB1D11BF8B0A40"
+  },
+  {
+    "Path": "C:\\HA\\design-concepts\\signal-v2\\assets\\OFL.txt",
+    "Hash": "E01B637272E0CBDFB240184DD98EA5CC671556D9894DAE2668D92AB2C906787C"
+  }
+]

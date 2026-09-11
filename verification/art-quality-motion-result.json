@@ -1,0 +1,108 @@
+{
+  "date": "2026-09-10",
+  "status": "Artwork quality and full-motion corrections implemented, verified and installed; subsequent queue-preload question diagnosed only",
+  "project": "C:\\HA\\design-concepts\\signal-orbit-steps",
+  "backups": [
+    "verification/before-art-quality-motion-20260910-180830",
+    "verification/before-always-on-motion-20260910-182037",
+    "verification/before-art-motion-handoff-20260910-182939"
+  ],
+  "changes": [
+    "Artwork quality raised from512px/JPEG85 to bounded2048px/JPEG94, without upscaling",
+    "Best shared bitmap or accessible local content original used; no remote fetch",
+    "Native artwork decode/compression runs asynchronously; stale work cancelled/discarded",
+    "Decode new cover before560ms crossfade; artwork remains anchored during control movement",
+    "Visible focus entry/exit with reversal and outgoing-layer cleanup",
+    "Preserve clock/player nodes on pause/resume, reading changes and foreground return",
+    "Automatic system motion-preference suppression removed across orb, particles, cards, pages and player; manual pause and hidden/offscreen cleanup retained"
+  ],
+  "checks": {
+    "node verification/check.cjs": "PASS after final motion-preference removal",
+    "node verification/workout-details.cjs": "PASS",
+    "verification/native-check.ps1": "PASS; includes artwork dimensions, aspect preservation, no upscaling and invalid-size rejection",
+    "renderedFocusMusic": {
+      "status": "PASS",
+      "widths": [
+        320,
+        389
+      ],
+      "widePreset": 390,
+      "finalMotionPreferenceRemovalRetestedAt": 389,
+      "coverage": [
+        "decoded1600px fixture",
+        "intermediate artwork crossfade opacity",
+        "old layer cleanup",
+        "art anchored during control motion",
+        "exit fade and reversal",
+        "pause/reading/foreground node preservation",
+        "existing media controls, errors, missing art, empty-player hide, rediscovery and stale seeks"
+      ],
+      "fixturesRestored": true
+    },
+    "renderedWorkoutDetails": "PASS after workout node-preservation changes",
+    "build": "Android API37 Java17 compilation and APKv3 signature verified",
+    "packaging": "Final bundled sources verified; production bundle contains no prefers-reduced-motion gates"
+  },
+  "installation": {
+    "device": "Samsung SM-S938B",
+    "serial": "192.168.0.210:39389",
+    "api": 37,
+    "status": "adb install-r SUCCESS",
+    "dataPreserved": true,
+    "buildDirectory": "android/build/20260910-182209",
+    "apkSha256": "bf8824404f675373c67bdacaada669d723ede4414260321b6c43f169bf0d6526",
+    "installedApkSha256": "bf8824404f675373c67bdacaada669d723ede4414260321b6c43f169bf0d6526",
+    "packagePath": "/data/app/~~Xn5cXYdt34unFktWMsJhcA==/com.mani.orbit-TAB4FOyQvVYznfalkuAkSg==/base.apk",
+    "launch": "WARM248ms"
+  },
+  "phone": {
+    "verified": [
+      "Orbit launch",
+      "real shared BitChord artwork renders",
+      "focused particle clock animates while real playback continues"
+    ],
+    "evidence": [
+      "verification/six-fixes-phone/42-quality-motion-installed.png",
+      "verification/six-fixes-phone/44-current-check.png",
+      "verification/six-fixes-phone/quality-motion.mp4",
+      "verification/six-fixes-phone/quality-motion-contact.png",
+      "verification/six-fixes-phone/46-quality-motion-current.xml"
+    ],
+    "recordingLimit": "Clip starts after focus entry; entry/exit and track crossfade were verified in browser, not qualified by this clip",
+    "actualSourcePixelDimensionsMeasured": false,
+    "agentChangedMusicPlayback": false,
+    "agentGrantedPermissions": false,
+    "ownedTest": "Third agent-created Strength session from18:23 remains active while user reviews focus. Two earlier tests completed. A guarded lock-screen Finish attempt aborted before tapping because UI changed; current focus was then observed. Finish the owned test after user review.",
+    "lastScreen": "Focused Strength with actual music"
+  },
+  "subsequentQuestion": {
+    "request": "Preload upcoming1-3 songs to reduce delay",
+    "inspection": "Read-only, no further production changes",
+    "findings": [
+      "Page polls native music every1000ms",
+      "Metadata callback marks dirty without immediate page event",
+      "Artwork worker completion waits until another poll",
+      "BitChord live Android session exposes queue size36 and active item id25"
+    ],
+    "nextQueueArtworkAccess": "Not yet inspected",
+    "recommendation": "Immediate native-to-page updates, then bounded next-three artwork preloading where queue descriptions expose accessible images; audio buffering remains BitChord-owned"
+  },
+  "limits": [
+    "Artwork quality is limited by the music app shared source",
+    "Real phone transition timing remains for user review; rendered transition checks passed",
+    "Outdoor GPS accuracy and Watch/native Health integration remain outside this task"
+  ],
+  "sourceSha256": {
+    "index.html": "b9f1188882007c023a4c802863d255808384d884ea8288197dd399b180406ce7",
+    "health-pages.js": "f6967bbc06a961c29f851a9080b23b8a8b91670e391a14b7a3282c9e1912dfce",
+    "health-pages.css": "2d4cfa977d15d1ec6575d645549e230cbbbfe9e9bc750cf214cc8a21d0dade5f",
+    "hero-dots.js": "32a1b1a5d6be4eb2305e218a53b0c0a93ac075f47f26e3870e53f1e71524063b",
+    "surface-motion.js": "8342d78a886f8dc4fbbcbacd9debeea941f1ce01d19791d362347f7db06f97c6",
+    "workout-focus.js": "4240bcee0eeec8a66c7c917374fc6a9fb967ebc8ad26042be33ace8764a46830",
+    "android/src/com/mani/orbit/MusicSession.java": "ee9b0759852e81277c5366c8bd71f9e0def37aa528075b4900ea7d5aa76ad760",
+    "android/src/com/mani/orbit/MainActivity.java": "1334b0504f4ad95151e3b24d0f3948c6fdf55ce9044dfca59e237bcf716eaa24",
+    "verification/check.cjs": "6aa507ca19e806538c9ddd59ecf648a328911ac3f26ee36b42fd3a4607573bef",
+    "verification/focus-music.html": "f5cf345acc9e7003141ec5cdec8b3166819ec77305cd9f2407a29cc1340156ad",
+    "verification/NativeFinalCheck.java": "68cc652fdf96d1f6bad2bb325f7cedf26deed66efd5ff18b7bb9b526facbe83a"
+  }
+}

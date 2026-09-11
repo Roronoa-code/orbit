@@ -1,0 +1,68 @@
+{
+  "width": 320,
+  "frostHeightMin": 62.5625,
+  "frostHeightMax": 289,
+  "stableTargets": [
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-title",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-meta",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-symbol",
+      "attribute": "href",
+      "type": "attributes"
+    },
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-title",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-meta",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-symbol",
+      "attribute": "href",
+      "type": "attributes"
+    },
+    {
+      "id": "live-timer",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-title",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-meta",
+      "attribute": null,
+      "type": "childList"
+    },
+    {
+      "id": "live-symbol",
+      "attribute": "href",
+      "type": "attributes"
+    }
+  ],
+  "maximumPixelChange": 0
+}

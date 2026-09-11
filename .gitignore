@@ -1,0 +1,8 @@
+# The release signing key stays local: its password is in android/build.py, so together they would let
+# anyone sign an app that installs over Orbit on the phone.
+android/signing/
+*.p12
+*.jks
+*.keystore
+
+__pycache__/

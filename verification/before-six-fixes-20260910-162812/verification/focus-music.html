@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8"><title>Orbit focus and music verification</title>
+<style>body{margin:20px;background:#17171b;color:#eee;font:14px system-ui}button{padding:10px 18px;margin:0 8px 14px 0}main{display:flex;gap:24px}iframe{width:390px;height:844px;border:0;flex-shrink:0}pre{white-space:pre-wrap;max-width:600px}</style>
+<button id="run">Check focus and music</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button><button id="preview">Preview test artwork</button><button id="reset">Reset test preview</button>
+<main><iframe id="live" src="../index.html?focus-music-check"></iframe><pre id="result">Ready. Test music is confined to this page.</pre></main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result'),wait=ms=>new Promise(r=>setTimeout(r,ms));
+let previewSaved;
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';document.querySelector('#wide').onclick=()=>live.style.width='390px';
+const q=s=>live.contentDocument.querySelector(s),w=()=>live.contentWindow;
+function fixture(){
+ const expose=live.contentDocument.createElement('script');expose.textContent='window.Health=Health;window.MusicPlayer=MusicPlayer;window.WorkoutFocus=WorkoutFocus';live.contentDocument.head.append(expose);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=400;const c=canvas.getContext('2d'),gradient=c.createLinearGradient(0,0,400,400);gradient.addColorStop(0,'#eec4bf');gradient.addColorStop(.5,'#ab6b79');gradient.addColorStop(1,'#55434e');c.fillStyle=gradient;c.fillRect(0,0,400,400);
+ c.strokeStyle='#fff2';c.lineWidth=26;for(let i=0;i<5;i++){c.beginPath();c.arc(280,140,40+i*40,0,Math.PI*2);c.stroke()}c.fillStyle='#fff';c.font='600 29px sans-serif';c.fillText('TEST ARTWORK',24,326);c.font='15px sans-serif';c.fillText('Browser verification only',25,353);
+ const snapshot={status:'ready',id:'session:1',artKey:'art:1',art:canvas.toDataURL('image/jpeg'),title:'A little more colour',artist:'Test track',source:'Test music app',position:22000,duration:141000,playing:true,buffering:false,canToggle:true,canSeek:true,canPrevious:true,canNext:true,canOpen:true};
+ const commands=[];let connects=0,fail=false,reads=0;
+ w().OrbitMusic={read(key){reads++;const next={...snapshot};if(key===next.artKey)delete next.art;return JSON.stringify(next)},command(id,action,value){if(fail||id!==snapshot.id)return false;commands.push({id,action,value});if(action==='pause')snapshot.playing=false;if(action==='play')snapshot.playing=true;if(action==='seek')snapshot.position=value;return true},connect(){connects++}};
+ return {snapshot,commands,get connects(){return connects},get reads(){return reads},set fail(value){fail=value}};
+}
+function start(){if(!w().Health.state.active)w().Health.action('start','Walking',60000);w().Health.open('workouts');}
+document.querySelector('#preview').onclick=()=>{if(previewSaved===undefined)previewSaved=w().localStorage.getItem('orbit-workouts-v1');fixture();start();if(q('[data-timer-focus]').getAttribute('aria-pressed')!=='true')q('[data-timer-focus]').click();result.textContent='Visual preview. Music is a local test fixture.'};
+document.querySelector('#reset').onclick=()=>{if(previewSaved!==undefined){if(previewSaved===null)w().localStorage.removeItem('orbit-workouts-v1');else w().localStorage.setItem('orbit-workouts-v1',previewSaved);previewSaved=undefined}live.contentWindow.location.reload();result.textContent='Preview reset.'};
+document.querySelector('#run').onclick=async()=>{
+ const saved=w().localStorage.getItem('orbit-workouts-v1'),check=(value,message)=>{if(!value)throw Error(message)};
+ try{
+  check(!JSON.parse(saved||'{"active":null}').active,'Use an isolated origin with no active workout');result.textContent='Checking…';const f=fixture();start();await wait(250);
+  check(!q('.workout-live-top .workout-glyph'),'Rejected activity graphic must be removed');check(q('[data-dot-play] svg').querySelectorAll('circle').length===72,'Dot pattern absent');const dot=q('[data-dot-play] circle'),shape=dot.style.transform;q('[data-dot-play]').click();check(dot.style.transform!==shape,'Dot shape must change without remounting');
+  const timer=q('.timer-dial'),time=q('#session-time');q('[data-timer-focus]').click();check(q('.timer-dial')===timer&&q('#session-time')===time,'Focus must preserve the timer nodes');check(w().WorkoutFocus.active>0||w().matchMedia('(prefers-reduced-motion:reduce)').matches,'Focus transition must animate');check(w().MusicPlayer.active&&!q('.workout-music').hidden,'Focus must show music');await wait(500);
+  check(w().WorkoutFocus.active===0,'Focus animations must finish');check(q('.music-cover img').complete&&q('.music-cover img').naturalWidth>0,'Artwork must render');check(q('.music-heading h2').textContent===f.snapshot.title,'Track title mismatch');
+  const musicRect=q('.workout-music').getBoundingClientRect(),actions=q('.session-actions').getBoundingClientRect(),viewport=q('#health-scroll').getBoundingClientRect();check(musicRect.width>250,'Music must fill the available width');check(actions.bottom<=viewport.bottom,'Workout controls must be reachable without scrolling');check(live.contentDocument.documentElement.scrollWidth<=w().innerWidth,'No horizontal overflow');check(timer.getBoundingClientRect().bottom<=musicRect.top,'Artwork must not overlap the timer');check(timer.getBoundingClientRect().top>=viewport.top,'Timer must not clip above the viewport');
+  q('[data-music="toggle"]').click();w().MusicPlayer.refresh();check(f.commands.at(-1).action==='pause'&&q('[data-music="toggle"]').getAttribute('aria-label')==='Play music','Music pause must update from the returned state');check(w().Health.state.active.resumedAt!==null,'Music pause must not pause workout');q('[data-session="pause"]').click();check(w().Health.state.active.resumedAt===null,'Workout pause must work in focus');check(!f.snapshot.playing,'Workout pause must not resume music');q('[data-session="resume"]').click();q('[data-music="toggle"]').click();w().MusicPlayer.refresh();
+  for(const action of ['previous','next','open']){q('[data-music="'+action+'"]').click();check(f.commands.at(-1).action===action,action+' control missing')}
+  const range=q('.music-timeline input');range.value='44000';range.dispatchEvent(new (w().Event)('input',{bubbles:true}));range.dispatchEvent(new (w().Event)('change',{bubbles:true}));check(f.commands.at(-1).action==='seek'&&f.commands.at(-1).value===44000,'Seek must reach the native bridge');
+  range.value='55000';range.dispatchEvent(new (w().Event)('input',{bubbles:true}));f.snapshot.id='session:2';w().MusicPlayer.refresh();const before=f.commands.length;range.dispatchEvent(new (w().Event)('change',{bubbles:true}));check(f.commands.length===before,'A track switch must cancel the previous scrub');
+  f.snapshot.title='<img src=x onerror=alert(1)>';f.snapshot.artist='<b>Artist</b>';w().MusicPlayer.refresh();check(q('.music-heading h2').textContent===f.snapshot.title&&!q('.music-heading h2 img'),'Metadata must be rendered as text');
+  f.snapshot.canNext=false;f.snapshot.canSeek=false;w().MusicPlayer.refresh();check(q('[data-music="next"]').disabled&&q('.music-timeline input').disabled,'Unsupported controls must be disabled');
+  f.fail=true;q('[data-music="previous"]').click();check(q('.toast').textContent.includes('Music control unavailable'),'Command failure must be visible');f.fail=false;
+  f.snapshot.art='';f.snapshot.artKey='art:2';w().MusicPlayer.refresh();check(q('.music-cover img').hidden&&!q('.music-cover-empty').hidden,'Missing artwork needs an explicit fallback');
+  f.snapshot.status='permission';w().MusicPlayer.refresh();check(!q('[data-music-connect]').hidden&&q('.music-track').hidden,'Permission state must hide stale track');q('[data-music-connect]').click();check(f.connects===1,'Connect must invoke Android settings');check(!q('.music-cover img').hasAttribute('src'),'Revoked permission must clear artwork');
+  f.snapshot.status='idle';w().MusicPlayer.refresh();check(q('.music-empty h2').textContent==='No music playing'&&q('[data-music-connect]').hidden,'No-session state must give useful instructions');
+  f.snapshot.status='ready';f.snapshot.position=-1;w().MusicPlayer.refresh();check(q('.music-empty h2').textContent==='Music unavailable','Invalid native data must fail visibly');f.snapshot.position=0;
+  for(let i=0;i<6;i++){q('[data-timer-focus]').click();await wait(40)}await wait(500);check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&w().WorkoutFocus.active===0,'Rapid focus reversal must settle');
+  q('[data-timer-focus]').click();const reads=f.reads;await wait(1100);check(!w().MusicPlayer.active&&f.reads===reads,'Leaving focus must stop media polling');check(w().getComputedStyle(q('.workout-unconnected')).display!=='none','Details must return');
+  q('[data-timer-focus]').click();w().Health.close();await wait(250);check(!w().MusicPlayer.active&&w().WorkoutFocus.active===0,'Closing page must dispose media and motion');
+  result.textContent=JSON.stringify({status:'PASS',width:w().innerWidth,timerIdentity:true,focusReversal:true,dotPattern:true,artwork:true,controls:['play','pause','previous','next','seek','open'],separateWorkoutControls:true,staleSeekRejected:true,permissionAndEmptyStates:true,metadataEscaping:true,unsupportedAndFailureStates:true,disposedWhenClosed:true,phoneMediaSession:'Not operated; browser fixture only'},null,2);
+ }catch(error){result.textContent='FAIL: '+error.stack}
+ finally{delete w().OrbitMusic;if(saved===null)w().localStorage.removeItem('orbit-workouts-v1');else w().localStorage.setItem('orbit-workouts-v1',saved);live.contentWindow.location.reload()}
+};
+</script>

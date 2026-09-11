@@ -1,0 +1,90 @@
+{
+ "label": "after",
+ "throttle": 4,
+ "results": {
+  "tap-open": {
+   "frames": 55,
+   "maxGapMs": 33.4,
+   "gapsOver20Ms": 1,
+   "heavyLifecycleFrames": [
+    {
+     "atMs": 28,
+     "ms": 13
+    }
+   ],
+   "rasterMs": 72.5,
+   "paintImages": {
+    "48x48": [
+     36,
+     584
+    ],
+    "1200x1200": [
+     36
+    ],
+    "545x545": [
+     36
+    ],
+    "390x814": [
+     36
+    ],
+    "390x70": [
+     36
+    ],
+    "192x192": [
+     38
+    ],
+    "330x4": [
+     38,
+     584
+    ]
+   }
+  },
+  "tap-close": {
+   "frames": 56,
+   "maxGapMs": 16.8,
+   "gapsOver20Ms": 0,
+   "heavyLifecycleFrames": [
+    {
+     "atMs": 20,
+     "ms": 7.6
+    }
+   ],
+   "rasterMs": 29.3,
+   "paintImages": {
+    "48x48": [
+     24
+    ],
+    "192x192": [
+     25,
+     582
+    ],
+    "330x4": [
+     25
+    ]
+   }
+  },
+  "drag-close": {
+   "frames": 111,
+   "maxGapMs": 16.8,
+   "gapsOver20Ms": 0,
+   "heavyLifecycleFrames": [
+    {
+     "atMs": 193,
+     "ms": 6.1
+    }
+   ],
+   "rasterMs": 19.1,
+   "paintImages": {
+    "48x48": [
+     196
+    ],
+    "192x192": [
+     197
+    ],
+    "330x4": [
+     197
+    ]
+   }
+  }
+ }
+}

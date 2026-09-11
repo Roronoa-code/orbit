@@ -1,0 +1,287 @@
+{
+ "label": "baseline",
+ "throttle": 4,
+ "drags": {
+  "drag-1-first": {
+   "presentedFrames": 10,
+   "firstDrawMs": 28.7,
+   "maxGapMs": 52.4,
+   "gapsOver20Ms": 3,
+   "gaps": [
+    49.9,
+    52.4,
+    8.8,
+    18,
+    20.1,
+    12.3,
+    16.7,
+    19.9,
+    13.7
+   ],
+   "rasterMs": 0.2,
+   "top": [
+    [
+     "Graphics.Pipeline",
+     26.1
+    ],
+    [
+     "DisplayScheduler::OnBeginFrameDeadline",
+     22.1
+    ],
+    [
+     "DisplayScheduler::DrawAndSwap",
+     22.1
+    ],
+    [
+     "Display::DrawAndSwap",
+     22.1
+    ],
+    [
+     "DirectRenderer::DrawFrame",
+     21.2
+    ],
+    [
+     "DirectRenderer::DrawRenderPass",
+     21
+    ],
+    [
+     "SoftwareRenderer::DoDrawQuad",
+     20.6
+    ],
+    [
+     "WebFrameWidgetImpl::UpdateLifecycle",
+     19.9
+    ],
+    [
+     "Commit",
+     16
+    ],
+    [
+     "v8.callFunction",
+     13.5
+    ],
+    [
+     "LayerTreeHost::DoUpdateLayers",
+     12.9
+    ],
+    [
+     "FunctionCall",
+     12.6
+    ],
+    [
+     "LocalFrameView::RunPaintLifecyclePhase",
+     9.1
+    ],
+    [
+     "WebFrameWidgetImpl::BeginMainFrame",
+     8.8
+    ],
+    [
+     "Blink.Animate.UpdateTime",
+     8.6
+    ],
+    [
+     "PageAnimator::serviceScriptedAnimations",
+     8.6
+    ],
+    [
+     "FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+     8.3
+    ],
+    [
+     "LocalFrameView::UpdateStyleAndLayout",
+     8.1
+    ]
+   ]
+  },
+  "drag-2-repeat": {
+   "presentedFrames": 10,
+   "firstDrawMs": 37.1,
+   "maxGapMs": 49,
+   "gapsOver20Ms": 2,
+   "gaps": [
+    34.9,
+    49,
+    12.6,
+    16.7,
+    19,
+    14.1,
+    17.7,
+    18.9,
+    13.5
+   ],
+   "rasterMs": 0.2,
+   "top": [
+    [
+     "Graphics.Pipeline",
+     27.8
+    ],
+    [
+     "DisplayScheduler::OnBeginFrameDeadline",
+     24
+    ],
+    [
+     "DisplayScheduler::DrawAndSwap",
+     24
+    ],
+    [
+     "Display::DrawAndSwap",
+     24
+    ],
+    [
+     "DirectRenderer::DrawFrame",
+     23.2
+    ],
+    [
+     "DirectRenderer::DrawRenderPass",
+     23.1
+    ],
+    [
+     "SoftwareRenderer::DoDrawQuad",
+     22.7
+    ],
+    [
+     "WebFrameWidgetImpl::UpdateLifecycle",
+     20.1
+    ],
+    [
+     "Commit",
+     16.6
+    ],
+    [
+     "LayerTreeHost::DoUpdateLayers",
+     13
+    ],
+    [
+     "LocalFrameView::RunPaintLifecyclePhase",
+     10.3
+    ],
+    [
+     "WebFrameWidgetImpl::BeginMainFrame",
+     7.7
+    ],
+    [
+     "v8.callFunction",
+     7.6
+    ],
+    [
+     "Blink.Animate.UpdateTime",
+     7.4
+    ],
+    [
+     "PageAnimator::serviceScriptedAnimations",
+     7.3
+    ],
+    [
+     "FunctionCall",
+     7.2
+    ],
+    [
+     "FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+     6.9
+    ],
+    [
+     "FireAnimationFrame",
+     6.8
+    ]
+   ]
+  },
+  "drag-3-after-period-change": {
+   "presentedFrames": 15,
+   "firstDrawMs": 3.1,
+   "maxGapMs": 17.3,
+   "gapsOver20Ms": 0,
+   "gaps": [
+    16.9,
+    16.5,
+    16.7,
+    17,
+    16.7,
+    16.3,
+    16.8,
+    17,
+    16.5,
+    16.4,
+    17.3,
+    16,
+    16.1,
+    16.8
+   ],
+   "rasterMs": 0.1,
+   "top": [
+    [
+     "Commit",
+     52.1
+    ],
+    [
+     "LayerTreeHost::DoUpdateLayers",
+     47.7
+    ],
+    [
+     "Graphics.Pipeline",
+     30.5
+    ],
+    [
+     "WebFrameWidgetImpl::UpdateLifecycle",
+     25.4
+    ],
+    [
+     "DisplayScheduler::OnBeginFrameDeadline",
+     24.7
+    ],
+    [
+     "DisplayScheduler::DrawAndSwap",
+     24.6
+    ],
+    [
+     "Display::DrawAndSwap",
+     24.6
+    ],
+    [
+     "DirectRenderer::DrawFrame",
+     23.5
+    ],
+    [
+     "DirectRenderer::DrawRenderPass",
+     23.2
+    ],
+    [
+     "SoftwareRenderer::DoDrawQuad",
+     22.8
+    ],
+    [
+     "WebFrameWidgetImpl::BeginMainFrame",
+     16.8
+    ],
+    [
+     "Blink.Animate.UpdateTime",
+     16.6
+    ],
+    [
+     "PageAnimator::serviceScriptedAnimations",
+     16.4
+    ],
+    [
+     "v8.callFunction",
+     15.8
+    ],
+    [
+     "FrameRequestCallbackCollection::ExecuteFrameCallbacks",
+     15.6
+    ],
+    [
+     "FireAnimationFrame",
+     15.4
+    ],
+    [
+     "FunctionCall",
+     15.2
+    ],
+    [
+     "AsyncTask Run",
+     15
+    ]
+   ]
+  }
+ }
+}

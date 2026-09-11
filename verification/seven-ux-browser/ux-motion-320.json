@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "width": 320,
+  "checks": [
+    "Live bar shell-first growth, reversal and fixed bottom",
+    "Launcher follows the finger both ways, closes from anywhere on it and is named apart from its shortcuts",
+    "Globe and reading transitions survive rapid input",
+    "Stack drag starts from rest; its structure changes only while it rests",
+    "Temporary chart value and intentional scroll fade",
+    "Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps",
+    "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
+    "Pause/resume preserves the clock, freezes time and eases brightness/size"
+  ],
+  "measurements": {
+    "liveBar": {
+      "closedHeight": 61.9921875,
+      "intermediateHeight": 115.703125,
+      "expandedHeight": 167.98828125
+    },
+    "stackDrag": {
+      "firstFrameShiftPx": 3.55
+    },
+    "body": {
+      "firstPlotX": 221.53846153846155,
+      "coverage": "90 demonstration measurements · 11 Jun–8 Sept"
+    },
+    "activeLiveBar": {
+      "height": 288.984375,
+      "controlsInsideShell": true,
+      "noStatusDots": true
+    }
+  }
+}

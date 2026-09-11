@@ -1,0 +1,44 @@
+{
+  "revision": "Animated workout focus, phone media controls, playful dot motif, concise copy and flat charcoal launcher",
+  "verifiedAt": "2026-09-10T03:07:39.9729568+01:00",
+  "node": "PASS: existing data, gestures, storage and workout native bridge contracts; added metadata validation, safe artwork types, motif shapes and rejected-copy checks",
+  "playerBrowser390": "PASS: open and timed sessions; timer continuity and no overlap; artwork; play/pause/previous/next/seek/open; independent workout controls; stale seek; metadata escaping; permission, empty, unsupported and failure states; disposal",
+  "playerBrowser320": "PASS: same checks",
+  "fullBrowser390": {
+    "minimumOrbToCardGap": 9.67999267578125,
+    "maxFrameGapMs": 6.3,
+    "status": "PASS",
+    "frames": 279
+  },
+  "fullBrowser320": {
+    "minimumOrbToCardGap": 9.67999267578125,
+    "maxFrameGapMs": 6.3,
+    "status": "PASS",
+    "frames": 277
+  },
+  "visualReview": "Browser screenshots inspected: timed focus timer, shaded artwork player and controls, flat unembossed launcher in matching charcoal",
+  "androidBuild": "PASS: platform Java compilation and v3 signature; current scripts/CSS embedded; verification music absent",
+  "install": "SUCCESS on SM-S938B; no launch, UI operation, notification-access grant or media controls performed",
+  "installedPackagePath": "/data/app/~~wfEZejGddS_aw61WJ8hy0A==/com.mani.orbit-QDoGtb-ndhNgJ9ge16ZZ7A==/base.apk",
+  "apkSha256": "1f105c17e207a9080c39cf5660e7e958400b87905217561bdcb3e7668b7b053f",
+  "sourceSha256": {
+    "index.html": "fbf8ed9f4b1d540775c1c420d8f143745d4458ab476e330aa0fc4e24aff23ba2",
+    "health-pages.js": "7c20b03c6084d7f431ce0c6d46e84c8842d8868d717efd3da1d11d6925930a95",
+    "health-pages.css": "733f4087e068ac32b559d8479400ebf104db088048d09d0a645236e9d0ebe424",
+    "hero-dots.js": "8215e6a0102e2d629b5fa5575305d50a656d0ad7e4d6d5032b61494f2b8d8624",
+    "workout-focus.js": "133db7bd1da25873b29af4fca3a96aa48776fbcf2fca825b90feb18acc288692",
+    "surface-motion.js": "13dc7656c7d3dbf8eb3f0cea5cbaca0fddacf416245c6b7017deadd89c98cbc6",
+    "sleep-timeline.js": "cbd4571e796e61c8284519a93c0636fae8b50ad9a221dca28e41db8a4b662b21",
+    "android\\src\\com\\mani\\orbit\\MusicSession.java": "0ff315f8fde855baa8e00592cb55209166d16325da0a5a31ad37b3ffd110091c",
+    "android\\src\\com\\mani\\orbit\\MainActivity.java": "5e3d15b438fb7b9d7ae073f7f053923283d41126f8b6f9f9c2d1c5f9e43e0deb",
+    "android\\AndroidManifest.xml": "3d75ba2a1e9177f5693ca6ba89596916520a61fe9d6b306771de5582c5305828",
+    "android\\build.py": "e6564ea01a5873d9a159f4267a5dfec70bee063f30f46cfc8d631f87223ef9f4"
+  },
+  "recoverableBaseline": "verification/before-focus-music-20260910-024012 and before-flat-launcher-20260910-025030.html",
+  "limitations": [
+    "User must enable notification access using Connect music. Real phone media-session playback and app compatibility remain unverified.",
+    "Metadata bitmap and accessible local content art are supported. Remote-only art falls back explicitly.",
+    "Native Health workspace and Watch untouched. Reconnect heartbeat remains paused.",
+    "Health and sleep chronology remain labelled demo data. Workout timer records remain app-owned."
+  ]
+}

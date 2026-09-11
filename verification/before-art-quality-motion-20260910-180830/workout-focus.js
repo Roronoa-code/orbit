@@ -1,0 +1,52 @@
+/* Keep the timer in place through focus changes; display only media shared by Android. */
+'use strict';
+const WorkoutFocus=(()=>{
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),animations=new Set();
+  let dots=null;
+  function attach(live,focused){dots?.stop();dots=null;if(focused){const canvas=live.querySelector('#focus-time-dots');dots=HeroDots.mount(canvas,live.querySelector('#session-time').dataset.reading||'00:00',true);canvas.onclick=event=>event.stopPropagation()}}
+  function dispose(){settle();dots?.stop();dots=null}
+  function settle(){for(const animation of animations)animation.cancel();animations.clear()}
+  function animate(node,frames,duration=360){if(reduced.matches||document.hidden)return;const animation=node.animate(frames,{duration,easing:'cubic-bezier(.2,.75,.2,1)'});animations.add(animation);animation.onfinish=()=>{animations.delete(animation);animation.cancel()}}
+  function toggle(live,focused){
+    const nodes=[live.querySelector('.timer-dial'),live.querySelector('.session-actions')],before=nodes.map(n=>n.getBoundingClientRect());
+    settle();live.classList.toggle('timer-focused',focused);
+    const button=nodes[0];button.setAttribute('aria-pressed',String(focused));button.setAttribute('aria-label',focused?'Show workout details':'Focus on timer and music');live.querySelector('.timer-tap-hint').textContent=focused?'Tap to show details':'Tap to focus';
+    attach(live,focused);const music=live.querySelector('.workout-music');music.hidden=!focused;if(focused)MusicPlayer.mount(music);else MusicPlayer.stop();
+    nodes.forEach((node,i)=>{const after=node.getBoundingClientRect(),old=before[i];animate(node,[{transformOrigin:'0 0',transform:`translate(${old.left-after.left}px,${old.top-after.top}px) scale(${old.width/after.width},${old.height/after.height})`},{transformOrigin:'0 0',transform:'none'}])});
+    const arriving=focused?music:live.querySelector('.workout-live-top');animate(arriving,[{opacity:0,transform:'translateY(18px)'},{opacity:1,transform:'none'}],420);
+  }
+  reduced.addEventListener('change',()=>{if(reduced.matches)settle()});document.addEventListener('visibilitychange',()=>{if(document.hidden)settle()});window.addEventListener('resize',settle);
+  return {toggle,settle,attach,dispose,reading(value){dots?.set(value)},get active(){return animations.size}};
+})();
+
+const MusicPlayer=(()=>{
+  let root=null,timer=0,state=null,art='',artKey='',scrubbing=false,scrubId='',notice=()=>{};
+  const icon=name=>`<svg viewBox="0 0 24 24" aria-hidden="true">${{play:'<path d="M8 4 21 12 8 20Z"/>',pause:'<rect x="5" y="4" width="5" height="16" rx="1.3"/><rect x="14" y="4" width="5" height="16" rx="1.3"/>',previous:'<path d="M19 5 7 12 19 19Z"/><rect x="3" y="5" width="3" height="14" rx="1"/>',next:'<path d="m5 5 12 7L5 19Z"/><rect x="18" y="5" width="3" height="14" rx="1"/>',music:'<path d="M10 4v12.2a4 4 0 1 0 2 3.5V8l8-2v8.2a4 4 0 1 0 2 3.5V1Z"/>',open:'<path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14Z"/><path d="M5 7h6v2H5v10h10v-6h2v8H3V7Z"/>'}[name]||''}</svg>`;
+  const clock=ms=>{const s=Math.floor(Math.max(0,ms)/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+  function valid(s){return s&&['permission','idle','ready','error','inactive','browser'].includes(s.status)&&(s.status!=='ready'||typeof s.id==='string'&&typeof s.artKey==='string'&&['title','artist','source'].every(k=>typeof s[k]==='string')&&['position','duration'].every(k=>Number.isFinite(s[k])&&s[k]>=0)&&['playing','buffering','canToggle','canPrevious','canNext','canSeek','canOpen'].every(k=>typeof s[k]==='boolean')&&(s.art===undefined||typeof s.art==='string'&&s.art.length<1500000&&(s.art===''||/^data:image\/(?:jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(s.art))))}
+  function shell(){root.innerHTML=`<div class="music-track" hidden><div class="music-cover"><img alt="Album artwork" hidden/></div><div class="music-bottom"><div class="music-heading"><div><h2></h2><p></p></div><button data-music="open" aria-label="Open music app">${icon('open')}</button></div><div class="music-timeline"><input type="range" min="0" max="1" value="0" step="1000" aria-label="Track position"/><div><output class="music-position">0:00</output><span class="music-source"></span><output class="music-duration">0:00</output></div></div><div class="music-controls"><button data-music="previous" aria-label="Previous track">${icon('previous')}</button><button data-music="toggle" aria-label="Play music">${icon('play')}</button><button data-music="next" aria-label="Next track">${icon('next')}</button></div></div></div>`}
+  function backdrop(value){const page=document.querySelector('#health-page');page.style.setProperty('--workout-art',value?`url("${value}")`:'none')}
+  function paint(next){
+    if(!root)return;const q=s=>root.querySelector(s),ready=next.status==='ready';state=next;
+    root.hidden=!ready;root.closest('.workout-live').classList.toggle('has-music',ready);
+    if(!ready){art='';artKey='';scrubbing=false;backdrop('');document.querySelector('#health-page').classList.remove('music-focus');q('.music-cover img').removeAttribute('src');return}
+    q('.music-track').hidden=false;
+    q('.music-heading h2').textContent=next.title||'Untitled track';q('.music-heading p').textContent=next.artist||next.source;q('.music-source').textContent=next.buffering?'Buffering…':(/^[a-z][\w]*(?:\.[\w]+){2,}$/i.test(next.source)?'This phone':next.source);
+    if(next.art!==undefined){art=next.art;artKey=next.artKey;const img=q('.music-cover img');img.hidden=!art;if(art)img.src=art;else img.removeAttribute('src');backdrop(art)}
+    document.querySelector('#health-page').classList.toggle('music-focus',Boolean(art));root.classList.toggle('has-art',Boolean(art));
+    root.classList.toggle('music-playing',next.playing);const toggle=q('[data-music="toggle"]'),action=next.playing?'pause':'play';if(toggle.dataset.state!==action){toggle.innerHTML=icon(action);toggle.dataset.state=action}toggle.setAttribute('aria-label',next.playing?'Pause music':'Play music');toggle.disabled=!next.canToggle;
+    for(const [action,key] of [['previous','canPrevious'],['next','canNext'],['open','canOpen']])q(`[data-music="${action}"]`).disabled=!next[key];
+    const range=q('input');range.disabled=!next.canSeek;range.max=String(next.duration||1);if(!scrubbing){range.value=String(next.position);range.style.setProperty('--music-progress',Math.min(100,next.position/(next.duration||1)*100)+'%');q('.music-position').textContent=clock(next.position);range.setAttribute('aria-valuetext',clock(next.position)+' of '+clock(next.duration))}q('.music-duration').textContent=next.duration?clock(next.duration):'Live';
+  }
+  function refresh(){if(!root||document.hidden)return;try{const next=window.OrbitMusic?JSON.parse(window.OrbitMusic.read(artKey)):{status:'browser'};if(!valid(next))throw Error('Invalid media response');paint(next)}catch{paint({status:'error'})}}
+  function send(action,value=0){if(state?.status!=='ready')return false;try{if(!window.OrbitMusic?.command(state.id,action,value))throw Error('Unavailable');return true}catch{notice('Music control unavailable. Check the music app.');return false}}
+  function connect(){try{window.OrbitMusic?.connect()}catch{notice('Open Android Settings > Notification access > Orbit.')}}
+  function click(event){const button=event.target.closest('button');if(button&&!button.disabled&&button.dataset.music)send(button.dataset.music==='toggle'?(state.playing?'pause':'play'):button.dataset.music)}
+  function input(event){if(event.target.type!=='range')return;if(!scrubbing)scrubId=state?.id;scrubbing=true;const value=Number(event.target.value);event.target.style.setProperty('--music-progress',Math.min(100,value/(state?.duration||1)*100)+'%');root.querySelector('.music-position').textContent=clock(value);event.target.setAttribute('aria-valuetext',clock(value)+' of '+clock(state?.duration||0))}
+  function change(event){if(event.target.type==='range'){if(scrubId===state?.id)send('seek',Number(event.target.value));else notice('The track changed. Choose a position in the new track.');scrubbing=false}}
+  function cancel(){scrubbing=false;refresh()}
+  function stop(){document.querySelector('#health-page').classList.remove('music-focus');backdrop('');clearInterval(timer);timer=0;if(root){root.hidden=true;root.closest('.workout-live')?.classList.remove('has-music');root.removeEventListener('click',click);root.removeEventListener('input',input);root.removeEventListener('change',change);root.removeEventListener('pointercancel',cancel);root.removeEventListener('focusout',cancel)}root=null;state=null;art='';artKey='';scrubbing=false}
+  function mount(node){stop();root=node;shell();root.addEventListener('click',click);root.addEventListener('input',input);root.addEventListener('change',change);root.addEventListener('pointercancel',cancel);root.addEventListener('focusout',cancel);refresh();if(!document.hidden&&window.OrbitMusic)timer=setInterval(refresh,1000)}
+  document.addEventListener('visibilitychange',()=>{clearInterval(timer);timer=0;scrubbing=false;if(!document.hidden&&root){refresh();if(window.OrbitMusic)timer=setInterval(refresh,1000)}});
+  return {mount,stop,refresh,valid,connect,init(fn){notice=fn},get active(){return Boolean(root)}};
+})();

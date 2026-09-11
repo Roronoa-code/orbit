@@ -1,0 +1,10 @@
+{
+  "package": "com.sec.android.app.shealth",
+  "apkSha256": "ea381f9ec2e46224164e1e3865e1a81b6af8df3681acbec0490d0ffae178fef0",
+  "assets": {
+    "cycling.png": "219a5bc8279ccc2ba5afa0d62e5a5c4242820f08d1bdbab32405cc9da4ebeab8",
+    "running.png": "d2f079c3a47e729529f583ff4f4c002669336907bc72f3e5a54da842b876210d",
+    "strength.png": "83002a26f374575e2580355280e2d4d372e53bd4bf04411c0459cc11cce751d4",
+    "walking.png": "4f11570014aed3308673f98db3b26a0222ee78c19adb3019b63ea67b9aac40fb"
+  }
+}

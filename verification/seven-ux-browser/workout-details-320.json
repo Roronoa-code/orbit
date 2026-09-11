@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "fixture": "OrbitWorkouts only; GPS and history data are verification-page local",
+  "checks": [
+    "validation and invalid setup inputs",
+    "outdoors start, optional weight and countdown",
+    "distance, pace, speed and MET energy",
+    "GPS permission retry and metric refresh identity",
+    "active and completed time details",
+    "route, speed, elevation and missing data states",
+    "pause, resume, finish, back and history reopening",
+    "metric-less history compatibility",
+    "320 px and 390 px finite/no-overflow detail",
+    "44 px controls",
+    "context menu and input selection",
+    "sleep scrub highlight without night cursor"
+  ]
+}

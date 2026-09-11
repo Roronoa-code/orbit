@@ -1,0 +1,11 @@
+{
+  "installedOn": "2026-09-09",
+  "deviceModel": "SM-S938B",
+  "appName": "Orbit",
+  "package": "com.mani.orbit",
+  "apk": "dist/Orbit.apk",
+  "sha256LocalAndInstalled": "05D7F5AC2C5E67CA83095E1EA97C1B7D1D478676C71854AC90A0702C17B1E32D",
+  "verified": ["APK signature", "separate package installation", "launch", "orb swipe and tap", "Steps, Heart rate, Sleep and Intake views", "original Health package path unchanged"],
+  "htmlSourceBaseline": "verification/before-panel-stack/index.html",
+  "includesLivePanelStack": false
+}

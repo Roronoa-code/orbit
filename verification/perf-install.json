@@ -1,0 +1,12 @@
+{
+  "installedAt": "2026-09-11T01:01:53",
+  "device": "SM-S938B / 192.168.0.210:44875",
+  "package": "com.mani.orbit",
+  "method": "adb install -r (data kept)",
+  "localSha256": "5eec8e21feee715220995be14b76c16ba003a4e572677a01ce944be8c20503dc",
+  "installedSha256": "5eec8e21feee715220995be14b76c16ba003a4e572677a01ce944be8c20503dc",
+  "match": true,
+  "previousInstalledSha256": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "previousApkBackup": "verification/perf-phone/phone-before.apk",
+  "launched": false
+}

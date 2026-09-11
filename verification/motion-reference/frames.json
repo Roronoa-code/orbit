@@ -1,0 +1,3619 @@
+{
+  "fps": 60,
+  "count": 602,
+  "duration": 10.033333333333333,
+  "frames": [
+    {
+      "frame": 1,
+      "time": 0.0,
+      "image": "frame-0001.jpg",
+      "meanPixelChange": 0
+    },
+    {
+      "frame": 2,
+      "time": 0.016666666666666666,
+      "image": "frame-0002.jpg",
+      "meanPixelChange": 38.0023
+    },
+    {
+      "frame": 3,
+      "time": 0.03333333333333333,
+      "image": "frame-0003.jpg",
+      "meanPixelChange": 0.085
+    },
+    {
+      "frame": 4,
+      "time": 0.05,
+      "image": "frame-0004.jpg",
+      "meanPixelChange": 0.0348
+    },
+    {
+      "frame": 5,
+      "time": 0.06666666666666667,
+      "image": "frame-0005.jpg",
+      "meanPixelChange": 0.0254
+    },
+    {
+      "frame": 6,
+      "time": 0.08333333333333333,
+      "image": "frame-0006.jpg",
+      "meanPixelChange": 0.1
+    },
+    {
+      "frame": 7,
+      "time": 0.1,
+      "image": "frame-0007.jpg",
+      "meanPixelChange": 0.1668
+    },
+    {
+      "frame": 8,
+      "time": 0.11666666666666667,
+      "image": "frame-0008.jpg",
+      "meanPixelChange": 0.0844
+    },
+    {
+      "frame": 9,
+      "time": 0.13333333333333333,
+      "image": "frame-0009.jpg",
+      "meanPixelChange": 0.0821
+    },
+    {
+      "frame": 10,
+      "time": 0.15,
+      "image": "frame-0010.jpg",
+      "meanPixelChange": 0.1955
+    },
+    {
+      "frame": 11,
+      "time": 0.16666666666666666,
+      "image": "frame-0011.jpg",
+      "meanPixelChange": 0.2268
+    },
+    {
+      "frame": 12,
+      "time": 0.18333333333333332,
+      "image": "frame-0012.jpg",
+      "meanPixelChange": 0.1678
+    },
+    {
+      "frame": 13,
+      "time": 0.2,
+      "image": "frame-0013.jpg",
+      "meanPixelChange": 0.2225
+    },
+    {
+      "frame": 14,
+      "time": 0.21666666666666667,
+      "image": "frame-0014.jpg",
+      "meanPixelChange": 0.3609
+    },
+    {
+      "frame": 15,
+      "time": 0.23333333333333334,
+      "image": "frame-0015.jpg",
+      "meanPixelChange": 0.4757
+    },
+    {
+      "frame": 16,
+      "time": 0.25,
+      "image": "frame-0016.jpg",
+      "meanPixelChange": 0.4111
+    },
+    {
+      "frame": 17,
+      "time": 0.26666666666666666,
+      "image": "frame-0017.jpg",
+      "meanPixelChange": 0.4758
+    },
+    {
+      "frame": 18,
+      "time": 0.2833333333333333,
+      "image": "frame-0018.jpg",
+      "meanPixelChange": 0.6152
+    },
+    {
+      "frame": 19,
+      "time": 0.3,
+      "image": "frame-0019.jpg",
+      "meanPixelChange": 0.7932
+    },
+    {
+      "frame": 20,
+      "time": 0.31666666666666665,
+      "image": "frame-0020.jpg",
+      "meanPixelChange": 0.6986
+    },
+    {
+      "frame": 21,
+      "time": 0.3333333333333333,
+      "image": "frame-0021.jpg",
+      "meanPixelChange": 0.7693
+    },
+    {
+      "frame": 22,
+      "time": 0.35,
+      "image": "frame-0022.jpg",
+      "meanPixelChange": 0.8196
+    },
+    {
+      "frame": 23,
+      "time": 0.36666666666666664,
+      "image": "frame-0023.jpg",
+      "meanPixelChange": 0.9098
+    },
+    {
+      "frame": 24,
+      "time": 0.38333333333333336,
+      "image": "frame-0024.jpg",
+      "meanPixelChange": 0.7939
+    },
+    {
+      "frame": 25,
+      "time": 0.4,
+      "image": "frame-0025.jpg",
+      "meanPixelChange": 0.8235
+    },
+    {
+      "frame": 26,
+      "time": 0.4166666666666667,
+      "image": "frame-0026.jpg",
+      "meanPixelChange": 0.9198
+    },
+    {
+      "frame": 27,
+      "time": 0.43333333333333335,
+      "image": "frame-0027.jpg",
+      "meanPixelChange": 0.9604
+    },
+    {
+      "frame": 28,
+      "time": 0.45,
+      "image": "frame-0028.jpg",
+      "meanPixelChange": 0.807
+    },
+    {
+      "frame": 29,
+      "time": 0.4666666666666667,
+      "image": "frame-0029.jpg",
+      "meanPixelChange": 0.7789
+    },
+    {
+      "frame": 30,
+      "time": 0.48333333333333334,
+      "image": "frame-0030.jpg",
+      "meanPixelChange": 0.8186
+    },
+    {
+      "frame": 31,
+      "time": 0.5,
+      "image": "frame-0031.jpg",
+      "meanPixelChange": 0.8527
+    },
+    {
+      "frame": 32,
+      "time": 0.5166666666666667,
+      "image": "frame-0032.jpg",
+      "meanPixelChange": 0.6603
+    },
+    {
+      "frame": 33,
+      "time": 0.5333333333333333,
+      "image": "frame-0033.jpg",
+      "meanPixelChange": 0.6301
+    },
+    {
+      "frame": 34,
+      "time": 0.55,
+      "image": "frame-0034.jpg",
+      "meanPixelChange": 0.7492
+    },
+    {
+      "frame": 35,
+      "time": 0.5666666666666667,
+      "image": "frame-0035.jpg",
+      "meanPixelChange": 0.7683
+    },
+    {
+      "frame": 36,
+      "time": 0.5833333333333334,
+      "image": "frame-0036.jpg",
+      "meanPixelChange": 0.6318
+    },
+    {
+      "frame": 37,
+      "time": 0.6,
+      "image": "frame-0037.jpg",
+      "meanPixelChange": 0.6179
+    },
+    {
+      "frame": 38,
+      "time": 0.6166666666666667,
+      "image": "frame-0038.jpg",
+      "meanPixelChange": 0.686
+    },
+    {
+      "frame": 39,
+      "time": 0.6333333333333333,
+      "image": "frame-0039.jpg",
+      "meanPixelChange": 0.6922
+    },
+    {
+      "frame": 40,
+      "time": 0.65,
+      "image": "frame-0040.jpg",
+      "meanPixelChange": 0.6002
+    },
+    {
+      "frame": 41,
+      "time": 0.6666666666666666,
+      "image": "frame-0041.jpg",
+      "meanPixelChange": 0.5827
+    },
+    {
+      "frame": 42,
+      "time": 0.6833333333333333,
+      "image": "frame-0042.jpg",
+      "meanPixelChange": 0.6096
+    },
+    {
+      "frame": 43,
+      "time": 0.7,
+      "image": "frame-0043.jpg",
+      "meanPixelChange": 0.6471
+    },
+    {
+      "frame": 44,
+      "time": 0.7166666666666667,
+      "image": "frame-0044.jpg",
+      "meanPixelChange": 0.5306
+    },
+    {
+      "frame": 45,
+      "time": 0.7333333333333333,
+      "image": "frame-0045.jpg",
+      "meanPixelChange": 0.5468
+    },
+    {
+      "frame": 46,
+      "time": 0.75,
+      "image": "frame-0046.jpg",
+      "meanPixelChange": 0.5304
+    },
+    {
+      "frame": 47,
+      "time": 0.7666666666666667,
+      "image": "frame-0047.jpg",
+      "meanPixelChange": 0.5735
+    },
+    {
+      "frame": 48,
+      "time": 0.7833333333333333,
+      "image": "frame-0048.jpg",
+      "meanPixelChange": 0.4724
+    },
+    {
+      "frame": 49,
+      "time": 0.8,
+      "image": "frame-0049.jpg",
+      "meanPixelChange": 0.5129
+    },
+    {
+      "frame": 50,
+      "time": 0.8166666666666667,
+      "image": "frame-0050.jpg",
+      "meanPixelChange": 0.4725
+    },
+    {
+      "frame": 51,
+      "time": 0.8333333333333334,
+      "image": "frame-0051.jpg",
+      "meanPixelChange": 0.5366
+    },
+    {
+      "frame": 52,
+      "time": 0.85,
+      "image": "frame-0052.jpg",
+      "meanPixelChange": 0.4723
+    },
+    {
+      "frame": 53,
+      "time": 0.8666666666666667,
+      "image": "frame-0053.jpg",
+      "meanPixelChange": 0.5021
+    },
+    {
+      "frame": 54,
+      "time": 0.8833333333333333,
+      "image": "frame-0054.jpg",
+      "meanPixelChange": 0.4951
+    },
+    {
+      "frame": 55,
+      "time": 0.9,
+      "image": "frame-0055.jpg",
+      "meanPixelChange": 0.5297
+    },
+    {
+      "frame": 56,
+      "time": 0.9166666666666666,
+      "image": "frame-0056.jpg",
+      "meanPixelChange": 0.4622
+    },
+    {
+      "frame": 57,
+      "time": 0.9333333333333333,
+      "image": "frame-0057.jpg",
+      "meanPixelChange": 0.4985
+    },
+    {
+      "frame": 58,
+      "time": 0.95,
+      "image": "frame-0058.jpg",
+      "meanPixelChange": 0.4919
+    },
+    {
+      "frame": 59,
+      "time": 0.9666666666666667,
+      "image": "frame-0059.jpg",
+      "meanPixelChange": 0.4822
+    },
+    {
+      "frame": 60,
+      "time": 0.9833333333333333,
+      "image": "frame-0060.jpg",
+      "meanPixelChange": 0.479
+    },
+    {
+      "frame": 61,
+      "time": 1.0,
+      "image": "frame-0061.jpg",
+      "meanPixelChange": 0.5657
+    },
+    {
+      "frame": 62,
+      "time": 1.0166666666666666,
+      "image": "frame-0062.jpg",
+      "meanPixelChange": 0.4404
+    },
+    {
+      "frame": 63,
+      "time": 1.0333333333333334,
+      "image": "frame-0063.jpg",
+      "meanPixelChange": 0.4745
+    },
+    {
+      "frame": 64,
+      "time": 1.05,
+      "image": "frame-0064.jpg",
+      "meanPixelChange": 0.4867
+    },
+    {
+      "frame": 65,
+      "time": 1.0666666666666667,
+      "image": "frame-0065.jpg",
+      "meanPixelChange": 0.3934
+    },
+    {
+      "frame": 66,
+      "time": 1.0833333333333333,
+      "image": "frame-0066.jpg",
+      "meanPixelChange": 0.4422
+    },
+    {
+      "frame": 67,
+      "time": 1.1,
+      "image": "frame-0067.jpg",
+      "meanPixelChange": 0.4615
+    },
+    {
+      "frame": 68,
+      "time": 1.1166666666666667,
+      "image": "frame-0068.jpg",
+      "meanPixelChange": 0.4656
+    },
+    {
+      "frame": 69,
+      "time": 1.1333333333333333,
+      "image": "frame-0069.jpg",
+      "meanPixelChange": 0.4035
+    },
+    {
+      "frame": 70,
+      "time": 1.15,
+      "image": "frame-0070.jpg",
+      "meanPixelChange": 0.4497
+    },
+    {
+      "frame": 71,
+      "time": 1.1666666666666667,
+      "image": "frame-0071.jpg",
+      "meanPixelChange": 0.4327
+    },
+    {
+      "frame": 72,
+      "time": 1.1833333333333333,
+      "image": "frame-0072.jpg",
+      "meanPixelChange": 0.4542
+    },
+    {
+      "frame": 73,
+      "time": 1.2,
+      "image": "frame-0073.jpg",
+      "meanPixelChange": 0.3992
+    },
+    {
+      "frame": 74,
+      "time": 1.2166666666666666,
+      "image": "frame-0074.jpg",
+      "meanPixelChange": 0.4267
+    },
+    {
+      "frame": 75,
+      "time": 1.2333333333333334,
+      "image": "frame-0075.jpg",
+      "meanPixelChange": 0.4244
+    },
+    {
+      "frame": 76,
+      "time": 1.25,
+      "image": "frame-0076.jpg",
+      "meanPixelChange": 0.4239
+    },
+    {
+      "frame": 77,
+      "time": 1.2666666666666666,
+      "image": "frame-0077.jpg",
+      "meanPixelChange": 0.3527
+    },
+    {
+      "frame": 78,
+      "time": 1.2833333333333334,
+      "image": "frame-0078.jpg",
+      "meanPixelChange": 0.4103
+    },
+    {
+      "frame": 79,
+      "time": 1.3,
+      "image": "frame-0079.jpg",
+      "meanPixelChange": 0.4049
+    },
+    {
+      "frame": 80,
+      "time": 1.3166666666666667,
+      "image": "frame-0080.jpg",
+      "meanPixelChange": 0.4196
+    },
+    {
+      "frame": 81,
+      "time": 1.3333333333333333,
+      "image": "frame-0081.jpg",
+      "meanPixelChange": 0.3414
+    },
+    {
+      "frame": 82,
+      "time": 1.35,
+      "image": "frame-0082.jpg",
+      "meanPixelChange": 0.3946
+    },
+    {
+      "frame": 83,
+      "time": 1.3666666666666667,
+      "image": "frame-0083.jpg",
+      "meanPixelChange": 0.4047
+    },
+    {
+      "frame": 84,
+      "time": 1.3833333333333333,
+      "image": "frame-0084.jpg",
+      "meanPixelChange": 0.4214
+    },
+    {
+      "frame": 85,
+      "time": 1.4,
+      "image": "frame-0085.jpg",
+      "meanPixelChange": 0.3484
+    },
+    {
+      "frame": 86,
+      "time": 1.4166666666666667,
+      "image": "frame-0086.jpg",
+      "meanPixelChange": 0.4157
+    },
+    {
+      "frame": 87,
+      "time": 1.4333333333333333,
+      "image": "frame-0087.jpg",
+      "meanPixelChange": 0.4325
+    },
+    {
+      "frame": 88,
+      "time": 1.45,
+      "image": "frame-0088.jpg",
+      "meanPixelChange": 0.4486
+    },
+    {
+      "frame": 89,
+      "time": 1.4666666666666666,
+      "image": "frame-0089.jpg",
+      "meanPixelChange": 0.3728
+    },
+    {
+      "frame": 90,
+      "time": 1.4833333333333334,
+      "image": "frame-0090.jpg",
+      "meanPixelChange": 0.4204
+    },
+    {
+      "frame": 91,
+      "time": 1.5,
+      "image": "frame-0091.jpg",
+      "meanPixelChange": 0.6063
+    },
+    {
+      "frame": 92,
+      "time": 1.5166666666666666,
+      "image": "frame-0092.jpg",
+      "meanPixelChange": 0.8325
+    },
+    {
+      "frame": 93,
+      "time": 1.5333333333333334,
+      "image": "frame-0093.jpg",
+      "meanPixelChange": 0.9602
+    },
+    {
+      "frame": 94,
+      "time": 1.55,
+      "image": "frame-0094.jpg",
+      "meanPixelChange": 1.1319
+    },
+    {
+      "frame": 95,
+      "time": 1.5666666666666667,
+      "image": "frame-0095.jpg",
+      "meanPixelChange": 1.2567
+    },
+    {
+      "frame": 96,
+      "time": 1.5833333333333333,
+      "image": "frame-0096.jpg",
+      "meanPixelChange": 1.4578
+    },
+    {
+      "frame": 97,
+      "time": 1.6,
+      "image": "frame-0097.jpg",
+      "meanPixelChange": 1.5423
+    },
+    {
+      "frame": 98,
+      "time": 1.6166666666666667,
+      "image": "frame-0098.jpg",
+      "meanPixelChange": 1.7649
+    },
+    {
+      "frame": 99,
+      "time": 1.6333333333333333,
+      "image": "frame-0099.jpg",
+      "meanPixelChange": 1.9456
+    },
+    {
+      "frame": 100,
+      "time": 1.65,
+      "image": "frame-0100.jpg",
+      "meanPixelChange": 2.1683
+    },
+    {
+      "frame": 101,
+      "time": 1.6666666666666667,
+      "image": "frame-0101.jpg",
+      "meanPixelChange": 2.3052
+    },
+    {
+      "frame": 102,
+      "time": 1.6833333333333333,
+      "image": "frame-0102.jpg",
+      "meanPixelChange": 2.5994
+    },
+    {
+      "frame": 103,
+      "time": 1.7,
+      "image": "frame-0103.jpg",
+      "meanPixelChange": 2.6877
+    },
+    {
+      "frame": 104,
+      "time": 1.7166666666666666,
+      "image": "frame-0104.jpg",
+      "meanPixelChange": 2.8915
+    },
+    {
+      "frame": 105,
+      "time": 1.7333333333333334,
+      "image": "frame-0105.jpg",
+      "meanPixelChange": 2.9328
+    },
+    {
+      "frame": 106,
+      "time": 1.75,
+      "image": "frame-0106.jpg",
+      "meanPixelChange": 2.4576
+    },
+    {
+      "frame": 107,
+      "time": 1.7666666666666666,
+      "image": "frame-0107.jpg",
+      "meanPixelChange": 2.2677
+    },
+    {
+      "frame": 108,
+      "time": 1.7833333333333334,
+      "image": "frame-0108.jpg",
+      "meanPixelChange": 2.1409
+    },
+    {
+      "frame": 109,
+      "time": 1.8,
+      "image": "frame-0109.jpg",
+      "meanPixelChange": 1.8531
+    },
+    {
+      "frame": 110,
+      "time": 1.8166666666666667,
+      "image": "frame-0110.jpg",
+      "meanPixelChange": 1.6145
+    },
+    {
+      "frame": 111,
+      "time": 1.8333333333333333,
+      "image": "frame-0111.jpg",
+      "meanPixelChange": 1.2019
+    },
+    {
+      "frame": 112,
+      "time": 1.85,
+      "image": "frame-0112.jpg",
+      "meanPixelChange": 0.917
+    },
+    {
+      "frame": 113,
+      "time": 1.8666666666666667,
+      "image": "frame-0113.jpg",
+      "meanPixelChange": 0.4617
+    },
+    {
+      "frame": 114,
+      "time": 1.8833333333333333,
+      "image": "frame-0114.jpg",
+      "meanPixelChange": 0.4007
+    },
+    {
+      "frame": 115,
+      "time": 1.9,
+      "image": "frame-0115.jpg",
+      "meanPixelChange": 0.623
+    },
+    {
+      "frame": 116,
+      "time": 1.9166666666666667,
+      "image": "frame-0116.jpg",
+      "meanPixelChange": 0.8956
+    },
+    {
+      "frame": 117,
+      "time": 1.9333333333333333,
+      "image": "frame-0117.jpg",
+      "meanPixelChange": 1.0388
+    },
+    {
+      "frame": 118,
+      "time": 1.95,
+      "image": "frame-0118.jpg",
+      "meanPixelChange": 1.2412
+    },
+    {
+      "frame": 119,
+      "time": 1.9666666666666666,
+      "image": "frame-0119.jpg",
+      "meanPixelChange": 1.2031
+    },
+    {
+      "frame": 120,
+      "time": 1.9833333333333334,
+      "image": "frame-0120.jpg",
+      "meanPixelChange": 1.3488
+    },
+    {
+      "frame": 121,
+      "time": 2.0,
+      "image": "frame-0121.jpg",
+      "meanPixelChange": 1.4786
+    },
+    {
+      "frame": 122,
+      "time": 2.0166666666666666,
+      "image": "frame-0122.jpg",
+      "meanPixelChange": 1.3482
+    },
+    {
+      "frame": 123,
+      "time": 2.033333333333333,
+      "image": "frame-0123.jpg",
+      "meanPixelChange": 1.3021
+    },
+    {
+      "frame": 124,
+      "time": 2.05,
+      "image": "frame-0124.jpg",
+      "meanPixelChange": 1.2248
+    },
+    {
+      "frame": 125,
+      "time": 2.066666666666667,
+      "image": "frame-0125.jpg",
+      "meanPixelChange": 1.1942
+    },
+    {
+      "frame": 126,
+      "time": 2.0833333333333335,
+      "image": "frame-0126.jpg",
+      "meanPixelChange": 1.0786
+    },
+    {
+      "frame": 127,
+      "time": 2.1,
+      "image": "frame-0127.jpg",
+      "meanPixelChange": 0.9534
+    },
+    {
+      "frame": 128,
+      "time": 2.1166666666666667,
+      "image": "frame-0128.jpg",
+      "meanPixelChange": 0.8066
+    },
+    {
+      "frame": 129,
+      "time": 2.1333333333333333,
+      "image": "frame-0129.jpg",
+      "meanPixelChange": 0.8214
+    },
+    {
+      "frame": 130,
+      "time": 2.15,
+      "image": "frame-0130.jpg",
+      "meanPixelChange": 0.7509
+    },
+    {
+      "frame": 131,
+      "time": 2.1666666666666665,
+      "image": "frame-0131.jpg",
+      "meanPixelChange": 0.503
+    },
+    {
+      "frame": 132,
+      "time": 2.183333333333333,
+      "image": "frame-0132.jpg",
+      "meanPixelChange": 0.4268
+    },
+    {
+      "frame": 133,
+      "time": 2.2,
+      "image": "frame-0133.jpg",
+      "meanPixelChange": 0.4374
+    },
+    {
+      "frame": 134,
+      "time": 2.216666666666667,
+      "image": "frame-0134.jpg",
+      "meanPixelChange": 0.3872
+    },
+    {
+      "frame": 135,
+      "time": 2.2333333333333334,
+      "image": "frame-0135.jpg",
+      "meanPixelChange": 0.1597
+    },
+    {
+      "frame": 136,
+      "time": 2.25,
+      "image": "frame-0136.jpg",
+      "meanPixelChange": 0.1015
+    },
+    {
+      "frame": 137,
+      "time": 2.2666666666666666,
+      "image": "frame-0137.jpg",
+      "meanPixelChange": 0.2822
+    },
+    {
+      "frame": 138,
+      "time": 2.283333333333333,
+      "image": "frame-0138.jpg",
+      "meanPixelChange": 0.296
+    },
+    {
+      "frame": 139,
+      "time": 2.3,
+      "image": "frame-0139.jpg",
+      "meanPixelChange": 0.2555
+    },
+    {
+      "frame": 140,
+      "time": 2.316666666666667,
+      "image": "frame-0140.jpg",
+      "meanPixelChange": 0.2955
+    },
+    {
+      "frame": 141,
+      "time": 2.3333333333333335,
+      "image": "frame-0141.jpg",
+      "meanPixelChange": 0.3743
+    },
+    {
+      "frame": 142,
+      "time": 2.35,
+      "image": "frame-0142.jpg",
+      "meanPixelChange": 0.3854
+    },
+    {
+      "frame": 143,
+      "time": 2.3666666666666667,
+      "image": "frame-0143.jpg",
+      "meanPixelChange": 0.3322
+    },
+    {
+      "frame": 144,
+      "time": 2.3833333333333333,
+      "image": "frame-0144.jpg",
+      "meanPixelChange": 0.3312
+    },
+    {
+      "frame": 145,
+      "time": 2.4,
+      "image": "frame-0145.jpg",
+      "meanPixelChange": 0.3766
+    },
+    {
+      "frame": 146,
+      "time": 2.4166666666666665,
+      "image": "frame-0146.jpg",
+      "meanPixelChange": 0.3609
+    },
+    {
+      "frame": 147,
+      "time": 2.433333333333333,
+      "image": "frame-0147.jpg",
+      "meanPixelChange": 0.3011
+    },
+    {
+      "frame": 148,
+      "time": 2.45,
+      "image": "frame-0148.jpg",
+      "meanPixelChange": 0.3385
+    },
+    {
+      "frame": 149,
+      "time": 2.466666666666667,
+      "image": "frame-0149.jpg",
+      "meanPixelChange": 0.4718
+    },
+    {
+      "frame": 150,
+      "time": 2.4833333333333334,
+      "image": "frame-0150.jpg",
+      "meanPixelChange": 0.5832
+    },
+    {
+      "frame": 151,
+      "time": 2.5,
+      "image": "frame-0151.jpg",
+      "meanPixelChange": 0.7073
+    },
+    {
+      "frame": 152,
+      "time": 2.5166666666666666,
+      "image": "frame-0152.jpg",
+      "meanPixelChange": 0.8467
+    },
+    {
+      "frame": 153,
+      "time": 2.533333333333333,
+      "image": "frame-0153.jpg",
+      "meanPixelChange": 1.0783
+    },
+    {
+      "frame": 154,
+      "time": 2.55,
+      "image": "frame-0154.jpg",
+      "meanPixelChange": 1.2873
+    },
+    {
+      "frame": 155,
+      "time": 2.566666666666667,
+      "image": "frame-0155.jpg",
+      "meanPixelChange": 1.437
+    },
+    {
+      "frame": 156,
+      "time": 2.5833333333333335,
+      "image": "frame-0156.jpg",
+      "meanPixelChange": 1.5611
+    },
+    {
+      "frame": 157,
+      "time": 2.6,
+      "image": "frame-0157.jpg",
+      "meanPixelChange": 1.7033
+    },
+    {
+      "frame": 158,
+      "time": 2.6166666666666667,
+      "image": "frame-0158.jpg",
+      "meanPixelChange": 1.7118
+    },
+    {
+      "frame": 159,
+      "time": 2.6333333333333333,
+      "image": "frame-0159.jpg",
+      "meanPixelChange": 1.7401
+    },
+    {
+      "frame": 160,
+      "time": 2.65,
+      "image": "frame-0160.jpg",
+      "meanPixelChange": 1.6069
+    },
+    {
+      "frame": 161,
+      "time": 2.6666666666666665,
+      "image": "frame-0161.jpg",
+      "meanPixelChange": 1.5357
+    },
+    {
+      "frame": 162,
+      "time": 2.683333333333333,
+      "image": "frame-0162.jpg",
+      "meanPixelChange": 1.4694
+    },
+    {
+      "frame": 163,
+      "time": 2.7,
+      "image": "frame-0163.jpg",
+      "meanPixelChange": 1.3552
+    },
+    {
+      "frame": 164,
+      "time": 2.716666666666667,
+      "image": "frame-0164.jpg",
+      "meanPixelChange": 1.4747
+    },
+    {
+      "frame": 165,
+      "time": 2.7333333333333334,
+      "image": "frame-0165.jpg",
+      "meanPixelChange": 1.0181
+    },
+    {
+      "frame": 166,
+      "time": 2.75,
+      "image": "frame-0166.jpg",
+      "meanPixelChange": 1.3172
+    },
+    {
+      "frame": 167,
+      "time": 2.7666666666666666,
+      "image": "frame-0167.jpg",
+      "meanPixelChange": 1.5451
+    },
+    {
+      "frame": 168,
+      "time": 2.783333333333333,
+      "image": "frame-0168.jpg",
+      "meanPixelChange": 1.7495
+    },
+    {
+      "frame": 169,
+      "time": 2.8,
+      "image": "frame-0169.jpg",
+      "meanPixelChange": 1.8355
+    },
+    {
+      "frame": 170,
+      "time": 2.816666666666667,
+      "image": "frame-0170.jpg",
+      "meanPixelChange": 1.9415
+    },
+    {
+      "frame": 171,
+      "time": 2.8333333333333335,
+      "image": "frame-0171.jpg",
+      "meanPixelChange": 2.1479
+    },
+    {
+      "frame": 172,
+      "time": 2.85,
+      "image": "frame-0172.jpg",
+      "meanPixelChange": 2.1648
+    },
+    {
+      "frame": 173,
+      "time": 2.8666666666666667,
+      "image": "frame-0173.jpg",
+      "meanPixelChange": 2.2165
+    },
+    {
+      "frame": 174,
+      "time": 2.8833333333333333,
+      "image": "frame-0174.jpg",
+      "meanPixelChange": 2.284
+    },
+    {
+      "frame": 175,
+      "time": 2.9,
+      "image": "frame-0175.jpg",
+      "meanPixelChange": 2.3075
+    },
+    {
+      "frame": 176,
+      "time": 2.9166666666666665,
+      "image": "frame-0176.jpg",
+      "meanPixelChange": 2.267
+    },
+    {
+      "frame": 177,
+      "time": 2.933333333333333,
+      "image": "frame-0177.jpg",
+      "meanPixelChange": 2.4033
+    },
+    {
+      "frame": 178,
+      "time": 2.95,
+      "image": "frame-0178.jpg",
+      "meanPixelChange": 2.4061
+    },
+    {
+      "frame": 179,
+      "time": 2.966666666666667,
+      "image": "frame-0179.jpg",
+      "meanPixelChange": 2.2314
+    },
+    {
+      "frame": 180,
+      "time": 2.9833333333333334,
+      "image": "frame-0180.jpg",
+      "meanPixelChange": 1.751
+    },
+    {
+      "frame": 181,
+      "time": 3.0,
+      "image": "frame-0181.jpg",
+      "meanPixelChange": 1.6729
+    },
+    {
+      "frame": 182,
+      "time": 3.0166666666666666,
+      "image": "frame-0182.jpg",
+      "meanPixelChange": 1.3299
+    },
+    {
+      "frame": 183,
+      "time": 3.033333333333333,
+      "image": "frame-0183.jpg",
+      "meanPixelChange": 1.0583
+    },
+    {
+      "frame": 184,
+      "time": 3.05,
+      "image": "frame-0184.jpg",
+      "meanPixelChange": 0.7573
+    },
+    {
+      "frame": 185,
+      "time": 3.066666666666667,
+      "image": "frame-0185.jpg",
+      "meanPixelChange": 0.5607
+    },
+    {
+      "frame": 186,
+      "time": 3.0833333333333335,
+      "image": "frame-0186.jpg",
+      "meanPixelChange": 0.6008
+    },
+    {
+      "frame": 187,
+      "time": 3.1,
+      "image": "frame-0187.jpg",
+      "meanPixelChange": 0.6768
+    },
+    {
+      "frame": 188,
+      "time": 3.1166666666666667,
+      "image": "frame-0188.jpg",
+      "meanPixelChange": 0.8484
+    },
+    {
+      "frame": 189,
+      "time": 3.1333333333333333,
+      "image": "frame-0189.jpg",
+      "meanPixelChange": 0.8969
+    },
+    {
+      "frame": 190,
+      "time": 3.15,
+      "image": "frame-0190.jpg",
+      "meanPixelChange": 1.0424
+    },
+    {
+      "frame": 191,
+      "time": 3.1666666666666665,
+      "image": "frame-0191.jpg",
+      "meanPixelChange": 1.1121
+    },
+    {
+      "frame": 192,
+      "time": 3.183333333333333,
+      "image": "frame-0192.jpg",
+      "meanPixelChange": 1.1122
+    },
+    {
+      "frame": 193,
+      "time": 3.2,
+      "image": "frame-0193.jpg",
+      "meanPixelChange": 1.182
+    },
+    {
+      "frame": 194,
+      "time": 3.216666666666667,
+      "image": "frame-0194.jpg",
+      "meanPixelChange": 1.1421
+    },
+    {
+      "frame": 195,
+      "time": 3.2333333333333334,
+      "image": "frame-0195.jpg",
+      "meanPixelChange": 1.1008
+    },
+    {
+      "frame": 196,
+      "time": 3.25,
+      "image": "frame-0196.jpg",
+      "meanPixelChange": 1.0431
+    },
+    {
+      "frame": 197,
+      "time": 3.2666666666666666,
+      "image": "frame-0197.jpg",
+      "meanPixelChange": 1.0445
+    },
+    {
+      "frame": 198,
+      "time": 3.283333333333333,
+      "image": "frame-0198.jpg",
+      "meanPixelChange": 0.9393
+    },
+    {
+      "frame": 199,
+      "time": 3.3,
+      "image": "frame-0199.jpg",
+      "meanPixelChange": 0.9013
+    },
+    {
+      "frame": 200,
+      "time": 3.316666666666667,
+      "image": "frame-0200.jpg",
+      "meanPixelChange": 0.8389
+    },
+    {
+      "frame": 201,
+      "time": 3.3333333333333335,
+      "image": "frame-0201.jpg",
+      "meanPixelChange": 0.7994
+    },
+    {
+      "frame": 202,
+      "time": 3.35,
+      "image": "frame-0202.jpg",
+      "meanPixelChange": 0.7044
+    },
+    {
+      "frame": 203,
+      "time": 3.3666666666666667,
+      "image": "frame-0203.jpg",
+      "meanPixelChange": 0.6836
+    },
+    {
+      "frame": 204,
+      "time": 3.3833333333333333,
+      "image": "frame-0204.jpg",
+      "meanPixelChange": 0.6113
+    },
+    {
+      "frame": 205,
+      "time": 3.4,
+      "image": "frame-0205.jpg",
+      "meanPixelChange": 0.5546
+    },
+    {
+      "frame": 206,
+      "time": 3.4166666666666665,
+      "image": "frame-0206.jpg",
+      "meanPixelChange": 0.5153
+    },
+    {
+      "frame": 207,
+      "time": 3.433333333333333,
+      "image": "frame-0207.jpg",
+      "meanPixelChange": 0.4781
+    },
+    {
+      "frame": 208,
+      "time": 3.45,
+      "image": "frame-0208.jpg",
+      "meanPixelChange": 0.437
+    },
+    {
+      "frame": 209,
+      "time": 3.466666666666667,
+      "image": "frame-0209.jpg",
+      "meanPixelChange": 0.4396
+    },
+    {
+      "frame": 210,
+      "time": 3.4833333333333334,
+      "image": "frame-0210.jpg",
+      "meanPixelChange": 0.4036
+    },
+    {
+      "frame": 211,
+      "time": 3.5,
+      "image": "frame-0211.jpg",
+      "meanPixelChange": 0.3819
+    },
+    {
+      "frame": 212,
+      "time": 3.5166666666666666,
+      "image": "frame-0212.jpg",
+      "meanPixelChange": 0.354
+    },
+    {
+      "frame": 213,
+      "time": 3.533333333333333,
+      "image": "frame-0213.jpg",
+      "meanPixelChange": 0.3578
+    },
+    {
+      "frame": 214,
+      "time": 3.55,
+      "image": "frame-0214.jpg",
+      "meanPixelChange": 0.3564
+    },
+    {
+      "frame": 215,
+      "time": 3.566666666666667,
+      "image": "frame-0215.jpg",
+      "meanPixelChange": 0.3487
+    },
+    {
+      "frame": 216,
+      "time": 3.5833333333333335,
+      "image": "frame-0216.jpg",
+      "meanPixelChange": 0.3552
+    },
+    {
+      "frame": 217,
+      "time": 3.6,
+      "image": "frame-0217.jpg",
+      "meanPixelChange": 0.3479
+    },
+    {
+      "frame": 218,
+      "time": 3.6166666666666667,
+      "image": "frame-0218.jpg",
+      "meanPixelChange": 0.3523
+    },
+    {
+      "frame": 219,
+      "time": 3.6333333333333333,
+      "image": "frame-0219.jpg",
+      "meanPixelChange": 0.3381
+    },
+    {
+      "frame": 220,
+      "time": 3.65,
+      "image": "frame-0220.jpg",
+      "meanPixelChange": 0.3349
+    },
+    {
+      "frame": 221,
+      "time": 3.6666666666666665,
+      "image": "frame-0221.jpg",
+      "meanPixelChange": 0.3384
+    },
+    {
+      "frame": 222,
+      "time": 3.683333333333333,
+      "image": "frame-0222.jpg",
+      "meanPixelChange": 0.3455
+    },
+    {
+      "frame": 223,
+      "time": 3.7,
+      "image": "frame-0223.jpg",
+      "meanPixelChange": 0.3166
+    },
+    {
+      "frame": 224,
+      "time": 3.716666666666667,
+      "image": "frame-0224.jpg",
+      "meanPixelChange": 0.3329
+    },
+    {
+      "frame": 225,
+      "time": 3.7333333333333334,
+      "image": "frame-0225.jpg",
+      "meanPixelChange": 0.3318
+    },
+    {
+      "frame": 226,
+      "time": 3.75,
+      "image": "frame-0226.jpg",
+      "meanPixelChange": 0.3297
+    },
+    {
+      "frame": 227,
+      "time": 3.7666666666666666,
+      "image": "frame-0227.jpg",
+      "meanPixelChange": 0.309
+    },
+    {
+      "frame": 228,
+      "time": 3.783333333333333,
+      "image": "frame-0228.jpg",
+      "meanPixelChange": 0.2976
+    },
+    {
+      "frame": 229,
+      "time": 3.8,
+      "image": "frame-0229.jpg",
+      "meanPixelChange": 0.309
+    },
+    {
+      "frame": 230,
+      "time": 3.816666666666667,
+      "image": "frame-0230.jpg",
+      "meanPixelChange": 0.3147
+    },
+    {
+      "frame": 231,
+      "time": 3.8333333333333335,
+      "image": "frame-0231.jpg",
+      "meanPixelChange": 0.3034
+    },
+    {
+      "frame": 232,
+      "time": 3.85,
+      "image": "frame-0232.jpg",
+      "meanPixelChange": 0.3016
+    },
+    {
+      "frame": 233,
+      "time": 3.8666666666666667,
+      "image": "frame-0233.jpg",
+      "meanPixelChange": 0.2789
+    },
+    {
+      "frame": 234,
+      "time": 3.8833333333333333,
+      "image": "frame-0234.jpg",
+      "meanPixelChange": 0.2866
+    },
+    {
+      "frame": 235,
+      "time": 3.9,
+      "image": "frame-0235.jpg",
+      "meanPixelChange": 0.2833
+    },
+    {
+      "frame": 236,
+      "time": 3.9166666666666665,
+      "image": "frame-0236.jpg",
+      "meanPixelChange": 0.2719
+    },
+    {
+      "frame": 237,
+      "time": 3.933333333333333,
+      "image": "frame-0237.jpg",
+      "meanPixelChange": 0.2705
+    },
+    {
+      "frame": 238,
+      "time": 3.95,
+      "image": "frame-0238.jpg",
+      "meanPixelChange": 0.2834
+    },
+    {
+      "frame": 239,
+      "time": 3.966666666666667,
+      "image": "frame-0239.jpg",
+      "meanPixelChange": 0.2671
+    },
+    {
+      "frame": 240,
+      "time": 3.9833333333333334,
+      "image": "frame-0240.jpg",
+      "meanPixelChange": 0.2628
+    },
+    {
+      "frame": 241,
+      "time": 4.0,
+      "image": "frame-0241.jpg",
+      "meanPixelChange": 0.3409
+    },
+    {
+      "frame": 242,
+      "time": 4.016666666666667,
+      "image": "frame-0242.jpg",
+      "meanPixelChange": 0.2283
+    },
+    {
+      "frame": 243,
+      "time": 4.033333333333333,
+      "image": "frame-0243.jpg",
+      "meanPixelChange": 0.258
+    },
+    {
+      "frame": 244,
+      "time": 4.05,
+      "image": "frame-0244.jpg",
+      "meanPixelChange": 0.252
+    },
+    {
+      "frame": 245,
+      "time": 4.066666666666666,
+      "image": "frame-0245.jpg",
+      "meanPixelChange": 0.2531
+    },
+    {
+      "frame": 246,
+      "time": 4.083333333333333,
+      "image": "frame-0246.jpg",
+      "meanPixelChange": 0.2653
+    },
+    {
+      "frame": 247,
+      "time": 4.1,
+      "image": "frame-0247.jpg",
+      "meanPixelChange": 0.2426
+    },
+    {
+      "frame": 248,
+      "time": 4.116666666666666,
+      "image": "frame-0248.jpg",
+      "meanPixelChange": 0.2542
+    },
+    {
+      "frame": 249,
+      "time": 4.133333333333334,
+      "image": "frame-0249.jpg",
+      "meanPixelChange": 0.2536
+    },
+    {
+      "frame": 250,
+      "time": 4.15,
+      "image": "frame-0250.jpg",
+      "meanPixelChange": 0.2756
+    },
+    {
+      "frame": 251,
+      "time": 4.166666666666667,
+      "image": "frame-0251.jpg",
+      "meanPixelChange": 0.2813
+    },
+    {
+      "frame": 252,
+      "time": 4.183333333333334,
+      "image": "frame-0252.jpg",
+      "meanPixelChange": 0.2712
+    },
+    {
+      "frame": 253,
+      "time": 4.2,
+      "image": "frame-0253.jpg",
+      "meanPixelChange": 0.2597
+    },
+    {
+      "frame": 254,
+      "time": 4.216666666666667,
+      "image": "frame-0254.jpg",
+      "meanPixelChange": 0.2695
+    },
+    {
+      "frame": 255,
+      "time": 4.233333333333333,
+      "image": "frame-0255.jpg",
+      "meanPixelChange": 0.287
+    },
+    {
+      "frame": 256,
+      "time": 4.25,
+      "image": "frame-0256.jpg",
+      "meanPixelChange": 0.256
+    },
+    {
+      "frame": 257,
+      "time": 4.266666666666667,
+      "image": "frame-0257.jpg",
+      "meanPixelChange": 0.2407
+    },
+    {
+      "frame": 258,
+      "time": 4.283333333333333,
+      "image": "frame-0258.jpg",
+      "meanPixelChange": 0.2719
+    },
+    {
+      "frame": 259,
+      "time": 4.3,
+      "image": "frame-0259.jpg",
+      "meanPixelChange": 0.2662
+    },
+    {
+      "frame": 260,
+      "time": 4.316666666666666,
+      "image": "frame-0260.jpg",
+      "meanPixelChange": 0.2587
+    },
+    {
+      "frame": 261,
+      "time": 4.333333333333333,
+      "image": "frame-0261.jpg",
+      "meanPixelChange": 0.2513
+    },
+    {
+      "frame": 262,
+      "time": 4.35,
+      "image": "frame-0262.jpg",
+      "meanPixelChange": 0.2688
+    },
+    {
+      "frame": 263,
+      "time": 4.366666666666666,
+      "image": "frame-0263.jpg",
+      "meanPixelChange": 0.2404
+    },
+    {
+      "frame": 264,
+      "time": 4.383333333333334,
+      "image": "frame-0264.jpg",
+      "meanPixelChange": 0.2376
+    },
+    {
+      "frame": 265,
+      "time": 4.4,
+      "image": "frame-0265.jpg",
+      "meanPixelChange": 0.235
+    },
+    {
+      "frame": 266,
+      "time": 4.416666666666667,
+      "image": "frame-0266.jpg",
+      "meanPixelChange": 0.254
+    },
+    {
+      "frame": 267,
+      "time": 4.433333333333334,
+      "image": "frame-0267.jpg",
+      "meanPixelChange": 0.2362
+    },
+    {
+      "frame": 268,
+      "time": 4.45,
+      "image": "frame-0268.jpg",
+      "meanPixelChange": 0.2271
+    },
+    {
+      "frame": 269,
+      "time": 4.466666666666667,
+      "image": "frame-0269.jpg",
+      "meanPixelChange": 0.2152
+    },
+    {
+      "frame": 270,
+      "time": 4.483333333333333,
+      "image": "frame-0270.jpg",
+      "meanPixelChange": 0.2446
+    },
+    {
+      "frame": 271,
+      "time": 4.5,
+      "image": "frame-0271.jpg",
+      "meanPixelChange": 0.2202
+    },
+    {
+      "frame": 272,
+      "time": 4.516666666666667,
+      "image": "frame-0272.jpg",
+      "meanPixelChange": 0.215
+    },
+    {
+      "frame": 273,
+      "time": 4.533333333333333,
+      "image": "frame-0273.jpg",
+      "meanPixelChange": 0.2135
+    },
+    {
+      "frame": 274,
+      "time": 4.55,
+      "image": "frame-0274.jpg",
+      "meanPixelChange": 0.2304
+    },
+    {
+      "frame": 275,
+      "time": 4.566666666666666,
+      "image": "frame-0275.jpg",
+      "meanPixelChange": 0.1994
+    },
+    {
+      "frame": 276,
+      "time": 4.583333333333333,
+      "image": "frame-0276.jpg",
+      "meanPixelChange": 0.2025
+    },
+    {
+      "frame": 277,
+      "time": 4.6,
+      "image": "frame-0277.jpg",
+      "meanPixelChange": 0.2071
+    },
+    {
+      "frame": 278,
+      "time": 4.616666666666666,
+      "image": "frame-0278.jpg",
+      "meanPixelChange": 0.2162
+    },
+    {
+      "frame": 279,
+      "time": 4.633333333333334,
+      "image": "frame-0279.jpg",
+      "meanPixelChange": 0.1905
+    },
+    {
+      "frame": 280,
+      "time": 4.65,
+      "image": "frame-0280.jpg",
+      "meanPixelChange": 0.1951
+    },
+    {
+      "frame": 281,
+      "time": 4.666666666666667,
+      "image": "frame-0281.jpg",
+      "meanPixelChange": 0.1916
+    },
+    {
+      "frame": 282,
+      "time": 4.683333333333334,
+      "image": "frame-0282.jpg",
+      "meanPixelChange": 0.1986
+    },
+    {
+      "frame": 283,
+      "time": 4.7,
+      "image": "frame-0283.jpg",
+      "meanPixelChange": 0.1688
+    },
+    {
+      "frame": 284,
+      "time": 4.716666666666667,
+      "image": "frame-0284.jpg",
+      "meanPixelChange": 0.1661
+    },
+    {
+      "frame": 285,
+      "time": 4.733333333333333,
+      "image": "frame-0285.jpg",
+      "meanPixelChange": 0.1833
+    },
+    {
+      "frame": 286,
+      "time": 4.75,
+      "image": "frame-0286.jpg",
+      "meanPixelChange": 0.185
+    },
+    {
+      "frame": 287,
+      "time": 4.766666666666667,
+      "image": "frame-0287.jpg",
+      "meanPixelChange": 0.1459
+    },
+    {
+      "frame": 288,
+      "time": 4.783333333333333,
+      "image": "frame-0288.jpg",
+      "meanPixelChange": 0.142
+    },
+    {
+      "frame": 289,
+      "time": 4.8,
+      "image": "frame-0289.jpg",
+      "meanPixelChange": 0.1763
+    },
+    {
+      "frame": 290,
+      "time": 4.816666666666666,
+      "image": "frame-0290.jpg",
+      "meanPixelChange": 0.1566
+    },
+    {
+      "frame": 291,
+      "time": 4.833333333333333,
+      "image": "frame-0291.jpg",
+      "meanPixelChange": 0.1111
+    },
+    {
+      "frame": 292,
+      "time": 4.85,
+      "image": "frame-0292.jpg",
+      "meanPixelChange": 0.1162
+    },
+    {
+      "frame": 293,
+      "time": 4.866666666666666,
+      "image": "frame-0293.jpg",
+      "meanPixelChange": 0.1579
+    },
+    {
+      "frame": 294,
+      "time": 4.883333333333334,
+      "image": "frame-0294.jpg",
+      "meanPixelChange": 0.1411
+    },
+    {
+      "frame": 295,
+      "time": 4.9,
+      "image": "frame-0295.jpg",
+      "meanPixelChange": 0.0805
+    },
+    {
+      "frame": 296,
+      "time": 4.916666666666667,
+      "image": "frame-0296.jpg",
+      "meanPixelChange": 0.0937
+    },
+    {
+      "frame": 297,
+      "time": 4.933333333333334,
+      "image": "frame-0297.jpg",
+      "meanPixelChange": 0.1387
+    },
+    {
+      "frame": 298,
+      "time": 4.95,
+      "image": "frame-0298.jpg",
+      "meanPixelChange": 0.0924
+    },
+    {
+      "frame": 299,
+      "time": 4.966666666666667,
+      "image": "frame-0299.jpg",
+      "meanPixelChange": 0.0492
+    },
+    {
+      "frame": 300,
+      "time": 4.983333333333333,
+      "image": "frame-0300.jpg",
+      "meanPixelChange": 0.1163
+    },
+    {
+      "frame": 301,
+      "time": 5.0,
+      "image": "frame-0301.jpg",
+      "meanPixelChange": 0.1902
+    },
+    {
+      "frame": 302,
+      "time": 5.016666666666667,
+      "image": "frame-0302.jpg",
+      "meanPixelChange": 0.0533
+    },
+    {
+      "frame": 303,
+      "time": 5.033333333333333,
+      "image": "frame-0303.jpg",
+      "meanPixelChange": 0.0271
+    },
+    {
+      "frame": 304,
+      "time": 5.05,
+      "image": "frame-0304.jpg",
+      "meanPixelChange": 0.0409
+    },
+    {
+      "frame": 305,
+      "time": 5.066666666666666,
+      "image": "frame-0305.jpg",
+      "meanPixelChange": 0.0849
+    },
+    {
+      "frame": 306,
+      "time": 5.083333333333333,
+      "image": "frame-0306.jpg",
+      "meanPixelChange": 0.1301
+    },
+    {
+      "frame": 307,
+      "time": 5.1,
+      "image": "frame-0307.jpg",
+      "meanPixelChange": 0.0791
+    },
+    {
+      "frame": 308,
+      "time": 5.116666666666666,
+      "image": "frame-0308.jpg",
+      "meanPixelChange": 0.0809
+    },
+    {
+      "frame": 309,
+      "time": 5.133333333333334,
+      "image": "frame-0309.jpg",
+      "meanPixelChange": 0.1254
+    },
+    {
+      "frame": 310,
+      "time": 5.15,
+      "image": "frame-0310.jpg",
+      "meanPixelChange": 0.1166
+    },
+    {
+      "frame": 311,
+      "time": 5.166666666666667,
+      "image": "frame-0311.jpg",
+      "meanPixelChange": 0.1172
+    },
+    {
+      "frame": 312,
+      "time": 5.183333333333334,
+      "image": "frame-0312.jpg",
+      "meanPixelChange": 0.1184
+    },
+    {
+      "frame": 313,
+      "time": 5.2,
+      "image": "frame-0313.jpg",
+      "meanPixelChange": 0.1614
+    },
+    {
+      "frame": 314,
+      "time": 5.216666666666667,
+      "image": "frame-0314.jpg",
+      "meanPixelChange": 0.1618
+    },
+    {
+      "frame": 315,
+      "time": 5.233333333333333,
+      "image": "frame-0315.jpg",
+      "meanPixelChange": 0.1296
+    },
+    {
+      "frame": 316,
+      "time": 5.25,
+      "image": "frame-0316.jpg",
+      "meanPixelChange": 0.1364
+    },
+    {
+      "frame": 317,
+      "time": 5.266666666666667,
+      "image": "frame-0317.jpg",
+      "meanPixelChange": 0.1536
+    },
+    {
+      "frame": 318,
+      "time": 5.283333333333333,
+      "image": "frame-0318.jpg",
+      "meanPixelChange": 0.1511
+    },
+    {
+      "frame": 319,
+      "time": 5.3,
+      "image": "frame-0319.jpg",
+      "meanPixelChange": 0.1342
+    },
+    {
+      "frame": 320,
+      "time": 5.316666666666666,
+      "image": "frame-0320.jpg",
+      "meanPixelChange": 0.1366
+    },
+    {
+      "frame": 321,
+      "time": 5.333333333333333,
+      "image": "frame-0321.jpg",
+      "meanPixelChange": 0.1607
+    },
+    {
+      "frame": 322,
+      "time": 5.35,
+      "image": "frame-0322.jpg",
+      "meanPixelChange": 0.1701
+    },
+    {
+      "frame": 323,
+      "time": 5.366666666666666,
+      "image": "frame-0323.jpg",
+      "meanPixelChange": 0.1442
+    },
+    {
+      "frame": 324,
+      "time": 5.383333333333334,
+      "image": "frame-0324.jpg",
+      "meanPixelChange": 0.1383
+    },
+    {
+      "frame": 325,
+      "time": 5.4,
+      "image": "frame-0325.jpg",
+      "meanPixelChange": 0.1751
+    },
+    {
+      "frame": 326,
+      "time": 5.416666666666667,
+      "image": "frame-0326.jpg",
+      "meanPixelChange": 0.1856
+    },
+    {
+      "frame": 327,
+      "time": 5.433333333333334,
+      "image": "frame-0327.jpg",
+      "meanPixelChange": 0.1676
+    },
+    {
+      "frame": 328,
+      "time": 5.45,
+      "image": "frame-0328.jpg",
+      "meanPixelChange": 0.1592
+    },
+    {
+      "frame": 329,
+      "time": 5.466666666666667,
+      "image": "frame-0329.jpg",
+      "meanPixelChange": 0.175
+    },
+    {
+      "frame": 330,
+      "time": 5.483333333333333,
+      "image": "frame-0330.jpg",
+      "meanPixelChange": 0.2128
+    },
+    {
+      "frame": 331,
+      "time": 5.5,
+      "image": "frame-0331.jpg",
+      "meanPixelChange": 0.2086
+    },
+    {
+      "frame": 332,
+      "time": 5.516666666666667,
+      "image": "frame-0332.jpg",
+      "meanPixelChange": 0.2022
+    },
+    {
+      "frame": 333,
+      "time": 5.533333333333333,
+      "image": "frame-0333.jpg",
+      "meanPixelChange": 0.2455
+    },
+    {
+      "frame": 334,
+      "time": 5.55,
+      "image": "frame-0334.jpg",
+      "meanPixelChange": 0.278
+    },
+    {
+      "frame": 335,
+      "time": 5.566666666666666,
+      "image": "frame-0335.jpg",
+      "meanPixelChange": 0.3052
+    },
+    {
+      "frame": 336,
+      "time": 5.583333333333333,
+      "image": "frame-0336.jpg",
+      "meanPixelChange": 0.3088
+    },
+    {
+      "frame": 337,
+      "time": 5.6,
+      "image": "frame-0337.jpg",
+      "meanPixelChange": 0.5698
+    },
+    {
+      "frame": 338,
+      "time": 5.616666666666666,
+      "image": "frame-0338.jpg",
+      "meanPixelChange": 0.9699
+    },
+    {
+      "frame": 339,
+      "time": 5.633333333333334,
+      "image": "frame-0339.jpg",
+      "meanPixelChange": 1.1407
+    },
+    {
+      "frame": 340,
+      "time": 5.65,
+      "image": "frame-0340.jpg",
+      "meanPixelChange": 1.1274
+    },
+    {
+      "frame": 341,
+      "time": 5.666666666666667,
+      "image": "frame-0341.jpg",
+      "meanPixelChange": 1.1379
+    },
+    {
+      "frame": 342,
+      "time": 5.683333333333334,
+      "image": "frame-0342.jpg",
+      "meanPixelChange": 1.3504
+    },
+    {
+      "frame": 343,
+      "time": 5.7,
+      "image": "frame-0343.jpg",
+      "meanPixelChange": 1.5577
+    },
+    {
+      "frame": 344,
+      "time": 5.716666666666667,
+      "image": "frame-0344.jpg",
+      "meanPixelChange": 1.7454
+    },
+    {
+      "frame": 345,
+      "time": 5.733333333333333,
+      "image": "frame-0345.jpg",
+      "meanPixelChange": 1.8518
+    },
+    {
+      "frame": 346,
+      "time": 5.75,
+      "image": "frame-0346.jpg",
+      "meanPixelChange": 1.9263
+    },
+    {
+      "frame": 347,
+      "time": 5.766666666666667,
+      "image": "frame-0347.jpg",
+      "meanPixelChange": 2.0412
+    },
+    {
+      "frame": 348,
+      "time": 5.783333333333333,
+      "image": "frame-0348.jpg",
+      "meanPixelChange": 2.0273
+    },
+    {
+      "frame": 349,
+      "time": 5.8,
+      "image": "frame-0349.jpg",
+      "meanPixelChange": 2.0312
+    },
+    {
+      "frame": 350,
+      "time": 5.816666666666666,
+      "image": "frame-0350.jpg",
+      "meanPixelChange": 1.9945
+    },
+    {
+      "frame": 351,
+      "time": 5.833333333333333,
+      "image": "frame-0351.jpg",
+      "meanPixelChange": 1.946
+    },
+    {
+      "frame": 352,
+      "time": 5.85,
+      "image": "frame-0352.jpg",
+      "meanPixelChange": 1.9984
+    },
+    {
+      "frame": 353,
+      "time": 5.866666666666666,
+      "image": "frame-0353.jpg",
+      "meanPixelChange": 1.9588
+    },
+    {
+      "frame": 354,
+      "time": 5.883333333333334,
+      "image": "frame-0354.jpg",
+      "meanPixelChange": 2.2066
+    },
+    {
+      "frame": 355,
+      "time": 5.9,
+      "image": "frame-0355.jpg",
+      "meanPixelChange": 2.3537
+    },
+    {
+      "frame": 356,
+      "time": 5.916666666666667,
+      "image": "frame-0356.jpg",
+      "meanPixelChange": 2.5642
+    },
+    {
+      "frame": 357,
+      "time": 5.933333333333334,
+      "image": "frame-0357.jpg",
+      "meanPixelChange": 2.2533
+    },
+    {
+      "frame": 358,
+      "time": 5.95,
+      "image": "frame-0358.jpg",
+      "meanPixelChange": 2.0619
+    },
+    {
+      "frame": 359,
+      "time": 5.966666666666667,
+      "image": "frame-0359.jpg",
+      "meanPixelChange": 1.9131
+    },
+    {
+      "frame": 360,
+      "time": 5.983333333333333,
+      "image": "frame-0360.jpg",
+      "meanPixelChange": 1.8075
+    },
+    {
+      "frame": 361,
+      "time": 6.0,
+      "image": "frame-0361.jpg",
+      "meanPixelChange": 1.7771
+    },
+    {
+      "frame": 362,
+      "time": 6.016666666666667,
+      "image": "frame-0362.jpg",
+      "meanPixelChange": 1.6642
+    },
+    {
+      "frame": 363,
+      "time": 6.033333333333333,
+      "image": "frame-0363.jpg",
+      "meanPixelChange": 1.6659
+    },
+    {
+      "frame": 364,
+      "time": 6.05,
+      "image": "frame-0364.jpg",
+      "meanPixelChange": 1.7115
+    },
+    {
+      "frame": 365,
+      "time": 6.066666666666666,
+      "image": "frame-0365.jpg",
+      "meanPixelChange": 1.6541
+    },
+    {
+      "frame": 366,
+      "time": 6.083333333333333,
+      "image": "frame-0366.jpg",
+      "meanPixelChange": 1.5762
+    },
+    {
+      "frame": 367,
+      "time": 6.1,
+      "image": "frame-0367.jpg",
+      "meanPixelChange": 1.6158
+    },
+    {
+      "frame": 368,
+      "time": 6.116666666666666,
+      "image": "frame-0368.jpg",
+      "meanPixelChange": 1.5187
+    },
+    {
+      "frame": 369,
+      "time": 6.133333333333334,
+      "image": "frame-0369.jpg",
+      "meanPixelChange": 1.5938
+    },
+    {
+      "frame": 370,
+      "time": 6.15,
+      "image": "frame-0370.jpg",
+      "meanPixelChange": 1.4898
+    },
+    {
+      "frame": 371,
+      "time": 6.166666666666667,
+      "image": "frame-0371.jpg",
+      "meanPixelChange": 1.5036
+    },
+    {
+      "frame": 372,
+      "time": 6.183333333333334,
+      "image": "frame-0372.jpg",
+      "meanPixelChange": 1.4731
+    },
+    {
+      "frame": 373,
+      "time": 6.2,
+      "image": "frame-0373.jpg",
+      "meanPixelChange": 1.4754
+    },
+    {
+      "frame": 374,
+      "time": 6.216666666666667,
+      "image": "frame-0374.jpg",
+      "meanPixelChange": 1.415
+    },
+    {
+      "frame": 375,
+      "time": 6.233333333333333,
+      "image": "frame-0375.jpg",
+      "meanPixelChange": 1.3647
+    },
+    {
+      "frame": 376,
+      "time": 6.25,
+      "image": "frame-0376.jpg",
+      "meanPixelChange": 1.3313
+    },
+    {
+      "frame": 377,
+      "time": 6.266666666666667,
+      "image": "frame-0377.jpg",
+      "meanPixelChange": 1.2491
+    },
+    {
+      "frame": 378,
+      "time": 6.283333333333333,
+      "image": "frame-0378.jpg",
+      "meanPixelChange": 1.1424
+    },
+    {
+      "frame": 379,
+      "time": 6.3,
+      "image": "frame-0379.jpg",
+      "meanPixelChange": 1.1332
+    },
+    {
+      "frame": 380,
+      "time": 6.316666666666666,
+      "image": "frame-0380.jpg",
+      "meanPixelChange": 1.0606
+    },
+    {
+      "frame": 381,
+      "time": 6.333333333333333,
+      "image": "frame-0381.jpg",
+      "meanPixelChange": 1.0291
+    },
+    {
+      "frame": 382,
+      "time": 6.35,
+      "image": "frame-0382.jpg",
+      "meanPixelChange": 0.9986
+    },
+    {
+      "frame": 383,
+      "time": 6.366666666666666,
+      "image": "frame-0383.jpg",
+      "meanPixelChange": 0.9576
+    },
+    {
+      "frame": 384,
+      "time": 6.383333333333334,
+      "image": "frame-0384.jpg",
+      "meanPixelChange": 0.897
+    },
+    {
+      "frame": 385,
+      "time": 6.4,
+      "image": "frame-0385.jpg",
+      "meanPixelChange": 0.8743
+    },
+    {
+      "frame": 386,
+      "time": 6.416666666666667,
+      "image": "frame-0386.jpg",
+      "meanPixelChange": 0.8585
+    },
+    {
+      "frame": 387,
+      "time": 6.433333333333334,
+      "image": "frame-0387.jpg",
+      "meanPixelChange": 0.8192
+    },
+    {
+      "frame": 388,
+      "time": 6.45,
+      "image": "frame-0388.jpg",
+      "meanPixelChange": 0.7759
+    },
+    {
+      "frame": 389,
+      "time": 6.466666666666667,
+      "image": "frame-0389.jpg",
+      "meanPixelChange": 0.8049
+    },
+    {
+      "frame": 390,
+      "time": 6.483333333333333,
+      "image": "frame-0390.jpg",
+      "meanPixelChange": 0.7419
+    },
+    {
+      "frame": 391,
+      "time": 6.5,
+      "image": "frame-0391.jpg",
+      "meanPixelChange": 0.6992
+    },
+    {
+      "frame": 392,
+      "time": 6.516666666666667,
+      "image": "frame-0392.jpg",
+      "meanPixelChange": 0.7204
+    },
+    {
+      "frame": 393,
+      "time": 6.533333333333333,
+      "image": "frame-0393.jpg",
+      "meanPixelChange": 0.7248
+    },
+    {
+      "frame": 394,
+      "time": 6.55,
+      "image": "frame-0394.jpg",
+      "meanPixelChange": 0.6721
+    },
+    {
+      "frame": 395,
+      "time": 6.566666666666666,
+      "image": "frame-0395.jpg",
+      "meanPixelChange": 0.6641
+    },
+    {
+      "frame": 396,
+      "time": 6.583333333333333,
+      "image": "frame-0396.jpg",
+      "meanPixelChange": 0.6379
+    },
+    {
+      "frame": 397,
+      "time": 6.6,
+      "image": "frame-0397.jpg",
+      "meanPixelChange": 0.6799
+    },
+    {
+      "frame": 398,
+      "time": 6.616666666666666,
+      "image": "frame-0398.jpg",
+      "meanPixelChange": 0.618
+    },
+    {
+      "frame": 399,
+      "time": 6.633333333333334,
+      "image": "frame-0399.jpg",
+      "meanPixelChange": 0.5879
+    },
+    {
+      "frame": 400,
+      "time": 6.65,
+      "image": "frame-0400.jpg",
+      "meanPixelChange": 0.5847
+    },
+    {
+      "frame": 401,
+      "time": 6.666666666666667,
+      "image": "frame-0401.jpg",
+      "meanPixelChange": 0.6
+    },
+    {
+      "frame": 402,
+      "time": 6.683333333333334,
+      "image": "frame-0402.jpg",
+      "meanPixelChange": 0.5651
+    },
+    {
+      "frame": 403,
+      "time": 6.7,
+      "image": "frame-0403.jpg",
+      "meanPixelChange": 0.5588
+    },
+    {
+      "frame": 404,
+      "time": 6.716666666666667,
+      "image": "frame-0404.jpg",
+      "meanPixelChange": 0.5371
+    },
+    {
+      "frame": 405,
+      "time": 6.733333333333333,
+      "image": "frame-0405.jpg",
+      "meanPixelChange": 0.5478
+    },
+    {
+      "frame": 406,
+      "time": 6.75,
+      "image": "frame-0406.jpg",
+      "meanPixelChange": 0.5337
+    },
+    {
+      "frame": 407,
+      "time": 6.766666666666667,
+      "image": "frame-0407.jpg",
+      "meanPixelChange": 0.5197
+    },
+    {
+      "frame": 408,
+      "time": 6.783333333333333,
+      "image": "frame-0408.jpg",
+      "meanPixelChange": 0.5176
+    },
+    {
+      "frame": 409,
+      "time": 6.8,
+      "image": "frame-0409.jpg",
+      "meanPixelChange": 0.4985
+    },
+    {
+      "frame": 410,
+      "time": 6.816666666666666,
+      "image": "frame-0410.jpg",
+      "meanPixelChange": 0.4614
+    },
+    {
+      "frame": 411,
+      "time": 6.833333333333333,
+      "image": "frame-0411.jpg",
+      "meanPixelChange": 0.4878
+    },
+    {
+      "frame": 412,
+      "time": 6.85,
+      "image": "frame-0412.jpg",
+      "meanPixelChange": 0.4775
+    },
+    {
+      "frame": 413,
+      "time": 6.866666666666666,
+      "image": "frame-0413.jpg",
+      "meanPixelChange": 0.4714
+    },
+    {
+      "frame": 414,
+      "time": 6.883333333333334,
+      "image": "frame-0414.jpg",
+      "meanPixelChange": 0.479
+    },
+    {
+      "frame": 415,
+      "time": 6.9,
+      "image": "frame-0415.jpg",
+      "meanPixelChange": 0.4585
+    },
+    {
+      "frame": 416,
+      "time": 6.916666666666667,
+      "image": "frame-0416.jpg",
+      "meanPixelChange": 0.4545
+    },
+    {
+      "frame": 417,
+      "time": 6.933333333333334,
+      "image": "frame-0417.jpg",
+      "meanPixelChange": 0.4331
+    },
+    {
+      "frame": 418,
+      "time": 6.95,
+      "image": "frame-0418.jpg",
+      "meanPixelChange": 0.4105
+    },
+    {
+      "frame": 419,
+      "time": 6.966666666666667,
+      "image": "frame-0419.jpg",
+      "meanPixelChange": 0.3876
+    },
+    {
+      "frame": 420,
+      "time": 6.983333333333333,
+      "image": "frame-0420.jpg",
+      "meanPixelChange": 0.4079
+    },
+    {
+      "frame": 421,
+      "time": 7.0,
+      "image": "frame-0421.jpg",
+      "meanPixelChange": 0.4685
+    },
+    {
+      "frame": 422,
+      "time": 7.016666666666667,
+      "image": "frame-0422.jpg",
+      "meanPixelChange": 0.338
+    },
+    {
+      "frame": 423,
+      "time": 7.033333333333333,
+      "image": "frame-0423.jpg",
+      "meanPixelChange": 0.3727
+    },
+    {
+      "frame": 424,
+      "time": 7.05,
+      "image": "frame-0424.jpg",
+      "meanPixelChange": 0.3642
+    },
+    {
+      "frame": 425,
+      "time": 7.066666666666666,
+      "image": "frame-0425.jpg",
+      "meanPixelChange": 0.365
+    },
+    {
+      "frame": 426,
+      "time": 7.083333333333333,
+      "image": "frame-0426.jpg",
+      "meanPixelChange": 0.3476
+    },
+    {
+      "frame": 427,
+      "time": 7.1,
+      "image": "frame-0427.jpg",
+      "meanPixelChange": 0.3302
+    },
+    {
+      "frame": 428,
+      "time": 7.116666666666666,
+      "image": "frame-0428.jpg",
+      "meanPixelChange": 0.3166
+    },
+    {
+      "frame": 429,
+      "time": 7.133333333333334,
+      "image": "frame-0429.jpg",
+      "meanPixelChange": 0.3318
+    },
+    {
+      "frame": 430,
+      "time": 7.15,
+      "image": "frame-0430.jpg",
+      "meanPixelChange": 0.3412
+    },
+    {
+      "frame": 431,
+      "time": 7.166666666666667,
+      "image": "frame-0431.jpg",
+      "meanPixelChange": 0.2973
+    },
+    {
+      "frame": 432,
+      "time": 7.183333333333334,
+      "image": "frame-0432.jpg",
+      "meanPixelChange": 0.2994
+    },
+    {
+      "frame": 433,
+      "time": 7.2,
+      "image": "frame-0433.jpg",
+      "meanPixelChange": 0.3143
+    },
+    {
+      "frame": 434,
+      "time": 7.216666666666667,
+      "image": "frame-0434.jpg",
+      "meanPixelChange": 0.314
+    },
+    {
+      "frame": 435,
+      "time": 7.233333333333333,
+      "image": "frame-0435.jpg",
+      "meanPixelChange": 0.2756
+    },
+    {
+      "frame": 436,
+      "time": 7.25,
+      "image": "frame-0436.jpg",
+      "meanPixelChange": 0.2854
+    },
+    {
+      "frame": 437,
+      "time": 7.266666666666667,
+      "image": "frame-0437.jpg",
+      "meanPixelChange": 0.2972
+    },
+    {
+      "frame": 438,
+      "time": 7.283333333333333,
+      "image": "frame-0438.jpg",
+      "meanPixelChange": 0.2927
+    },
+    {
+      "frame": 439,
+      "time": 7.3,
+      "image": "frame-0439.jpg",
+      "meanPixelChange": 0.2454
+    },
+    {
+      "frame": 440,
+      "time": 7.316666666666666,
+      "image": "frame-0440.jpg",
+      "meanPixelChange": 0.2672
+    },
+    {
+      "frame": 441,
+      "time": 7.333333333333333,
+      "image": "frame-0441.jpg",
+      "meanPixelChange": 0.2755
+    },
+    {
+      "frame": 442,
+      "time": 7.35,
+      "image": "frame-0442.jpg",
+      "meanPixelChange": 0.2627
+    },
+    {
+      "frame": 443,
+      "time": 7.366666666666666,
+      "image": "frame-0443.jpg",
+      "meanPixelChange": 0.2228
+    },
+    {
+      "frame": 444,
+      "time": 7.383333333333334,
+      "image": "frame-0444.jpg",
+      "meanPixelChange": 0.219
+    },
+    {
+      "frame": 445,
+      "time": 7.4,
+      "image": "frame-0445.jpg",
+      "meanPixelChange": 0.2455
+    },
+    {
+      "frame": 446,
+      "time": 7.416666666666667,
+      "image": "frame-0446.jpg",
+      "meanPixelChange": 0.2543
+    },
+    {
+      "frame": 447,
+      "time": 7.433333333333334,
+      "image": "frame-0447.jpg",
+      "meanPixelChange": 0.1782
+    },
+    {
+      "frame": 448,
+      "time": 7.45,
+      "image": "frame-0448.jpg",
+      "meanPixelChange": 0.2042
+    },
+    {
+      "frame": 449,
+      "time": 7.466666666666667,
+      "image": "frame-0449.jpg",
+      "meanPixelChange": 0.225
+    },
+    {
+      "frame": 450,
+      "time": 7.483333333333333,
+      "image": "frame-0450.jpg",
+      "meanPixelChange": 0.1939
+    },
+    {
+      "frame": 451,
+      "time": 7.5,
+      "image": "frame-0451.jpg",
+      "meanPixelChange": 0.146
+    },
+    {
+      "frame": 452,
+      "time": 7.516666666666667,
+      "image": "frame-0452.jpg",
+      "meanPixelChange": 0.1637
+    },
+    {
+      "frame": 453,
+      "time": 7.533333333333333,
+      "image": "frame-0453.jpg",
+      "meanPixelChange": 0.178
+    },
+    {
+      "frame": 454,
+      "time": 7.55,
+      "image": "frame-0454.jpg",
+      "meanPixelChange": 0.168
+    },
+    {
+      "frame": 455,
+      "time": 7.566666666666666,
+      "image": "frame-0455.jpg",
+      "meanPixelChange": 0.1232
+    },
+    {
+      "frame": 456,
+      "time": 7.583333333333333,
+      "image": "frame-0456.jpg",
+      "meanPixelChange": 0.1211
+    },
+    {
+      "frame": 457,
+      "time": 7.6,
+      "image": "frame-0457.jpg",
+      "meanPixelChange": 0.15
+    },
+    {
+      "frame": 458,
+      "time": 7.616666666666666,
+      "image": "frame-0458.jpg",
+      "meanPixelChange": 0.1698
+    },
+    {
+      "frame": 459,
+      "time": 7.633333333333334,
+      "image": "frame-0459.jpg",
+      "meanPixelChange": 0.095
+    },
+    {
+      "frame": 460,
+      "time": 7.65,
+      "image": "frame-0460.jpg",
+      "meanPixelChange": 0.1226
+    },
+    {
+      "frame": 461,
+      "time": 7.666666666666667,
+      "image": "frame-0461.jpg",
+      "meanPixelChange": 0.1546
+    },
+    {
+      "frame": 462,
+      "time": 7.683333333333334,
+      "image": "frame-0462.jpg",
+      "meanPixelChange": 0.1488
+    },
+    {
+      "frame": 463,
+      "time": 7.7,
+      "image": "frame-0463.jpg",
+      "meanPixelChange": 0.0764
+    },
+    {
+      "frame": 464,
+      "time": 7.716666666666667,
+      "image": "frame-0464.jpg",
+      "meanPixelChange": 0.091
+    },
+    {
+      "frame": 465,
+      "time": 7.733333333333333,
+      "image": "frame-0465.jpg",
+      "meanPixelChange": 0.1256
+    },
+    {
+      "frame": 466,
+      "time": 7.75,
+      "image": "frame-0466.jpg",
+      "meanPixelChange": 0.1212
+    },
+    {
+      "frame": 467,
+      "time": 7.766666666666667,
+      "image": "frame-0467.jpg",
+      "meanPixelChange": 0.0533
+    },
+    {
+      "frame": 468,
+      "time": 7.783333333333333,
+      "image": "frame-0468.jpg",
+      "meanPixelChange": 0.0686
+    },
+    {
+      "frame": 469,
+      "time": 7.8,
+      "image": "frame-0469.jpg",
+      "meanPixelChange": 0.0941
+    },
+    {
+      "frame": 470,
+      "time": 7.816666666666666,
+      "image": "frame-0470.jpg",
+      "meanPixelChange": 0.1113
+    },
+    {
+      "frame": 471,
+      "time": 7.833333333333333,
+      "image": "frame-0471.jpg",
+      "meanPixelChange": 0.042
+    },
+    {
+      "frame": 472,
+      "time": 7.85,
+      "image": "frame-0472.jpg",
+      "meanPixelChange": 0.0408
+    },
+    {
+      "frame": 473,
+      "time": 7.866666666666666,
+      "image": "frame-0473.jpg",
+      "meanPixelChange": 0.0748
+    },
+    {
+      "frame": 474,
+      "time": 7.883333333333334,
+      "image": "frame-0474.jpg",
+      "meanPixelChange": 0.0685
+    },
+    {
+      "frame": 475,
+      "time": 7.9,
+      "image": "frame-0475.jpg",
+      "meanPixelChange": 0.0148
+    },
+    {
+      "frame": 476,
+      "time": 7.916666666666667,
+      "image": "frame-0476.jpg",
+      "meanPixelChange": 0.0113
+    },
+    {
+      "frame": 477,
+      "time": 7.933333333333334,
+      "image": "frame-0477.jpg",
+      "meanPixelChange": 0.1097
+    },
+    {
+      "frame": 478,
+      "time": 7.95,
+      "image": "frame-0478.jpg",
+      "meanPixelChange": 0.2848
+    },
+    {
+      "frame": 479,
+      "time": 7.966666666666667,
+      "image": "frame-0479.jpg",
+      "meanPixelChange": 0.4226
+    },
+    {
+      "frame": 480,
+      "time": 7.983333333333333,
+      "image": "frame-0480.jpg",
+      "meanPixelChange": 0.6384
+    },
+    {
+      "frame": 481,
+      "time": 8.0,
+      "image": "frame-0481.jpg",
+      "meanPixelChange": 0.9317
+    },
+    {
+      "frame": 482,
+      "time": 8.016666666666667,
+      "image": "frame-0482.jpg",
+      "meanPixelChange": 1.0786
+    },
+    {
+      "frame": 483,
+      "time": 8.033333333333333,
+      "image": "frame-0483.jpg",
+      "meanPixelChange": 1.3781
+    },
+    {
+      "frame": 484,
+      "time": 8.05,
+      "image": "frame-0484.jpg",
+      "meanPixelChange": 1.6773
+    },
+    {
+      "frame": 485,
+      "time": 8.066666666666666,
+      "image": "frame-0485.jpg",
+      "meanPixelChange": 1.9059
+    },
+    {
+      "frame": 486,
+      "time": 8.083333333333334,
+      "image": "frame-0486.jpg",
+      "meanPixelChange": 2.1569
+    },
+    {
+      "frame": 487,
+      "time": 8.1,
+      "image": "frame-0487.jpg",
+      "meanPixelChange": 2.306
+    },
+    {
+      "frame": 488,
+      "time": 8.116666666666667,
+      "image": "frame-0488.jpg",
+      "meanPixelChange": 2.3423
+    },
+    {
+      "frame": 489,
+      "time": 8.133333333333333,
+      "image": "frame-0489.jpg",
+      "meanPixelChange": 2.3542
+    },
+    {
+      "frame": 490,
+      "time": 8.15,
+      "image": "frame-0490.jpg",
+      "meanPixelChange": 2.3614
+    },
+    {
+      "frame": 491,
+      "time": 8.166666666666666,
+      "image": "frame-0491.jpg",
+      "meanPixelChange": 2.2412
+    },
+    {
+      "frame": 492,
+      "time": 8.183333333333334,
+      "image": "frame-0492.jpg",
+      "meanPixelChange": 2.0979
+    },
+    {
+      "frame": 493,
+      "time": 8.2,
+      "image": "frame-0493.jpg",
+      "meanPixelChange": 2.0248
+    },
+    {
+      "frame": 494,
+      "time": 8.216666666666667,
+      "image": "frame-0494.jpg",
+      "meanPixelChange": 1.9376
+    },
+    {
+      "frame": 495,
+      "time": 8.233333333333333,
+      "image": "frame-0495.jpg",
+      "meanPixelChange": 1.8386
+    },
+    {
+      "frame": 496,
+      "time": 8.25,
+      "image": "frame-0496.jpg",
+      "meanPixelChange": 1.6913
+    },
+    {
+      "frame": 497,
+      "time": 8.266666666666667,
+      "image": "frame-0497.jpg",
+      "meanPixelChange": 1.619
+    },
+    {
+      "frame": 498,
+      "time": 8.283333333333333,
+      "image": "frame-0498.jpg",
+      "meanPixelChange": 1.5356
+    },
+    {
+      "frame": 499,
+      "time": 8.3,
+      "image": "frame-0499.jpg",
+      "meanPixelChange": 1.48
+    },
+    {
+      "frame": 500,
+      "time": 8.316666666666666,
+      "image": "frame-0500.jpg",
+      "meanPixelChange": 1.3695
+    },
+    {
+      "frame": 501,
+      "time": 8.333333333333334,
+      "image": "frame-0501.jpg",
+      "meanPixelChange": 1.3413
+    },
+    {
+      "frame": 502,
+      "time": 8.35,
+      "image": "frame-0502.jpg",
+      "meanPixelChange": 1.3039
+    },
+    {
+      "frame": 503,
+      "time": 8.366666666666667,
+      "image": "frame-0503.jpg",
+      "meanPixelChange": 1.1927
+    },
+    {
+      "frame": 504,
+      "time": 8.383333333333333,
+      "image": "frame-0504.jpg",
+      "meanPixelChange": 1.1848
+    },
+    {
+      "frame": 505,
+      "time": 8.4,
+      "image": "frame-0505.jpg",
+      "meanPixelChange": 1.1011
+    },
+    {
+      "frame": 506,
+      "time": 8.416666666666666,
+      "image": "frame-0506.jpg",
+      "meanPixelChange": 1.1082
+    },
+    {
+      "frame": 507,
+      "time": 8.433333333333334,
+      "image": "frame-0507.jpg",
+      "meanPixelChange": 1.0112
+    },
+    {
+      "frame": 508,
+      "time": 8.45,
+      "image": "frame-0508.jpg",
+      "meanPixelChange": 0.9746
+    },
+    {
+      "frame": 509,
+      "time": 8.466666666666667,
+      "image": "frame-0509.jpg",
+      "meanPixelChange": 0.9661
+    },
+    {
+      "frame": 510,
+      "time": 8.483333333333333,
+      "image": "frame-0510.jpg",
+      "meanPixelChange": 0.9312
+    },
+    {
+      "frame": 511,
+      "time": 8.5,
+      "image": "frame-0511.jpg",
+      "meanPixelChange": 0.9056
+    },
+    {
+      "frame": 512,
+      "time": 8.516666666666667,
+      "image": "frame-0512.jpg",
+      "meanPixelChange": 0.8464
+    },
+    {
+      "frame": 513,
+      "time": 8.533333333333333,
+      "image": "frame-0513.jpg",
+      "meanPixelChange": 0.8437
+    },
+    {
+      "frame": 514,
+      "time": 8.55,
+      "image": "frame-0514.jpg",
+      "meanPixelChange": 0.86
+    },
+    {
+      "frame": 515,
+      "time": 8.566666666666666,
+      "image": "frame-0515.jpg",
+      "meanPixelChange": 0.7581
+    },
+    {
+      "frame": 516,
+      "time": 8.583333333333334,
+      "image": "frame-0516.jpg",
+      "meanPixelChange": 0.7655
+    },
+    {
+      "frame": 517,
+      "time": 8.6,
+      "image": "frame-0517.jpg",
+      "meanPixelChange": 0.7424
+    },
+    {
+      "frame": 518,
+      "time": 8.616666666666667,
+      "image": "frame-0518.jpg",
+      "meanPixelChange": 0.7361
+    },
+    {
+      "frame": 519,
+      "time": 8.633333333333333,
+      "image": "frame-0519.jpg",
+      "meanPixelChange": 0.7078
+    },
+    {
+      "frame": 520,
+      "time": 8.65,
+      "image": "frame-0520.jpg",
+      "meanPixelChange": 0.6866
+    },
+    {
+      "frame": 521,
+      "time": 8.666666666666666,
+      "image": "frame-0521.jpg",
+      "meanPixelChange": 0.676
+    },
+    {
+      "frame": 522,
+      "time": 8.683333333333334,
+      "image": "frame-0522.jpg",
+      "meanPixelChange": 0.677
+    },
+    {
+      "frame": 523,
+      "time": 8.7,
+      "image": "frame-0523.jpg",
+      "meanPixelChange": 0.6365
+    },
+    {
+      "frame": 524,
+      "time": 8.716666666666667,
+      "image": "frame-0524.jpg",
+      "meanPixelChange": 0.6224
+    },
+    {
+      "frame": 525,
+      "time": 8.733333333333333,
+      "image": "frame-0525.jpg",
+      "meanPixelChange": 0.6101
+    },
+    {
+      "frame": 526,
+      "time": 8.75,
+      "image": "frame-0526.jpg",
+      "meanPixelChange": 0.5946
+    },
+    {
+      "frame": 527,
+      "time": 8.766666666666667,
+      "image": "frame-0527.jpg",
+      "meanPixelChange": 0.5834
+    },
+    {
+      "frame": 528,
+      "time": 8.783333333333333,
+      "image": "frame-0528.jpg",
+      "meanPixelChange": 0.5741
+    },
+    {
+      "frame": 529,
+      "time": 8.8,
+      "image": "frame-0529.jpg",
+      "meanPixelChange": 0.5524
+    },
+    {
+      "frame": 530,
+      "time": 8.816666666666666,
+      "image": "frame-0530.jpg",
+      "meanPixelChange": 0.5437
+    },
+    {
+      "frame": 531,
+      "time": 8.833333333333334,
+      "image": "frame-0531.jpg",
+      "meanPixelChange": 0.5901
+    },
+    {
+      "frame": 532,
+      "time": 8.85,
+      "image": "frame-0532.jpg",
+      "meanPixelChange": 0.585
+    },
+    {
+      "frame": 533,
+      "time": 8.866666666666667,
+      "image": "frame-0533.jpg",
+      "meanPixelChange": 0.6881
+    },
+    {
+      "frame": 534,
+      "time": 8.883333333333333,
+      "image": "frame-0534.jpg",
+      "meanPixelChange": 0.8897
+    },
+    {
+      "frame": 535,
+      "time": 8.9,
+      "image": "frame-0535.jpg",
+      "meanPixelChange": 3.7187
+    },
+    {
+      "frame": 536,
+      "time": 8.916666666666666,
+      "image": "frame-0536.jpg",
+      "meanPixelChange": 3.2574
+    },
+    {
+      "frame": 537,
+      "time": 8.933333333333334,
+      "image": "frame-0537.jpg",
+      "meanPixelChange": 3.0645
+    },
+    {
+      "frame": 538,
+      "time": 8.95,
+      "image": "frame-0538.jpg",
+      "meanPixelChange": 2.8201
+    },
+    {
+      "frame": 539,
+      "time": 8.966666666666667,
+      "image": "frame-0539.jpg",
+      "meanPixelChange": 2.5926
+    },
+    {
+      "frame": 540,
+      "time": 8.983333333333333,
+      "image": "frame-0540.jpg",
+      "meanPixelChange": 2.4944
+    },
+    {
+      "frame": 541,
+      "time": 9.0,
+      "image": "frame-0541.jpg",
+      "meanPixelChange": 2.4677
+    },
+    {
+      "frame": 542,
+      "time": 9.016666666666667,
+      "image": "frame-0542.jpg",
+      "meanPixelChange": 2.1585
+    },
+    {
+      "frame": 543,
+      "time": 9.033333333333333,
+      "image": "frame-0543.jpg",
+      "meanPixelChange": 2.0582
+    },
+    {
+      "frame": 544,
+      "time": 9.05,
+      "image": "frame-0544.jpg",
+      "meanPixelChange": 1.9067
+    },
+    {
+      "frame": 545,
+      "time": 9.066666666666666,
+      "image": "frame-0545.jpg",
+      "meanPixelChange": 1.8448
+    },
+    {
+      "frame": 546,
+      "time": 9.083333333333334,
+      "image": "frame-0546.jpg",
+      "meanPixelChange": 1.7663
+    },
+    {
+      "frame": 547,
+      "time": 9.1,
+      "image": "frame-0547.jpg",
+      "meanPixelChange": 1.8178
+    },
+    {
+      "frame": 548,
+      "time": 9.116666666666667,
+      "image": "frame-0548.jpg",
+      "meanPixelChange": 1.7093
+    },
+    {
+      "frame": 549,
+      "time": 9.133333333333333,
+      "image": "frame-0549.jpg",
+      "meanPixelChange": 1.6505
+    },
+    {
+      "frame": 550,
+      "time": 9.15,
+      "image": "frame-0550.jpg",
+      "meanPixelChange": 1.675
+    },
+    {
+      "frame": 551,
+      "time": 9.166666666666666,
+      "image": "frame-0551.jpg",
+      "meanPixelChange": 1.5782
+    },
+    {
+      "frame": 552,
+      "time": 9.183333333333334,
+      "image": "frame-0552.jpg",
+      "meanPixelChange": 1.4251
+    },
+    {
+      "frame": 553,
+      "time": 9.2,
+      "image": "frame-0553.jpg",
+      "meanPixelChange": 1.3489
+    },
+    {
+      "frame": 554,
+      "time": 9.216666666666667,
+      "image": "frame-0554.jpg",
+      "meanPixelChange": 1.293
+    },
+    {
+      "frame": 555,
+      "time": 9.233333333333333,
+      "image": "frame-0555.jpg",
+      "meanPixelChange": 1.1922
+    },
+    {
+      "frame": 556,
+      "time": 9.25,
+      "image": "frame-0556.jpg",
+      "meanPixelChange": 1.1007
+    },
+    {
+      "frame": 557,
+      "time": 9.266666666666667,
+      "image": "frame-0557.jpg",
+      "meanPixelChange": 1.0445
+    },
+    {
+      "frame": 558,
+      "time": 9.283333333333333,
+      "image": "frame-0558.jpg",
+      "meanPixelChange": 0.9584
+    },
+    {
+      "frame": 559,
+      "time": 9.3,
+      "image": "frame-0559.jpg",
+      "meanPixelChange": 0.8792
+    },
+    {
+      "frame": 560,
+      "time": 9.316666666666666,
+      "image": "frame-0560.jpg",
+      "meanPixelChange": 0.7972
+    },
+    {
+      "frame": 561,
+      "time": 9.333333333333334,
+      "image": "frame-0561.jpg",
+      "meanPixelChange": 0.7286
+    },
+    {
+      "frame": 562,
+      "time": 9.35,
+      "image": "frame-0562.jpg",
+      "meanPixelChange": 0.7027
+    },
+    {
+      "frame": 563,
+      "time": 9.366666666666667,
+      "image": "frame-0563.jpg",
+      "meanPixelChange": 0.5732
+    },
+    {
+      "frame": 564,
+      "time": 9.383333333333333,
+      "image": "frame-0564.jpg",
+      "meanPixelChange": 0.4867
+    },
+    {
+      "frame": 565,
+      "time": 9.4,
+      "image": "frame-0565.jpg",
+      "meanPixelChange": 0.4095
+    },
+    {
+      "frame": 566,
+      "time": 9.416666666666666,
+      "image": "frame-0566.jpg",
+      "meanPixelChange": 0.3076
+    },
+    {
+      "frame": 567,
+      "time": 9.433333333333334,
+      "image": "frame-0567.jpg",
+      "meanPixelChange": 0.2368
+    },
+    {
+      "frame": 568,
+      "time": 9.45,
+      "image": "frame-0568.jpg",
+      "meanPixelChange": 0.2061
+    },
+    {
+      "frame": 569,
+      "time": 9.466666666666667,
+      "image": "frame-0569.jpg",
+      "meanPixelChange": 0.2432
+    },
+    {
+      "frame": 570,
+      "time": 9.483333333333333,
+      "image": "frame-0570.jpg",
+      "meanPixelChange": 0.2712
+    },
+    {
+      "frame": 571,
+      "time": 9.5,
+      "image": "frame-0571.jpg",
+      "meanPixelChange": 0.2597
+    },
+    {
+      "frame": 572,
+      "time": 9.516666666666667,
+      "image": "frame-0572.jpg",
+      "meanPixelChange": 0.2559
+    },
+    {
+      "frame": 573,
+      "time": 9.533333333333333,
+      "image": "frame-0573.jpg",
+      "meanPixelChange": 0.2738
+    },
+    {
+      "frame": 574,
+      "time": 9.55,
+      "image": "frame-0574.jpg",
+      "meanPixelChange": 0.3029
+    },
+    {
+      "frame": 575,
+      "time": 9.566666666666666,
+      "image": "frame-0575.jpg",
+      "meanPixelChange": 0.2643
+    },
+    {
+      "frame": 576,
+      "time": 9.583333333333334,
+      "image": "frame-0576.jpg",
+      "meanPixelChange": 0.2598
+    },
+    {
+      "frame": 577,
+      "time": 9.6,
+      "image": "frame-0577.jpg",
+      "meanPixelChange": 0.2932
+    },
+    {
+      "frame": 578,
+      "time": 9.616666666666667,
+      "image": "frame-0578.jpg",
+      "meanPixelChange": 0.2788
+    },
+    {
+      "frame": 579,
+      "time": 9.633333333333333,
+      "image": "frame-0579.jpg",
+      "meanPixelChange": 0.2158
+    },
+    {
+      "frame": 580,
+      "time": 9.65,
+      "image": "frame-0580.jpg",
+      "meanPixelChange": 0.1933
+    },
+    {
+      "frame": 581,
+      "time": 9.666666666666666,
+      "image": "frame-0581.jpg",
+      "meanPixelChange": 0.2137
+    },
+    {
+      "frame": 582,
+      "time": 9.683333333333334,
+      "image": "frame-0582.jpg",
+      "meanPixelChange": 0.2222
+    },
+    {
+      "frame": 583,
+      "time": 9.7,
+      "image": "frame-0583.jpg",
+      "meanPixelChange": 0.1532
+    },
+    {
+      "frame": 584,
+      "time": 9.716666666666667,
+      "image": "frame-0584.jpg",
+      "meanPixelChange": 0.1595
+    },
+    {
+      "frame": 585,
+      "time": 9.733333333333333,
+      "image": "frame-0585.jpg",
+      "meanPixelChange": 0.1824
+    },
+    {
+      "frame": 586,
+      "time": 9.75,
+      "image": "frame-0586.jpg",
+      "meanPixelChange": 0.204
+    },
+    {
+      "frame": 587,
+      "time": 9.766666666666667,
+      "image": "frame-0587.jpg",
+      "meanPixelChange": 0.1418
+    },
+    {
+      "frame": 588,
+      "time": 9.783333333333333,
+      "image": "frame-0588.jpg",
+      "meanPixelChange": 0.1551
+    },
+    {
+      "frame": 589,
+      "time": 9.8,
+      "image": "frame-0589.jpg",
+      "meanPixelChange": 0.1677
+    },
+    {
+      "frame": 590,
+      "time": 9.816666666666666,
+      "image": "frame-0590.jpg",
+      "meanPixelChange": 0.1948
+    },
+    {
+      "frame": 591,
+      "time": 9.833333333333334,
+      "image": "frame-0591.jpg",
+      "meanPixelChange": 0.1389
+    },
+    {
+      "frame": 592,
+      "time": 9.85,
+      "image": "frame-0592.jpg",
+      "meanPixelChange": 0.1478
+    },
+    {
+      "frame": 593,
+      "time": 9.866666666666667,
+      "image": "frame-0593.jpg",
+      "meanPixelChange": 0.1759
+    },
+    {
+      "frame": 594,
+      "time": 9.883333333333333,
+      "image": "frame-0594.jpg",
+      "meanPixelChange": 0.1888
+    },
+    {
+      "frame": 595,
+      "time": 9.9,
+      "image": "frame-0595.jpg",
+      "meanPixelChange": 0.1231
+    },
+    {
+      "frame": 596,
+      "time": 9.916666666666666,
+      "image": "frame-0596.jpg",
+      "meanPixelChange": 0.1345
+    },
+    {
+      "frame": 597,
+      "time": 9.933333333333334,
+      "image": "frame-0597.jpg",
+      "meanPixelChange": 0.1523
+    },
+    {
+      "frame": 598,
+      "time": 9.95,
+      "image": "frame-0598.jpg",
+      "meanPixelChange": 0.1412
+    },
+    {
+      "frame": 599,
+      "time": 9.966666666666667,
+      "image": "frame-0599.jpg",
+      "meanPixelChange": 0.1023
+    },
+    {
+      "frame": 600,
+      "time": 9.983333333333333,
+      "image": "frame-0600.jpg",
+      "meanPixelChange": 0.1305
+    },
+    {
+      "frame": 601,
+      "time": 10.0,
+      "image": "frame-0601.jpg",
+      "meanPixelChange": 0.2195
+    },
+    {
+      "frame": 602,
+      "time": 10.016666666666667,
+      "image": "frame-0602.jpg",
+      "meanPixelChange": 0.0618
+    }
+  ]
+}

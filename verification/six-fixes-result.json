@@ -1,0 +1,177 @@
+{
+  "date": "2026-09-10",
+  "status": "implemented, browser verified, final build installed and short physical sweep complete; user full sweep next",
+  "project": "C:/HA/design-concepts/signal-orbit-steps",
+  "backup": "verification/before-six-fixes-20260910-162812",
+  "browser": {
+    "navigation": {
+      "status": "PASS",
+      "widths": [
+        320,
+        390
+      ],
+      "frames": 277,
+      "minimumOrbToCardGapPx": 9.67999267578125
+    },
+    "focusMusic": {
+      "status": "PASS",
+      "widths": [
+        320,
+        389
+      ],
+      "widePreset": 390,
+      "wideRounding": "Scaled preview measures 389 CSS px",
+      "checks": [
+        "no focused orbit",
+        "wide interactive particle clock",
+        "whole-page artwork",
+        "plain music app launch icon",
+        "independent media controls",
+        "permission and missing artwork states",
+        "reduced motion and disposal",
+        "full-width cover from page top",
+        "extra focus timer labels hidden",
+        "entire empty player hidden",
+        "new tracks appear through continued polling",
+        "paused tracks retained",
+        "music permission access in setup"
+      ]
+    },
+    "recordedWorkouts": {
+      "status": "PASS",
+      "widths": [
+        320,
+        390
+      ],
+      "checks": [
+        "input validation",
+        "countdown with recording options",
+        "GPS retry",
+        "native update keeps timer and music nodes",
+        "distance and active-time pace",
+        "weight-based energy estimate",
+        "active and completed details",
+        "route speed and elevation gaps",
+        "pause resume finish",
+        "new and old history",
+        "finite output and no horizontal overflow",
+        "touch targets",
+        "accessible main reading",
+        "focus retained on GPS update",
+        "noneditable selection blocked",
+        "input editing preserved",
+        "sleep scrub without cursor"
+      ]
+    },
+    "visualReview": [
+      "focus music full-page artwork and small launch control",
+      "completed workout summary top",
+      "movement and energy summary bottom",
+      "revised full-width artwork focus",
+      "no-track clock-only focus"
+    ],
+    "fixturesRestored": true
+  },
+  "sourceChecks": {
+    "verification/check.cjs": "PASS",
+    "verification/workout-details.cjs": "PASS"
+  },
+  "native": {
+    "status": "PASS",
+    "compilation": "Android API37, Java17, UTF8",
+    "check": "altitude, token validation, haversine",
+    "physicalGPS": "user-created GPS route rendered; outdoor accuracy not qualified",
+    "runnableCheck": "verification/native-check.ps1"
+  },
+  "installation": {
+    "status": "PASS",
+    "device": "Samsung SM-S938B",
+    "serial": "192.168.0.210:39389",
+    "api": 37,
+    "dataPreserved": true,
+    "apkHashMatchesBuild": true,
+    "certificateMatchesPrevious": true,
+    "packagePath": "/data/app/~~nebjpIYL1srQI2Xwc6SCMQ==/com.mani.orbit-msM4NIVe8ND2ue1JrlJTfw==/base.apk",
+    "installedApkSha256": "b0d7dae4437b69563b8a74cf1867dc6e120bdac9eb7f29de15dfcf3b4e7db012"
+  },
+  "phoneCheck": {
+    "status": "PASS within authorised short sweep",
+    "verified": [
+      "launch and Home",
+      "existing seven workouts retained",
+      "user-created GPS workout summary and route render",
+      "native countdown and optional-weight setup",
+      "wide focused timer and real BitChord artwork",
+      "touching timer particles preserves focus",
+      "neutral launcher icon visible in real notification",
+      "API37 metric notification duration ticks in background",
+      "full-width real artwork behind clock and controls",
+      "fixed target remains00:01:00 at duration01:18",
+      "notification Pause freezes duration",
+      "direct notification Resume opens Orbit and resumes",
+      "finish stores active total and paused time",
+      "sleep long press has no copy or selection menu",
+      "sleep scrub changes interval and keeps highlight with no dotted cursor"
+    ],
+    "foundAndFixed": "Target TimeDifference runs negative when backgrounded; target now displays the fixed duration, main duration remains dynamic",
+    "pending": [],
+    "testWorkoutCreated": true,
+    "testWorkout": "Two owned Strength workouts finished;17:34 active09:13 and17:51 active01:42. No active test.",
+    "newLocationPermissionGrantedByAgent": false,
+    "userGPSRecordObserved": true,
+    "outdoorGPSAccuracyQualified": false,
+    "testWorkoutRecordsRetained": 2,
+    "phoneLeftAt": "Steps Home, panels collapsed",
+    "agentChangedMusicPlayback": false,
+    "evidenceDirectory": "verification/six-fixes-phone",
+    "finalEvidence": [
+      "24-final-fullbleed-focus.png",
+      "27-notification-after-target.png",
+      "28-notification-paused.png",
+      "29-notification-resume-return.xml",
+      "30-final-strength-saved.xml",
+      "35-sleep-long-press.xml",
+      "37-sleep-scrubbed.png",
+      "39-final-home.xml"
+    ]
+  },
+  "limits": [
+    "Actual outdoor GPS accuracy needs a real outdoor workout",
+    "Energy is an explicitly labelled population MET estimate",
+    "Route is stored locally with no street-map service",
+    "Watch and real Health data store are outside this project"
+  ],
+  "build": {
+    "status": "PASS",
+    "signature": "APK v3 verified",
+    "apkSha256": "b0d7dae4437b69563b8a74cf1867dc6e120bdac9eb7f29de15dfcf3b4e7db012",
+    "buildDirectory": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260910-174753",
+    "assets": "current scripts and CSS embedded after normalising Windows line endings; no verification music or bridge; neutral adaptive icons packaged"
+  },
+  "sourceSha256": {
+    "index.html": "e40d4028969ff95f7bdb35ff4aa1577a3cda90bb7f5f7416a713dec5d511ea34",
+    "health-pages.css": "313c37f999f0d19f77c3539e728f70c90d76a12d8e6e333885045c51d70e3b3f",
+    "health-pages.js": "0ddc5f1c67a6f1be5e29eac745d6e037d3a7fc31706f58033d697cbf152a36cf",
+    "surface-motion.js": "13dc7656c7d3dbf8eb3f0cea5cbaca0fddacf416245c6b7017deadd89c98cbc6",
+    "hero-dots.js": "c0a0a79015013f0a937ef125dc237036308377d0b0cb3273a0572c80f430d7fc",
+    "sleep-timeline.js": "4b5b1df58ea7e91f5f6df0106cf907aa8d0995f2206af3e1c94e4c4d0f8a32a5",
+    "workout-focus.js": "fe4026c810a467b1311fd241e97305b8916227593ab6c783f77971f1b379c578",
+    "workout-details.js": "6705884d9fd040a9cabd7172a7262a1763afa703179faba0ded7a5f95b1a6c56",
+    "android/AndroidManifest.xml": "fd33aff5abf3eaf9ab8fda2f9ed054417a879c0b5ab3d77611fddacda1071a78",
+    "android/build.py": "30aca26dabee2a5441de32a8513bd3abe1ec94856706c311658d74f21ebb11a9",
+    "android/src/com/mani/orbit/MainActivity.java": "b5910c232d4cd0bec2f7ef7d96786ba29435d8417c3deae6deb7817617093ad3",
+    "android/src/com/mani/orbit/MusicSession.java": "0ff315f8fde855baa8e00592cb55209166d16325da0a5a31ad37b3ffd110091c",
+    "android/src/com/mani/orbit/WorkoutLocationMath.java": "36d06b7bdd26f9f1fb0a696a5d1631d124304f9865ae39fc7687558a09ac41d3",
+    "android/src/com/mani/orbit/WorkoutNotification.java": "f3da44d6899e7a9a814693a536b6381a167c7e76995a2d53b47f739be3ffe2fe",
+    "android/src/com/mani/orbit/WorkoutSession.java": "1b5904501ffb125df9a7c85b3a2a75c769dbd213d8679129c4d28cc7dd1f5051",
+    "android/src/com/mani/orbit/WorkoutTrackingService.java": "9f34a1877d5c51b907b6349ad8a3b1c5906db3c6a7fdc6b19343fb8faa50d50f",
+    "android/res/drawable/orbit_background.xml": "3fc58a6d6b6e3a34f3362d9bc546eef7e6df4f183d35fe3f107453beee39e37e",
+    "android/res/drawable/orbit_icon.xml": "e8b14dcde92040931c9c63f86a71c7d9536c4281582216013c84af9d5e318994",
+    "android/res/drawable/orbit_mark.xml": "51d4ee77bcb5cca44eaad748c6d6a3dc2ba13b9e4e03c9f9f4c3b42fe6149e33",
+    "android/res/drawable/orbit_monochrome.xml": "4285d43402f671a7aeca84f771bcf12c236ea935a8c7eca0918990c893a792ac",
+    "android/res/drawable/workout_notification.xml": "2187f4baba42b247801d5d2535a7bdc1cb480b37795883933edf14ed5b71fefa",
+    "android/res/drawable-v33/orbit_icon.xml": "3b858a03543608e43afe511a560c9487cc9be0fa77aeca08ac937067c147ffb8",
+    "android/res/values/styles.xml": "850a47851ee149881957907e5d2a487e20ab447a060c6802bb89fbe313651692"
+  },
+  "latestRefinementBackup": "verification/before-fullbleed-music-20260910-174442"
+}

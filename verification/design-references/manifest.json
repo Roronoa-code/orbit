@@ -1,0 +1,116 @@
+[
+  {
+    "file": "nothing-x-layout.png",
+    "sha256": "41ba4919735fba089fc5c9e2b92f5ba2950dadd0858f1f9053211cdc5779b192",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-f97443e1-34c0-49db-b4c3-a7d916b2d665.png",
+    "purpose": "Layout inspiration; keep Orbit palette"
+  },
+  {
+    "file": "rejected-samsung-body-1.jpg",
+    "sha256": "8066cbf34d0ef4beac45f95969e706e1a53cc8c5956401ef927c57050a3df4d9",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-60cef04a-a8ee-44d6-bb30-941e0ca6652d.jpg",
+    "purpose": "Rejected Body presentation; not health data"
+  },
+  {
+    "file": "rejected-samsung-body-2.jpg",
+    "sha256": "47949230c12675a10bad68703815c8efb81cfee4a65b07a68788ea7d393122a6",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-916a73d1-a843-4fcc-a301-d898de7eb4bb.jpg",
+    "purpose": "Rejected Body presentation; not health data"
+  },
+  {
+    "file": "rejected-sticky-chart-tip.jpg",
+    "sha256": "c39b52df162282bd09608fe2f68b35e2f0b422007dfd858beabcb7d396d3f7d1",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-66420c5d-7ef4-43e6-8ec4-7aea5e57e63e.jpg",
+    "purpose": "Rejected persistent chart badge"
+  },
+  {
+    "file": "rejected-card-cutoff.jpg",
+    "sha256": "0bcd57cfc726db3c0434de0efcf78407493f2450db26b8dac81860aa476eeeae",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-0827f055-9708-428f-8133-c4e98e374a2b.jpg",
+    "purpose": "Rejected abrupt scrolling edge"
+  },
+  {
+    "file": "rejected-body-static-controls.jpg",
+    "sha256": "d470cd30bdf225354797061d9940ba2fd950d45c27dfd7607168bbd41d626157",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-4deec725-62ba-4642-b33c-2ab083d9083f.jpg",
+    "purpose": "Rejected static controls and short-only history"
+  },
+  {
+    "file": "rejected-live-bar-1.png",
+    "sha256": "a542241c67c7dbb309e154192b13ea90c52369c3af3c013b7b11b9f948147633",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-46f3743e-876e-4a25-af7b-eb3dccec8fcd.png",
+    "purpose": "Rejected duplicate dots and launcher motion/appearance"
+  },
+  {
+    "file": "rejected-live-bar-2.png",
+    "sha256": "3c6519a614d15d219d06da797b64dc10fbee24cd2fcd9edf69964a9caf6c0797",
+    "source": "C:\\Users\\abdul\\AppData\\Local\\Temp\\codex-clipboard-d0e40f01-b25b-4abd-8cb6-d482da2c41b8.png",
+    "purpose": "Rejected duplicate dots and launcher motion/appearance"
+  },
+  {
+    "file": "rejected-sleep-text-selection.jpg",
+    "sha256": "3b173f9685ea3cb33416a5f62c24c18c06f29c11842ca6b8777eacab9dfa65e6",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-1.jpg",
+    "purpose": "Disable selection; retain sleep card"
+  },
+  {
+    "file": "rejected-android-selection-menu.jpg",
+    "sha256": "5f26edd60273574b65a0750280e5f860daf18aa4ec04c246ce8b6f1891cdc58a",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-2.jpg",
+    "purpose": "Disable copy/translate on app content; retain editable input behaviour"
+  },
+  {
+    "file": "rejected-sleep-dotted-cursor.jpg",
+    "sha256": "d68fbb264aa86fac7382e9149a866f7737305abc5eac15d3c875b447668e4fc3",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-3.jpg",
+    "purpose": "Retain scrubbing and stage selection; remove dotted cursor"
+  },
+  {
+    "file": "rejected-focus-small-orbit.jpg",
+    "sha256": "f0b0944b995c8c009fb4f61571918780fb11ac6a43c92855b99c1ed4918eafaf",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-4.jpg",
+    "purpose": "Retain real music composition; replace small timer orbit"
+  },
+  {
+    "file": "focus-fullscreen-art-inspiration.jpg",
+    "sha256": "6ac2ace896c68c51ba8e808c378eb4c4438a68c7c088070c377963867ae75bca",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-5.jpg",
+    "purpose": "Whole-screen art inspiration; create Orbit interpretation"
+  },
+  {
+    "file": "rejected-blue-workout-notification.jpg",
+    "sha256": "dfc39dad213fddeaca2f9246d76ed8b8a13329b59869722d990f4a2dcc5285e1",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-6.jpg",
+    "purpose": "Neutral icon and useful organised live metrics required"
+  },
+  {
+    "file": "rejected-purple-app-icon.jpg",
+    "sha256": "d0489599e5597c56c9540e5b731a39fdeef43dbd902147c6fcc5e404f8fcca8c",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-7.jpg",
+    "purpose": "Use charcoal/silver monochrome-compatible app icon"
+  },
+  {
+    "file": "workout-summary-inspiration.jpg",
+    "sha256": "1cb0962484a06cceba29c241a61844c636913e411ae7273adc0474508f081154",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-8.jpg",
+    "purpose": "Useful grouped workout data; not exact clone"
+  },
+  {
+    "file": "workout-details-inspiration.jpg",
+    "sha256": "6b43a3ed9eb1eb2e481b1d34094d2429f6d98ed70357f9ddd4cda3846036f53c",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-9.jpg",
+    "purpose": "Useful workout density/grouping; actual data only"
+  },
+  {
+    "file": "chrome-icon-inspiration.png",
+    "sha256": "84881b3eff088d69c579d65f620be2aa9b262773e427c64621a72be30dc240af",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-10.png",
+    "purpose": "Charcoal/silver icon material inspiration"
+  },
+  {
+    "file": "chrome-orbits-inspiration.png",
+    "sha256": "487ddb44cadc62415609f2b6fe4940fbbe958a89463402199411dca65f16d774",
+    "source": "C:\\Users\\abdul\\.codex\\attachments\\f4f63406-df26-4e82-8167-6bc30285ea2a\\image-11.png",
+    "purpose": "Charcoal/silver icon composition inspiration"
+  }
+]

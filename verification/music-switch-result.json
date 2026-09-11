@@ -1,0 +1,39 @@
+{
+  "updated": "2026-09-10T23:54:25",
+  "status": "Built and verified; not installed at the user's request",
+  "project": "C:\\HA\\design-concepts\\signal-orbit-steps",
+  "build": "android/build/20260910-235056",
+  "apkSha256": "1e2d98005a3cf686affaf9d26a3a17d42e2eaeb78da5daee2fbd09fccf9e7a63",
+  "previousApkSha256": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "installedApkSha256": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "phone": {
+    "address": "192.168.0.210:44875",
+    "model": "SM-S938B",
+    "interaction": "read-only package query only"
+  },
+  "rootCause": "New track metadata arrives before its cover; the bridge reported art:\"\" and the page dropped the previous cover immediately",
+  "changes": [
+    "MusicSession.java: 2 s artwork grace with 250 ms retries; art omitted while pending",
+    "workout-focus.js: graceful 440 ms cover fade for art-less tracks; 48 px blurred backdrop copy; two-frame pre-raster before crossfade",
+    "health-pages.css: will-change on art layers; page background colour transition",
+    "verification/focus-music.html: pending-cover and art-less fade assertions"
+  ],
+  "checks": {
+    "nodeModel": "PASS",
+    "rendered": [
+      "focus-music-390",
+      "focus-music-320",
+      "ux-motion-390",
+      "ux-motion-320"
+    ],
+    "nativeBoundsTokensDistance": "PASS",
+    "compileSignature": "PASS"
+  },
+  "backups": [
+    "verification/before-music-switch-20260910-234519"
+  ],
+  "limits": [
+    "Grace-period behaviour not yet exercised on the phone",
+    "A provider that never supplies a cover shows the previous cover for up to 2 s before fading"
+  ]
+}

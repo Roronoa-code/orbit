@@ -1,0 +1,16 @@
+{
+  "installedApkSHA256": "ccf45820fbe94d8e4d4a9fe416ed13dd6217221656493c73c1ef04a32097f9d5",
+  "sourceSHA256": "4bab8f5213970e8dda9d74a656ce49f28adf5832ce19003b2aea93dab8f5516c",
+  "installedMatchesLocal": true,
+  "bundledHtmlMatchesBuild": true,
+  "bundledScriptMatchesCurrentSource": true,
+  "nativeGoal": 10000,
+  "browserWidthsPassed": [
+    390,
+    320
+  ],
+  "browserMinimumOrbGapPx": [
+    11.67657470703125,
+    11.676239013671875
+  ]
+}

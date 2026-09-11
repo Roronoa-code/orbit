@@ -1,0 +1,52 @@
+{
+  "updated": "2026-09-11T04:20",
+  "status": "Built, verified and installed on the phone at the user's request (2026-09-11 04:14; installed hash matched; data kept; not launched)",
+  "build": "android/build/20260911-041135",
+  "apkSha256": "a81b137d20403325dbd3e2236b68c22d5cfc96cb827d9d78ff51c21b62636337",
+  "supersedes": "5076c44e3a93f0442e5f756f13354ec3571d5fe793d16985b954442c7a51d722",
+  "install": "verification/music-morph-install.json",
+  "requests": {
+    "notification": "Duration shown twice (header and card); plain, nothing of Orbit in it",
+    "controls": "Plain transport controls; press highlight off-centre; use Samsung player icons without the circles",
+    "morph": "Swipe down from the page-wide player animates into the small player; tapping the small player animates everything into place",
+    "palette": "The two bottom buttons take colours from the album cover, not one flat colour"
+  },
+  "changes": [
+    "WorkoutNotification.java: the Android 17 metric card no longer repeats the running time as a header chronometer; older Android keeps the header clock and drops the text clock while it runs",
+    "WorkoutNotification.java + res/drawable/orbit_notification.xml: small icon is Orbit's planet-and-ring mark; accent is Orbit purple; large icon is the activity glyph in Orbit's sixty-dot ring; a spare metric slot shows the start time. Still a standard MetricStyle Live Update (not colorised, no custom view)",
+    "workout-focus.js: WorkoutFocus morph - one progress value moves the workout view and the page-wide music view into each other for taps (small cover/title, header chevron, clock) and finger drags (down on the music view, up on the small player); reversible from any point; the cover image travels between page and small cover; the clock reading keeps its proportions; parts of the other layout wait at measured places and fade; transforms and opacity only; the hidden cover is drawn at touch-down",
+    "workout-focus.js: One UI-style rounded transport glyphs; palette from the cover (two-tone Pause with contrast-checked text, tinted glass Finish; grey covers stay neutral)",
+    "health-pages.css: square centred transport targets whose glyph shrinks and dims on press (no halo); page tint moved into the cover so it fades with the move; square art box with the same crop; base styles for the small cover and tile; compositor hints for moved parts; colour and title transitions",
+    "health-pages.js: gestures bound once to the page; the morph manages the header chevron",
+    "verification: focus-music.html (mid-move positions, spring-back, drag down, drag up, centred haloless glyphs, palette contrast); perf-tools/measure12.cjs"
+  ],
+  "method": "Playwright + Chromium 1243, 390x844 @3x, 4x CPU throttle, touch events through CDP; headless software raster, so numbers are relative",
+  "measurements": {
+    "tapOpen": {"programmaticClickNoPrewarm": "one 33.4 ms frame gap and a 13 ms lifecycle frame while the hidden cover was first drawn", "realTapWithPrewarm": "65 frames in 900 ms, max gap 16.8 ms, no gaps over 20 ms, no lifecycle frame over 6 ms"},
+    "tapClose": "55 frames, max gap 16.8 ms, no gaps over 20 ms",
+    "dragClose": "110 frames, max gap 16.8 ms, no gaps over 20 ms",
+    "files": "verification/perf-tools/measure12-after.json, measure12-after-prewarm.json"
+  },
+  "visualChecks": {
+    "focusArtwork": "Header and artwork above the clock compared with the previous build: top 295 px identical; below, only sub-pixel anti-aliasing on the sharp vertical edges of the test art (the image now sits in its own layer). Crop and colours unchanged",
+    "clockPosition": "The focus clock sits 7 px higher because the transport row is 9 px taller",
+    "frames": "Open and close contact sheets reviewed; the clock stays visible and lands in place"
+  },
+  "checks": {
+    "nodeModel": "PASS",
+    "workoutDetailsModel": "PASS",
+    "rendered": ["focus-music-390", "focus-music-320", "ux-motion-390", "ux-motion-320", "workout-details-390", "workout-details-320"],
+    "liveBackground": "PASS (frost size range 0 px, timer-only mutations, 0 px background change)",
+    "native": "PASS",
+    "javaCompile": "PASS against android-37",
+    "apkSignature": "v3 PASS",
+    "bundledPage": "assets/index.html in the APK contains the new code; orbit_notification drawable packaged"
+  },
+  "backups": ["verification/before-music-morph-20260911-034126", "verification/music-morph-phone/phone-before.apk"],
+  "limits": [
+    "The notification's look on One UI 9 was not seen: it needs a running workout",
+    "Heart and shuffle are not added: they would have to come from the music app's own actions",
+    "Swipes verified with synthetic touches in Chromium, not on the phone",
+    "Headless measurements are relative"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "revision": "Dot heroes, flat shaded Body chart, timed sleep stages, continuous frost and simple transitions",
+  "verifiedAt": "2026-09-10T02:35:33.520116+01:00",
+  "node": "PASS: existing data, gestures, persistence, native bridge; added dot touch/cancel/reduced-motion, native animation cancellation, and exact sleep totals across 30 nights",
+  "browser390": {
+    "status": "PASS",
+    "frames": 279,
+    "maxFrameGapMs": 6.3
+  },
+  "browser320": {
+    "status": "PASS",
+    "frames": 273,
+    "maxFrameGapMs": 12.2
+  },
+  "browserFlows": [
+    "All Home metrics and periods",
+    "Body selectors, smooth chart, exact date and 7/30 day ranges",
+    "No duplicate Home shortcuts in Health",
+    "Oxygen seven-day selection and collapse",
+    "Sleep summary tap, overnight start/end times, every stage, all matching intervals highlighted, interval and night navigation, back restoration",
+    "Workout target, countdown pixels and cancellation, dot timer, elapsed/remaining, focus mode, pause/resume/finish and reload",
+    "Simple page fades, fixed dock position, content behind frost, final card clear of dock"
+  ],
+  "visualReview": "Observed browser: frameless Home and frosted dock, Body composition, flat shaded Body chart, compact Health and expanded oxygen. No phone UI was operated.",
+  "apkBuild": "PASS; v3 signature verified; all scripts/CSS embedded",
+  "install": "Update installed successfully on SM-S938B at 192.168.0.210:38797; no launch or automated phone test",
+  "apkSha256": "7119fb20b0bb7e0adc7a03652cd3a537158027cfe215aa8f8c14479192ce8f2d",
+  "sourceSha256": {
+    "index.html": "db65b8a3d653a57233406f3452f155d248f741736c562bdb84db448e3ec6a146",
+    "health-pages.js": "597fc3951955f70ded24a156481493d09aa394614aeec5a824f933d5cfd84749",
+    "health-pages.css": "bfc572e4a8b51bd828158f60f43c77f20b494acd241ba6abb9bc09c50ca0de41",
+    "hero-dots.js": "3b1c552e23ce0e3abe08466b34d44f6d184c94926915c8bbf800a49aced9faf0",
+    "sleep-timeline.js": "cbd4571e796e61c8284519a93c0636fae8b50ad9a221dca28e41db8a4b662b21",
+    "surface-motion.js": "13dc7656c7d3dbf8eb3f0cea5cbaca0fddacf416245c6b7017deadd89c98cbc6",
+    "android/build.py": "de8cc000db7d84518c8d96a8d14aa9e10f22e9e8f04d3bdbbdba04c21c70e5ed",
+    "dist/Orbit.apk": "7119fb20b0bb7e0adc7a03652cd3a537158027cfe215aa8f8c14479192ce8f2d"
+  },
+  "limitations": [
+    "Health and timed sleep intervals are explicitly demo data; no real stage chronology is inferred from totals.",
+    "Physical appearance remains for user review; reconnect automation stays paused.",
+    "Native Health workspace and Watch were not changed or operated."
+  ]
+}

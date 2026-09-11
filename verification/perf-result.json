@@ -1,0 +1,170 @@
+{
+  "updated": "2026-09-11T00:58:46",
+  "status": "Built and verified; installed 2026-09-11 01:01 at the user's request (verification/perf-install.json); superseded on the phone by build 20260911-030125 at 03:09 (verification/five-fixes-install.json)",
+  "build": "android/build/20260911-005538",
+  "apkSha256": "5eec8e21feee715220995be14b76c16ba003a4e572677a01ce944be8c20503dc",
+  "supersedes": "1e2d98005a3cf686affaf9d26a3a17d42e2eaeb78da5daee2fbd09fccf9e7a63",
+  "installedOnPhone": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "phoneFrameStats": {
+    "source": "read-only dumpsys gfxinfo com.mani.orbit",
+    "frames": 13405,
+    "jankyPct": 15.16,
+    "p50Ms": 8,
+    "p90Ms": 17,
+    "p95Ms": 21,
+    "p99Ms": 42,
+    "slowIssueDrawCommands": 1663
+  },
+  "method": "Playwright + Chromium 1243, 390x844 @3x, 4x CPU throttle, trace sums per scenario (main thread style/layout, raster, viz)",
+  "scenarios": {
+    "idle-home": {
+      "before": {
+        "busyPct": 13.9,
+        "styleMs": 0,
+        "rasterMs": 0,
+        "vizMs": 158.6,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      },
+      "after": {
+        "busyPct": 16.8,
+        "styleMs": 0,
+        "rasterMs": 0,
+        "vizMs": 162.6,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      }
+    },
+    "orb-period-taps-x3": {
+      "before": {
+        "busyPct": 34.3,
+        "styleMs": 25.1,
+        "rasterMs": 96.6,
+        "vizMs": 418.3,
+        "over20ms": 3,
+        "maxFrameMs": 50
+      },
+      "after": {
+        "busyPct": 42.8,
+        "styleMs": 28.5,
+        "rasterMs": 153.5,
+        "vizMs": 502.7,
+        "over20ms": 3,
+        "maxFrameMs": 49.9
+      }
+    },
+    "deck-open-close-x2": {
+      "before": {
+        "busyPct": 46.1,
+        "styleMs": 863.5,
+        "rasterMs": 2328.5,
+        "vizMs": 2948.9,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      },
+      "after": {
+        "busyPct": 24.9,
+        "styleMs": 165.4,
+        "rasterMs": 180.6,
+        "vizMs": 2935.5,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      }
+    },
+    "deck-scroll-expanded": {
+      "before": {
+        "busyPct": 19,
+        "styleMs": 28,
+        "rasterMs": 144.2,
+        "vizMs": 808.9,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      },
+      "after": {
+        "busyPct": 20.1,
+        "styleMs": 23.6,
+        "rasterMs": 145.3,
+        "vizMs": 813.8,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      }
+    },
+    "live-bar-open-close-x2": {
+      "before": {
+        "busyPct": 32.6,
+        "styleMs": 246,
+        "rasterMs": 408.9,
+        "vizMs": 1816.5,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      },
+      "after": {
+        "busyPct": 24.6,
+        "styleMs": 134.3,
+        "rasterMs": 283.5,
+        "vizMs": 1858.9,
+        "over20ms": 0,
+        "maxFrameMs": 16.8
+      }
+    },
+    "open-body-page-and-back": {
+      "before": {
+        "busyPct": 21.8,
+        "styleMs": 129.1,
+        "rasterMs": 221.6,
+        "vizMs": 1129.5,
+        "over20ms": 1,
+        "maxFrameMs": 50.1
+      },
+      "after": {
+        "busyPct": 20,
+        "styleMs": 79.8,
+        "rasterMs": 157.8,
+        "vizMs": 1191.3,
+        "over20ms": 1,
+        "maxFrameMs": 50
+      }
+    }
+  },
+  "shellRepaintsPerFoldCycle": {
+    "before": 428,
+    "after": 16
+  },
+  "styleResolutionsPerFoldCycle": {
+    "before": 14121,
+    "after": 2576
+  },
+  "changes": [
+    "index.html: cards wrapped in .stack-motion boxes (transform/opacity/height clip/z-order); shell is a .stack-shell child element with the former ::before rules; inline staged-reveal, footer and metric-icon values; children promoted",
+    "index.html: --deck-progress on the live bar, --island-open on the island trigger; hero transforms written directly to canvas/readout",
+    "index.html: charts deferred to idle or deck opening; measureDeck single layout; live island radius in whole pixels",
+    "signal-orb.js: dots batched into 16 depth bands",
+    "verification/check.cjs: exposes renderCharts and flushes before NaN assertions"
+  ],
+  "checks": {
+    "nodeModel": "PASS",
+    "rendered": [
+      "ux-motion-390",
+      "ux-motion-320",
+      "focus-music-390",
+      "focus-music-320"
+    ],
+    "liveBackground": "PASS",
+    "native": "PASS"
+  },
+  "visualDiff": {
+    "folded": "0 px",
+    "midFold": "0.07% >8 levels, 0.005% >40",
+    "open": "0.14% >8 levels, 0.02% >40",
+    "liveBarOpen": "0 px",
+    "note": "orb canvas masked; residual is text/icon edge anti-aliasing of composited layers in headless desktop Chromium",
+    "files": "verification/perf-visual-diff/"
+  },
+  "backups": [
+    "verification/before-music-switch-20260910-234519"
+  ],
+  "limits": [
+    "Relative desktop measurements, not S25 Ultra frame times",
+    "Frost re-blur cost intentionally unchanged"
+  ]
+}

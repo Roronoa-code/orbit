@@ -1,0 +1,9 @@
+{
+  "apkSha256": "3a0f73bbea9d9ed193c2b6ccabc17425b29dd1b0f06708e16f11b10f86352647",
+  "installedPackageSha256": "3a0f73bbea9d9ed193c2b6ccabc17425b29dd1b0f06708e16f11b10f86352647",
+  "apkBytes": 131673,
+  "sourceLines": 621,
+  "bundledScriptAndStyleMatch": true,
+  "legacyModalAndPillMorphRemoved": true,
+  "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260909-231528"
+}

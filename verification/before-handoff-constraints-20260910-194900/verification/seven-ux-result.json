@@ -1,0 +1,78 @@
+{
+  "updated": "2026-09-10T19:46:20",
+  "status": "Installed; user requested that further phone checks stop and will review",
+  "project": "C:\\HA\\design-concepts\\signal-orbit-steps",
+  "apkSha256": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "installedApkSha256": "6dfb41a4e867e51cd67b9983e30db71ca922c02c41c112fbcdd325f8f72ad883",
+  "build": "android/build/20260910-194200",
+  "device": "Samsung SM-S938B / 192.168.0.210:39389",
+  "launch": "WARM 115 ms",
+  "checks": {
+    "nodeModel": "PASS",
+    "workoutDetails": "PASS",
+    "nativeBoundsTokensDistance": "PASS",
+    "compileSignatureBundledSources": "PASS",
+    "rendered": [
+      "ux-motion-390",
+      "ux-motion-320",
+      "focus-music-390",
+      "focus-music-320",
+      "workout-details-390",
+      "workout-details-320"
+    ],
+    "liveBackground": [
+      "live-background-390",
+      "live-background-320"
+    ]
+  },
+  "backgroundCheckLimit": "Headless baseline did not reproduce the visible flash. Regression checks establish stable blur dimensions, timer-only mutations and unchanged sampled background pixels. Final running-workout phone verification stopped at user request.",
+  "nativeMusic": {
+    "firstReadMs": 1,
+    "artworkReadyEvent": true,
+    "coverWidth": 544,
+    "coverHeight": 544,
+    "eligibleUpcomingLocalArtwork": false,
+    "prefetchedCovers": 0,
+    "transportCommands": 0,
+    "evidence": "Read-only MusicRuntimeCheck on preceding build with unchanged native sources; check package removed"
+  },
+  "phone": {
+    "precedingBuild": "2604486b2902b18db97402c2446200c290062c6f4873e282ac5b5d6d0473c6ea",
+    "priorSweep": "Focus pause/resume, real artwork, live-bar opening/closing, finish/save and history",
+    "ownedTestFinished": true,
+    "ownedActiveDuration": "03:31",
+    "recordsBefore": 13,
+    "recordsAfter": 14,
+    "finalPatchWorkoutStarted": false,
+    "finalPatchCheck": "Installed hash and idle launch confirmed; stopped before active-session check on user instruction",
+    "finalCapture": "verification/seven-ux-phone/flicker-current.png"
+  },
+  "limits": [
+    "Final visual acceptance pending user review",
+    "Positive upcoming-cover prefetch depends on provider artwork access and is not qualified on checked BitChord queue",
+    "Health histories are demonstration fixtures",
+    "Outdoor GPS and Watch/native Health integration unqualified"
+  ],
+  "backups": [
+    "verification/before-seven-ux-fixes-20260910-183639",
+    "verification/before-live-bar-review-20260910-191140",
+    "verification/before-live-background-20260910-193826"
+  ],
+  "sourceSha256": {
+    "index.html": "e9210253d711f36aecaf4bdb3de45274353fb71c3fc3243fca999ca96e538e23",
+    "health-pages.css": "98a0fe59dc9c6e5eb777da67590628b285f249e7a704cedb39866e01ca74d28e",
+    "health-pages.js": "c9a918328fc78cb6eec9b020359e7a4fa2de9e1ff0f138be97d3fcb40405db7a",
+    "hero-dots.js": "278afc6644b67dc4cefca93800a3042c493c292a9c94c8e0c168e2a827cee8e8",
+    "signal-orb.js": "9ae09909d5f162632057806c513886a4346292f620af8a6d81a2268f96c7e68d",
+    "sleep-timeline.js": "4b5b1df58ea7e91f5f6df0106cf907aa8d0995f2206af3e1c94e4c4d0f8a32a5",
+    "surface-motion.js": "681e13d6df45fd21084abe13a13fd06676b515c3b0e2e310b5aca71431161493",
+    "workout-details.js": "6705884d9fd040a9cabd7172a7262a1763afa703179faba0ded7a5f95b1a6c56",
+    "workout-focus.js": "5559bd2879218d518b9deb199f970d3be5c5af873ddc8dcff7b283eb50f2107e",
+    "android/src/com/mani/orbit/MainActivity.java": "9c50b7a009b226da155f048a65de8ce2e8437d6c2fe2e80c5a91aeeea1ca2e69",
+    "android/src/com/mani/orbit/MusicSession.java": "3b3ed26295a75a128627b24eac2d4f07d175840a4fa19a4b693ccd9e745177ac",
+    "android/src/com/mani/orbit/WorkoutLocationMath.java": "36d06b7bdd26f9f1fb0a696a5d1631d124304f9865ae39fc7687558a09ac41d3",
+    "android/src/com/mani/orbit/WorkoutNotification.java": "f3da44d6899e7a9a814693a536b6381a167c7e76995a2d53b47f739be3ffe2fe",
+    "android/src/com/mani/orbit/WorkoutSession.java": "1b5904501ffb125df9a7c85b3a2a75c769dbd213d8679129c4d28cc7dd1f5051",
+    "android/src/com/mani/orbit/WorkoutTrackingService.java": "9f34a1877d5c51b907b6349ad8a3b1c5906db3c6a7fdc6b19343fb8faa50d50f"
+  }
+}
