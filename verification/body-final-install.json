@@ -1,0 +1,14 @@
+{
+ "request": "User, 11 September 2026: \"192.168.0.210:38347 - install to my phone\"",
+ "device": "192.168.0.210:38347, model SM-S938B",
+ "time": "2026-09-11 21:37:57",
+ "command": "adb -s 192.168.0.210:38347 install -r dist/Orbit.apk",
+ "result": "Success (streamed install, app data kept)",
+ "build": "android/build/20260911-213518",
+ "apkSha256": "843ab25a6824d0ab4cb33a3ba273bec80343c1628024a629c8367a60f05d276e",
+ "installedSha256": "843ab25a6824d0ab4cb33a3ba273bec80343c1628024a629c8367a60f05d276e",
+ "installedMatchesBuild": true,
+ "previousApk": {"sha256": "7d8b32a3d700de0af983ea83981715a3423f9e1ab63efc57fe64789144adc01e", "build": "android/build/20260911-203737", "backup": "verification/body-final-phone/phone-before.apk"},
+ "launched": false,
+ "otherDevices": "BYZL25052900310864 not touched"
+}

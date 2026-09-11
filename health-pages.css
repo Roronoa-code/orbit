@@ -406,24 +406,15 @@
 .body-share i:not(:first-child){margin-left:6px}
 .body-centre{position:absolute;inset:16%;padding:0;border:0;border-radius:50%;background:none}
 .body-centre:focus-visible{outline-offset:-2px}
-.body-shift{position:absolute;top:50%;width:44px;height:44px;margin-top:-22px;padding:0;border:0;border-radius:50%;background:none;display:grid;place-items:center;color:#bba9e6;opacity:.6;transition:opacity 220ms ease,transform 160ms ease}
-.body-shift[data-body-shift="-1"]{left:5%}
-.body-shift[data-body-shift="1"]{right:5%}
-.body-shift svg{width:15px;height:15px}
-.body-shift[data-body-shift="-1"] svg{transform:rotate(180deg)}
-.body-shift:active{transform:scale(.88);opacity:.9}
-.body-shift:disabled{opacity:0;pointer-events:none}
 
-/* The selector doubles as the compact summary: every measurement's value, the chosen one under a lavender glass pill. */
-.body-metric-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:8px 0 0;padding:4px;border-radius:24px}
-.body-metric-picker button{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;min-height:54px;padding:8px 2px;border:0;border-radius:20px;background:none;color:#a7a3b1;transition:color 240ms ease,transform 160ms ease}
-.body-metric-picker button>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;letter-spacing:.15px;white-space:nowrap}
-.body-metric-picker strong{font-size:14px;font-weight:500;letter-spacing:-.2px;color:#d9d6e0;white-space:nowrap;font-variant-numeric:tabular-nums;transition:color 240ms ease}
-.body-metric-picker strong small{margin-left:2px;font-size:8.5px;letter-spacing:0;color:inherit;opacity:.72}
-.body-metric-picker button[aria-pressed=true]{color:#e4dafc}
-.body-metric-picker button[aria-pressed=true] strong{color:#fff}
-.body-metric-picker button:active{transform:scale(.96)}
+/* The selector only chooses: fixed labels on a glass track, with a capsule that can be dragged across them. Two
+   capsules sit one track-width apart, so a looping move leaves one end as it enters the other. */
+.body-metric-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 0;padding:4px;border-radius:24px;overflow:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.body-metric-picker button{position:relative;z-index:1;min-width:0;min-height:44px;padding:0 4px;border:0;border-radius:20px;background:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;letter-spacing:.1px;color:#a7a3b1;transition:color 220ms ease}
+.body-metric-picker button[aria-pressed=true],.body-metric-picker button.is-over{color:#f1ebff}
+.body-metric-picker.is-dragging button[aria-pressed=true]:not(.is-over){color:#a7a3b1}
 .body-metric-picker>.selection-pill{border-radius:20px;background:linear-gradient(180deg,#bca4ff38,#b69cff1c);box-shadow:inset 0 1px 0 #efe6ff38,inset 0 0 0 1px #c6b3ff24,0 6px 14px -8px #000;will-change:transform}
+.body-metric-picker.is-dragging>.selection-pill{background:linear-gradient(180deg,#c7b2ff4d,#b69cff2b);box-shadow:inset 0 1px 0 #f3ecff52,inset 0 0 0 1px #cdbbff3a,0 8px 18px -8px #000}
 
 /* History: range, inspected reading, chart, then the period's average and extremes. */
 .body-timeline{margin:12px 0 0;padding:16px 16px 14px;border-radius:26px}
@@ -435,9 +426,15 @@
 .segmented button:active{transform:scale(.96)}
 .segmented>.selection-pill{border-radius:17px;box-shadow:inset 0 1px 0 #ffffff2e,0 3px 8px -4px #000}
 .body-readout{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 2px 0}
-.body-readout-value{font-size:27px;font-weight:500;line-height:1.1;letter-spacing:-.9px;color:#f4f2f8;font-variant-numeric:tabular-nums}
+.body-readout-value{font-size:27px;font-weight:500;line-height:1.1;letter-spacing:-.9px;color:#f4f2f8;font-variant-numeric:tabular-nums;white-space:nowrap}
 .body-readout-value small{margin-left:5px;font-size:12px;font-weight:400;letter-spacing:0;color:#c5c0cf}
-.body-readout-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin-top:5px;font-size:10.5px;color:#aaa6b4}
+.body-readout-text{flex:1;min-width:0}
+/* Fat's share of body weight is its own line under the kg reading. */
+.body-readout-share{margin-top:4px;font-size:11.5px;color:#d3cddd;white-space:nowrap;font-variant-numeric:tabular-nums}
+.body-readout-share:empty{display:none}
+/* Date and change never break inside; when the row is too narrow they stack as whole lines. */
+.body-readout-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin-top:6px;font-size:10.5px;color:#aaa6b4}
+.body-readout-meta>*{white-space:nowrap}
 #body-date{color:#e3dcf4}
 #body-change{color:#c7b3ff}
 .body-date-stepper{display:flex;gap:6px;flex:none}
@@ -460,6 +457,6 @@
 .body-stats dd small{margin-left:3px;font-size:9.5px;font-weight:400;letter-spacing:0;color:#aaa6b4}
 .body-coverage{margin:12px 2px 0;font-size:9px;line-height:1.5;color:#8f8a9b}
 .health-page[data-page=body] .health-note{margin:12px 6px 4px;font-size:9.5px;line-height:1.6;color:#9a96a4}
-@media(max-width:360px){.body-composition{width:min(100%,280px)}.body-value .matrix-reading{height:44px}.body-metric-picker strong{font-size:13px}.body-metric-picker button>span{font-size:9px}.body-timeline{padding-inline:13px}.body-readout-value{font-size:24px}.body-stats dd{font-size:14px}}
+@media(max-width:360px){.body-composition{width:min(100%,280px)}.body-value .matrix-reading{height:44px}.body-metric-picker button{font-size:11px}.body-timeline{padding-inline:13px}.body-hero:before{left:-11px;right:-11px}.body-readout-value{font-size:24px}.body-readout-meta{flex-direction:column;align-items:flex-start;gap:2px}.body-stats dd{font-size:14px}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-glass,.health-page[data-page=body] .health-page-head .icon-button{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}.health-page[data-page=body] .health-head-frost{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0a0a0c}}
 @media(forced-colors:active){.health-glass{background:Canvas;border:1px solid CanvasText}.health-glass:before,.health-page[data-page=body] .health-head-frost{display:none}.body-metric-picker>.selection-pill{background:Highlight}.body-share i{forced-color-adjust:none}}

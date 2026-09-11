@@ -1,0 +1,126 @@
+{
+ "W": 390,
+ "H": 844,
+ "states": [
+  {
+   "name": "rest",
+   "metric": "weight",
+   "pillLeft": 18,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "held-30px",
+   "metric": "weight",
+   "pillLeft": 27.3,
+   "current": "translate3d(-22px, 0px, 0px) scale(0.9948)",
+   "next": "translate3d(188px, 0px, 0px) scale(0.9552)"
+  },
+  {
+   "name": "held-70px",
+   "metric": "weight",
+   "pillLeft": 44.1,
+   "current": "translate3d(-62px, 0px, 0px) scale(0.9852)",
+   "next": "translate3d(148px, 0px, 0px) scale(0.9648)"
+  },
+  {
+   "name": "held-110px",
+   "metric": "weight",
+   "pillLeft": 61,
+   "current": "translate3d(-102px, 0px, 0px) scale(0.9757)",
+   "next": "translate3d(108px, 0px, 0px) scale(0.9743)"
+  },
+  {
+   "name": "held-160px",
+   "metric": "weight",
+   "pillLeft": 82.1,
+   "current": "translate3d(-152px, 0px, 0px) scale(0.9638)",
+   "next": "translate3d(58px, 0px, 0px) scale(0.9862)"
+  },
+  {
+   "name": "released-90ms",
+   "metric": "fatMass",
+   "pillLeft": 103.7,
+   "current": "translate3d(-203.34px, 0px, 0px) scale(0.9516)",
+   "next": "translate3d(6.66px, 0px, 0px) scale(0.9984)"
+  },
+  {
+   "name": "settled",
+   "metric": "fatMass",
+   "pillLeft": 106.5,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "short-held",
+   "metric": "fatMass",
+   "pillLeft": 93,
+   "current": "translate3d(32px, 0px, 0px) scale(0.9924)",
+   "next": "translate3d(-178px, 0px, 0px) scale(0.9576)"
+  },
+  {
+   "name": "sprung-back",
+   "metric": "fatMass",
+   "pillLeft": 106.5,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "tap-70ms",
+   "metric": "lean",
+   "pillLeft": 257.1,
+   "current": "translate3d(-178.73px, 0px, 0px) scale(0.9574)",
+   "next": "translate3d(31.27px, 0px, 0px) scale(0.9926)"
+  },
+  {
+   "name": "tap-180ms",
+   "metric": "lean",
+   "pillLeft": 282.9,
+   "current": "translate3d(-209.26px, 0px, 0px) scale(0.9502)",
+   "next": "translate3d(0.74px, 0px, 0px) scale(0.9998)"
+  },
+  {
+   "name": "tap-settled",
+   "metric": "lean",
+   "pillLeft": 283.5,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "loop-held",
+   "metric": "weight",
+   "pillLeft": 324.8,
+   "current": "translate3d(112px, 0px, 0px) scale(0.9733)",
+   "next": "translate3d(-98px, 0px, 0px) scale(0.9767)"
+  },
+  {
+   "name": "loop-settled",
+   "metric": "lean",
+   "pillLeft": 283.5,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "selector-drag",
+   "metric": "lean",
+   "pillLeft": 194.5,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "selector-released",
+   "metric": "muscle",
+   "pillLeft": 195,
+   "current": "translate3d(185.55px, 0px, 0px) scale(0.9558)",
+   "next": "translate3d(-24.45px, 0px, 0px) scale(0.9942)"
+  },
+  {
+   "name": "selector-settled",
+   "metric": "muscle",
+   "pillLeft": 195,
+   "current": "",
+   "next": ""
+  }
+ ],
+ "errors": []
+}

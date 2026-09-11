@@ -29,8 +29,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await touch('touchEnd');await sleep(700);await shot('sprung-back');
  // A tap on a distant entry runs the same move over one lens width while the pill travels the row.
  await page.tap('[data-body-metric="lean"]');await sleep(70);await shot('tap-70ms');await sleep(110);await shot('tap-180ms');await sleep(600);await shot('tap-settled');
- // The first measurement resists instead of wrapping.
- await page.tap('[data-body-metric="weight"]');await sleep(800);x=box.cx-20;await touch('touchStart',x,y);while(x<box.cx+100){x+=6;await touch('touchMove',x,y);await sleep(16)}await sleep(80);await shot('edge-held');await touch('touchEnd');await sleep(700);await shot('edge-settled');
+ // From the first measurement a drag back loops round to the last.
+ await page.tap('[data-body-metric="weight"]');await sleep(800);x=box.cx-20;await touch('touchStart',x,y);while(x<box.cx+100){x+=6;await touch('touchMove',x,y);await sleep(16)}await sleep(80);await shot('loop-held');await touch('touchEnd');await sleep(700);await shot('loop-settled');
+ // Press the selector and slide across the labels: the capsule follows, the labels stay, release picks.
+ const labels=await page.evaluate(()=>[...document.querySelectorAll('[data-body-metric]')].map(n=>{const r=n.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}}));
+ if(labels.length>2){x=labels[0].x;const ly=labels[0].y;await touch('touchStart',x,ly);while(x<labels[2].x){x=Math.min(labels[2].x,x+7);await touch('touchMove',x,ly);await sleep(16)}await sleep(60);await shot('selector-drag');await touch('touchEnd');await sleep(90);await shot('selector-released');await sleep(700);await shot('selector-settled')}
  fs.writeFileSync(path.join(out,'states.json'),JSON.stringify({W,H,states,errors},null,1));
  const tileW=W,tileH=clip.height,cols=4,rows=Math.ceil(shots.length/cols),composites=[];
  for(const [i,s] of shots.entries()){const left=(i%cols)*(tileW+8),top=Math.floor(i/cols)*(tileH+30);composites.push({input:await sharp(s.file).resize(tileW,Math.round(tileH)).toBuffer(),left,top:top+26});composites.push({input:Buffer.from(`<svg width="${tileW}" height="24"><text x="4" y="17" font-family="Segoe UI" font-size="15" fill="#fff">${s.name}</text></svg>`),left,top})}

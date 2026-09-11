@@ -7,7 +7,7 @@
     "Globe and reading transitions survive rapid input",
     "Stack drag starts from rest; its structure changes only while it rests",
     "Temporary chart value and intentional scroll fade",
-    "Ring drag, spring-back, chevron step and edge resistance",
+    "Four label-only measurements in order, looping ring drag and tap, spring-back, draggable glass selector, fat in kg with its share",
     "Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps",
     "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
     "Pause/resume preserves the clock, freezes time and eases brightness/size"
@@ -15,7 +15,7 @@
   "measurements": {
     "liveBar": {
       "closedHeight": 61.9921875,
-      "intermediateHeight": 115.64453125,
+      "intermediateHeight": 114.53125,
       "expandedHeight": 167.98828125
     },
     "stackDrag": {

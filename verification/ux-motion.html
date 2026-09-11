@@ -70,15 +70,24 @@ document.querySelector('#run').onclick=async()=>{
     api().Health.open('body');await wait(260);const picker=q('.body-metric-picker'),ring=q('[data-mix-dot="0"]'),muscle=q('[data-body-metric="muscle"]'),pill=q('.body-metric-picker .selection-pill'),left=box(pill).left;
     muscle.click();check(q('.body-metric-picker')===picker&&q('[data-mix-dot="0"]')===ring,'Body selection must preserve controls and ring');await wait(85);
     const mid=box(pill).left;check(mid>left+.5&&mid<box(muscle).left-.1,'Body selection pill must slide between tabs');await wait(400);check(Math.abs(box(pill).left-box(muscle).left)<.5,'Selection pill must finish under the chosen tab');
-    // A horizontal drag on the ring is the same switch: the pill follows the finger and the release settles.
-    const dial=box(q('.body-composition')),centre=q('.body-centre'),ptr=(type,x)=>centre.dispatchEvent(new (w().PointerEvent)(type,{pointerId:9,isPrimary:true,pointerType:'touch',clientX:x,clientY:dial.top+dial.height/2,bubbles:true,cancelable:true}));
-    const swipe=async(dx,hold)=>{const x0=dial.left+dial.width/2;ptr('pointerdown',x0);for(let i=1;i<=10;i++){await nextFrame();ptr('pointermove',x0+dx*i/10)}const during=box(pill).left;if(hold)await wait(hold);ptr('pointerup',x0+dx);return during};
-    const muscleLeft=box(muscle).left;check(await swipe(-150,0)>muscleLeft+2,'The pill must follow a ring drag towards the next measurement');await wait(700);
-    check(q('[data-body-metric="fat"]').getAttribute('aria-pressed')==='true'&&q('[data-mix-dot="0"]')===ring,'Releasing a long ring drag must select the next measurement and keep the ring');
-    await swipe(40,120);await wait(700);check(q('[data-body-metric="fat"]').getAttribute('aria-pressed')==='true','A short, held ring drag must spring back');
-    q('[data-body-shift="-1"]').click();await wait(700);check(q('[data-body-metric="muscle"]').getAttribute('aria-pressed')==='true','The ring chevron must step to the previous measurement');
-    q('[data-body-metric="weight"]').click();await wait(700);await swipe(120,0);await wait(700);check(q('[data-body-metric="weight"]').getAttribute('aria-pressed')==='true'&&q('[data-body-shift="-1"]').disabled,'The first measurement must resist a drag instead of wrapping');
-    checks.push('Ring drag, spring-back, chevron step and edge resistance');
+    // A horizontal drag on the ring is the same switch and the row loops: the capsule follows the finger, the release settles.
+    const dial=box(q('.body-composition')),centre=q('.body-centre'),ptr=(target,type,x,y)=>target.dispatchEvent(new (w().PointerEvent)(type,{pointerId:9,isPrimary:true,pointerType:'touch',clientX:x,clientY:y,bubbles:true,cancelable:true}));
+    const swipe=async(dx,hold)=>{const x0=dial.left+dial.width/2,y=dial.top+dial.height/2;ptr(centre,'pointerdown',x0,y);for(let i=1;i<=10;i++){await nextFrame();ptr(centre,'pointermove',x0+dx*i/10,y)}const during=box(pill).left;if(hold)await wait(hold);ptr(centre,'pointerup',x0+dx,y);return during};
+    const pressed=()=>q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric,labels=[...doc().querySelectorAll('[data-body-metric]')];
+    check(labels.map(n=>n.textContent).join()==='Weight,Fat,Muscle,Lean mass'&&!q('[data-body-value]')&&!q('[data-body-shift]')&&!q('.body-composition svg use'),'The selector must list only Weight, Fat, Muscle and Lean mass as labels, with no values or arrows');
+    const muscleLeft=box(muscle).left;check(await swipe(-150,0)>muscleLeft+2,'The capsule must follow a ring drag towards the next measurement');await wait(700);
+    check(pressed()==='lean'&&q('[data-mix-dot="0"]')===ring,'Releasing a long ring drag must select the next measurement and keep the ring');
+    await swipe(40,120);await wait(700);check(pressed()==='lean','A short, held ring drag must spring back');
+    await swipe(-150,0);await wait(700);check(pressed()==='weight','Swiping on from Lean mass must loop to Weight');
+    await swipe(150,0);await wait(700);check(pressed()==='lean','Swiping back from Weight must loop to Lean mass');
+    centre.click();await wait(700);check(pressed()==='weight'&&Math.abs(box(pill).left-box(labels[0]).left)<.6,'Tapping the ring on Lean mass must loop to Weight');
+    // Press the selector and slide across the labels: the capsule follows the finger, the labels stay put, release picks.
+    const track=q('.body-metric-picker'),cx=n=>box(n).left+box(n).width/2,ty=box(track).top+box(track).height/2,labelLefts=labels.map(n=>box(n).left);
+    ptr(labels[0],'pointerdown',cx(labels[0]),ty);for(let i=1;i<=12;i++){await nextFrame();ptr(labels[0],'pointermove',cx(labels[0])+(cx(labels[2])-cx(labels[0]))*i/12,ty)}await wait(150);
+    check(box(pill).left>labelLefts[1]&&pressed()==='weight'&&labels.every((n,i)=>Math.abs(box(n).left-labelLefts[i])<.1),'The glass capsule must follow a selector drag without moving the labels or committing early');
+    ptr(labels[0],'pointerup',cx(labels[2]),ty);await wait(700);check(pressed()==='muscle'&&Math.abs(box(pill).left-labelLefts[2])<.6,'Releasing a selector drag must pick the label beneath the finger');
+    q('[data-body-metric="fatMass"]').click();await wait(700);check(q('#body-reading').textContent===q('.body-reading.is-current .body-value title').textContent&&q('#body-unit').textContent==='kg'&&/% of body weight/.test(q('#body-fat-share').textContent)&&/% of body weight/.test(q('.body-reading.is-current .body-share').textContent),'Fat must read in kg with its share of body weight, in the ring and in History');
+    checks.push('Four label-only measurements in order, looping ring drag and tap, spring-back, draggable glass selector, fat in kg with its share');
     const year=q('[data-body-range="365"]');year.click();check(q('[data-body-range="365"]')===year,'Range controls must retain their identity');await wait(420);
     check(q('#body-range-start').textContent.includes('2024')&&q('#body-range-end').textContent.includes('2025'),'Year axis must cover a full year');check(q('#body-coverage').textContent.startsWith('90 '),'Year view must include all90 available demo records');check(q('#body-gap').textContent==='No earlier measurements','Missing early history must be explicit');check(Number(q('#body-line').getAttribute('d').match(/^M([\d.]+)/)[1])>210,'Ninety days must occupy their actual place within a year');
     q('#body-scrub').value=0;q('#body-scrub').dispatchEvent(new (w().Event)('input',{bubbles:true}));check(q('#body-date').textContent.includes('Jun'),'Scrubbing missing history must select an existing date');check(Number(q('#body-scrub').value)>270,'Scrubber must align with the recorded date, not invent earlier readings');
