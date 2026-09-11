@@ -7,6 +7,7 @@
     "Globe and reading transitions survive rapid input",
     "Stack drag starts from rest; its structure changes only while it rests",
     "Temporary chart value and intentional scroll fade",
+    "Ring drag, spring-back, chevron step and edge resistance",
     "Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps",
     "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
     "Pause/resume preserves the clock, freezes time and eases brightness/size"
@@ -14,7 +15,7 @@
   "measurements": {
     "liveBar": {
       "closedHeight": 61.9921875,
-      "intermediateHeight": 119.6875,
+      "intermediateHeight": 118.06640625,
       "expandedHeight": 167.98828125
     },
     "stackDrag": {
@@ -22,7 +23,7 @@
     },
     "body": {
       "firstPlotX": 221.53846153846155,
-      "coverage": "90 demonstration measurements · 11 Jun–8 Sept"
+      "coverage": "90 demonstration measurements · 11 Jun–8 Sept · line shows weekly averages"
     },
     "activeLiveBar": {
       "height": 288.984375,

@@ -1,0 +1,15 @@
+{
+ "request": "User, 11 September 2026: \"192.168.0.210:38347 - install to my phone\"",
+ "device": "192.168.0.210:38347, model SM-S938B",
+ "time": "2026-09-11 20:43:07",
+ "command": "adb -s 192.168.0.210:38347 install -r dist/Orbit.apk",
+ "result": "Success (streamed install, app data kept)",
+ "build": "android/build/20260911-203737",
+ "apkSha256": "7d8b32a3d700de0af983ea83981715a3423f9e1ab63efc57fe64789144adc01e",
+ "installedSha256": "7d8b32a3d700de0af983ea83981715a3423f9e1ab63efc57fe64789144adc01e",
+ "installedMatchesBuild": true,
+ "installedPath": "/data/app/~~eYt9ZlaSu_vLM_B5EBo4Xg==/com.mani.orbit-7eFGITS8XR_jBjKbGFEyfQ==/base.apk",
+ "previousApk": {"sha256": "a81b137d20403325dbd3e2236b68c22d5cfc96cb827d9d78ff51c21b62636337", "build": "android/build/20260911-041135", "backup": "verification/body-premium-phone/phone-before.apk"},
+ "launched": false,
+ "otherDevices": "BYZL25052900310864 not touched; the stale offline entry 192.168.0.210:44875 was not used"
+}

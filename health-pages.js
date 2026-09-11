@@ -40,7 +40,7 @@ const Health = (() => {
     return false;
   }
   function live(){const a=store.active;return a?{title:a.kind,elapsed:clock(elapsed(a)),paused:a.resumedAt===null,targetMs:a.targetMs||0,remaining:clock(Math.max(0,(a.targetMs||0)-elapsed(a)))}:null}
-  const bodyFields={weight:['Weight','kg'],muscle:['Muscle','kg'],fat:['Body fat','%'],fatMass:['Fat mass','kg'],lean:['Lean mass','kg']};
+  const bodyFields={weight:['Weight','kg'],muscle:['Skeletal muscle','kg','Muscle'],fat:['Body fat','%'],fatMass:['Fat mass','kg'],lean:['Lean mass','kg']};
   function sample(which,date){
     const ago=Math.round((Date.parse(options.dates.at(-1)+'T12:00:00Z')-Date.parse(date+'T12:00:00Z'))/86400000),weight=75.8+ago*.025,fat=18.2+Math.sin(ago)*.3;
     if(which==='body')return {weight,muscle:34.1+Math.sin(ago)*.2,fat,fatMass:weight*fat/100,lean:weight*(1-fat/100)};
@@ -58,44 +58,150 @@ const Health = (() => {
   }
   function bodyRows(){const end=options.getDate(),start=dayOffset(end,1-bodyRange);return (options.historyDates||options.dates).filter(date=>date>=start&&date<=end)}
   function sleepView(){const index=options.dates.indexOf(sleepDate);return `<div class="sleep-date-nav"><button data-night-date="-1" aria-label="Previous night" ${index<=0?'disabled':''}>‹</button><span>${stamp(sleepDate+'T12:00:00',true)}</span><button data-night-date="1" aria-label="Next night" ${index>=options.dates.length-1?'disabled':''}>›</button></div>`+SleepTimeline.view(options.getDaily(sleepDate).night,sleepMinute)}
-  function bodyFill(i,data){const fraction=bodyMetric==='fat'?data.fat/100:data[bodyMetric]/data.weight;return bodyMetric==='weight'?(i/80<data.fat/100?'#b69cff':'#dddce4'):(i/80<fraction?'#b69cff':'#36343e')}
-  function bodyRing(data){return `<svg viewBox="0 0 300 300" aria-hidden="true">${Array.from({length:80},(_,i)=>{const a=(i/80*360-90)*Math.PI/180;return `<circle data-mix-dot="${i}" cx="${150+Math.cos(a)*128}" cy="${150+Math.sin(a)*128}" r="3.2" fill="${bodyFill(i,data)}"/>`}).join('')}<circle cx="150" cy="150" r="112" fill="none" stroke="#ffffff09"/></svg>`}
+  // Each of the ring's 100 dots is 1% of body weight: purple is the selected measurement's share (fat for Weight).
+  const bodyOrder=Object.keys(bodyFields),bodyTone={purple:[182,156,255],lean:[220,219,227],rest:[52,50,60]};
+  const bodyShare=(field,d)=>field==='weight'||field==='fat'?d.fat/100:d[field]/d.weight;
+  const bodyRest=field=>field==='weight'?bodyTone.lean:bodyTone.rest;
+  const bodyIndex=field=>bodyOrder.indexOf(field),bodyNumber=(field,d)=>d[field].toFixed(1),percent=n=>Math.round(n*100)+'%';
+  const mixTone=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+  let ringFills=[];
+  function bodyCaption(field,d){
+    if(field==='weight')return `<i class="is-lean"></i>${percent(d.lean/d.weight)} lean<i></i>${percent(d.fat/100)} fat`;
+    return `<i></i>${field==='fat'?`${d.fatMass.toFixed(1)} kg of ${d.weight.toFixed(1)} kg`:percent(bodyShare(field,d))+' of body weight'}`;
+  }
+  function bodyReading(field,date){const d=sample('body',date),[label,unit]=bodyFields[field],latest=date===bodyRows().at(-1);return `<span class="body-measure-name">${label}${latest?'':' · '+stamp(date+'T12:00:00')}</span><span class="body-value">${HeroDots.markup(bodyNumber(field,d))}<small>${unit}</small></span><span class="body-share">${bodyCaption(field,d)}</span>`}
+  function bodyRing(){return `<svg viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="117" fill="none" stroke="#ffffff08"/>${Array.from({length:100},(_,i)=>{const a=(i/100*360-90)*Math.PI/180;return `<circle data-mix-dot="${i}" cx="${(150+Math.cos(a)*134).toFixed(2)}" cy="${(150+Math.sin(a)*134).toFixed(2)}" r="2.6"/>`}).join('')}</svg>`}
+  // A fractional share lights the boundary dot partly, so the arc grows smoothly while it moves.
+  function paintRing(share,rest){const lit=share*100;document.querySelectorAll('[data-mix-dot]').forEach((dot,i)=>{const fill=`rgb(${mixTone(rest,bodyTone.purple,Math.max(0,Math.min(1,lit-i)))})`;if(ringFills[i]!==fill){ringFills[i]=fill;dot.setAttribute('fill',fill)}})}
   const bodyOffset=date=>Math.round((Date.parse(date+'T12:00:00Z')-Date.parse(dayOffset(options.getDate(),1-bodyRange)+'T12:00:00Z'))/86400000);
   function bodyPlot(rows){
     const values=rows.map(date=>sample('body',date)[bodyMetric]),min=Math.min(...values),span=Math.max(.1,Math.max(...values)-min),start=Date.parse(dayOffset(options.getDate(),1-bodyRange)+'T12:00:00Z');
     return values.map((value,i)=>({x:10+(Date.parse(rows[i]+'T12:00:00Z')-start)/86400000/Math.max(1,bodyRange-1)*280,y:97-(value-min)/span*65}));
   }
-  function positionBodySelection(picker,scroll=false){
+  // Long ranges draw weekly averages through the daily readings (the dots), so day-to-day scatter does not read as a zigzag.
+  function bodyTrend(rows,points){
+    if(bodyRange<90)return points;
+    const last=Date.parse(rows.at(-1)+'T12:00:00Z'),weeks=new Map();
+    rows.forEach((date,i)=>{const week=Math.floor((last-Date.parse(date+'T12:00:00Z'))/604800000);if(!weeks.has(week))weeks.set(week,[]);weeks.get(week).push(points[i])});
+    const means=[...weeks.values()].map(group=>({x:group.reduce((sum,p)=>sum+p.x,0)/group.length,y:group.reduce((sum,p)=>sum+p.y,0)/group.length}));
+    return [{x:points[0].x,y:means[0].y},...means,{x:points.at(-1).x,y:means.at(-1).y}].filter((p,i,all)=>!i||p.x>all[i-1].x+.01);
+  }
+  function positionBodySelection(picker){
     const selected=picker?.querySelector('[aria-pressed="true"]');if(!selected)return;
     picker.style.setProperty('--selection-x',selected.offsetLeft+'px');picker.style.setProperty('--selection-y',selected.offsetTop+'px');picker.style.setProperty('--selection-width',selected.offsetWidth+'px');picker.style.setProperty('--selection-height',selected.offsetHeight+'px');
     void picker.offsetWidth;picker.classList.add('is-ready');
-    if(scroll)picker.scrollTo?.({left:Math.max(0,selected.offsetLeft-(picker.clientWidth-selected.offsetWidth)/2),behavior:'smooth'});
+  }
+  // The ring is a lens over a row of measurements. A horizontal drag slides the reading, grows or shrinks the purple
+  // arc and carries the selector pill together; a tap on the centre, a chevron or the selector runs the same move.
+  // x is in lens widths: 0 rests on `from`, -1 has moved one place right (to the next measurement), +1 one place left.
+  const lens={x:{value:0,velocity:0},target:0,from:null,to:null,frame:0,last:0,width:200,drag:null,dragged:0};
+  const lensLayers=()=>{const root=q('.body-lens');return [root.querySelector('.is-current'),root.querySelector('.is-next')]};
+  const pillX=field=>q(`[data-body-metric="${field}"]`)?.offsetLeft||0;
+  function placePill(){const picker=q('.body-metric-picker'),pill=picker?.querySelector('.selection-pill'),b=q(`[data-body-metric="${bodyMetric}"]`);if(!pill||!b)return;Object.assign(pill.style,{width:b.offsetWidth+'px',height:b.offsetHeight+'px',top:b.offsetTop+'px',transform:`translate3d(${b.offsetLeft}px,0,0)`})}
+  function paintLens(){
+    const [current,next]=lensLayers(),x=lens.x.value,t=Math.min(1,Math.abs(x)),w=lens.width,side=x<0?1:-1,from=lens.from||bodyMetric,to=lens.to||from,d=sample('body',bodyDate);
+    current.style.transform=`translate3d(${(x*w).toFixed(2)}px,0,0) scale(${(1-.05*t).toFixed(4)})`;current.style.opacity=String(1-t*.6);
+    next.style.transform=`translate3d(${((x+side)*w).toFixed(2)}px,0,0) scale(${(.95+.05*t).toFixed(4)})`;next.style.opacity=String(lens.to?.4+t*.6:0);
+    paintRing(bodyShare(from,d)+(bodyShare(to,d)-bodyShare(from,d))*t,mixTone(bodyRest(from),bodyRest(to),t));
+    const a=pillX(from),b=pillX(to),pill=q('.body-metric-picker>.selection-pill');if(pill)pill.style.transform=`translate3d(${(a+(b-a)*t).toFixed(2)}px,0,0)`;
+  }
+  function settleLens(){
+    const [current,next]=lensLayers();lens.frame=0;
+    if(lens.target&&lens.to)current.innerHTML=next.innerHTML;
+    next.innerHTML='';lens.x.value=lens.x.velocity=lens.target=0;lens.from=lens.to=null;
+    for(const layer of [current,next]){layer.style.transform='';layer.style.opacity=''}
+    q('.body-lens').classList.remove('is-moving');paintHero();
+  }
+  function runLens(){
+    cancelAnimationFrame(lens.frame);lens.last=performance.now();
+    const step=time=>{
+      const dt=Math.min(.034,Math.max(.001,(time-lens.last)/1000));lens.last=time;springStep(lens.x,lens.target,dt,19);
+      const done=Math.abs(lens.x.value-lens.target)<.002&&Math.abs(lens.x.velocity)<.02;if(done)lens.x.value=lens.target;
+      paintLens();if(done)settleLens();else lens.frame=requestAnimationFrame(step);
+    };
+    lens.frame=requestAnimationFrame(step);
+  }
+  // The decision is made at release or tap, so the selector, history and announcement answer at once while the lens settles.
+  function aimLens(target){
+    lens.target=target;const field=target&&lens.to?lens.to:lens.from||bodyMetric;
+    if(field!==bodyMetric){bodyMetric=field;paintBody(true);const d=sample('body',bodyDate);q('#body-announce').textContent=`${bodyFields[field][0]}, ${bodyNumber(field,d)} ${bodyFields[field][1]}`}
+    runLens();
+  }
+  function goBody(field){
+    if(!Object.hasOwn(bodyFields,field)||lens.drag)return;
+    const [current,next]=lensLayers();
+    if(lens.frame&&lens.to&&Math.abs(lens.x.value)>=.5){current.innerHTML=next.innerHTML;lens.x.value+=lens.x.value<0?1:-1;lens.from=lens.to;lens.to=null}
+    else if(!lens.frame)lens.from=bodyMetric;
+    if(field===lens.from){if(lens.frame)aimLens(0);return}
+    lens.to=field;next.innerHTML=bodyReading(field,bodyDate);lens.width=q('.body-lens').clientWidth||200;q('.body-lens').classList.add('is-moving');
+    aimLens(bodyIndex(field)>bodyIndex(lens.from)?-1:1);
+  }
+  function lensDown(event){
+    lens.dragged=0;const dial=event.target.closest?.('[data-body-dial]');if(!dial||!event.isPrimary||lens.drag)return;
+    lens.drag={id:event.pointerId,x:event.clientX,y:event.clientY,start:lens.x.value,active:false,samples:[[event.timeStamp,event.clientX]],dial};
+  }
+  function lensMove(event){
+    const g=lens.drag;if(!g||event.pointerId!==g.id)return;
+    if(!g.active){
+      const dx=event.clientX-g.x,dy=event.clientY-g.y;
+      if(Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)){lens.drag=null;return}
+      if(Math.abs(dx)<8)return;
+      // Start from rest at the edge of the touch slop, and from wherever a settling move currently is.
+      g.active=true;g.x+=Math.sign(dx)*8;try{g.dial.setPointerCapture(g.id)}catch{}cancelAnimationFrame(lens.frame);lens.frame=0;
+      if(!lens.from)lens.from=bodyMetric;lens.width=q('.body-lens').clientWidth||200;q('.body-lens').classList.add('is-moving');
+    }
+    g.samples.push([event.timeStamp,event.clientX]);if(g.samples.length>5)g.samples.shift();
+    let x=g.start+(event.clientX-g.x)/lens.width;const to=bodyOrder[bodyIndex(lens.from)+(x<0?1:-1)];
+    if(!to)x=Math.sign(x)*Math.min(.14,Math.abs(x)*.3); // the first and last measurement resist instead of wrapping
+    x=Math.max(-1,Math.min(1,x));
+    if((to||null)!==lens.to){lens.to=to||null;lensLayers()[1].innerHTML=to?bodyReading(to,bodyDate):''}
+    lens.x.value=x;lens.x.velocity=0;paintLens();
+  }
+  function lensUp(event){
+    // Moving the capture from the touched button to the dial reports a lost capture on the button; only the dial's own counts.
+    const g=lens.drag;if(!g||event.pointerId!==g.id||event.type==='lostpointercapture'&&event.target!==g.dial)return;lens.drag=null;if(!g.active)return;
+    lens.dragged=performance.now();const [t0,x0]=g.samples[0],[t1,x1]=g.samples.at(-1),speed=event.type==='pointerup'&&event.timeStamp-t1<80?(x1-x0)/Math.max(8,t1-t0)*1000/lens.width:0,x=lens.x.value;
+    lens.x.velocity=speed;aimLens(lens.to&&(Math.abs(x)>.38||Math.abs(speed)>1.6&&Math.sign(speed)===Math.sign(x))?Math.sign(x):0);
+  }
+  function paintHero(){
+    const d=sample('body',bodyDate),[label,unit]=bodyFields[bodyMetric],i=bodyIndex(bodyMetric);
+    if(!lens.frame&&!lens.drag){lensLayers()[0].innerHTML=bodyReading(bodyMetric,bodyDate);paintRing(bodyShare(bodyMetric,d),bodyRest(bodyMetric));placePill()}
+    document.querySelectorAll('[data-body-metric]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.bodyMetric===bodyMetric)));
+    document.querySelectorAll('[data-body-value]').forEach(n=>{n.innerHTML=`${bodyNumber(n.dataset.bodyValue,d)}<small>${bodyFields[n.dataset.bodyValue][1]}</small>`});
+    for(const [node,field,name] of [[q('[data-body-shift="-1"]'),bodyOrder[i-1],'Previous'],[q('[data-body-shift="1"]'),bodyOrder[i+1],'Next']]){node.disabled=!field;node.setAttribute('aria-label',field?`${name} measurement: ${bodyFields[field][0]}`:`No ${name.toLowerCase()} measurement`)}
+    q('[data-next-body]').setAttribute('aria-label',`${label}, ${bodyNumber(bodyMetric,d)} ${unit}. Tap for the next measurement, or swipe left or right`);
   }
   function bodyView(){
-    const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);
-    const [label,unit]=bodyFields[bodyMetric],data=sample('body',bodyDate),first=sample('body',rows[0])[bodyMetric],delta=data[bodyMetric]-first,points=bodyPlot(rows),point=points[rows.indexOf(bodyDate)],smooth=curve(points);
-    return `<section class="body-hero"><div class="body-metric-picker" role="group" aria-label="Body measurement"><span class="selection-pill" aria-hidden="true"></span>${Object.entries(bodyFields).map(([field,[name]])=>`<button data-body-metric="${field}" aria-pressed="${field===bodyMetric}">${name}</button>`).join('')}</div><button class="body-composition" data-next-body aria-label="${label}, ${data[bodyMetric].toFixed(1)} ${unit}. Tap to explore the next body measurement"><span id="body-ring">${bodyRing(data)}</span><span class="body-center"><span class="body-measure-name">${label}</span><span id="body-value">${HeroDots.markup(data[bodyMetric].toFixed(1))} <small>${unit}</small></span><span id="body-share">${bodyMetric==='weight'?'Lean mass + fat mass':Math.round((bodyMetric==='fat'?data.fat/100:data[bodyMetric]/data.weight)*100)+'% of body weight'}</span></span></button><p class="body-explore-hint">Tap the centre to explore your body mix</p><div class="body-mix-key"><button data-select-body="lean"><i></i><span>Lean mass<strong data-body-value="lean">${data.lean.toFixed(1)} kg</strong></span></button><button data-select-body="fatMass"><i></i><span>Fat mass<strong data-body-value="fatMass">${data.fatMass.toFixed(1)} kg</strong></span></button></div></section>
-    <section class="health-tile body-timeline"><div class="health-section-head"><h2>History</h2><div class="segmented" role="group" aria-label="Body history period"><span class="selection-pill" aria-hidden="true"></span>${[[7,'7D'],[30,'30D'],[90,'3M'],[365,'1Y']].map(([n,name])=>`<button data-body-range="${n}" aria-pressed="${bodyRange===n}" aria-label="${n===365?'Last year':n===90?'Last three months':'Last '+n+' days'}">${name}</button>`).join('')}</div></div><div class="body-date-stepper"><button data-body-step="-1" aria-label="Previous measurement" ${bodyDate===rows[0]?'disabled':''}>‹</button><output id="body-date">${stamp(bodyDate+'T12:00:00',true)}</output><button data-body-step="1" aria-label="Next measurement" ${bodyDate===rows.at(-1)?'disabled':''}>›</button></div><p class="body-change" id="body-change">${delta>0?'+':''}${delta.toFixed(1)} ${unit} <span>since ${stamp(rows[0]+'T12:00:00')}</span></p><figure class="body-chart" aria-label="${label} history. Drag on the chart or use arrow keys to inspect each date."><svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="body-area-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b69cff" stop-opacity=".26"/><stop offset="1" stop-color="#b69cff" stop-opacity=".015"/></linearGradient></defs><path d="M10 107H290M10 70H290M10 33H290" stroke="#ffffff10" stroke-dasharray="1 6"/><path id="body-area" d="${smooth}L${points.at(-1).x} 107L${points[0].x} 107Z" fill="url(#body-area-fill)"/><path id="body-line" d="${smooth}" stroke="#c0a5f5" stroke-width="2" stroke-linecap="round" fill="none"/><text id="body-gap" x="18" y="66" fill="#aeadb9" font-size="9"></text><path id="body-guide" d="M${point.x} 10V107" stroke="#ffffff35" stroke-dasharray="2 4"/><circle id="body-point" cx="${point.x}" cy="${point.y}" r="4" fill="#e6daff" stroke="#3c304f" stroke-width="2"/></svg><input id="body-scrub" type="range" min="0" max="${bodyRange-1}" value="${bodyOffset(bodyDate)}" aria-label="Inspect body measurement date" aria-valuetext="${stamp(bodyDate+'T12:00:00')}: ${data[bodyMetric].toFixed(1)} ${unit}"/><figcaption><span id="body-range-start"></span><span id="body-range-middle">Drag to inspect</span><span id="body-range-end"></span></figcaption></figure><p class="body-coverage" id="body-coverage"></p></section><p class="health-note">The ring shows each measurement as a share of body weight. Fat and lean mass are calculated from weight and body fat; muscle is part of lean mass.</p>`;
+    const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);ringFills=[];cancelAnimationFrame(lens.frame);Object.assign(lens,{frame:0,drag:null,from:null,to:null,target:0,x:{value:0,velocity:0}});
+    const chevron='<svg aria-hidden="true"><use href="#chevron"/></svg>';
+    return `<section class="body-hero"><div class="body-composition" data-body-dial><span id="body-ring" aria-hidden="true">${bodyRing()}</span><span class="body-lens" aria-hidden="true"><span class="body-reading is-current"></span><span class="body-reading is-next"></span></span><button class="body-centre" data-next-body></button><button class="body-shift" data-body-shift="-1">${chevron}</button><button class="body-shift" data-body-shift="1">${chevron}</button></div><span class="sr-only" id="body-announce" aria-live="polite"></span>
+    <div class="body-metric-picker health-glass" role="group" aria-label="Body measurement"><span class="selection-pill" aria-hidden="true"></span>${bodyOrder.map(field=>`<button data-body-metric="${field}" aria-pressed="${field===bodyMetric}"><span>${bodyFields[field][2]||bodyFields[field][0]}</span><strong data-body-value="${field}"></strong></button>`).join('')}</div></section>
+    <section class="health-tile health-glass body-timeline"><div class="health-section-head"><h2>History</h2><div class="segmented" role="group" aria-label="Body history period"><span class="selection-pill" aria-hidden="true"></span>${[[7,'7D'],[30,'30D'],[90,'3M'],[365,'1Y']].map(([n,name])=>`<button data-body-range="${n}" aria-pressed="${bodyRange===n}" aria-label="${n===365?'Last year':n===90?'Last three months':'Last '+n+' days'}">${name}</button>`).join('')}</div></div>
+    <div class="body-readout"><div><p class="body-readout-value"><span id="body-reading"></span><small id="body-unit"></small></p><p class="body-readout-meta"><output id="body-date"></output><span id="body-change"></span></p></div><div class="body-date-stepper"><button data-body-step="-1" aria-label="Previous measurement">${chevron}</button><button data-body-step="1" aria-label="Next measurement">${chevron}</button></div></div>
+    <figure class="body-chart"><svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="body-area-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b69cff" stop-opacity=".24"/><stop offset="1" stop-color="#b69cff" stop-opacity="0"/></linearGradient><linearGradient id="body-guide-fill" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="107"><stop stop-color="#cbb8ff" stop-opacity="0"/><stop offset=".45" stop-color="#cbb8ff" stop-opacity=".55"/><stop offset="1" stop-color="#cbb8ff" stop-opacity=".08"/></linearGradient></defs><path d="M10 32H290M10 97H290" stroke="#ffffff0c"/><path id="body-area" fill="url(#body-area-fill)"/><g id="body-dots" fill="#cdb9ff" fill-opacity=".5"></g><path id="body-line" stroke="#c3a9f7" stroke-width="2" stroke-linecap="round" fill="none"/><text id="body-gap" x="18" y="66" fill="#aeadb9" font-size="9"></text><path id="body-guide" stroke="url(#body-guide-fill)" stroke-width="1.2"/><circle id="body-halo" r="9" fill="#b69cff24"/><circle id="body-point" r="4" fill="#efe7ff" stroke="#3c304f" stroke-width="2"/></svg><input id="body-scrub" type="range" min="0" max="${bodyRange-1}" value="${bodyOffset(bodyDate)}" aria-label="Inspect body measurement date"/><figcaption><span id="body-range-start"></span><span id="body-range-middle"></span><span id="body-range-end"></span></figcaption></figure>
+    <dl class="body-stats"><div><dt>Average</dt><dd id="body-average"></dd></div><div><dt>Lowest</dt><dd id="body-low"></dd></div><div><dt>Highest</dt><dd id="body-high"></dd></div></dl><p class="body-coverage" id="body-coverage"></p></section><p class="health-note">Each ring dot is 1% of body weight. Fat and lean mass are calculated from weight and body fat; muscle is part of lean mass.</p>`;
   }
   function inspectBody(index){
     const rows=bodyRows();if(!Number.isInteger(index)||!rows[index])return;bodyDate=rows[index];
-    const data=sample('body',bodyDate),unit=bodyFields[bodyMetric][1],delta=data[bodyMetric]-sample('body',rows[0])[bodyMetric],point=bodyPlot(rows)[index];
-    q('[data-next-body]').setAttribute('aria-label',`${bodyFields[bodyMetric][0]}, ${data[bodyMetric].toFixed(1)} ${unit}. Tap to explore the next body measurement`);q('#body-value').innerHTML=HeroDots.markup(data[bodyMetric].toFixed(1))+` <small>${unit}</small>`;
-    document.querySelectorAll('[data-mix-dot]').forEach(n=>n.setAttribute('fill',bodyFill(Number(n.dataset.mixDot),data)));
-    q('#body-share').textContent=bodyMetric==='weight'?'Lean mass + fat mass':Math.round((bodyMetric==='fat'?data.fat/100:data[bodyMetric]/data.weight)*100)+'% of body weight';q('#body-change').innerHTML=`${delta>0?'+':''}${delta.toFixed(1)} ${unit} <span>since ${stamp(rows[0]+'T12:00:00')}</span>`;q('#body-date').textContent=stamp(bodyDate+'T12:00:00',true);
-    q('#body-scrub').value=bodyOffset(bodyDate);q('#body-scrub').setAttribute('aria-valuetext',`${stamp(bodyDate+'T12:00:00')}: ${data[bodyMetric].toFixed(1)} ${unit}`);q('#body-point').setAttribute('cx',point.x);q('#body-point').setAttribute('cy',point.y);q('#body-guide').setAttribute('d',`M${point.x} 10V107`);q('[data-body-step="-1"]').disabled=index===0;q('[data-body-step="1"]').disabled=index===rows.length-1;
-    document.querySelectorAll('[data-body-value]').forEach(n=>n.textContent=data[n.dataset.bodyValue].toFixed(1)+' kg');
+    const d=sample('body',bodyDate),unit=bodyFields[bodyMetric][1],change=Math.round((d[bodyMetric]-sample('body',rows[0])[bodyMetric])*10)/10,point=bodyPlot(rows)[index];
+    q('#body-reading').textContent=bodyNumber(bodyMetric,d);q('#body-unit').textContent=unit;q('#body-date').textContent=stamp(bodyDate+'T12:00:00',true);
+    q('#body-change').textContent=index?`${change>0?'+':change<0?'−':'±'}${Math.abs(change).toFixed(1)} ${unit} since ${stamp(rows[0]+'T12:00:00')}`:'First measurement in range';
+    q('#body-scrub').value=bodyOffset(bodyDate);q('#body-scrub').setAttribute('aria-valuetext',`${stamp(bodyDate+'T12:00:00')}: ${bodyNumber(bodyMetric,d)} ${unit}`);
+    for(const id of ['#body-point','#body-halo']){q(id).setAttribute('cx',point.x);q(id).setAttribute('cy',point.y)}q('#body-guide').setAttribute('d',`M${point.x} 6V107`);
+    q('[data-body-step="-1"]').disabled=index===0;q('[data-body-step="1"]').disabled=index===rows.length-1;
+    paintHero();
   }
   function paintBody(animate=false){
-    const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);const points=bodyPlot(rows),smooth=curve(points),end=options.getDate(),start=dayOffset(end,1-bodyRange),[label]=bodyFields[bodyMetric];
-    q('.body-measure-name').textContent=label;document.querySelectorAll('[data-body-metric]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.bodyMetric===bodyMetric)));document.querySelectorAll('[data-body-range]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.bodyRange)===bodyRange)));
-    positionBodySelection(q('.body-metric-picker'),animate);positionBodySelection(q('.body-timeline .segmented'));
-    q('#body-line').setAttribute('d',smooth);q('#body-area').setAttribute('d',`${smooth}L${points.at(-1).x} 107L${points[0].x} 107Z`);q('#body-scrub').max=bodyRange-1;q('.body-chart').setAttribute('aria-label',label+' history. Drag on the chart or use arrow keys to inspect recorded dates.');
+    const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);
+    const points=bodyPlot(rows),trend=bodyTrend(rows,points),smooth=curve(trend),end=options.getDate(),start=dayOffset(end,1-bodyRange),[label,unit]=bodyFields[bodyMetric],values=rows.map(date=>sample('body',date)[bodyMetric]);
+    document.querySelectorAll('[data-body-range]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.bodyRange)===bodyRange)));positionBodySelection(q('.body-timeline .segmented'));
+    q('#body-line').setAttribute('d',smooth);q('#body-dots').setAttribute('fill-opacity',bodyRange>30?.32:.55);q('#body-dots').innerHTML=points.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${bodyRange>30?1.1:bodyRange>7?1.5:2.2}"/>`).join('');q('#body-area').setAttribute('d',`${smooth}L${trend.at(-1).x} 107L${trend[0].x} 107Z`);q('#body-scrub').max=bodyRange-1;q('.body-chart').setAttribute('aria-label',label+' history. Drag on the chart or use arrow keys to inspect recorded dates.');
     const axis=date=>bodyRange===365?dateLabel(date,{month:'short',year:'numeric'}):stamp(date+'T12:00:00');
     q('#body-range-start').textContent=axis(start);q('#body-range-end').textContent=axis(end);q('#body-range-middle').textContent=bodyRange>=90?axis(dayOffset(start,Math.floor(bodyRange/2))):'Drag to inspect';q('#body-gap').textContent=points[0].x>110?'No earlier measurements':'';
-    q('#body-coverage').textContent=`${rows.length} demonstration measurements · ${stamp(rows[0]+'T12:00:00')}–${stamp(rows.at(-1)+'T12:00:00')}`;
+    for(const [id,value] of [['#body-average',values.reduce((a,b)=>a+b,0)/values.length],['#body-low',Math.min(...values)],['#body-high',Math.max(...values)]])q(id).innerHTML=`${value.toFixed(1)}<small>${unit}</small>`;
+    q('#body-coverage').textContent=`${rows.length} demonstration measurements · ${stamp(rows[0]+'T12:00:00')}–${stamp(rows.at(-1)+'T12:00:00')}${bodyRange>=90?' · line shows weekly averages':''}`;
     inspectBody(rows.indexOf(bodyDate));
-    if(animate){SurfaceMotion.reveal(q('#body-value'),{x:0,y:7},340);SurfaceMotion.reveal(q('.body-chart>svg'),{x:0,y:6},360)}
+    if(animate)SurfaceMotion.reveal(q('.body-chart>svg'),{x:0,y:6},360);
   }
   function workoutHome(){
     const recent=store.history[0],bins=Array.from({length:7},(_,i)=>{const date=new Date(now());date.setHours(0,0,0,0);date.setDate(date.getDate()-6+i);const next=new Date(date);next.setDate(next.getDate()+1);const records=store.history.filter(r=>r.endedAt>=date.getTime()&&r.endedAt<next.getTime());return {date,records,minutes:records.reduce((n,r)=>n+r.elapsed,0)/60000}}),count=bins.reduce((n,b)=>n+b.records.length,0),mins=Math.round(bins.reduce((n,b)=>n+b.minutes,0)),peak=Math.max(1,...bins.map(b=>b.minutes));
@@ -125,13 +231,13 @@ const Health = (() => {
     q('#health-title').textContent=page==='workouts'?(record()?.kind||store.active?.kind||setup?.kind||titles[page]):titles[page];
     q('#health-back').setAttribute('aria-label',workoutRecord!==null?'Back to workouts':countdown!==null?'Cancel countdown':setup?'Back to workouts':page==='sleep'?'Back to sleep summary':'Back to dashboard');
     q('#health-source').textContent=page==='workouts'?'':page==='sleep'?'Demo night · stage timing illustration':'Demo data · '+stamp(options.getDate()+'T12:00:00',true);
-    q('#health-source').hidden=page==='workouts';q('#health-page').classList.toggle('workout-focus',Boolean(focus));
+    q('#health-source').hidden=page==='workouts';q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;
     countDots?.stop();countDots=null;WorkoutFocus.dispose();MusicPlayer.stop();
     body.innerHTML=page==='body'?bodyView():page==='overview'?overview():page==='sleep'?sleepView():workoutRecord!==null?recordView():countdown!==null?`<div class="workout-countdown"><p class="countdown-heading">${setup.kind}</p><div class="countdown-play"><canvas id="countdown-dots" aria-hidden="true"></canvas><output class="sr-only" id="workout-count" aria-live="polite">${countdown}</output></div><p class="countdown-invitation">Touch the dots</p><div class="countdown-stages" aria-hidden="true">${[3,2,1].map(n=>`<i data-count-stage="${n}" class="${countdown<=n?'lit':''}"></i>`).join('')}</div><button data-cancel-countdown>Cancel</button></div>`:store.active?sessionView():setup?setupView():workoutHome();
     if(page==='body')paintBody();
     if(page==='workouts'&&countdown!==null)countDots=HeroDots.mount(q('#countdown-dots'),countdown);
     if(page==='workouts'&&store.active&&workoutRecord===null){paintTimer();if(timerFocused)WorkoutFocus.attach(q('.workout-live'),true);MusicPlayer.mount(q('.workout-music'),timerFocused)}focusChrome();
-    q('#health-scroll').scrollTop=scroll;
+    q('#health-scroll').scrollTop=scroll;frostHead();
   }
   function cancelCountdown(){clearInterval(countTimer);countTimer=0;countdown=null;countDots?.stop();countDots=null}
   function startCountdown(kind,targetMs,recording={}){
@@ -172,6 +278,8 @@ const Health = (() => {
   // Focus has its own way back to the workout view, mirroring the back button; the small player's cover opens focus.
   // While the two views move into each other WorkoutFocus fades the chevron; a freshly rendered page sets it here.
   function focusChrome(){const button=q('#health-minimize'),show=page==='workouts'&&workoutRecord===null&&Boolean(store.active)&&timerFocused;if(button.hidden!==!show)button.hidden=!show}
+  // Content scrolling under the Body header gets a soft frosted edge; at the top of the page the header stays clear.
+  function frostHead(){const frost=q('.health-head-frost');if(frost)frost.style.opacity=String(Math.min(1,q('#health-scroll').scrollTop/24))}
   function setFocus(value){const live=q('.workout-live');if(!live||timerFocused===value)return;timerFocused=value;WorkoutFocus.toggle(live,value)}
   function init(config){
     options=config;MusicPlayer.init(config.notice);readStore();q('#health-back').addEventListener('click',close);q('#health-minimize').addEventListener('click',()=>setFocus(false));
@@ -189,7 +297,7 @@ const Health = (() => {
       else if(b.dataset.workoutChart){workoutChart=b.dataset.workoutChart;if(['route','speed','altitude'].includes(workoutChart)){const s=record();q('.workout-route-group').innerHTML=WorkoutDetails.chart(s,elapsed(s),workoutChart);q('[data-workout-chart="'+workoutChart+'"]').focus({preventScroll:true})}}
       else if(b.hasAttribute('data-music-connect'))MusicPlayer.connect();
       else if(b.hasAttribute('data-tracking'))window.OrbitWorkouts?.enableTracking();
-      else if(b.dataset.bodyMetric||b.dataset.selectBody||b.hasAttribute('data-next-body')){const fields=Object.keys(bodyFields),next=b.dataset.bodyMetric||b.dataset.selectBody||fields[(fields.indexOf(bodyMetric)+1)%fields.length];if(!Object.hasOwn(bodyFields,next)||next===bodyMetric)return;bodyMetric=next;paintBody(true)}
+      else if(b.dataset.bodyMetric||b.dataset.bodyShift||b.hasAttribute('data-next-body')){if(event.detail&&performance.now()-lens.dragged<400)return;const i=bodyIndex(bodyMetric),next=b.dataset.bodyMetric||(b.dataset.bodyShift?bodyOrder[i+Number(b.dataset.bodyShift)]:bodyOrder[(i+1)%bodyOrder.length]);if(next)goBody(next)}
       else if(b.dataset.bodyRange){const next=Number(b.dataset.bodyRange);if(![7,30,90,365].includes(next)||next===bodyRange)return;bodyRange=next;paintBody(true)}
       else if(b.dataset.bodyStep)inspectBody(bodyRows().indexOf(bodyDate)+Number(b.dataset.bodyStep));
       else if(b.dataset.nightDate){const date=options.dates[options.dates.indexOf(sleepDate)+Number(b.dataset.nightDate)];if(date){sleepDate=date;sleepMinute=0;render();q('[data-night-date="'+b.dataset.nightDate+'"]').focus({preventScroll:true})}}
@@ -208,7 +316,10 @@ const Health = (() => {
     q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
     q('#health-content').addEventListener('submit',event=>{if(event.target.id!=='workout-setup-form')return;event.preventDefault();const time=q('input[name="target"]:checked').value==='time',minutes=Number(q('#target-minutes').value);if(time&&(!Number.isInteger(minutes)||minutes<1||minutes>1440)){q('#workout-error').textContent='Choose between 1 and 1,440 minutes.';return}const weightKg=Number(q('#workout-weight').value||0),trackLocation=Boolean(q('#workout-track')?.checked);if(weightKg!==0&&(!Number.isFinite(weightKg)||weightKg<20||weightKg>350)){q('#workout-error').textContent='Enter a weight from 20 to 350 kg, or leave it empty.';return}startCountdown(setup.kind,time?minutes*60000:0,{trackLocation,weightKg})});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&countdown!==null){cancelCountdown();render()}schedule();if(!document.hidden)tick()});
-    const alignBody=()=>{if(page==='body'){positionBodySelection(q('.body-metric-picker'));positionBodySelection(q('.body-timeline .segmented'))}};window.addEventListener('resize',alignBody);document.fonts?.ready.then(alignBody);
+    const alignBody=()=>{if(page==='body'){placePill();positionBodySelection(q('.body-timeline .segmented'))}};window.addEventListener('resize',alignBody);document.fonts?.ready.then(alignBody);
+    const content=q('#health-content');content.addEventListener('pointerdown',lensDown);content.addEventListener('pointermove',lensMove);for(const type of ['pointerup','pointercancel','lostpointercapture'])content.addEventListener(type,lensUp);
+    content.addEventListener('keydown',event=>{if(!event.target.closest?.('[data-body-dial]')||!['ArrowLeft','ArrowRight'].includes(event.key))return;const next=bodyOrder[bodyIndex(bodyMetric)+(event.key==='ArrowRight'?1:-1)];if(next){event.preventDefault();goBody(next)}});
+    q('#health-scroll').addEventListener('scroll',frostHead,{passive:true});
     window.addEventListener('focus',refresh);schedule();
   }
   return {init,open,close,render,live,action,sample,elapsed,clock,validSession,validTarget,refresh,startCountdown,get page(){return page},get state(){return store}};

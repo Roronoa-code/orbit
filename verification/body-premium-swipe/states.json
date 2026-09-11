@@ -1,0 +1,105 @@
+{
+ "W": 384,
+ "H": 832,
+ "states": [
+  {
+   "name": "rest",
+   "metric": "weight",
+   "pillLeft": 18,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "held-30px",
+   "metric": "weight",
+   "pillLeft": 25.3,
+   "current": "translate3d(-22px, 0px, 0px) scale(0.9948)",
+   "next": "translate3d(188px, 0px, 0px) scale(0.9552)"
+  },
+  {
+   "name": "held-70px",
+   "metric": "weight",
+   "pillLeft": 38.7,
+   "current": "translate3d(-62px, 0px, 0px) scale(0.9852)",
+   "next": "translate3d(148px, 0px, 0px) scale(0.9648)"
+  },
+  {
+   "name": "held-110px",
+   "metric": "weight",
+   "pillLeft": 52,
+   "current": "translate3d(-102px, 0px, 0px) scale(0.9757)",
+   "next": "translate3d(108px, 0px, 0px) scale(0.9743)"
+  },
+  {
+   "name": "held-160px",
+   "metric": "weight",
+   "pillLeft": 68.7,
+   "current": "translate3d(-152px, 0px, 0px) scale(0.9638)",
+   "next": "translate3d(58px, 0px, 0px) scale(0.9862)"
+  },
+  {
+   "name": "released-90ms",
+   "metric": "muscle",
+   "pillLeft": 85.7,
+   "current": "translate3d(-203.05px, 0px, 0px) scale(0.9517)",
+   "next": "translate3d(6.95px, 0px, 0px) scale(0.9983)"
+  },
+  {
+   "name": "settled",
+   "metric": "muscle",
+   "pillLeft": 88,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "short-held",
+   "metric": "muscle",
+   "pillLeft": 77.3,
+   "current": "translate3d(32px, 0px, 0px) scale(0.9924)",
+   "next": "translate3d(-178px, 0px, 0px) scale(0.9576)"
+  },
+  {
+   "name": "sprung-back",
+   "metric": "muscle",
+   "pillLeft": 88,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "tap-70ms",
+   "metric": "lean",
+   "pillLeft": 265,
+   "current": "translate3d(-178.69px, 0px, 0px) scale(0.9575)",
+   "next": "translate3d(31.31px, 0px, 0px) scale(0.9925)"
+  },
+  {
+   "name": "tap-180ms",
+   "metric": "lean",
+   "pillLeft": 295.4,
+   "current": "translate3d(-209.43px, 0px, 0px) scale(0.9501)",
+   "next": "translate3d(0.57px, 0px, 0px) scale(0.9999)"
+  },
+  {
+   "name": "tap-settled",
+   "metric": "lean",
+   "pillLeft": 296,
+   "current": "",
+   "next": ""
+  },
+  {
+   "name": "edge-held",
+   "metric": "weight",
+   "pillLeft": 18,
+   "current": "translate3d(29.4px, 0px, 0px) scale(0.993)",
+   "next": "translate3d(-180.6px, 0px, 0px) scale(0.957)"
+  },
+  {
+   "name": "edge-settled",
+   "metric": "weight",
+   "pillLeft": 18,
+   "current": "",
+   "next": ""
+  }
+ ],
+ "errors": []
+}

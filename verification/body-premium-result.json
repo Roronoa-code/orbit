@@ -1,0 +1,19 @@
+{
+ "batch": "Body page and glass material",
+ "date": "2026-09-11",
+ "baseline": "git commit e45f6ef (tracked files clean)",
+ "changed": ["health-pages.js", "health-pages.css", "index.html", "verification/ux-motion.html", "README.md", "HANDOFF.md"],
+ "added": ["verification/perf-tools/body-shots.cjs", "verification/perf-tools/body-swipe-frames.cjs", "verification/body-premium-before/", "verification/body-premium-after/", "verification/body-premium-swipe/"],
+ "checks": {
+  "check.cjs": "PASS",
+  "workout-details.cjs": "PASS",
+  "rendered ux-motion 390/320": "PASS",
+  "rendered focus-music 390/320": "PASS",
+  "rendered workout-details 390/320": "PASS",
+  "check-live-background.cjs": "PASS (frostRange 0, mutationTargets live-timer only, maximumPixelChange 0 at 390 and 320)",
+  "native-check.ps1": "PASS"
+ },
+ "swipeFrames": "verification/body-premium-swipe/states.json: drag moves reading 1:1 after 8 px slop, release past 38% commits (weight -> muscle), short held drag springs back, tap weight -> lean travels the pill 18 -> 296 px, first measurement resists (max 0.14 lens width)",
+ "build": {"folder": "android/build/20260911-203737", "apk": "dist/Orbit.apk", "sha256": "7d8b32a3d700de0af983ea83981715a3423f9e1ab63efc57fe64789144adc01e", "signature": "v3", "installed": true, "installedAt": "2026-09-11 20:43", "installRecord": "verification/body-premium-install.json"},
+ "limits": ["Synthetic touches in headless Chromium at 384 x 832; phone feel and GPU frost not yet seen on the S25 Ultra", "Not committed or pushed"]
+}

@@ -1,0 +1,50 @@
+{
+ "W": 384,
+ "H": 832,
+ "layout": {
+  ".health-page-head": [
+   0,
+   30,
+   384,
+   70
+  ],
+  ".body-hero": [
+   14,
+   0,
+   356,
+   372
+  ],
+  ".body-composition": [
+   42,
+   0,
+   300,
+   300
+  ],
+  ".body-metric-picker": [
+   14,
+   308,
+   356,
+   62
+  ],
+  ".body-timeline": [
+   14,
+   384,
+   356,
+   374
+  ],
+  ".body-chart": [
+   30,
+   516,
+   324,
+   148
+  ],
+  ".health-note": [
+   20,
+   770,
+   344,
+   30
+  ],
+  "scrollHeight": 913
+ },
+ "errors": []
+}
