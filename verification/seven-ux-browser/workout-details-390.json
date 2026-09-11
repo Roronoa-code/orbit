@@ -13,6 +13,11 @@
     "320 px and 390 px finite/no-overflow detail",
     "44 px controls",
     "context menu and input selection",
-    "sleep scrub highlight without night cursor"
+    "sleep scrub highlight without night cursor",
+    "time-only summary uses recorded time, pauses and target",
+    "in-progress details keep the same session controls",
+    "Open workout submits no duration",
+    "weekly chart day inspection with exact dates and zero states",
+    "workout history naming, grouping and start times"
   ]
 }

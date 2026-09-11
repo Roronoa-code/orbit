@@ -9,7 +9,7 @@ const nodes = new Map(), frames = new Map(); let nextFrame = 0;
 const noop = () => {};
 function events(target={}) { const handlers={}; return Object.assign(target,{addEventListener:(name,fn)=>(handlers[name]??=[]).push(fn),removeEventListener:(name,fn)=>{handlers[name]=(handlers[name]||[]).filter(item=>item!==fn)},fire:(name,event={})=>(handlers[name]??[]).forEach(fn=>fn(event))}); }
 function node(id) {
-  if (!nodes.has(id)) nodes.set(id, events({textContent:'', style:{setProperty:noop}, classList:{remove:noop,add:noop,toggle:noop}, id:id.replace('#',''),dataset:{},getAttribute:()=>null,setAttribute:noop,querySelector:s=>node(id+' '+s),querySelectorAll:()=>[],contains:()=>false,focus:noop,animate:noop,hasPointerCapture:()=>false,setPointerCapture:noop,releasePointerCapture:noop,clientWidth:390,clientHeight:790,offsetHeight:180,scrollTop:0}));
+  if (!nodes.has(id)) nodes.set(id, events({textContent:'', style:{setProperty:noop,removeProperty:noop,getPropertyValue:()=>''}, classList:{remove:noop,add:noop,toggle:noop}, id:id.replace('#',''),dataset:{},getAttribute:()=>null,setAttribute:noop,querySelector:s=>node(id+' '+s),querySelectorAll:()=>[],contains:()=>false,focus:noop,animate:noop,hasPointerCapture:()=>false,setPointerCapture:noop,releasePointerCapture:noop,clientWidth:390,clientHeight:790,offsetHeight:180,scrollTop:0}));
   return nodes.get(id);
 }
 node('#period-content').querySelectorAll=()=>['.facts','.hourly','.weekly','.comparison'].map(node);

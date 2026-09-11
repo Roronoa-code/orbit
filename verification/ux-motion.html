@@ -127,13 +127,37 @@ document.querySelector('#run').onclick=async()=>{
     check(rows.map(r=>r.dataset.setup).join()==='Walking,Running,Cycling,Strength'&&rows.every(r=>box(r).height>67.5&&r.parentElement===rows[0].parentElement)&&q('.workout-start-title').textContent==='Start a session'&&!doc().querySelector('.workout-kinds small')?.textContent.includes('↗'),'The chooser must be one surface of four rows');
     for(const kind of ['Walking','Running','Cycling','Strength']){
       q(`[data-setup="${kind}"]`).click();await wait(420);
-      check(q('#health-page').dataset.workoutScreen==='setup'&&q('#health-title').textContent===kind&&!q('.workout-art')&&!q('.workout-setup h2')&&q('.workout-setup-intro').textContent.includes('Choose a target'),kind+' setup must have one title and no illustration');
+      check(q('#health-page').dataset.workoutScreen==='setup'&&q('#health-title').textContent===kind&&!q('.workout-art')&&!q('.workout-setup h2')&&!q('.workout-setup-intro'),kind+' setup must have one title, no illustration and no repeated intro copy');
       check(Boolean(q('#workout-track'))===(kind!=='Strength')&&q('.workout-primary').textContent.trim()==='Start '+kind.toLowerCase(),kind+' setup must offer GPS only outdoors');
       const scroller=q('#health-scroll'),panel=box(q('.setup-panel'));const outside=[...doc().querySelectorAll('.setup-segments label,.setup-field,.tracking-option input')].filter(n=>n.getClientRects().length).filter(n=>box(n).right>panel.right+.5||box(n).left<panel.left-.5).map(n=>n.className||n.id||n.tagName);
       check(scroller.scrollWidth<=scroller.clientWidth+1&&!outside.length,kind+' setup must not clip or overflow: '+JSON.stringify({scrollWidth:scroller.scrollWidth,clientWidth:scroller.clientWidth,outside}));
       if(kind==='Walking'){
         const pickTarget=value=>q(`input[name="target"][value="${value}"]`).closest('label').click();
-        pickTarget('time');await wait(320);check(!q('#target-options').hidden&&!q('#target-minutes').disabled&&q('#target-minutes').value==='30','Time target must reveal a 30-minute duration');
+        // Press, drag and release over the target segments; a tap, a cancel and a vertical gesture all behave.
+        const track=q('.setup-segments'),segs=[...doc().querySelectorAll('.setup-segments label')],capsule=q('.setup-capsule');
+        const mid=n=>[box(n).left+box(n).width/2,box(n).top+box(n).height/2],[ax,ay]=mid(segs[0]),[bx,by]=mid(segs[1]);
+        const slide=async(fromX,fromY,toX,toY,steps=8)=>{ptr(track,'pointerdown',fromX,fromY);for(let i=1;i<=steps;i++){await nextFrame();ptr(track,'pointermove',fromX+(toX-fromX)*i/steps,fromY+(toY-fromY)*i/steps)}};
+        const chosen=()=>q('input[name="target"]:checked').value;
+        check(style(segs[0]).webkitTapHighlightColor==='rgba(0, 0, 0, 0)'&&style(segs[1]).webkitTapHighlightColor==='rgba(0, 0, 0, 0)','Target segments must not carry the default tap highlight');
+        pickTarget('open');await wait(320);check(chosen()==='open','The gesture checks must start from Open workout');
+        await slide(ax,ay,bx,by);
+        check(chosen()==='open'&&track.classList.contains('is-dragging')&&box(capsule).left>box(segs[0]).left+2,'A held drag must carry the capsule without committing early: '+box(capsule).left);
+        check(style(segs[1]).color!==style(segs[0]).color||segs[1].classList.contains('is-over'),'The option under the finger must be marked');
+        for(let i=8;i>=0;i--){await nextFrame();ptr(track,'pointermove',ax+(bx-ax)*i/8,ay)}
+        ptr(track,'pointerup',ax,ay);await wait(340);
+        check(chosen()==='open'&&q('#target-options').hidden&&q('#target-minutes').disabled&&Math.abs(box(capsule).left-box(segs[0]).left)<1.5,'Reversing and releasing over Open must keep Open, with the duration hidden and excluded');
+        await slide(ax,ay,bx,by);ptr(track,'pointerup',bx,by);await wait(340);
+        check(chosen()==='time'&&!q('#target-options').hidden&&!q('#target-minutes').disabled&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'Releasing over Time target must commit it, reveal the duration and settle the capsule');
+        await slide(bx,by,ax,ay,6);ptr(track,'pointercancel',ax,ay);await wait(340);
+        check(chosen()==='time'&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'A cancelled gesture must restore the previous selection');
+        await slide(bx,by,ax,ay,6);ptr(track,'pointerup',ax,box(track).bottom+120);await wait(340);
+        check(chosen()==='time'&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'Releasing away from the track must restore the previous selection');
+        ptr(track,'pointerdown',bx,by);for(let i=1;i<=6;i++){await nextFrame();ptr(track,'pointermove',bx,by+i*7)}ptr(track,'pointerup',bx,by+42);await wait(240);
+        check(!track.classList.contains('is-dragging')&&style(track).touchAction.includes('pan-y')&&chosen()==='time','A vertical gesture must remain a scroll and change nothing');
+        q('input[name="target"][value="open"]').click();await wait(320);
+        check(chosen()==='open'&&q('#target-options').hidden,'Activating the radio directly, as a keyboard or assistive technology does, must still select Open');
+        pickTarget('time');await wait(320);
+        check(!q('#target-options').hidden&&!q('#target-minutes').disabled&&q('#target-minutes').value==='30','Time target must reveal a 30-minute duration');
         check(Math.abs(box(q('.setup-capsule')).left-box(q('input[name="target"][value="time"]').closest('label')).left)<1,'The capsule must move under Time target');
         q('#target-minutes').value='45';pickTarget('open');await wait(320);check(q('#target-options').hidden&&q('#target-minutes').disabled,'Open workout must hide and disable the duration');
         pickTarget('time');await wait(320);check(q('#target-minutes').value==='45','Switching back must keep the entered duration');
@@ -144,6 +168,13 @@ document.querySelector('#run').onclick=async()=>{
       api().Health.close();await wait(400);
     }
     checks.push('Shared chooser rows; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel');
+    checks.push('Target segments answer tap, hold, drag, reversal, cancellation, release outside the track and vertical scrolling, with no default tap highlight');
+    // The page reserves whatever room the host reports for the system bars, rather than an assumed bar height.
+    api().Health.open('workouts');await wait(360);const headTop=box(q('.health-page-head .icon-button')).top;
+    doc().documentElement.style.setProperty('--orbit-inset-top','48px');await nextFrame();const insetTop=box(q('.health-page-head .icon-button')).top;
+    doc().documentElement.style.removeProperty('--orbit-inset-top');await nextFrame();
+    check(insetTop-headTop>30&&Math.abs(box(q('.health-page-head .icon-button')).top-headTop)<1,'Reported system-bar room must move the header and back control down: '+(insetTop-headTop));
+    checks.push('Reported system-bar room moves the header clear of transient bars (browser only; device insets are not verifiable here)');
     api().Health.close();await wait(230);check(doc().documentElement.scrollWidth<=doc().documentElement.clientWidth+1,'No horizontal page overflow');
     result.textContent=JSON.stringify({status:'PASS',width:doc().documentElement.clientWidth,checks,measurements},null,2);
   }catch(error){result.textContent=error.stack}

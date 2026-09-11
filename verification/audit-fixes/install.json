@@ -1,0 +1,18 @@
+{
+ "authorisation": "Standing rule from the user, 11 September 2026: \"from now on once done install on phone and push to github\"",
+ "device": "adb-R5CY13S5F8D-7zVWkV._adb-tls-connect._tcp, serial R5CY13S5F8D, model SM-S938B",
+ "deviceNote": "The previous address 192.168.0.210:38347 refused the connection; the same phone was already paired and online over its wireless-debugging mDNS name. No pairing, permission or setting was changed.",
+ "time": "2026-09-11 23:59",
+ "command": "adb -s adb-R5CY13S5F8D-7zVWkV._adb-tls-connect._tcp install -r dist/Orbit.apk",
+ "result": "Success (streamed install, app data kept)",
+ "build": "android/build/20260911-235621",
+ "apkSha256": "59adcb841e336e1de1fbe192732076fab916a3398ae40bad3122be852c4c4a64",
+ "installedSha256": "59adcb841e336e1de1fbe192732076fab916a3398ae40bad3122be852c4c4a64",
+ "installedMatchesBuild": true,
+ "previousApk": {"sha256": "a46d13622c86c2e4245ec5f266cde2d68e2796b17efc1e6c04a975e811319807", "build": "android/build/20260911-220922", "backup": "verification/audit-fixes/phone/phone-before.apk"},
+ "launched": false,
+ "workoutsStarted": 0,
+ "permissionsChanged": "none",
+ "musicControlled": false,
+ "otherDevices": "BYZL25052900310864 not touched"
+}

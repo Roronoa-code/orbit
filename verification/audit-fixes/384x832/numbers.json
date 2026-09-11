@@ -1,0 +1,185 @@
+{
+ "width": 384,
+ "height": 832,
+ "chooser": [
+  "WalkingLast 11 Sept · 25:00",
+  "RunningNo sessions yet",
+  "CyclingNo sessions yet",
+  "StrengthLast 11 Sept · 12:00"
+ ],
+ "weekToday": "11 Sept 2026 · 37 min · 2 sessions",
+ "weekEmpty": "10 Sept 2026 · no sessions recorded",
+ "weekOlder": "9 Sept 2026 · 40 min · 1 session",
+ "weekTotal": "77min / 3 sessions in total",
+ "history": {
+  "title": "Workout history",
+  "caption": "3 sessions · latest 11 Sept",
+  "days": [
+   "11 Sept 2026",
+   "9 Sept 2026"
+  ],
+  "rows": [
+   "Walking08:5525:00 ↗",
+   "Strength07:0812:00 ↗",
+   "Walking07:4040:00 ↗"
+  ]
+ },
+ "targetDuringDrag": {
+  "checked": "open",
+  "capsule": 192,
+  "dragging": true
+ },
+ "targetAfterTime": {
+  "checked": "time",
+  "duration": "shown",
+  "disabled": false
+ },
+ "targetAfterOpen": {
+  "checked": "open",
+  "duration": "hidden",
+  "kept": "30"
+ },
+ "liveSummary": "Started23:55Paused00:00TargetOpenEnergy estimateAdd your weight before a workout to see one.Time onlyAll details ↗",
+ "details": {
+  "heading": "In progress · 11 Sept 2026",
+  "actions": [
+   "Pause",
+   "Finish"
+  ],
+  "timers": 0
+ },
+ "settledFull": {
+  "matrix": 0,
+  "canvas": 1,
+  "clock": {
+   "w": 260,
+   "h": 82
+  },
+  "head": "rgba(0, 0, 0, 0.133)",
+  "picker": "rgb(233, 226, 224)",
+  "action": "rgb(233, 93, 150)",
+  "lit": true,
+  "remaining": "rgb(219, 212, 216)",
+  "titleWidth": 270,
+  "titleOverlapsTransport": [],
+  "veil": "0.716"
+ },
+ "heldCompact": {
+  "matrix": 1,
+  "canvas": 0,
+  "clock": {
+   "w": 156,
+   "h": 63
+  },
+  "head": "rgb(36, 36, 39)",
+  "picker": "rgb(182, 156, 255)",
+  "action": "rgb(182, 156, 255)",
+  "lit": false,
+  "remaining": "rgb(185, 185, 196)",
+  "titleWidth": 118,
+  "titleOverlapsTransport": [],
+  "veil": "0.716"
+ },
+ "heldFullReversed": {
+  "matrix": 0,
+  "canvas": 1,
+  "clock": {
+   "w": 259,
+   "h": 82
+  },
+  "head": "rgba(0, 0, 0, 0.133)",
+  "picker": "rgb(233, 226, 224)",
+  "action": "rgb(233, 93, 150)",
+  "lit": true,
+  "remaining": "rgb(219, 212, 216)",
+  "titleWidth": 268,
+  "titleOverlapsTransport": [],
+  "veil": "0.716"
+ },
+ "settledAfterRelease": {
+  "matrix": 0,
+  "canvas": 1,
+  "clock": {
+   "w": 260,
+   "h": 82
+  },
+  "head": "rgba(0, 0, 0, 0.133)",
+  "picker": "rgb(233, 226, 224)",
+  "action": "rgb(233, 93, 150)",
+  "lit": true,
+  "remaining": "rgb(219, 212, 216)",
+  "titleWidth": 270,
+  "titleOverlapsTransport": [],
+  "veil": "0.716"
+ },
+ "partialProgress": [
+  {
+   "progress": "10pc",
+   "matrix": 0,
+   "canvas": 1,
+   "clock": {
+    "w": 250,
+    "h": 79
+   },
+   "head": "rgba(0, 0, 0, 0.133)",
+   "picker": "rgb(233, 226, 224)",
+   "action": "rgb(233, 93, 150)",
+   "lit": true,
+   "remaining": "rgb(219, 212, 216)",
+   "titleWidth": 256,
+   "titleOverlapsTransport": [],
+   "veil": "0.716"
+  },
+  {
+   "progress": "50pc",
+   "matrix": 0.53,
+   "canvas": 0.47,
+   "clock": {
+    "w": 156,
+    "h": 63
+   },
+   "head": "rgba(32, 32, 35, 0.584)",
+   "picker": "rgb(182, 156, 255)",
+   "action": "rgb(207, 126, 205)",
+   "lit": false,
+   "remaining": "rgb(185, 185, 196)",
+   "titleWidth": 192,
+   "titleOverlapsTransport": [],
+   "veil": "0.716"
+  },
+  {
+   "progress": "90pc",
+   "matrix": 1,
+   "canvas": 0,
+   "clock": {
+    "w": 156,
+    "h": 63
+   },
+   "head": "rgb(36, 36, 39)",
+   "picker": "rgb(182, 156, 255)",
+   "action": "rgb(182, 156, 255)",
+   "lit": false,
+   "remaining": "rgb(185, 185, 196)",
+   "titleWidth": 116,
+   "titleOverlapsTransport": [],
+   "veil": "0.716"
+  }
+ ],
+ "settledCompact": {
+  "matrix": 1,
+  "canvas": 0,
+  "clock": {
+   "w": 156,
+   "h": 63
+  },
+  "head": "rgb(36, 36, 39)",
+  "picker": "rgb(182, 156, 255)",
+  "action": "rgb(182, 156, 255)",
+  "lit": false,
+  "remaining": "rgb(185, 185, 196)",
+  "titleWidth": 118,
+  "titleOverlapsTransport": [],
+  "veil": "0.716"
+ },
+ "errors": []
+}

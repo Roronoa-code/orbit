@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "width": 383,
+  "checks": [
+    "Live bar shell-first growth, reversal and fixed bottom",
+    "Launcher follows the finger both ways, closes from anywhere on it and is named apart from its shortcuts",
+    "Globe and reading transitions survive rapid input",
+    "Stack drag starts from rest; its structure changes only while it rests",
+    "Temporary chart value and intentional scroll fade",
+    "Four label-only measurements in order, looping ring drag and tap, spring-back, draggable glass selector, fat in kg with its share",
+    "Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps",
+    "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
+    "Compact active launcher: measured height, action order, status line, hours-long timer, pause/resume/open",
+    "Pause/resume preserves the clock, freezes time and eases brightness/size",
+    "Shared chooser rows; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel",
+    "Target segments answer tap, hold, drag, reversal, cancellation, release outside the track and vertical scrolling, with no default tap highlight",
+    "Reported system-bar room moves the header clear of transient bars (browser only; device insets are not verifiable here)"
+  ],
+  "measurements": {
+    "liveBar": {
+      "closedHeight": 61.9921875,
+      "intermediateHeight": 97.98828125,
+      "expandedHeight": 133.984375
+    },
+    "idleLauncher": {
+      "collapsed": 61.9921875,
+      "expanded": 133.984375
+    },
+    "stackDrag": {
+      "firstFrameShiftPx": 3.55
+    },
+    "body": {
+      "firstPlotX": 221.53846153846155,
+      "coverage": "90 demonstration measurements · 11 Jun–8 Sept · line shows weekly averages"
+    },
+    "activeLiveBar": {
+      "height": 245.99609375,
+      "controlsInsideShell": true,
+      "noStatusDots": true
+    }
+  }
+}

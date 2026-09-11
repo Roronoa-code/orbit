@@ -191,7 +191,56 @@ async function runChecks(){
     check(qa('[data-night-stage]').some(node=>node.getAttribute('aria-pressed')==='true'),'Sleep scrub must retain the active stage');
     check(!q('#night-cursor'),'Sleep scrub must not create a night cursor');
 
-    result.textContent=JSON.stringify({status:'PASS',fixture:'OrbitWorkouts only; GPS and history data are verification-page local',checks:['validation and invalid setup inputs','outdoors start, optional weight and countdown','distance, pace, speed and MET energy','GPS permission retry and metric refresh identity','active and completed time details','route, speed, elevation and missing data states','pause, resume, finish, back and history reopening','metric-less history compatibility','320 px and 390 px finite/no-overflow detail','44 px controls','context menu and input selection','sleep scrub highlight without night cursor']},null,2);
+    // A time-only session: the submitted target matches the visible selection, the summary uses what was
+    // recorded, and the in-progress details keep the session's own controls without a second timer.
+    state=installFixture({active:null,history:[]});await openWorkouts();
+    click('[data-setup="Strength"]');await wait(240);
+    check(!q('#workout-track'),'Strength setup must not offer GPS');
+    click('input[name="target"][value="time"]');await wait(240);q('#target-minutes').value='45';
+    click('input[name="target"][value="open"]');await wait(240);
+    check(q('#target-options').hidden&&q('#target-minutes').disabled&&q('#target-minutes').value==='45','Open workout must hide and disable the duration while keeping the entered value');
+    click('#workout-setup-form button[type="submit"]');await wait(3600);
+    const openCall=state.calls.find(call=>call.name==='start');
+    check(openCall&&openCall.targetMs===0&&openCall.trackLocation===false,'An Open workout must submit no duration and no tracking: '+raw(openCall));
+    const summary=q('#live-workout-metrics');
+    check(!/Distance|Average pace|Average speed/.test(summary.textContent),'A time-only session must not present distance, pace or speed: '+summary.textContent);
+    check(/Started/.test(summary.textContent)&&/Paused/.test(summary.textContent)&&/Target/.test(summary.textContent),'A time-only session must summarise its recorded start, pauses and target');
+    const quiet=q('.workout-stat-note');check(quiet&&/weight/i.test(quiet.textContent),'An unavailable estimate must explain itself once');
+    check(parseFloat(win().getComputedStyle(q('.workout-stat-copy')).fontSize)<parseFloat(win().getComputedStyle(q('[data-workout-value="paused"] dd')).fontSize),'The explanation must not carry the weight of a recorded reading');
+    click('[data-workout-detail="active"]');await wait(280);
+    const body=finishResult();check(body&&body.textContent.includes('In progress'),'In-progress details must say so');
+    check(q('[data-session="pause"]',body)&&q('[data-session="finish"]',body),'In-progress details must keep the session controls');
+    check(qa('#health-content .timer-dial').length===0&&qa('#health-content [data-session]').length===2,'In-progress details must not add a second timer or duplicate the controls');
+    check(!q('.workout-route-group')&&body.textContent.includes('Total')&&body.textContent.includes('Active'),'Time-only details must omit movement metrics and keep Active and Total');
+    click('#workout-record-body [data-session="pause"]');await wait(160);
+    check(state.store.active.resumedAt===null&&q('#workout-record-body [data-session="resume"]'),'Pausing from the details page must use the same session');
+    click('#workout-record-body [data-session="resume"]');await wait(160);
+    check(state.store.active.resumedAt!==null&&state.calls.filter(call=>call.name==='start').length===1,'Resuming from the details page must use the same session');
+    click('#workout-record-body [data-session="finish"]');await wait(320);
+    check(state.store.active===null&&state.store.history.length===1&&finishResult().textContent.includes('Workout saved'),'Finishing from the details page must save one record');
+
+    // The weekly chart can be inspected day by day, and the history describes itself without repeating its newest row.
+    const dayMs=86400000,at=(back,hour,minutes,kind)=>{const end=new Date(Date.now()-back*dayMs);end.setHours(hour,20,0,0);return {kind,startedAt:end.getTime()-minutes*60000,endedAt:end.getTime(),elapsed:minutes*60000,totalMs:minutes*60000,targetMs:0,weightKg:0,trackLocation:false}};
+    state=installFixture({active:null,history:[at(0,9,25,'Walking'),at(0,7,12,'Strength'),at(2,8,40,'Walking')]});await openWorkouts();
+    const weekScrub=q('#week-scrub');check(weekScrub,'The weekly chart must offer inspection');
+    const weekTotal=text('.workout-week .tile-value');
+    const inspect=day=>{weekScrub.value=String(day);weekScrub.dispatchEvent(new (win().Event)('input',{bubbles:true}));return text('#week-readout')};
+    const todayText=inspect(6);
+    check(/37 min/.test(todayText)&&/2 sessions/.test(todayText)&&/20\d\d/.test(todayText),'Inspecting a day must give its exact date, minutes and session count: '+todayText);
+    check(qa('[data-week-day].is-selected').length===1,'The inspected day must be marked on the chart');
+    check(/no sessions recorded/.test(inspect(5)),'A day without records must say so instead of reading as data');
+    const older=inspect(4);check(/40 min/.test(older)&&/1 session/.test(older)&&!/sessions/.test(older),'A single session must be counted as one: '+older);
+    check(text('.workout-week .tile-value')===weekTotal&&/in total/.test(text('.workout-week .health-section-head span')),'The week total must stay identified apart from the inspected day');
+    check(text('.workout-history summary h2')==='Workout history'&&!q('.workout-history summary strong'),'The disclosure must describe the history rather than repeat its newest record');
+    check(/3 sessions/.test(text('.workout-history summary small')),'The disclosure must say how much history it holds');
+    click('.workout-history summary');await wait(260);
+    const historyRows=qa('.workout-history li button');
+    check(historyRows.length===3,'Every record must be preserved and listed: '+historyRows.length);
+    check(qa('.workout-history .history-day').length===2,'Same-day sessions must be grouped under their own date');
+    check(historyRows.every(row=>/\d\d:\d\d/.test(q('small',row).textContent)),'Each record must show its recorded start time');
+    check(q('#health-scroll').scrollHeight>q('#health-scroll').clientHeight||historyRows.length===3,'The opened history must keep its real scrolling');
+
+    result.textContent=JSON.stringify({status:'PASS',fixture:'OrbitWorkouts only; GPS and history data are verification-page local',checks:['validation and invalid setup inputs','outdoors start, optional weight and countdown','distance, pace, speed and MET energy','GPS permission retry and metric refresh identity','active and completed time details','route, speed, elevation and missing data states','pause, resume, finish, back and history reopening','metric-less history compatibility','320 px and 390 px finite/no-overflow detail','44 px controls','context menu and input selection','sleep scrub highlight without night cursor','time-only summary uses recorded time, pauses and target','in-progress details keep the same session controls','Open workout submits no duration','weekly chart day inspection with exact dates and zero states','workout history naming, grouping and start times']},null,2);
   }catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}
   finally{restoreFrame()}
 }

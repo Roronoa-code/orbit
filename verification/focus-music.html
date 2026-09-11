@@ -81,6 +81,50 @@ document.querySelector('#run').onclick=async()=>{
   check(q('[data-timer-focus]').getAttribute('aria-pressed')==='false'&&!q('#health-page').classList.contains('music-focus')&&!q('.workout-music').hidden&&w().getComputedStyle(q('.music-cover')).visibility==='hidden'&&minimise.hidden,'Swiping the page-wide view down must settle in the small player');
   const small=q('.music-heading h2'),smallTop=small.getBoundingClientRect().top;await drag(small,smallTop,smallTop-160,10);await settled();
   check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&q('#health-page').classList.contains('music-focus')&&!minimise.hidden,'Swiping the small player up must open the page-wide view');
+  // Endpoint agreement: a gesture held near either end already renders that end. Releasing must not swap the
+  // timer's rendering, the header surfaces, the selected reading control or the action material, and the title
+  // must never reach the transport controls at any progress value.
+  f.snapshot.title='Would You Love Me the Same If I Were Somebody Else Entirely Different';f.snapshot.artist='A Deliberately Long Artist Name For Truncation';w().MusicPlayer.refresh();
+  const cs=n=>w().getComputedStyle(n),vis=n=>cs(n).display==='none'?0:Number(cs(n).opacity),near=(a,b,slack=2)=>Math.abs(a-b)<=slack;
+  const shot=()=>{const matrix=q('.session-matrix'),canvas=q('#focus-time-dots'),head=q('.health-page-head .icon-button'),picked=q('.timer-mode-picker button[aria-pressed=true]'),action=q('.session-actions button:first-child');
+    return {matrix:vis(matrix),canvas:vis(canvas),matrixBox:matrix.getBoundingClientRect(),canvasBox:canvas.getBoundingClientRect(),head:cs(head).backgroundColor,picker:cs(picked).backgroundColor,action:cs(action).backgroundColor,lit:q('#health-page').classList.contains('music-lit'),hint:q('.timer-tap-hint').textContent,pressed:q('[data-timer-focus]').getAttribute('aria-pressed'),orbit:q('.timer-orbit').getBoundingClientRect()}};
+  const sameSkin=(a,b,where)=>{check(a.head===b.head&&a.picker===b.picker&&a.action===b.action&&a.lit===b.lit&&a.hint===b.hint&&a.pressed===b.pressed,where+' must already carry the settled treatment: '+JSON.stringify({held:[a.head,a.picker,a.action,a.lit,a.hint,a.pressed],settled:[b.head,b.picker,b.action,b.lit,b.hint,b.pressed]}))};
+  const clockBox=s=>s.canvas>s.matrix?s.canvasBox:s.matrixBox;
+  const collisions=()=>{const title=q('.music-heading h2').getBoundingClientRect();return [...q('.music-controls').querySelectorAll('button')].filter(b=>{const r=b.getBoundingClientRect();return title.right>r.left+.5&&title.left<r.right-.5&&title.bottom>r.top+.5&&title.top<r.bottom-.5}).map(b=>b.dataset.music)};
+  const holdDrag=async(target,from,offsets)=>{fireAt(target,'touchstart',from);for(const dy of offsets){await frame();fireAt(target,'touchmove',from+dy)}};
+  if(q('[data-timer-focus]').getAttribute('aria-pressed')!=='true'){q('[data-timer-focus]').click();await settled()}
+  await wait(520);const fullSettled=shot();check(fullSettled.canvas>.9&&fullSettled.matrix<.1,'The settled full view must read its clock from the focus canvas');
+  q('[data-timer-focus]').click();await settled();await wait(520);const compactSettled=shot();
+  check(compactSettled.matrix>.9&&compactSettled.canvas<.1,'The settled compact view must read its clock from the ring matrix');
+  check(!collisions().length,'The settled compact title must clear the transport controls');
+  q('[data-timer-focus]').click();await settled();
+  const head2=q('.music-heading h2'),startY=head2.getBoundingClientRect().top;
+  // Down to the compact end and held there.
+  await holdDrag(head2,startY,[20,90,170,250,320,352]);await wait(560);const heldCompact=shot(); // the treatment eases across; a held finger lets it finish
+  check(heldCompact.matrix>.8&&heldCompact.canvas<.2,'A gesture held at the compact end must already show the ring matrix clock: '+JSON.stringify({matrix:heldCompact.matrix,canvas:heldCompact.canvas}));
+  check(near(clockBox(heldCompact).width,clockBox(compactSettled).width,3)&&near(clockBox(heldCompact).height,clockBox(compactSettled).height,3),'The clock held at the compact end must already have its settled size: '+JSON.stringify({held:clockBox(heldCompact).width,settled:clockBox(compactSettled).width}));
+  sameSkin(heldCompact,compactSettled,'A gesture held at the compact end');
+  check(['x','y','width','height'].every(k=>Math.abs(heldCompact.orbit[k]-compactSettled.orbit[k])<3),'The dial ring held at the compact end must already sit where it settles: '+JSON.stringify({held:heldCompact.orbit,settled:compactSettled.orbit}));
+  check(!collisions().length,'A title held at the compact end must clear the transport controls');
+  // Reverse back up to the full end without releasing, then down and up again.
+  for(const dy of [300,240,160,90,40,12]){await frame();fireAt(head2,'touchmove',startY+dy)}
+  await wait(560);const heldFull=shot();
+  check(heldFull.canvas>.8&&heldFull.matrix<.2,'A gesture reversed to the full end must already show the focus canvas clock: '+JSON.stringify({matrix:heldFull.matrix,canvas:heldFull.canvas}));
+  check(near(clockBox(heldFull).width,clockBox(fullSettled).width,3)&&near(clockBox(heldFull).height,clockBox(fullSettled).height,3),'The clock held at the full end must already have its settled size');
+  sameSkin(heldFull,fullSettled,'A gesture reversed to the full end');
+  const sampled=[];for(const dy of [35,120,200,290,330,200,60]){await frame();fireAt(head2,'touchmove',startY+dy);sampled.push(...collisions())}
+  check(!sampled.length,'The title must never reach the transport controls at any progress: '+sampled.join());
+  for(const dy of [40,10]){await frame();fireAt(head2,'touchmove',startY+dy)}
+  await wait(560);const beforeRelease=shot();fireAt(head2,'touchend',startY+10);await settled();await wait(560);const afterRelease=shot();
+  sameSkin(beforeRelease,afterRelease,'Releasing at the full end');
+  check(afterRelease.canvas>.9&&afterRelease.matrix<.1&&near(clockBox(afterRelease).width,clockBox(beforeRelease).width,3),'Releasing must not change which clock is drawn or its size');
+  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&!collisions().length,'Releasing at the full end must settle in the page-wide view without a title collision');
+  // Hidden layers stay out of the way and every visible transport button owns its own hit region.
+  check([...live.contentDocument.querySelectorAll('.is-held')].every(n=>cs(n).pointerEvents==='none'),'Held layers must be noninteractive');
+  for(const button of q('.music-controls').querySelectorAll('button')){const r=button.getBoundingClientRect(),at=live.contentDocument.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);check(button.contains(at)||at===button,'A visible transport button must own its hit region: '+button.dataset.music)}
+  check(Number(cs(q('#health-page')).getPropertyValue('--art-veil')||0)>0||q('#health-page').style.getPropertyValue('--art-veil'),'A cover must set its own local shading strength');
+  f.snapshot.title='A little more colour';f.snapshot.artist='Test track';w().MusicPlayer.refresh();
+  q('[data-timer-focus]').click();await settled();q('[data-timer-focus]').click();await settled();
   f.snapshot.art='';f.snapshot.artKey='art:2';w().MusicPlayer.refresh();check(!q('.workout-music').hidden&&!q('#health-page').classList.contains('music-focus'),'A real track without artwork keeps controls and clears the art backdrop');
   await wait(140);const fading=q('.music-cover');check(fading&&Number(w().getComputedStyle(fading).opacity)<1,'A track without artwork must fade the previous cover out instead of cutting to the bare page');
   await wait(520);check(!q('.music-cover'),'The faded cover must be released');

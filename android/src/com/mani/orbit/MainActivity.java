@@ -31,6 +31,7 @@ public final class MainActivity extends Activity {
     private WorkoutSession workouts;
     private MusicSession music;
     private boolean pageReady;
+    private String insetCss = "";
     private boolean activityVisible;
     private boolean locationRequestPending;
     private long pendingLocationStart = -1;
@@ -46,6 +47,7 @@ public final class MainActivity extends Activity {
         root.setOnApplyWindowInsetsListener((view, insets) -> {
             Insets keyboard = insets.getInsets(WindowInsets.Type.ime());
             view.setPadding(0, 0, 0, keyboard.bottom);
+            readInsets(insets);
             return insets;
         });
         web = new WebView(this);
@@ -66,7 +68,7 @@ public final class MainActivity extends Activity {
         web.addJavascriptInterface(music, "OrbitMusic");
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient() {
-            @Override public void onPageFinished(WebView view, String url) { pageReady = true; openWorkoutIntent(); }
+            @Override public void onPageFinished(WebView view, String url) { pageReady = true; sendInsets(); openWorkoutIntent(); }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return !PAGE.equals(request.getUrl().toString());
             }
@@ -157,6 +159,24 @@ public final class MainActivity extends Activity {
         }
         workouts.updateNotification();
         if (pageReady) web.evaluateJavascript("Health.render();", null);
+    }
+
+    // System bars are hidden and can appear transiently over the page, so the page is told the room they occupy
+    // whether or not they are showing. These are the window's own measured insets, not an assumed bar height.
+    private void readInsets(WindowInsets insets) {
+        Insets bars = insets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        float density = Math.max(1f, getResources().getDisplayMetrics().density);
+        String next = String.format(java.util.Locale.US, "%.2f:%.2f", bars.top / density, bars.bottom / density);
+        if (next.equals(insetCss)) return;
+        insetCss = next;
+        sendInsets();
+    }
+
+    private void sendInsets() {
+        if (!pageReady || web == null || insetCss.isEmpty()) return;
+        String[] room = insetCss.split(":");
+        web.evaluateJavascript("document.documentElement.style.setProperty('--orbit-inset-top','" + room[0]
+            + "px');document.documentElement.style.setProperty('--orbit-inset-bottom','" + room[1] + "px');", null);
     }
 
     private void goBack() {
