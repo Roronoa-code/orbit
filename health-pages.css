@@ -21,7 +21,7 @@
 .health-source{margin:0 6px 16px;font-size:10px;color:#adadb5}
 .health-tile{border:0;border-radius:25px;background:#202023;padding:21px;margin:0 0 9px;min-width:0}
 /* Two surface roles on the workout screens: one raised panel material for grouped content, the page behind it. */
-.workout-week,.workout-history,.workout-detail-group,.workout-energy,.workout-route-group,.workout-kinds,.setup-panel{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:var(--frost-rim),var(--frost-hairline)}
+.workout-history,.workout-detail-group,.workout-energy,.workout-route-group,.workout-kinds,.setup-panel{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:var(--frost-rim),var(--frost-hairline)}
 .health-tile h2{font-size:15px;letter-spacing:-.2px;font-weight:500}
 .health-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .health-section-head>span{font-size:10px;color:#babac3}
@@ -37,8 +37,8 @@
 .tile-art{height:94px;width:100%;display:flex;justify-content:space-between;align-items:center;color:#c9b5ff}
 .tile-art>.workout-glyph{width:65px;height:65px}
 .round-arrow{background:#34323b;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-size:17px}
-.oxygen-tile summary,.workout-history summary{cursor:pointer;list-style:none}
-.oxygen-tile summary::-webkit-details-marker,.workout-history summary::-webkit-details-marker{display:none}
+.oxygen-tile summary{cursor:pointer;list-style:none}
+.oxygen-tile summary::-webkit-details-marker{display:none}
  .health-destinations{margin:7px 0 12px}
 .oxygen-tile{padding:17px 18px}
 .oxygen-tile summary{display:flex;align-items:center;gap:12px;min-height:50px}
@@ -74,29 +74,6 @@
 .workout-kinds small{display:block;margin-top:3px;font-size:12px;letter-spacing:0;color:#a9a5b3}
 .workout-kinds button:active{background:#ffffff0a}
 .workout-kinds button:disabled{opacity:.4}
-.workout-week{padding:20px 22px}
-.workout-week .tile-value{margin:8px 0 0}
-/* The chart can be inspected day by day; the selected day reads out its own date, minutes and session count. */
-.week-chart{position:relative;margin-top:6px}
-.week-chart:focus-within{outline:1px solid #b69cff;outline-offset:5px;border-radius:4px}
-.week-bars{display:flex;justify-content:space-between;gap:8px;height:77px}
-.week-bars>span.is-selected i{background:#ded2ff;box-shadow:0 0 0 1px #ffffff2e}
-.week-bars>span.is-selected small{color:#f4f4f6}
-.week-readout{margin:11px 0 0;font-size:11px;line-height:1.5;color:#bdb8c6;font-variant-numeric:tabular-nums}
-.history-day{margin:15px 0 0;font-size:11px;font-weight:500;letter-spacing:.3px;color:#b8b3c3}
-.workout-history ol+*{margin-top:15px}
-.workout-history ol>li:first-child{border-top:0}
-.week-bars>span{display:flex;flex:1;flex-direction:column;justify-content:flex-end;align-items:center;gap:10px}
-.week-bars i{display:block;width:9px;border-radius:5px;background:#b69cff}
-.workout-history{padding:18px 16px;background:transparent;box-shadow:none}
-.workout-history summary{display:flex;align-items:center;gap:12px}
-.workout-history summary>span:first-child{flex:1}
-.workout-history summary h2{font-size:13px}
-.workout-history summary small{display:block;margin-top:5px}
-.workout-history strong{font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
-.workout-history ol{padding:0;list-style:none;margin:4px 0 0}
-.workout-history li{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:16px 0;border-top:1px solid #ffffff14;font-size:12px}
-.workout-history li small{display:block;margin-top:5px}
 .workout-focus .health-scroll{display:flex;flex-direction:column}
 .workout-focus .health-content{flex:1;display:flex;flex-direction:column}
 /* Setup is one configuration flow under the header title: a short intro row, one panel of settings, help, then Start. */
@@ -243,7 +220,7 @@
 .music-tint{position:absolute;inset:0;background:#241f24;will-change:opacity}
 .music-art-layer{position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-start;opacity:0;will-change:opacity;transition:opacity 560ms cubic-bezier(.2,.65,.2,1)}
 .music-art-layer.is-visible{opacity:1}
-.music-glow{position:absolute;inset:-45px;background-image:var(--art);background-size:cover;background-position:center 34%;filter:blur(38px);opacity:.8;will-change:opacity}
+.music-glow{position:absolute;inset:-45px;background-size:100% 100%;opacity:.8;will-change:opacity}
 .music-shade{position:absolute;inset:0;background:linear-gradient(rgb(9 9 12/calc(.16 + var(--art-veil,.24)*.56)),transparent 20%,rgb(16 15 20/calc(var(--art-veil,.24)*.62)) 44%,rgb(12 12 15/calc(.54 + var(--art-veil,.24)*.32)) 100%);will-change:opacity}
 /* Show the whole square cover at screen width instead of enlarging and cropping it to a tall page. */
 .music-cover img{position:relative;flex:none;width:100%;height:auto;aspect-ratio:1;object-fit:cover;object-position:center;display:block;mask-image:linear-gradient(#000 55%,#000b 78%,transparent);transform-origin:0 0;will-change:transform,opacity}
@@ -254,6 +231,7 @@
 .timer-focused.has-music #focus-time-dots{height:82px}
 .music-heading{display:flex;align-items:center;gap:10px}
 .music-heading>div{flex:1;min-width:0}
+.music-heading h2,.music-heading p{contain:layout paint}
 .music-heading h2{font-size:22px;line-height:1.2;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:650;color:#fff}
 .music-heading p{font-size:15px;color:#e4dce8;line-height:1.4;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .music-heading button{height:44px;width:44px;border:0;border-radius:0;background:none;flex-shrink:0;color:#e6dfe5}
@@ -325,11 +303,6 @@
 .tracking-line i.tracking{background:#d4c7e8}
 .tracking-line button{border:0;background:none;font-size:11px;min-height:44px;padding:9px 0 9px 14px;color:#e2d5f4}
 .tracking-line button span{padding-left:8px}
-.workout-history li{padding:0}
-.workout-history li button{width:100%;min-height:74px;padding:14px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;background:none;border:0}
-.workout-history li button>strong{display:flex;font-size:13px;align-items:center;gap:8px;white-space:nowrap}
-.workout-history li button>span{font-size:14px;min-width:0}
-.workout-history li button>span small{font-size:11px;line-height:1.5}
 .workout-result{text-align:center;padding:12px 8px 27px}
 .workout-result .health-eyebrow{font-size:10px}
 .workout-result-value{margin:27px auto 23px;display:flex;flex-direction:column;align-items:center;gap:13px;max-width:290px;color:#f1eef5}
@@ -419,12 +392,14 @@
 
 /* Body is one scene: a quiet light behind the ring, a header that frosts only once content passes beneath it. */
 .health-head-frost{display:none}
+.deck-frost{position:absolute;inset:-24px 0 auto;height:84px;z-index:7;pointer-events:none;opacity:0;background:linear-gradient(transparent,#0a0a0c 28.6%,#0a0a0c8c 52%,transparent);backdrop-filter:blur(16px) saturate(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.1);mask-image:linear-gradient(transparent,#000 28.6%,#000 48%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 28.6%,#000 48%,transparent)}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.deck-frost{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .health-page[data-page=body]{background:radial-gradient(120% 55% at 50% -10%,#18171f,transparent 62%),#0a0a0c}
 .health-page[data-page=body] .health-page-head{position:absolute;inset:0 0 auto;z-index:5}
 .health-page[data-page=body] .health-head-frost{display:block;position:absolute;inset:0 0 -26px;z-index:-1;pointer-events:none;opacity:0;background:linear-gradient(#0a0a0cd9,#0a0a0c8c 62%,#0a0a0c00);-webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);-webkit-mask-image:linear-gradient(#000 58%,transparent);mask-image:linear-gradient(#000 58%,transparent);will-change:opacity}
 
-.health-page[data-page=body] .health-scroll{padding-top:70px}
-.health-page[data-page=body] .health-source{margin:-6px 0 0 59px;color:#9d99a8}
+.health-page[data-page=body] .health-scroll{padding-top:calc(80px + var(--safe-top,0px))}
+.health-page[data-page=body] .health-source{margin:0 0 8px 58px;color:#9d99a8}
 
 .body-hero{position:relative;isolation:isolate;padding:0 0 2px}
 .body-hero:before{content:"";position:absolute;z-index:-1;left:-14px;right:-14px;top:-40px;height:480px;pointer-events:none;background:radial-gradient(closest-side at 50% 40%,#b69cff1c,#b69cff0a 55%,transparent),radial-gradient(60% 36% at 50% 97%,#e4e2f00c,transparent 70%)}
@@ -441,7 +416,6 @@
 .body-value small{font-size:13px;color:#cdc8d6;letter-spacing:0}
 .body-share{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#b3aebf;white-space:nowrap;font-variant-numeric:tabular-nums}
 .body-share i{width:6px;height:6px;border-radius:50%;background:#b69cff;flex:none}
-.body-share i.is-lean{background:#dcdbe3}
 .body-share i:not(:first-child){margin-left:6px}
 .body-centre{position:absolute;inset:16%;padding:0;border:0;border-radius:50%;background:none}
 .body-centre:focus-visible{outline-offset:-2px}
@@ -522,10 +496,6 @@
 .health-scroll{padding-bottom:calc(24px + var(--safe-bottom,0px));scroll-padding-bottom:90px}
 .health-page-head .icon-button{flex-shrink:0}
 .health-overview-intro{font-size:16px;color:#e4dfed;margin:8px 4px 18px}
-.history-day{font-size:13px;color:#ddd7e9;margin:25px 0 8px}
-.workout-history li button:active{background:#ffffff0d}
-.workout-history li button>strong{white-space:normal;text-align:right;max-width:48%;justify-content:flex-end}
-.workout-history li button>strong small{font-size:20px;margin:0}
 #workout-record-body{display:flex;flex-direction:column;min-height:100%}
 #workout-record-body>.session-actions{position:sticky;bottom:0;margin-top:auto;padding:14px 0 6px;background:linear-gradient(transparent,#0a0a0c 22%);z-index:4}
 .session-time{position:relative;isolation:isolate}
@@ -551,24 +521,46 @@
 .workout-live .session-actions button{min-height:56px}
 
 /* Settings uses the same page navigation and fields as workout setup. */
-.settings-profile,.settings-section{padding:18px 6px 24px}
-.settings-profile{padding-top:4px}
-.settings-section{border-top:1px solid #ffffff12}
-.settings-profile h2,.settings-section h2{font-size:17px;font-weight:550;margin-bottom:10px}
+.settings-profile,.settings-section{padding:18px;margin:0 0 14px;border-radius:22px;background:#18171d;box-shadow:var(--frost-rim)}
+.settings-profile h2,.settings-section h2{font-size:15px;font-weight:550;margin-bottom:8px}
 .settings-note,.settings-about p{font-size:12px;line-height:1.6;color:#b7b1c1}
-.settings-fields{display:grid;gap:18px;margin:22px 0 16px}
-.settings-fields label,.settings-goal{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;color:#e2dce9}
-.settings-fields input,.settings-goal input{display:block;width:100%;min-width:0;min-height:50px;padding:12px 14px;border:1px solid #ffffff16;border-radius:14px;background:#1d1c23;color:#f2edf8;font:inherit;font-size:16px;color-scheme:dark;box-sizing:border-box}
+.settings-fields{display:grid;gap:0;margin:8px 0 0}
+.settings-fields>label,.settings-goal{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;font-size:12px;color:#bdb7c9;min-height:56px}
+.settings-fields>label{border-bottom:1px solid #ffffff0c}
+.settings-fields input,.settings-goal input{display:block;width:100%;min-width:0;min-height:44px;padding:10px 8px;border:0;border-radius:8px;background:transparent;color:#f2edf8;font:inherit;font-size:15px;color-scheme:dark;box-sizing:border-box}
+.settings-fields>label input{width:58%;text-align:right}
 .settings-fields input:focus-visible,.settings-goal input:focus-visible{outline:2px solid #bfa7f2;outline-offset:2px}
-.settings-measurements{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.settings-measurements{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+.settings-measurements label{font-size:12px;color:#bdb7c9}
 .settings-measurements label>span{position:relative}
-.settings-measurements input{padding-right:38px}
-.settings-measurements small{position:absolute;right:14px;top:17px;color:#b9b2c4;pointer-events:none}
+.settings-measurements label>span{display:block;border-bottom:1px solid #ffffff16}
+.settings-measurements input{padding-left:0;padding-right:30px}
+.settings-measurements small{position:absolute;right:2px;top:14px;color:#b9b2c4;pointer-events:none}
 .settings-saved{color:#d2bef5;font-size:13px;min-height:0}
 .settings-saved:not(:empty){margin:12px 0}
-.settings-profile .workout-primary{margin-top:16px;width:100%}
-.settings-action{min-height:48px;border:1px solid #ffffff20;background:#24212d;border-radius:14px;padding:10px 20px;margin-top:12px;color:#e7dafb;font:inherit;font-size:13px}
+.settings-profile .workout-primary{margin-top:18px;width:100%;min-height:48px;border-radius:24px;font-size:14px}
+.settings-action{min-height:44px;border:0;background:#302b3b;border-radius:22px;padding:10px 18px;color:#e7dafb;font:inherit;font-size:13px}
+.settings-goal-row{display:flex;align-items:center;gap:12px}.settings-goal{flex:1;min-width:0}.settings-goal input{width:90px;text-align:right}
 .settings-action:active{background:#393143}
-.settings-section .tracking-option{margin-top:0;padding:12px 0;border-top:0}
+.settings-section .tracking-option{margin-top:0;padding:8px 0;border-top:0;min-height:48px;font-size:13px}
 .settings-section .music-access{margin-top:0}
+.settings-about summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer}.settings-about summary:after{content:'+';color:#bfa7f2}.settings-about[open] summary:after{content:'−'}
 .utility-island.is-open .settings-open{display:none}
+
+/* History shows one calendar week and one day's summaries, with full records a tap away. */
+.workout-history{padding:18px 12px}
+.history-week-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;text-align:center}
+.history-week-nav button{width:44px;height:44px;flex:none;border:0;border-radius:50%;background:#ffffff08;font-size:24px;color:#dac7ff}
+.history-week-nav button:disabled{opacity:.25}
+.history-week-nav p{font-size:10px;color:#b9b3c3;margin-top:5px}
+.history-week-metrics{display:flex;justify-content:center;gap:38px;margin:22px 0}
+.history-week-metrics p{display:flex;align-items:baseline;gap:7px}.history-week-metrics strong{font-size:28px;font-weight:500;line-height:1}.history-week-metrics small{font-size:10px}
+.history-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.history-days button{display:flex;flex-direction:column;align-items:center;gap:7px;min-height:74px;padding:10px 0;border:0;border-radius:22px;background:none;transition:background-color 180ms ease,color 180ms ease}
+.history-days button[aria-pressed=true]{background:#bfa7f2;color:#1b1425}.history-days button[aria-pressed=true] small{color:inherit}
+.history-days button:disabled{opacity:.28}.history-days strong{font-size:15px;font-weight:550}.history-days i{width:4px;height:4px;border-radius:50%;background:transparent}.history-days i.has-records{background:#bfa7f2}.history-days [aria-pressed=true] i.has-records{background:#33283f}
+.history-day{margin:22px 6px 7px;font-size:12px;font-weight:500;color:#d7d0e1}
+.history-session{width:100%;display:flex;align-items:center;gap:10px;min-height:76px;padding:14px 6px;border:0;border-top:1px solid #ffffff0d;background:none;text-align:left}
+.history-session>.workout-glyph{width:28px;height:28px;flex:none;color:#c5adef}.history-session>span:nth-child(2){flex:1;min-width:0}
+.history-session strong{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:14px;font-weight:500}.history-session strong small{font-size:10px;color:#aba4b6}
+.history-session-metrics{display:block;margin-top:7px;font-size:11px;color:#bfb7ca;line-height:1.5}.history-arrow{font-size:21px;color:#bfa7f2}.history-session:active{background:#ffffff08}.history-empty{padding:20px 6px 10px;color:#a59db1;font-size:12px}

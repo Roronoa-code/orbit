@@ -10,7 +10,7 @@ const WorkoutFocus=(()=>{
     dots?.stop();dots=null;dotsCanvas=null;
     if(focused&&canvas){dots=HeroDots.mount(canvas,live.querySelector('#session-time').dataset.reading||'00:00',true);dotsCanvas=canvas;canvas.onclick=event=>event.stopPropagation()}
   }
-  function dispose(){finish();settle();dots?.stop();dots=null;dotsCanvas=null}
+  function dispose(){finish();settle();measurements=null;dots?.stop();dots=null;dotsCanvas=null}
   function settle(){for(const animation of animations)animation.cancel();animations.clear()}
   function animate(node,frames,duration=500){if(document.hidden)return;const animation=node.animate(frames,{duration,easing:'cubic-bezier(.2,.75,.2,1)'});animations.add(animation);animation.oncancel=()=>animations.delete(animation);animation.onfinish=()=>{animations.delete(animation);animation.cancel()}}
   function layout(live,update){
@@ -34,7 +34,7 @@ const WorkoutFocus=(()=>{
   const ONLY='.workout-live-top,.workout-unconnected,.target-remaining,.music-tile,.music-thumb,.music-timeline,.music-heading [data-music="open"],.timer-orbit,#timer-label,.timer-tap-hint';
   const TEXT='.music-heading h2,.music-heading p',CONTROL='.music-controls button';
   const HELD=['position','left','top','width','height','margin','display','z-index','box-sizing','pointer-events','opacity'];
-  let morph=null,frame=0,drag=null,warm=0,swallowClick=false,hooks={target(){}};
+  let morph=null,frame=0,drag=null,warm=0,measurements=null,swallowClick=false,hooks={target(){}};
   const clamp=n=>Math.max(0,Math.min(1,n)),smooth=(p,a,b)=>{const t=clamp((p-a)/(b-a));return t*t*(3-2*t)},mix=(a,b,t)=>a+(b-a)*t;
   const between=(a,b,t)=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),w:mix(a.w,b.w,t),h:mix(a.h,b.h,t)});
   const host=()=>document.querySelector('#health-page');
@@ -54,6 +54,17 @@ const WorkoutFocus=(()=>{
     const matrix=live.querySelector('.session-matrix'),canvas=live.querySelector('#focus-time-dots');
     return {shared,only,clock:{matrix:matrix&&rect(matrix,g),canvas:canvas&&rect(canvas,g)}};
   }
+  function layouts(live,g){
+    const focused=live.classList.contains('timer-focused'),clock=live.querySelector('#session-time'),transform=getComputedStyle(clock).transform;
+    // Reuse stable geometry across repeated opens. Pausing/resuming must still measure the visible intermediate scale.
+    const stable=!live.classList.contains('is-paused')&&(transform==='none'||transform==='matrix(1, 0, 0, 1, 0, 0)');
+    const key=[g.box.width,g.box.height,document.querySelector('#health-scroll').scrollTop,clock.dataset.reading?.length,live.classList.contains('has-music'),live.querySelector('.music-heading')?.textContent,document.fonts.status].join('|');
+    if(stable&&measurements?.live===live&&measurements.key===key)return {...measurements,cached:true};
+    const here=measure(live,g);clock.style.transition='none';
+    live.classList.toggle('timer-focused',!focused);const there=measure(live,g);live.classList.toggle('timer-focused',focused);
+    const pair={live,key,compact:focused?there:here,focus:focused?here:there};if(stable)measurements=pair;
+    return pair;
+  }
   // An SVG has no offsetParent, so the containing block is found the same way the browser does.
   function container(node){
     if(node.offsetParent instanceof Element)return node.offsetParent;
@@ -72,16 +83,13 @@ const WorkoutFocus=(()=>{
   function begin(live){
     if(morph)return morph;
     settle();
-    const g=geometry(),focused=live.classList.contains('timer-focused'),here=measure(live,g);
-    // Keep the visible pause scale as the start, but measure the destination after its CSS transition.
-    live.querySelector('#session-time').style.transition='none';
-    live.classList.toggle('timer-focused',!focused);const there=measure(live,g);live.classList.toggle('timer-focused',focused);
-    const compact=focused?there:here,focus=focused?here:there,page=host(),cover=page.querySelector('.music-cover'),img=cover?.querySelector('img'),thumb=live.querySelector('.music-thumb');
+    const g=geometry(),focused=live.classList.contains('timer-focused'),pair=layouts(live,g),{compact,focus}=pair,here=focused?focus:compact,there=focused?compact:focus;
+    const page=host(),cover=page.querySelector('.music-cover'),img=cover?.querySelector('img'),thumb=live.querySelector('.music-thumb');
     const m={live,start:focused,p:focused?1:0,v:0,target:focused,shared:[],leaving:[],held:[],cover,thumb,imgRect:img?rect(img,g):null,thumbRect:thumb?compact.only.get(thumb)?.rect:null,
       radius:thumb?parseFloat(getComputedStyle(thumb).borderRadius)||12:12,range:Math.max(200,Math.min(420,g.box.height/g.scale*.42)),kx:1,ky:1};
     m.flying=Boolean(m.imgRect&&m.thumbRect);
     for(const [node,c] of compact.shared){const f=focus.shared.get(node);if(f){Object.assign(node.style,{transformOrigin:'0 0',transition:'none',transform:'none'});m.shared.push({node,c,f,uniform:node.matches(UNIFORM),centred:node.id==='session-time',text:node.matches(TEXT),control:node.matches(CONTROL)})}}
-    for(const s of m.shared)s.base=rect(s.node,g);
+    for(const s of m.shared)s.base=pair.cached?(focused?s.f:s.c):rect(s.node,g);
     // One clock, two renderings: the ring's dot matrix and the focus canvas cross over during the move, each at the
     // size its own layout gives it, so a gesture held near either end already shows that end's clock.
     const flow=focused?live.querySelector('#focus-time-dots'):live.querySelector('.session-matrix');
@@ -161,7 +169,9 @@ const WorkoutFocus=(()=>{
     attach(live,final);
     MusicPlayer.setFocused(final);
     // Commit the resting styles while transitions are still off, so nothing animates back from where the move left it.
-    for(const s of m.shared){getComputedStyle(s.node).transform;s.node.style.removeProperty('transition')}
+    // One style flush for the whole scene, then release every transition together.
+    getComputedStyle(live).transform;
+    for(const s of m.shared)s.node.style.removeProperty('transition');
   }
   function run(){
     if(frame||!morph)return;let last=performance.now();
@@ -281,6 +291,12 @@ const MusicPlayer=(()=>{
   // Downscaled copies: the blurred backdrop cannot show more detail than its blur radius, and the small
   // cover needs only its displayed size. Neither is ever enlarged beyond the decoded image.
   function thumbnail(img,width){try{const w=Math.max(1,Math.min(width,img.naturalWidth)),height=Math.max(1,Math.round(w*img.naturalHeight/img.naturalWidth)),canvas=document.createElement('canvas');canvas.width=w;canvas.height=height;canvas.getContext('2d').drawImage(img,0,0,w,height);return canvas.toDataURL('image/jpeg',.82)}catch{return null}}
+  function glowArt(img){
+    // The diffuse background has no fine detail. Blur it once when art changes, not at screen resolution during every move.
+    const host=page(),scale=96/(host.clientWidth+90),canvas=document.createElement('canvas');canvas.width=96;canvas.height=Math.ceil((host.clientHeight+90)*scale);
+    const ctx=canvas.getContext('2d'),fit=Math.max(canvas.width/img.naturalWidth,canvas.height/img.naturalHeight),w=img.naturalWidth*fit,h=img.naturalHeight*fit;
+    ctx.filter=`blur(${38*scale}px)`;ctx.drawImage(img,(canvas.width-w)/2,(canvas.height-h)*.34,w,h);return canvas.toDataURL();
+  }
   function artwork(value){
     if(value===art&&cover?.querySelector('.music-art-layer:last-child img')?.src===value)return;
     if(!value){if(cover)retireArtwork();else clearArtwork();return}
@@ -291,7 +307,7 @@ const MusicPlayer=(()=>{
       if(!cover){cover=document.createElement('div');cover.className='music-cover';cover.classList.toggle('is-minimised',!focused);const base=document.createElement('div');base.className='music-tint';cover.append(base);host.append(cover)}
       clearTimeout(artCleanup);const layers=cover.querySelectorAll('.music-art-layer');for(let i=0;i<layers.length-1;i++)layers[i].remove();
       const small=thumbnail(img,48)||value,previous=cover.querySelector('.music-art-layer'),layer=document.createElement('div'),glow=document.createElement('div'),shade=document.createElement('div');
-      layer.className='music-art-layer';glow.className='music-glow';shade.className='music-shade';layer.style.setProperty('--art',`url("${small}")`);
+      layer.className='music-art-layer';glow.className='music-glow';shade.className='music-shade';glow.style.backgroundImage=`url("${glowArt(img)}")`;
       // Crossfade the fixed mask instead of repainting a large image for a new gradient every frame.
       const solid=img.cloneNode();solid.className='music-unmasked';solid.alt='';solid.setAttribute('aria-hidden','true');layer.append(glow,img,solid,shade);cover.append(layer);
       backdrop(small);host.classList.toggle('music-focus',focused);host.classList.toggle('music-lit',focused);node.classList.add('has-art');miniArt(thumbnail(img,192)||value);tint(palette(img));

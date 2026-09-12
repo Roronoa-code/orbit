@@ -90,7 +90,7 @@
       "name": "Swipe down/up and fixed transport targets through interrupted focus changes",
       "status": "PASS",
       "detail": {
-        "maxControlSizeChangePx": 0.000019073486328125
+        "maxControlSizeChangePx": 1.9073486328125e-05
       }
     },
     {
@@ -304,6 +304,150 @@
     "jank": "97 (8.00%)\r"
   },
   "release": {
+    "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260912-232234",
+    "sha256": "9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b",
+    "installedSha256": "9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b",
+    "bytes": 267703,
+    "auditRemoved": true,
+    "auditAndProductionAssetsIdentical": true
+  },
+  "bodyHistory": {
+    "desktop": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "rapid": [
+          "lean",
+          "muscle",
+          "fatMass"
+        ],
+        "ring": [
+          81,
+          100
+        ],
+        "title": {
+          "x": 72,
+          "y": 54.796875,
+          "width": 49.890625,
+          "height": 26.390625
+        },
+        "source": {
+          "x": 72,
+          "y": 114,
+          "width": 304,
+          "height": 15
+        }
+      },
+      {
+        "width": 320,
+        "status": "PASS",
+        "rapid": [
+          "lean",
+          "muscle",
+          "fatMass"
+        ],
+        "ring": [
+          81,
+          100
+        ],
+        "title": {
+          "x": 72,
+          "y": 54.796875,
+          "width": 49.890625,
+          "height": 26.390625
+        },
+        "source": {
+          "x": 69,
+          "y": 114,
+          "width": 240,
+          "height": 15
+        }
+      }
+    ],
+    "phone": {
+      "gestures": {
+        "rapid": [
+          "lean",
+          "muscle",
+          "fatMass"
+        ],
+        "ring": [
+          81,
+          100
+        ],
+        "title": {
+          "x": 72,
+          "y": 55.80000305175781,
+          "width": 49.879173278808594,
+          "height": 26.400001525878906
+        },
+        "source": {
+          "x": 72,
+          "y": 115.00000762939453,
+          "width": 298.0000305175781,
+          "height": 14.999992370605469
+        }
+      },
+      "profile": "Native persistence and numeric birth-date entry PASS",
+      "history": "Native workout saved, compact daily summaries, full detail and calendar return PASS",
+      "fog": "Native scroll fog with fade above and below the boundary PASS"
+    },
+    "phoneEndpoints": [
+      {
+        "paused": false,
+        "open": true,
+        "maxEndpointJumpPx": 0.41094970703125,
+        "frames": 73
+      },
+      {
+        "paused": false,
+        "open": false,
+        "maxEndpointJumpPx": 0.2413177490234375,
+        "frames": 92
+      },
+      {
+        "paused": true,
+        "open": true,
+        "maxEndpointJumpPx": 0.38232421875,
+        "frames": 68
+      },
+      {
+        "paused": true,
+        "open": false,
+        "maxEndpointJumpPx": 0.25091552734375,
+        "frames": 94
+      }
+    ],
+    "perfBefore": {
+      "frames": 1745,
+      "median": 8.300000000000182,
+      "p95": 8.400000000001455,
+      "max": 83.30000000000018,
+      "over25": 1,
+      "rasterMs": 2337.884999999996,
+      "largeImagePaints": 0,
+      "jank": "95 (8.11%)\r"
+    },
+    "perfAfter": {
+      "frames": 1771,
+      "median": 8.300000000000182,
+      "p95": 8.400000000001455,
+      "max": 25,
+      "over25": 0,
+      "rasterMs": 2559.183,
+      "largeImagePaints": 0,
+      "jank": "115 (9.43%)\r"
+    },
+    "release": {
+      "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260912-232234",
+      "sha256": "9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b",
+      "installedSha256": "9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b",
+      "bytes": 267703,
+      "auditRemoved": true,
+      "auditAndProductionAssetsIdentical": true
+    }
+  },
+  "previousRelease": {
     "build": "20260912-223127",
     "sha256": "2d0b07d8b16457c5715539d891779b7774e1de22e9d4aa0fb179780703d6483f",
     "installedHashVerified": true,

@@ -5,7 +5,7 @@ const Health = (() => {
   const key='orbit-workouts-v1',q=s=>document.querySelector(s);
   let page=null,store={active:null,history:[]},storageFault=false,options,timer=0,returnFocus;
   let bodyMetric='weight',bodyRange=30,bodyDate=null,setup=null,countdown=null,countTimer=0,countDots=null;
-  let timerMode='elapsed',timerFocused=false,dotPattern=0,weekDay=6;
+  let timerMode='elapsed',timerFocused=false,dotPattern=0,historyDate=null;
   let sleepDate=null,sleepMinute=0,workoutRecord=null,workoutChart='route',workoutReturn=null;
   const now=()=>performance.timeOrigin+performance.now();
   const stamp=(date,full=false)=>new Date(date).toLocaleDateString('en-GB',full?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
@@ -59,15 +59,15 @@ const Health = (() => {
   }
   function bodyRows(){const end=options.getDate(),start=dayOffset(end,1-bodyRange);return (options.historyDates||options.dates).filter(date=>date>=start&&date<=end)}
   function sleepView(){const index=options.dates.indexOf(sleepDate);return `<div class="sleep-date-nav"><button data-night-date="-1" aria-label="Previous night" ${index<=0?'disabled':''}>‹</button><span>${stamp(sleepDate+'T12:00:00',true)}</span><button data-night-date="1" aria-label="Next night" ${index>=options.dates.length-1?'disabled':''}>›</button></div>`+SleepTimeline.view(options.getDaily(sleepDate).night,sleepMinute)}
-  // Each of the ring's 100 dots is 1% of body weight: purple is the selected measurement's share (fat for Weight).
-  const bodyOrder=Object.keys(bodyFields),bodyTone={purple:[182,156,255],lean:[220,219,227],rest:[52,50,60]};
-  const bodyShare=(field,d)=>field==='weight'||field==='fatMass'?d.fat/100:d[field]/d.weight;
-  const bodyRest=field=>field==='weight'?bodyTone.lean:bodyTone.rest;
+  // Each of the ring's 100 dots is 1% of body weight: purple is the selected measurement's share, with Weight filling the whole ring.
+  const bodyOrder=Object.keys(bodyFields),bodyTone={purple:[182,156,255],rest:[52,50,60]};
+  const bodyShare=(field,d)=>field==='weight'?1:field==='fatMass'?d.fat/100:d[field]/d.weight;
+  const bodyRest=()=>bodyTone.rest;
   const bodyIndex=field=>bodyOrder.indexOf(field),bodyNumber=(field,d)=>d[field].toFixed(1),percent=n=>Math.round(n*100)+'%';
   const mixTone=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
   let ringFills=[];
   function bodyCaption(field,d){
-    if(field==='weight')return `<i class="is-lean"></i>${percent(d.lean/d.weight)} lean<i></i>${percent(d.fat/100)} fat`;
+    if(field==='weight')return '<i></i>Total body weight';
     return `<i></i>${field==='fatMass'?d.fat.toFixed(1)+'%':percent(bodyShare(field,d))} of body weight`;
   }
   function bodyReading(field,date){const d=sample('body',date),[label,unit]=bodyFields[field],latest=date===bodyRows().at(-1);return `<span class="body-measure-name">${label}${latest?'':' · '+stamp(date+'T12:00:00')}</span><span class="body-value">${HeroDots.markup(bodyNumber(field,d))}<small>${unit}</small></span><span class="body-share">${bodyCaption(field,d)}</span>`}
@@ -202,6 +202,13 @@ const Health = (() => {
       if(Math.abs(dx)<8)return;
       // Start from rest at the edge of the touch slop, and from wherever a settling move currently is.
       g.active=true;g.x+=Math.sign(dx)*8;try{g.dial.setPointerCapture(g.id)}catch{}cancelAnimationFrame(lens.frame);lens.frame=0;
+      // A new swipe starts from the last committed measurement, even while its move is settling.
+      // Swap the two visible layers and rebase progress without moving either layer on screen.
+      if(lens.target&&lens.to){
+        const [current,next]=lensLayers(),old=current.innerHTML;current.innerHTML=next.innerHTML;next.innerHTML=old;
+        const from=lens.from;lens.from=lens.to;lens.to=from;lens.x.value-=lens.target;lens.target=0;lens.toSlot=null;
+      }
+      g.start=lens.x.value;
       if(!lens.from)lens.from=bodyMetric;lens.pillFrom=null;lens.width=q('.body-lens').clientWidth||200;q('.body-lens').classList.add('is-moving');
     }
     g.samples.push([event.timeStamp,event.clientX]);if(g.samples.length>5)g.samples.shift();
@@ -256,22 +263,40 @@ const Health = (() => {
     inspectBody(rows.indexOf(bodyDate));
     if(animate)SurfaceMotion.shift(q('.body-chart>svg'),{x:0,y:4},220);
   }
-  // Each of the seven days can be inspected for its own date, recorded minutes and session count; the week's
-  // total keeps its own place above the chart, and a day without records says so instead of reading as zero data.
-  function weekBins(){return Array.from({length:7},(_,i)=>{const date=new Date(now());date.setHours(0,0,0,0);date.setDate(date.getDate()-6+i);const next=new Date(date);next.setDate(next.getDate()+1);const records=store.history.filter(r=>r.endedAt>=date.getTime()&&r.endedAt<next.getTime());return {date,records,minutes:records.reduce((n,r)=>n+r.elapsed,0)/60000}})}
-  const sessionDuration=ms=>{const seconds=Math.floor(ms/1000);return (seconds>=3600?Math.floor(seconds/3600)+' hr ':'')+Math.floor(seconds/60)%60+' min '+seconds%60+' sec'};
+  const dayStart=value=>{const d=new Date(value);d.setHours(0,0,0,0);return d};
+  const weekStart=value=>{const d=dayStart(value);d.setDate(d.getDate()-(d.getDay()+6)%7);return d};
+  const addDays=(date,n)=>{const d=new Date(date);d.setDate(d.getDate()+n);return d};
   const hhmm=ms=>new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  const weekText=b=>`${stamp(b.date,true)} · ${b.records.length?Math.round(b.minutes)+' min · '+b.records.length+(b.records.length===1?' session':' sessions'):'no sessions recorded'}`;
+  function weekBins(){
+    if(historyDate===null)historyDate=dayStart(store.history[0]?.startedAt??now()).getTime();
+    const start=weekStart(historyDate);
+    return Array.from({length:7},(_,i)=>{const date=addDays(start,i),end=addDays(date,1).getTime(),records=store.history.filter(r=>r.startedAt>=date.getTime()&&r.startedAt<end);return {date,records,minutes:records.reduce((n,r)=>n+r.elapsed,0)/60000}});
+  }
+  function historySessions(bin){
+    return `<h3 class="history-day">${bin.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</h3>${bin.records.length?bin.records.map(r=>{const v=WorkoutDetails.readings(r,r.elapsed);return `<button class="history-session" data-workout-detail="${r.startedAt}">${activityIcon(r.kind)}<span><strong>${r.kind}<small>${hhmm(r.startedAt)}</small></strong><span class="history-session-metrics">${clock(r.elapsed)} active${v.distance!==null?' · '+(v.distance/1000).toFixed(2)+' km':''}${v.calories!==null?' · '+Math.round(v.calories)+' kcal est.':''}</span></span><span class="history-arrow" aria-hidden="true">›</span></button>`}).join(''):'<p class="history-empty">No workouts this day</p>'}`;
+  }
+  function historyCalendar(){
+    const bins=weekBins(),start=bins[0].date,end=bins[6].date,count=bins.reduce((n,b)=>n+b.records.length,0),mins=Math.round(bins.reduce((n,b)=>n+b.minutes,0)),today=dayStart(now());
+    const earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt))),selected=bins.find(b=>b.date.getTime()===historyDate)||bins[0];
+    return `<div class="history-week-nav"><button data-history-week="-1" aria-label="Previous week" ${start<=earliest?'disabled':''}>‹</button><div><h2>Workout history</h2><p>${stamp(start)} – ${stamp(end,true)}</p></div><button data-history-week="1" aria-label="Next week" ${end>=today?'disabled':''}>›</button></div>
+    <div class="history-week-metrics"><p><strong>${count}</strong><small>${count===1?'session':'sessions'}</small></p><p><strong>${mins}</strong><small>active min</small></p></div>
+    <div class="history-days" role="group" aria-label="Choose workout day">${bins.map((b,i)=>`<button data-week-day="${i}" aria-pressed="${b.date.getTime()===historyDate}" aria-label="${stamp(b.date,true)}, ${b.records.length} sessions" ${b.date>today?'disabled':''}><small>${b.date.toLocaleDateString('en-GB',{weekday:'short'}).slice(0,1)}</small><strong>${b.date.getDate()}</strong><i class="${b.records.length?'has-records':''}" aria-hidden="true"></i></button>`).join('')}</div>
+    <div id="history-sessions" aria-live="polite">${historySessions(selected)}</div>`;
+  }
   function inspectWeek(index){
-    const bins=weekBins(),scrub=q('#week-scrub');if(!scrub||!bins[index])return;
-    weekDay=index;q('#week-readout').textContent=weekText(bins[index]);
-    scrub.value=String(index);scrub.setAttribute('aria-valuetext',weekText(bins[index]));
-    document.querySelectorAll('[data-week-day]').forEach(n=>n.classList.toggle('is-selected',Number(n.dataset.weekDay)===index));
+    const bin=weekBins()[index];if(!bin||bin.date>dayStart(now()))return;
+    historyDate=bin.date.getTime();document.querySelectorAll('[data-week-day]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.weekDay)===index)));
+    q('#history-sessions').innerHTML=historySessions(bin);SurfaceMotion.shift(q('#history-sessions'),{x:0,y:5},180);
+  }
+  function changeWeek(step){
+    if(![-1,1].includes(step))return;
+    const next=addDays(historyDate,step*7),earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt)));
+    if(weekStart(next)<earliest||weekStart(next)>weekStart(now()))return;
+    historyDate=Math.min(next.getTime(),dayStart(now()).getTime());q('#workout-calendar').innerHTML=historyCalendar();
+    SurfaceMotion.shift(q('#workout-calendar'),{x:step*10,y:0},200);q('[data-history-week="'+step+'"]').focus({preventScroll:true});
   }
   function workoutHome(){
-    const recent=store.history[0],bins=weekBins(),count=bins.reduce((n,b)=>n+b.records.length,0),mins=Math.round(bins.reduce((n,b)=>n+b.minutes,0)),peak=Math.max(1,...bins.map(b=>b.minutes));
-    const groups=[];for(const r of store.history){const day=new Date(r.startedAt);day.setHours(0,0,0,0);if(groups.at(-1)?.key!==day.getTime())groups.push({key:day.getTime(),date:day,items:[]});groups.at(-1).items.push(r)}
-    return `<section class="workout-start"><h2 class="workout-start-title">Start a session</h2><div class="workout-kinds">${kinds.map(kind=>{const last=store.history.find(r=>r.kind===kind);return `<button data-setup="${kind}" ${storageFault?'disabled':''}>${activityIcon(kind)}<span><strong>${kind}</strong><small>${last?'Last '+stamp(last.endedAt)+' · '+clock(last.elapsed):'No sessions yet'}</small></span></button>`}).join('')}</div></section>${storageFault?'<p class="health-error">Saved workouts could not be read. Recording is disabled to preserve them.</p>':''}<section class="health-tile workout-week"><div class="health-section-head"><h2>Last 7 days</h2><span>${count} ${count===1?'session':'sessions'} in total</span></div><p class="tile-value">${mins}<small>min</small></p><div class="week-chart"><div class="week-bars" aria-hidden="true">${bins.map((b,i)=>`<span data-week-day="${i}"><i style="height:${Math.max(3,b.minutes/peak*64)}px;opacity:${b.minutes?1:.25}"></i><small>${b.date.toLocaleDateString('en-GB',{weekday:'narrow'})}</small></span>`).join('')}</div><input id="week-scrub" class="chart-input" type="range" min="0" max="6" step="1" value="${weekDay}" aria-label="Inspect a day in the last seven days"/></div><p class="week-readout" id="week-readout"></p></section><details class="health-tile workout-history"><summary><span><h2>Workout history</h2><small>${store.history.length?`${store.history.length} ${store.history.length===1?'session':'sessions'} · latest ${stamp(recent.endedAt)}`:'Completed sessions appear here'}</small></span><span aria-hidden="true">⌄</span></summary><div class="details-body">${store.history.length?groups.map(g=>`<h3 class="history-day">${stamp(g.date,true)}</h3><ol>${g.items.map(r=>`<li><button data-workout-detail="${r.startedAt}"><span>${r.kind}<small>Started ${hhmm(r.startedAt)}${r.targetMs?' · '+r.targetMs/60000+' min target':''}</small></span><strong>${sessionDuration(r.elapsed)} <small aria-hidden="true">›</small></strong></button></li>`).join('')}</ol>`).join(''):'<p class="health-note">Choose an activity to get started.</p>'}</div></details>`;
+    return `<section class="workout-start"><h2 class="workout-start-title">Start a session</h2><div class="workout-kinds">${kinds.map(kind=>{const last=store.history.find(r=>r.kind===kind);return `<button data-setup="${kind}" ${storageFault?'disabled':''}>${activityIcon(kind)}<span><strong>${kind}</strong><small>${last?'Last '+stamp(last.endedAt)+' · '+clock(last.elapsed):'No sessions yet'}</small></span></button>`}).join('')}</div></section>${storageFault?'<p class="health-error">Saved workouts could not be read. Recording is disabled to preserve them.</p>':''}<section class="health-tile workout-history" id="workout-calendar">${historyCalendar()}</section>`;
   }
   // One configuration flow for every activity: the header carries the name; the panel holds target, GPS and weight.
   function setupView(){
@@ -303,13 +328,12 @@ const Health = (() => {
     q('#health-title').textContent=page==='workouts'?(record()?.kind||store.active?.kind||setup?.kind||titles[page]):titles[page];
     q('#health-back').setAttribute('aria-label',workoutRecord!==null?'Back to workouts':countdown!==null?'Cancel countdown':setup?'Back to workouts':page==='sleep'?'Back to sleep summary':'Back to dashboard');
     q('#health-source').textContent=page==='settings'?'Your profile · saved on this device':page==='workouts'?'Recorded locally on this phone':page==='sleep'?'Demo night · stage timing illustration':'Demo data · '+stamp(options.getDate()+'T12:00:00',true);
-    q('#health-source').hidden=page==='workouts'&&Boolean(focus||workoutRecord!==null);q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;q('#health-page').dataset.workoutScreen=page!=='workouts'?'':workoutRecord!==null?'record':countdown!==null?'countdown':store.active?'active':setup?'setup':'picker';
+    q('#health-source').hidden=page==='settings'||page==='workouts'&&Boolean(focus||workoutRecord!==null);q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;q('#health-page').dataset.workoutScreen=page!=='workouts'?'':workoutRecord!==null?'record':countdown!==null?'countdown':store.active?'active':setup?'setup':'picker';
     countDots?.stop();countDots=null;WorkoutFocus.dispose();MusicPlayer.stop();
     body.innerHTML=page==='settings'?OrbitSettings.view():page==='body'?bodyView():page==='overview'?overview():page==='sleep'?sleepView():workoutRecord!==null?recordView():countdown!==null?`<div class="workout-countdown"><p class="countdown-heading">${setup.kind}</p><div class="countdown-play"><canvas id="countdown-dots" aria-hidden="true"></canvas><output class="sr-only" id="workout-count" aria-live="polite">${countdown}</output></div><p class="countdown-invitation">Starts automatically · touch dots to play</p><div class="countdown-stages" aria-hidden="true">${[3,2,1].map(n=>`<i data-count-stage="${n}" class="${countdown<=n?'lit':''}"></i>`).join('')}</div><button data-cancel-countdown>Cancel</button></div>`:store.active?sessionView():setup?setupView():workoutHome();
     bindTracks();
     if(page==='body')paintBody();
     if(page==='settings')OrbitSettings.mount(options.settings);
-    if(q('#week-scrub'))inspectWeek(Math.max(0,Math.min(6,weekDay)));
     if(page==='workouts'&&countdown!==null)countDots=HeroDots.mount(q('#countdown-dots'),countdown);
     if(page==='workouts'&&store.active&&workoutRecord===null){paintTimer();if(timerFocused)WorkoutFocus.attach(q('.workout-live'),true);MusicPlayer.mount(q('.workout-music'),timerFocused)}
     q('#health-scroll').scrollTop=scroll;frostHead();
@@ -327,7 +351,7 @@ const Health = (() => {
   function open(which,source=q('#live-bar'),stage){
     if(!Object.hasOwn(titles,which))return false;
     const enter=()=>{
-      if(!page)returnFocus=source||document.activeElement;page=which;setup=null;workoutRecord=null;cancelCountdown();options.beforeOpen();q('#health-page').hidden=false;q('.screen').classList.add('is-detail');
+      if(!page)returnFocus=source||document.activeElement;page=which;setup=null;workoutRecord=null;if(which==='workouts')historyDate=null;cancelCountdown();options.beforeOpen();q('#health-page').hidden=false;q('.screen').classList.add('is-detail');
       if(which==='sleep'){sleepDate=options.getDate();const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.valid(night)?SleepTimeline.stageMinute(night,stage):0}
       for(const selector of ['.masthead','.hero','#deck-scroll','#stack-open','#utility-island','#live-island'])q(selector).inert=true;
       render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true});q('#health-page').setAttribute('aria-label',titles[which]);return true;
@@ -337,7 +361,7 @@ const Health = (() => {
   }
   function close(){
     if(!page)return false;
-    if(workoutRecord!==null){SurfaceMotion.change(()=>{workoutRecord=null;render();if(workoutReturn?.historyOpen&&q('.workout-history'))q('.workout-history').open=true;q('#health-scroll').scrollTop=workoutReturn?.scroll||0;workoutReturn=null;q('#health-back').focus({preventScroll:true})});return true}
+    if(workoutRecord!==null){SurfaceMotion.change(()=>{workoutRecord=null;render();q('#health-scroll').scrollTop=workoutReturn?.scroll||0;workoutReturn=null;q('#health-back').focus({preventScroll:true})});return true}
     if(countdown!==null){SurfaceMotion.change(()=>{cancelCountdown();render();q('.workout-primary').focus({preventScroll:true})});return true}
     if(setup){const kind=setup.kind;SurfaceMotion.change(()=>{setup=null;render();q('#health-scroll').scrollTop=0;q('[data-setup="'+kind+'"]').focus({preventScroll:true})});return true}
     MusicPlayer.stop();WorkoutFocus.dispose();releaseTracks();page=null;SurfaceMotion.dismiss(q('#health-page'),()=>{
@@ -362,12 +386,14 @@ const Health = (() => {
       const b=event.target.closest('button');if(!b)return;
       if(b.dataset.session){
         const finish=b.dataset.session==='finish';
-        const saved=finish?SurfaceMotion.change(()=>{const saved=action('finish');if(saved){workoutRecord=store.history[0].startedAt;workoutChart='route';render();q('#health-scroll').scrollTop=0}return saved}):action(b.dataset.session);
+        const saved=finish?SurfaceMotion.change(()=>{const saved=action('finish');if(saved){workoutRecord=store.history[0].startedAt;historyDate=dayStart(workoutRecord).getTime();workoutChart='route';render();q('#health-scroll').scrollTop=0}return saved}):action(b.dataset.session);
         if(saved){if(finish){options.notice('Workout saved');q('#health-back').focus({preventScroll:true})}else q('#health-content [data-session="'+(store.active.resumedAt===null?'resume':'pause')+'"]').focus({preventScroll:true})}
       }
       else if(b.dataset.setup)SurfaceMotion.change(()=>{setup={kind:b.dataset.setup,targetMs:0,trackLocation:b.dataset.setup!=='Strength',weightKg:OrbitSettings.profile().weightKg||0};if(OrbitSettings.error)options.notice(OrbitSettings.error);render();q('#health-scroll').scrollTop=0;q('input[name="target"]:checked').focus({preventScroll:true})});
-      else if(b.dataset.workoutDetail){workoutReturn={scroll:q('#health-scroll').scrollTop,historyOpen:Boolean(q('.workout-history')?.open)};workoutRecord=b.dataset.workoutDetail==='active'?'active':Number(b.dataset.workoutDetail);if(!record()){workoutRecord=null;return}workoutChart='route';SurfaceMotion.change(()=>{render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true})})}
+      else if(b.dataset.workoutDetail){workoutReturn={scroll:q('#health-scroll').scrollTop};workoutRecord=b.dataset.workoutDetail==='active'?'active':Number(b.dataset.workoutDetail);if(!record()){workoutRecord=null;return}workoutChart='route';SurfaceMotion.change(()=>{render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true})})}
       else if(b.dataset.workoutChart)setWorkoutChart(b.dataset.workoutChart);
+      else if(b.dataset.historyWeek)changeWeek(Number(b.dataset.historyWeek));
+      else if(b.dataset.weekDay!==undefined)inspectWeek(Number(b.dataset.weekDay));
       else if(b.hasAttribute('data-music-connect'))MusicPlayer.connect();
       else if(b.hasAttribute('data-tracking'))window.OrbitWorkouts?.enableTracking();
       else if(b.dataset.bodyMetric||b.hasAttribute('data-next-body')){if(b.dataset.bodyMetric)goBody(b.dataset.bodyMetric);else goBody(bodyNeighbour(bodyMetric,1),1)}
@@ -386,7 +412,7 @@ const Health = (() => {
       else if(b.hasAttribute('data-notifications'))window.OrbitWorkouts?.enableNotifications();
     });
     q('#health-content').addEventListener('change',event=>{if(event.target.name==='target'){const open=event.target.value==='time';q('#target-minutes').disabled=!open;SurfaceMotion.expand(q('#target-options'),open)}});
-    q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='week-scrub'){const day=Number(event.target.value);if(Number.isInteger(day)&&day>=0&&day<7)inspectWeek(day)}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
+    q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
     q('#health-content').addEventListener('submit',event=>{if(event.target.id!=='workout-setup-form')return;event.preventDefault();const time=q('input[name="target"]:checked').value==='time',minutes=Number(q('#target-minutes').value);if(time&&(!Number.isInteger(minutes)||minutes<1||minutes>1440)){q('#workout-error').textContent='Choose between 1 and 1,440 minutes.';return}const weightKg=Number(q('#workout-weight').value||0),trackLocation=Boolean(q('#workout-track')?.checked);if(weightKg!==0&&(!Number.isFinite(weightKg)||weightKg<20||weightKg>350)){q('#workout-error').textContent='Enter a weight from 20 to 350 kg, or leave it empty.';return}startCountdown(setup.kind,time?minutes*60000:0,{trackLocation,weightKg})});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&countdown!==null){cancelCountdown();render()}schedule();if(!document.hidden)tick()});
     const realign=()=>{if(page)remeasureTracks()};window.addEventListener('resize',realign);document.fonts?.ready.then(realign);

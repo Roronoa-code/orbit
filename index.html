@@ -144,7 +144,7 @@ body{background:#0a0a0c}
 </div></div>
 
 <section class="hero" aria-label="Step count"><div class="readout"><div class="hero-copy"><p class="label" id="hero-label">Steps</p><p class="number" id="steps">8,420</p><p class="goal-label" id="goal-label">of 10,000 steps</p><p class="orb-period" id="orb-period">Today</p></div></div><button class="orb-button" id="orb-button" aria-label="Steps. Swipe left or right, or tap, to change metric"><span id="globe" aria-hidden="true"></span></button><span class="sr-only" aria-live="polite" aria-atomic="true" id="metric-announcement"></span></section>
-<div class="panel-deck" id="panel-deck"><div class="deck-scroll" id="deck-scroll"><div id="period-content" role="region" tabindex="-1" aria-label="Steps details">
+<div class="panel-deck" id="panel-deck"><span class="deck-frost" aria-hidden="true"></span><div class="deck-scroll" id="deck-scroll"><div id="period-content" role="region" tabindex="-1" aria-label="Steps details">
 <section class="facts horizon" aria-label="Activity summary"><div class="metrics">
 <div class="metric"><svg aria-hidden="true"><use href="#route"/></svg><p class="metric-value"><b id="distance" style="font-weight:inherit">6.32</b> <span>km</span></p><small>Distance</small></div>
 <div class="metric"><svg aria-hidden="true"><use href="#flame"/></svg><p class="metric-value"><b id="energy" style="font-weight:inherit">337</b> <span>kcal</span></p><small>Estimated energy</small></div>
@@ -386,6 +386,9 @@ $('#bar-range').addEventListener('input',e=>{inspectBar(Number(e.target.value),t
 $('#about-link').addEventListener('click',e=>{e.preventDefault();Health.open('settings',e.currentTarget)});
 let deckExpanded=false,deckProgress=0,deckReady=false;
 const deck=$('#panel-deck'),deckScroller=$('#deck-scroll'),panelContent=$('#period-content'),liveBar=$('#live-bar');
+const deckFrost=deck.querySelector('.deck-frost');
+function frostDeck(){if(deckFrost)deckFrost.style.opacity=String(Math.min(1,deckScroller.scrollTop/24)*deckProgress)}
+deckScroller.addEventListener('scroll',frostDeck,{passive:true});
 let deckCards=[],cardMotion=[],deckGesture=null,ignoreDeckClick=false;
 const deckMotion={value:0,velocity:0},orbPose={value:0,velocity:0};
 // The folded card shell is a child element rather than ::before: every per-frame change to a card
@@ -487,6 +490,7 @@ function layoutDeck(){
   });
   if(scrollReturn)deckScroller.scrollTop=scrollReturn.top*clamp(p/scrollReturn.progress);
   if(p===0)scrollReturn=null;
+  frostDeck();
 }
 function setDeckExpanded(value,keyboard=false){
   if(value)setIslandOpen(islands.live,false);

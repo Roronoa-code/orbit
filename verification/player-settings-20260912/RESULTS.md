@@ -1,5 +1,23 @@
 # Player and Settings corrections — 12 September 2026
 
+## Body, scroll fog, Settings and weekly history — 12 September 2026 23:22
+
+Baseline: clean `5aea4c2`. Installed production build `android/build/20260912-232234`, SHA256 `9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b`. Installed hash and production/Audit bundled HTML both match. The previous phone APK is retained locally at `body-history/phone-before.apk`. Audit and its forwarded port were removed; production was launched under the user's existing phone-test authorization.
+
+| User request | Final behavior | Evidence |
+| --- | --- | --- |
+| Body overlap, quick swipes, ring fill, held blobs | Header reserves the real top inset. Every quick swipe advances from the last committed measurement without resetting the visible pose. Weight is 100% of the ring, labelled Total body weight. Shared tracks ignore only a child's capture transfer; real cancellation remains handled. | Actual CDP touches reproduce baseline failures (held drag stayed on Weight; three swipes stayed on Lean). Desktop 390/320 and Galaxy now advance Lean → Muscle → Fat; held measurement/range drags commit. Lean → Weight monotonically fills 81 → 100 dots. |
+| Soft Home fog, including both edges | A 16 px blur fades above and below the card boundary, strongest at the clipping edge; it follows scroll depth and disappears at the top. | Desktop and Galaxy scroll checks/captures. The user's follow-up replaced the initial hard top with a fade extending 24 px above and 60 px below the boundary. |
+| Crowded Settings and birthday picker | Compact profile rows, paired measurements, shorter copy, grouped preferences and collapsed About. Numeric birthday entry inserts separators; leap-day/date validation and native persistence remain enforced. | Profile, goal, save-failure, corrupt-data, saved workout defaults and three-width checks PASS. Galaxy entry 29022000, native save/reload, saved height/weight and new-session default PASS. |
+| Long workout history | Monday–Sunday calendar with previous/next weeks, selectable days, week session/time totals and selected-day summary cards. Tap a card for full details; Back preserves the week/day. | Multiweek/empty-day/future-bound/old-record and detail return checks PASS at 390/384/320. Galaxy saves a workout and reopens it from its day. Records use local start dates and remain unchanged by navigation. |
+| Player opening/closing lag | Blur the diffuse background once per artwork instead of filtering a full-screen layer during motion. Retain original-resolution foreground artwork. Reuse unchanged endpoint geometry; paused/resuming states are remeasured. One final style flush replaces one per shared element. | Fixed transport targets, 18 endpoint cases and focus/music suites PASS. Real Galaxy tap-open/swipe-close endpoint changes are all below 0.42 CSS px, running and paused. |
+
+### Performance and limits
+
+The original timing helper included debugger trace startup/export in its animation frame samples. It now starts sampling after tracing starts and stops before trace export. Comparable eight-cycle phone runs: baseline median/p95 8.3/8.4 ms, maximum 83.3 ms and 1 gap over 25 ms; final median/p95 8.3/8.4 ms, maximum 25.0 ms and 0 gaps over 25 ms. This is evidence for the tested player interaction, not a guarantee of uninterrupted 120 Hz: Android's separate frame counter still reported 9.43% jank (baseline 8.11%). Intermediate runs varied. No refresh-rate, display, or playback setting was changed. Music rendering used generated artwork; real external-player transport was not requalified in this batch.
+
+Runnable checks: `body-history.cjs`, `body-history-phone.cjs`, `check.cjs`, `blob-math.cjs`, `workout-details.cjs`, `settings-store.cjs`, `player-settings.cjs`, `workout-endpoints.cjs`, `video-audit-controls.cjs`, rendered `ux-motion`, `workout-details`, `focus-music`, and `native-check.ps1`. Captures, the phone motion recording and raw traces stay in ignored local evidence folders. Current compact results are under `bodyHistory` in `checks.json`; earlier evidence below is retained as history.
+
 The first desktop phase followed the user's screenshots and phone hold, from clean Git commit `4fab983`. The user subsequently authorised installation and testing. The physical follow-up below starts at `251fa9b` and supersedes the earlier not-installed status.
 
 | Request | Change | Verification |

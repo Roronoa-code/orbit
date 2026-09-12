@@ -170,10 +170,12 @@ async function runChecks(){
     check(state.store.history.some(record=>!Object.hasOwn(record,'metrics')),'Metric-less old history must remain preserved');
 
     click('#health-back');await wait(260);const history=q('.workout-history');check(history,'Back must return to workout history');
-    click('.workout-history summary');await wait(240);const rows=qa('.workout-history li button');check(rows.length===2,'Saved and old history rows must both remain');
-    const old=rows.find(row=>row.textContent.includes('Walking'));check(old,'Metric-less old history row is missing');old.click();await wait(260);check(finishResult()&&!q('.workout-route-group'),'Old history without metrics must open a time-only summary');
-    click('#health-back');await wait(260);click('.workout-history summary');await wait(220);
-    const newest=qa('.workout-history li button').find(row=>row.textContent.includes('Running'));check(newest,'New completed history row is missing');newest.click();await wait(260);check(finishResult()?.textContent.includes('Workout saved'),'History row must reopen completed summary');
+    const pickHistoryDay=async(ms,direction)=>{const label=new Date(ms).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});for(let i=0;i<3;i++){const day=qa('[data-week-day]').find(n=>n.getAttribute('aria-label').startsWith(label+','));if(day){day.click();await wait(220);return}click('[data-history-week="'+direction+'"]');await wait(220)}throw Error('Missing calendar date '+label)};
+    await pickHistoryDay(state.store.history.find(r=>r.kind==='Walking').startedAt,-1);
+    const old=qa('.history-session').find(row=>row.textContent.includes('Walking'));check(old,'Metric-less old history row is missing');old.click();await wait(260);check(finishResult()&&!q('.workout-route-group'),'Old history without metrics must open a time-only summary');
+    click('#health-back');await wait(260);
+    await pickHistoryDay(state.store.history.find(r=>r.kind==='Running').startedAt,1);
+    const newest=qa('.history-session').find(row=>row.textContent.includes('Running'));check(newest,'New completed history row is missing');newest.click();await wait(260);check(finishResult()?.textContent.includes('Workout saved'),'History row must reopen completed summary');
 
     for(const width of [320,390]){
       live.style.width=width+'px';await wait(100);
@@ -219,34 +221,25 @@ async function runChecks(){
     click('#workout-record-body [data-session="finish"]');await wait(320);
     check(state.store.active===null&&state.store.history.length===1&&finishResult().textContent.includes('Workout saved'),'Finishing from the details page must save one record');
 
-    // The weekly chart can be inspected day by day, and the history describes itself without repeating its newest row.
-    const dayMs=86400000,at=(back,hour,minutes,kind)=>{const end=new Date(Date.now()-back*dayMs);end.setHours(hour,20,0,0);return {kind,startedAt:end.getTime()-minutes*60000,endedAt:end.getTime(),elapsed:minutes*60000,totalMs:minutes*60000,targetMs:0,weightKg:0,trackLocation:false}};
-    state=installFixture({active:null,history:[at(0,9,25,'Walking'),at(0,7,12,'Strength'),at(2,8,40,'Walking')]});await openWorkouts();
-    const weekScrub=q('#week-scrub');check(weekScrub,'The weekly chart must offer inspection');
-    const weekTotal=text('.workout-week .tile-value');
-    const inspect=day=>{weekScrub.value=String(day);weekScrub.dispatchEvent(new (win().Event)('input',{bubbles:true}));return text('#week-readout')};
-    const todayText=inspect(6);
-    check(/37 min/.test(todayText)&&/2 sessions/.test(todayText)&&/20\d\d/.test(todayText),'Inspecting a day must give its exact date, minutes and session count: '+todayText);
-    check(qa('[data-week-day].is-selected').length===1,'The inspected day must be marked on the chart');
-    check(/no sessions recorded/.test(inspect(5)),'A day without records must say so instead of reading as data');
-    const older=inspect(4);check(/40 min/.test(older)&&/1 session/.test(older)&&!/sessions/.test(older),'A single session must be counted as one: '+older);
-    check(text('.workout-week .tile-value')===weekTotal&&/in total/.test(text('.workout-week .health-section-head span')),'The week total must stay identified apart from the inspected day');
-    check(text('.workout-history summary h2')==='Workout history'&&!q('.workout-history summary strong'),'The disclosure must describe the history rather than repeat its newest record');
-    check(/3 sessions/.test(text('.workout-history summary small')),'The disclosure must say how much history it holds');
-    click('.workout-history summary');await wait(260);
-    const historyRows=qa('.workout-history li button');
-    check(historyRows.length===3,'Every record must be preserved and listed: '+historyRows.length);
-    check(qa('.workout-history .history-day').length===2,'Same-day sessions must be grouped under their own date');
-    check(historyRows.every(row=>/\d\d:\d\d/.test(q('small',row).textContent)),'Each record must show its recorded start time');
-    check(q('#health-scroll').scrollHeight>q('#health-scroll').clientHeight||historyRows.length===3,'The opened history must keep its real scrolling');
+    // Inspect calendar days without expanding every record in storage.
+    const at=(back,hour,minutes,kind)=>{const end=new Date();end.setDate(end.getDate()-back);end.setHours(hour,20,0,0);return {kind,startedAt:end.getTime()-minutes*60000,endedAt:end.getTime(),elapsed:minutes*60000,totalMs:minutes*60000,targetMs:0,weightKg:0,trackLocation:false}};
+    state=installFixture({active:null,history:[at(0,9,25,'Walking'),at(0,7,12,'Strength'),at(7,8,40,'Walking')]});await openWorkouts();
+    check(qa('[data-week-day]').length===7,'History must show seven selectable calendar days');
+    const weekTotal=text('.history-week-metrics');check(/37/.test(weekTotal),'Week active time must total its records');
+    check(qa('.history-session').length===2,'Only selected-day records should appear');
+    check(qa('[data-week-day][aria-pressed=true]').length===1,'One day must be selected');
+    await pickHistoryDay(state.store.history[2].startedAt,-1);
+    check(qa('.history-session').length===1&&/40/.test(text('.history-session-metrics')),'Previous week must expose its own record');
+    check(state.store.history.length===3,'Week navigation must preserve all records');
+    check(qa('.history-session').every(row=>/\d\d:\d\d/.test(q('small',row).textContent)),'Each summary must show its start time');
 
-    result.textContent=JSON.stringify({status:'PASS',fixture:'OrbitWorkouts only; GPS and history data are verification-page local',checks:['validation and invalid setup inputs','outdoors start, optional weight and countdown','distance, pace, speed and MET energy','GPS permission retry and metric refresh identity','active and completed time details','route, speed, elevation and missing data states','pause, resume, finish, back and history reopening','metric-less history compatibility','320 px and 390 px finite/no-overflow detail','44 px controls','context menu and input selection','sleep scrub highlight without night cursor','time-only summary uses recorded time, pauses and target','in-progress details keep the same session controls','Open workout submits no duration','weekly chart day inspection with exact dates and zero states','workout history naming, grouping and start times']},null,2);
+    result.textContent=JSON.stringify({status:'PASS',fixture:'OrbitWorkouts only; GPS and history data are verification-page local',checks:['validation and invalid setup inputs','outdoors start, optional weight and countdown','distance, pace, speed and MET energy','GPS permission retry and metric refresh identity','active and completed time details','route, speed, elevation and missing data states','pause, resume, finish, back and history reopening','metric-less history compatibility','320 px and 390 px finite/no-overflow detail','44 px controls','context menu and input selection','sleep scrub highlight without night cursor','time-only summary uses recorded time, pauses and target','in-progress details keep the same session controls','Open workout submits no duration','calendar week and day inspection with exact dates','compact workout summaries and start times']},null,2);
   }catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}
   finally{restoreFrame()}
 }
 document.querySelector('#narrow').onclick=()=>live.style.width='320px';
 document.querySelector('#wide').onclick=()=>live.style.width='390px';
 document.querySelector('#run').onclick=runChecks;
-document.querySelector('#preview').onclick=async()=>{try{await frameReady();expose();installFixture({active:null,history:[previewRecord()]});await openWorkouts();click('.workout-history summary');await wait(220);const row=qa('.workout-history li button')[0];check(row,'Preview record is missing');row.click();await wait(260);result.textContent='Preview only. Recorded workout and GPS points are fixture data in this verification page.'}catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}};
+document.querySelector('#preview').onclick=async()=>{try{await frameReady();expose();installFixture({active:null,history:[previewRecord()]});await openWorkouts();const row=qa('.history-session')[0];check(row,'Preview record is missing');row.click();await wait(260);result.textContent='Preview only. Recorded workout and GPS points are fixture data in this verification page.'}catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}};
 document.querySelector('#reset').onclick=()=>{restoreFrame();result.textContent='Preview reset. Fixture data was removed from the child page.'};
 </script>

@@ -19,26 +19,36 @@ const OrbitSettings=(()=>{
     catch{error='Your saved profile could not be read. It has been preserved.';return {}}
   }
   function view(){return `<form id="profile-form" class="settings-profile" novalidate>
-    <h2>Your profile</h2><p class="settings-note">Set it once. Your saved weight fills in automatically for new workouts.</p>
-    <div class="settings-fields"><label>Name<input id="profile-name" autocomplete="name" maxlength="80" placeholder="Your name"/></label>
-    <label>Date of birth<input id="profile-birth" type="date" min="1900-01-01" max="${today()}" autocomplete="bday"/></label>
+    <h2>Profile</h2><p class="settings-note">Your defaults for new workouts.</p>
+    <div class="settings-fields"><label>Name<input id="profile-name" autocomplete="name" maxlength="80" placeholder="Optional"/></label>
+    <label>Date of birth<input id="profile-birth" inputmode="numeric" maxlength="10" placeholder="DD / MM / YYYY" autocomplete="bday"/></label>
     <div class="settings-measurements"><label>Height<span><input id="profile-height" type="number" min="40" max="260" step="0.1" inputmode="decimal" placeholder="—"/><small>cm</small></span></label>
     <label>Weight<span><input id="profile-weight" type="number" min="20" max="350" step="0.1" inputmode="decimal" placeholder="—"/><small>kg</small></span></label></div></div>
-    <p class="settings-note">All fields are optional. Energy estimates use your weight; previous workouts keep their original values.</p>
     <p id="profile-error" class="health-error" role="alert"></p><p id="profile-saved" class="settings-saved" role="status"></p><button class="workout-primary" type="submit">Save profile</button></form>
-    <section class="settings-section"><h2>Daily goal</h2><form id="settings-goal-form" novalidate><label class="settings-goal">Steps per day<input id="settings-goal" type="number" min="100" max="100000" step="100" inputmode="numeric" required/></label><p id="settings-goal-error" class="health-error" role="alert"></p><button type="submit" class="settings-action">Save goal</button></form></section>
-    <section class="settings-section"><h2>Motion</h2><label class="tracking-option"><span>Reduce motion<small>Short fades instead of large movements</small></span><input id="settings-reduce" type="checkbox" role="switch"/></label><label class="tracking-option"><span>Globe rotation<small>Rotate the globe on the Home screen</small></span><input id="settings-rotation" type="checkbox" role="switch"/></label><p class="health-error" id="settings-motion-error" role="alert"></p></section>
+    <section class="settings-section"><h2>Daily goal</h2><form id="settings-goal-form" novalidate><div class="settings-goal-row"><label class="settings-goal">Steps<input id="settings-goal" type="number" min="100" max="100000" step="100" inputmode="numeric" required/></label><button type="submit" class="settings-action">Save</button></div><p id="settings-goal-error" class="health-error" role="alert"></p></form></section>
+    <section class="settings-section"><h2>Motion</h2><label class="tracking-option"><span>Reduce motion</span><input id="settings-reduce" type="checkbox" role="switch"/></label><label class="tracking-option"><span>Globe rotation</span><input id="settings-rotation" type="checkbox" role="switch"/></label><p class="health-error" id="settings-motion-error" role="alert"></p></section>
     <section class="settings-section"><h2>Music</h2><button class="music-access" data-music-connect ${window.OrbitMusic?'':'disabled'}>${MusicPlayer.accessLabel()}</button></section>
-    <section class="settings-section settings-about"><h2>About Orbit</h2><p>Workouts and your profile stay on this device. Home and Body charts currently use labelled demonstration data; they do not use your profile as recorded measurements.</p></section>`}
+    <details class="settings-section settings-about"><summary>About Orbit</summary><div class="details-body"><p>Saved on this device. Home and Body charts show demo measurements. Your profile supplies workout defaults; past sessions keep their original values.</p></div></details>`}
   function mount(options){
     const value=profile(),form=q('#profile-form');
     for(const [id,field] of [['name','name'],['birth','birthDate'],['height','heightCm'],['weight','weightKg']])q('#profile-'+id).value=value[field]??'';
+    if(value.birthDate)q('#profile-birth').value=value.birthDate.split('-').reverse().join('/');
     q('#profile-error').textContent=error;form.querySelector('button[type=submit]').disabled=Boolean(error);
-    form.addEventListener('input',()=>{q('#profile-saved').textContent='';q('#profile-error').textContent=error});
+    form.addEventListener('input',event=>{
+      const input=event.target;
+      if(input.id==='profile-birth'&&/^[\d/]*$/.test(input.value)){
+        const at=input.selectionStart,digitsBefore=input.value.slice(0,at).replace(/\D/g,'').length;
+        input.value=input.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1/$2').replace(/^(\d{2}\/\d{2})(\d)/,'$1/$2');
+        const caret=digitsBefore+(digitsBefore>2?1:0)+(digitsBefore>4?1:0);input.setSelectionRange(caret,caret);
+      }
+      q('#profile-saved').textContent='';q('#profile-error').textContent=error;
+    });
     form.addEventListener('submit',event=>{
       event.preventDefault();if(error)return;
       const number=id=>q(id).value===''?null:Number(q(id).value);
-      const next={name:q('#profile-name').value.trim(),birthDate:q('#profile-birth').value,heightCm:number('#profile-height'),weightKg:number('#profile-weight')};
+      const birth=q('#profile-birth').value.trim(),parts=birth.match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4})$/);
+      const birthDate=parts?`${parts[3]}-${parts[2].padStart(2,'0')}-${parts[1].padStart(2,'0')}`:birth;
+      const next={name:q('#profile-name').value.trim(),birthDate,heightCm:number('#profile-height'),weightKg:number('#profile-weight')};
       const invalid=validate(next)||([...form.querySelectorAll('input')].some(n=>n.validity.badInput)?'Enter a valid number for height and weight.':'');
       if(invalid){q('#profile-error').textContent=invalid;return}
       try{SettingsStore.write(key,JSON.stringify(next))}

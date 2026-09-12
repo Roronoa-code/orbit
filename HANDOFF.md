@@ -1,5 +1,12 @@
 # Orbit — handoff (updated 12 September 2026)
 
+## Latest installed follow-up — 12 September 2026 23:22
+
+- Implemented all five follow-ups: Body inset and rapid swipe fixes, genuine shared selector hold/drag, Weight ring filling to 100%, scroll fog feathered on both edges, compact Settings with direct birthday entry, calendar week/day history with summary-to-detail navigation, and lighter music focus transitions. Full-screen artwork and fixed-size controls remain.
+- Built and installed `android/build/20260912-232234`; `dist/Orbit.apk` SHA256 `9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b`. Source/bundle/installed hash parity verified. Production/Audit HTML is identical. Native gesture, profile persistence/defaults, workout save/history and fog checks PASS. All relevant browser, endpoint, model and native checks PASS.
+- Eight-cycle matched player test now excludes debugger startup/export: largest gap 83.3 → 25.0 ms; no final gaps over 25 ms. Android separately still reports 9.43% jank; do not claim universal smoothness. Real touch endpoint handover changes stay below 0.42 CSS px. Generated artwork was used; no playback or display setting changed.
+- Audit and its port/listener were removed, production launched, previous installed APK retained locally. See `verification/player-settings-20260912/RESULTS.md` and `checks.json` (`bodyHistory`) for scope and evidence. This section supersedes the installed-build and current-behavior descriptions below.
+
 ## Workout endpoint resizing — latest installed build, 12 September 2026 22:31
 
 - The user correctly reported remaining size changes when the workout view finished opening or closing. Earlier fixed-button checks were too narrow. New glyph and descendant measurements reproduced title font/weight/baseline changes, the timer selector changing height, action labels changing font size at 320 px, and a paused clock's scale being counted twice.

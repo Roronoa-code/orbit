@@ -293,7 +293,12 @@ const BlobTrack=(()=>{
       config.onCancel?.(reason);
       settleTo(committedIndex());
     }
-    function lost(event){if(session&&event.pointerId===session.id&&event.type!=='lostpointercapture')cancel(event.type);else if(session&&event.type==='lostpointercapture'&&session.owned)cancel('lost')}
+    function lost(event){
+      if(!session||event.pointerId!==session.id)return;
+      // Touch starts with implicit capture on the child; moving it to the track is not cancellation.
+      if(event.type==='lostpointercapture'&&event.target!==host)return;
+      cancel(event.type);
+    }
 
     function sync(id,{animate=true}={}){
       if(session)return; // an owned gesture keeps the pose it is showing
