@@ -19,7 +19,7 @@
       "refraction": "none — no displacement pass on this backend"
     },
     "halfHeld": {
-      "centreError": -0.01,
+      "centreError": 0,
       "raw": [
         0,
         0.5,
@@ -39,7 +39,7 @@
         0
       ],
       "committed": "weight",
-      "width": 92.87
+      "width": 93.03
     },
     "distantHold": {
       "budget": 8.85,
