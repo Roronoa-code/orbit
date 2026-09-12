@@ -15,7 +15,7 @@ const OrbitSettings=(()=>{
     return '';
   }
   function profile(){
-    error='';try{const raw=localStorage.getItem(key);if(raw===null)return {};const value=JSON.parse(raw);if(validate(value))throw Error('Invalid profile');return value}
+    error='';try{const raw=SettingsStore.read(key);if(raw===null)return {};const value=JSON.parse(raw);if(validate(value))throw Error('Invalid profile');return value}
     catch{error='Your saved profile could not be read. It has been preserved.';return {}}
   }
   function view(){return `<form id="profile-form" class="settings-profile" novalidate>
@@ -41,7 +41,7 @@ const OrbitSettings=(()=>{
       const next={name:q('#profile-name').value.trim(),birthDate:q('#profile-birth').value,heightCm:number('#profile-height'),weightKg:number('#profile-weight')};
       const invalid=validate(next)||([...form.querySelectorAll('input')].some(n=>n.validity.badInput)?'Enter a valid number for height and weight.':'');
       if(invalid){q('#profile-error').textContent=invalid;return}
-      try{const raw=JSON.stringify(next);localStorage.setItem(key,raw);if(localStorage.getItem(key)!==raw)throw Error('Save not confirmed')}
+      try{SettingsStore.write(key,JSON.stringify(next))}
       catch{q('#profile-error').textContent='Could not confirm the save. Keep this page open and try again.';return}
       q('#profile-error').textContent='';q('#profile-saved').textContent='Profile saved';
     });

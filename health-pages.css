@@ -147,7 +147,7 @@
 .session-time .matrix-reading{height:63px}
 .timer-tap-hint{font-size:9px;color:#a8a3b4;margin-top:21px}
 .timer-mode-picker{display:flex;padding:4px;border-radius:24px;margin-top:-14px;z-index:1;--blob-inactive:#bcb6c9;--blob-active:#f1ebff}
-.timer-mode-picker button{position:relative;z-index:1;border:0;min-height:38px;padding:8px 17px;border-radius:22px;background:none;font-size:10px}
+.timer-mode-picker button{position:relative;z-index:1;border:0;min-height:44px;padding:8px 17px;border-radius:22px;background:none;font-size:10px}
 .timer-mode-picker>.selection-pill{border-radius:22px;will-change:transform,width}
 .timer-focused .workout-unconnected,.timer-focused .sensor-note,.timer-focused .workout-live-top{display:none}
 .timer-focused .workout-time-focus{flex:1;min-height:230px;padding:0 0 24px}
@@ -157,7 +157,6 @@
 .timer-focused .session-time{width:100%}
 .timer-focused .session-time .session-matrix{display:none}
 .timer-focused .timer-mode-picker{margin-top:0}
-.timer-focused .timer-mode-picker button{min-height:44px;padding:8px 17px}
 .timer-focused .session-actions{margin-top:auto;padding-top:14px}
 .target-remaining{font-size:11px;color:#b9b9c4;margin-top:10px}
 .workout-live progress{width:85%;height:5px;margin:13px auto 0;border:0;border-radius:5px;accent-color:#b69cff}
@@ -255,7 +254,7 @@
 .timer-focused.has-music #focus-time-dots{height:82px}
 .music-heading{display:flex;align-items:center;gap:10px}
 .music-heading>div{flex:1;min-width:0}
-.music-heading h2{font-size:22px;line-height:1.2;letter-spacing:-.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:650;color:#fff}
+.music-heading h2{font-size:22px;line-height:1.2;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:650;color:#fff}
 .music-heading p{font-size:15px;color:#e4dce8;line-height:1.4;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .music-heading button{height:44px;width:44px;border:0;border-radius:0;background:none;flex-shrink:0;color:#e6dfe5}
 .workout-music .music-heading button svg{width:18px;height:18px}
@@ -279,7 +278,6 @@
 .music-controls [data-music=next]:active svg{transform:translateX(3px)}
 .music-controls [data-music=toggle]:active svg{transform:rotate(-8deg)}
 .workout-music button:disabled{opacity:.3;cursor:default}
-.timer-focused .session-actions button{min-height:56px;font-size:14px}
 @media(max-height:750px){.timer-focused.has-music .workout-time-focus{min-height:210px;padding-bottom:14px}.music-bottom{padding-bottom:4px}.music-heading h2{font-size:20px}.music-controls{margin-top:5px}}
 @media(forced-colors:active){.workout-music{background:Canvas;border:1px solid CanvasText}.music-cover{display:none}.music-heading h2,.music-heading p,.music-source,.music-timeline>div{color:CanvasText}.music-controls button{color:ButtonText}.workout-music button:disabled{opacity:.5}}
 
@@ -385,7 +383,7 @@
 .workout-live:not(.timer-focused) .music-tile{display:block}
 .workout-live:not(.timer-focused) .music-thumb{display:block;grid-area:1/1}
 .workout-live:not(.timer-focused) .music-heading{grid-area:1/2;min-width:0}
-.workout-live:not(.timer-focused) .music-heading h2{font-size:14px;line-height:1.3;letter-spacing:-.2px;font-weight:600}
+.workout-live:not(.timer-focused) .music-heading h2{font-size:14px}
 .workout-live:not(.timer-focused) .music-heading p{font-size:11px;line-height:1.4;margin-top:1px;color:#bab6c2}
 .workout-live:not(.timer-focused) .music-heading button,.workout-live:not(.timer-focused) .music-timeline{display:none}
 .workout-live:not(.timer-focused) .music-expand{display:block;grid-area:1/1/2/3;align-self:stretch;position:relative;z-index:1;margin:-8px 0 -8px -8px;border:0;border-radius:22px 0 0 22px;background:none;padding:0}

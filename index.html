@@ -168,6 +168,7 @@ body{background:#0a0a0c}
 </div></main>
 <footer class="copy-label">ORBIT <span>·</span> Standalone design copy <span>·</span> <a href="#about" id="about-link">Demo data</a></footer>
 <p class="toast" role="status" id="toast"></p>
+<script src="settings-store.js"></script>
 <script src="surface-motion.js"></script>
 <script src="signal-orb.js"></script>
 <script src="hero-dots.js"></script>
@@ -191,7 +192,7 @@ const hours=[62,28,19,10,10,12,32,72,127,117,67,99,211,371,513,360,650,1300,3180
 // The selected day ends at 18:42. Later hours stay unrecorded, rather than inventing future steps.
 const earlySum=hours.slice(0,18).reduce((a,b)=>a+b,0);hours[17]+=8420-3180-earlySum;
 let days=1,selected=anchor,goal=10000,barIndex=18,lineIndex=6,paused=false,storageError=false,toastTimer,barTipTimer;
-try{const saved=localStorage.getItem(key);if(saved!==null){const n=Number(saved);if(!Number.isInteger(n)||n<100||n>100000||n%100)throw Error('Invalid stored goal');goal=n}}catch{storageError=true}
+try{const saved=SettingsStore.read(key);if(saved!==null){const n=Number(saved);if(!Number.isInteger(n)||n<100||n>100000||n%100)throw Error('Invalid stored goal');goal=n}}catch{storageError=true}
 function toast(message){$('#toast').textContent=message;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').textContent='',3500)}
 function windowRows(count,end=selected){return records.filter(r=>r.date<=end&&r.date>=dayOffset(end,1-count))}
 function movement(){if(metric!=='steps')return extraMovement();if(days>1)return windowRows(days).map(r=>({label:dateLabel(r.date),value:r.steps}));const r=windowRows(1)[0],weights=hours.map(v=>v??90),weightTotal=weights.reduce((a,b)=>a+b,0);let cumulative=0,allocated=0;return hours.map((v,i)=>{cumulative+=weights[i];const next=Math.round(cumulative*r.steps/weightTotal),value=selected===anchor?v:next-allocated;allocated=next;return {label:`${String(i).padStart(2,'0')}:00 – ${String(i+1).padStart(2,'0')}:00`,value}})}
@@ -377,7 +378,7 @@ $('#date-next').addEventListener('click',()=>setDateChoice(dateOptions[Number($(
 $('#back').addEventListener('click',()=>{selected=anchor;days=1;metric='steps';render()});$('#settings-open').addEventListener('click',e=>Health.open('settings',e.currentTarget));$('#date-button').addEventListener('click',e=>show('#date-dialog',e.currentTarget));$('#date-form').addEventListener('submit',e=>{e.preventDefault();const value=$('#date-input').value;if(!dateOptions.includes(value))return;selected=value;days=1;render();closeUtility()});
 function saveGoal(n){
   if(!Number.isInteger(n)||n<100||n>100000||n%100)return 'Choose 100–100,000 steps, in increments of 100.';
-  try{localStorage.setItem(key,String(n));if(localStorage.getItem(key)!==String(n))throw Error('Save not confirmed')}
+  try{SettingsStore.write(key,String(n))}
   catch{return 'Could not confirm the save. Try again.'}
   goal=n;storageError=false;render();toast('Daily goal saved');return '';
 }

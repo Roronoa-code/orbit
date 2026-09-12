@@ -42,7 +42,14 @@ const WorkoutFocus=(()=>{
   function rect(node,g){const r=node.getBoundingClientRect();return r.width&&r.height?{x:(r.left-g.box.left)/g.scale,y:(r.top-g.box.top)/g.scale,w:r.width/g.scale,h:r.height/g.scale}:null}
   function measure(live,g){
     const shared=new Map(),only=new Map();
-    for(const node of live.querySelectorAll(SHARED)){const r=rect(node,g);if(r)shared.set(node,r)}
+    for(const node of live.querySelectorAll(SHARED)){
+      const r=rect(node,g);if(!r)continue;
+      if(node.matches(TEXT)&&node.firstChild?.nodeType===Node.TEXT_NODE){
+        const text=document.createRange();text.selectNodeContents(node);
+        r.textTop=(text.getBoundingClientRect().top-node.getBoundingClientRect().top)/g.scale;r.lineHeight=parseFloat(getComputedStyle(node).lineHeight);
+      }
+      shared.set(node,r);
+    }
     for(const node of live.querySelectorAll(ONLY)){const r=rect(node,g);if(r)only.set(node,{rect:r,display:getComputedStyle(node).display})}
     const matrix=live.querySelector('.session-matrix'),canvas=live.querySelector('#focus-time-dots');
     return {shared,only,clock:{matrix:matrix&&rect(matrix,g),canvas:canvas&&rect(canvas,g)}};
@@ -66,12 +73,15 @@ const WorkoutFocus=(()=>{
     if(morph)return morph;
     settle();
     const g=geometry(),focused=live.classList.contains('timer-focused'),here=measure(live,g);
+    // Keep the visible pause scale as the start, but measure the destination after its CSS transition.
+    live.querySelector('#session-time').style.transition='none';
     live.classList.toggle('timer-focused',!focused);const there=measure(live,g);live.classList.toggle('timer-focused',focused);
     const compact=focused?there:here,focus=focused?here:there,page=host(),cover=page.querySelector('.music-cover'),img=cover?.querySelector('img'),thumb=live.querySelector('.music-thumb');
     const m={live,start:focused,p:focused?1:0,v:0,target:focused,shared:[],leaving:[],held:[],cover,thumb,imgRect:img?rect(img,g):null,thumbRect:thumb?compact.only.get(thumb)?.rect:null,
-      radius:thumb?parseFloat(getComputedStyle(thumb).borderRadius)||12:12,range:Math.max(200,Math.min(420,g.box.height/g.scale*.42)),k:1};
+      radius:thumb?parseFloat(getComputedStyle(thumb).borderRadius)||12:12,range:Math.max(200,Math.min(420,g.box.height/g.scale*.42)),kx:1,ky:1};
     m.flying=Boolean(m.imgRect&&m.thumbRect);
-    for(const [node,c] of compact.shared){const f=focus.shared.get(node);if(f){Object.assign(node.style,{transformOrigin:'0 0',transition:'none'});m.shared.push({node,c,f,uniform:node.matches(UNIFORM),centred:node.id==='session-time',text:node.matches(TEXT),control:node.matches(CONTROL)})}}
+    for(const [node,c] of compact.shared){const f=focus.shared.get(node);if(f){Object.assign(node.style,{transformOrigin:'0 0',transition:'none',transform:'none'});m.shared.push({node,c,f,uniform:node.matches(UNIFORM),centred:node.id==='session-time',text:node.matches(TEXT),control:node.matches(CONTROL)})}}
+    for(const s of m.shared)s.base=rect(s.node,g);
     // One clock, two renderings: the ring's dot matrix and the focus canvas cross over during the move, each at the
     // size its own layout gives it, so a gesture held near either end already shows that end's clock.
     const flow=focused?live.querySelector('#focus-time-dots'):live.querySelector('.session-matrix');
@@ -92,11 +102,16 @@ const WorkoutFocus=(()=>{
     // The transport keeps its own width the whole way: the metadata is only ever as wide as the room beside it.
     const controls=m.shared.filter(s=>s.control).map(s=>s.v);
     for(const s of m.shared){
-      const at=m.start?s.f:s.c,v=s.v;
+      const at=s.base,v=s.v;
       if(s.control||s.node.classList.contains('session-actions')){s.node.style.transform=`translate(${v.x-at.x}px,${v.y-at.y}px)`;continue}
-      if(s.centred){const k=v.w/at.w;m.k=k;s.node.style.transform=`translate(${v.x+v.w/2-at.x-at.w*k/2}px,${v.y+v.h/2-at.y-at.h*k/2}px) scale(${k})`;continue}
+      if(s.centred){m.kx=v.w/at.w;m.ky=v.h/at.h;s.node.style.transform=`translate(${v.x-at.x}px,${v.y-at.y}px) scale(${m.kx},${m.ky})`;continue}
       const sy=v.h/at.h,sx=s.uniform?sy:v.w/at.w;
-      if(s.text){let room=v.w;for(const c of controls)if(v.y<c.y+c.h&&c.y<v.y+v.h)room=Math.min(room,c.x-v.x-8);s.node.style.width=Math.max(24,Math.min(v.w,room))/sy+'px'}
+      if(s.text){
+        let room=v.w;for(const c of controls)if(v.y<c.y+c.h&&c.y<v.y+v.h)room=Math.min(room,c.x-v.x-8);s.node.style.width=Math.max(24,Math.min(v.w,room))/sy+'px';
+        // Font baselines round differently at the two CSS sizes. Carry that offset through the move too.
+        const from=m.start?s.f:s.c;
+        if(Number.isFinite(from.textTop)){s.node.style.height=at.h+'px';s.node.style.lineHeight=from.lineHeight+2*(mix(s.c.textTop,s.f.textTop,p)/sy-from.textTop)+'px'}
+      }
       s.node.style.transform=`translate(${v.x-at.x}px,${v.y-at.y}px) scale(${sx},${sy})`;
     }
     const going=m.start?smooth(p,.45,1):smooth(1-p,.45,1),coming=m.start?smooth(1-p,.5,1):smooth(p,.5,1),swap=smooth(p,.02,.14);
@@ -104,9 +119,10 @@ const WorkoutFocus=(()=>{
     for(const node of m.held)node.style.opacity=String(node===m.thumb&&m.flying?1-swap:coming);
     for(const node of [...m.leaving,...m.held])if(node.classList.contains('workout-unconnected'))node.style.opacity=String(1-smooth(p,0,.2));
     if(m.clockOver){
-      const fade=smooth(p,.25,.75),toCanvas=!m.start;
-      m.clockOver.style.opacity=String(toCanvas?fade:1-fade);m.clockFlow.style.opacity=String(toCanvas?1-fade:fade);
-      m.clockOver.style.transform=`translate(-50%,-50%) scale(${(1/(m.k||1)).toFixed(4)})`;
+      const fade=smooth(p,.25,.75),toCanvas=!m.start,ink=m.live.classList.contains('is-paused')?.82:1;
+      m.clockOver.style.opacity=String((toCanvas?fade:1-fade)*ink);m.clockFlow.style.opacity=String((toCanvas?1-fade:fade)*ink);
+      m.clockOver.style.transform=`translate(-50%,-50%) scale(${1/m.kx},${1/m.ky})`;
+      m.clockFlow.style.transform=`scale(1,${m.kx/m.ky})`;
     }
     // The full view's surfaces, selected control and workout actions belong to the far half of the move,
     // not to the release: a gesture held near either end already carries that end's treatment.
@@ -127,10 +143,10 @@ const WorkoutFocus=(()=>{
     const m=morph;if(!m)return;
     cancelAnimationFrame(frame);frame=0;morph=null;if(drag?.active)drag=null;
     const final=m.target==null?m.p>.5:m.target,live=m.live;
-    for(const s of m.shared){s.node.style.removeProperty('transform');s.node.style.removeProperty('transform-origin');if(s.text)s.node.style.removeProperty('width')}
+    for(const s of m.shared){s.node.style.removeProperty('transform');s.node.style.removeProperty('transform-origin');if(s.text)for(const name of ['width','height','line-height'])s.node.style.removeProperty(name)}
     for(const node of m.leaving)node.style.removeProperty('opacity');
     for(const node of m.held)release(node);
-    if(m.clockOver){for(const name of ['display','position','left','top','width','height','margin','pointer-events','z-index','transform','opacity'])m.clockOver.style.removeProperty(name);m.clockFlow.style.removeProperty('opacity')}
+    if(m.clockOver){for(const name of ['display','position','left','top','width','height','margin','pointer-events','z-index','transform','opacity'])m.clockOver.style.removeProperty(name);m.clockFlow.style.removeProperty('opacity');m.clockFlow.style.removeProperty('transform')}
     if(m.cover)host().classList.toggle('music-lit',final);
     dialState(live,final);
     if(m.cover){

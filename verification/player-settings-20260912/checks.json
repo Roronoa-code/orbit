@@ -1,38 +1,312 @@
-[
-  {
-    "width": 390,
-    "status": "PASS",
-    "geometry": {
-      "top": 0,
-      "imageTop": 0,
+{
+  "desktop": [
+    {
       "width": 390,
-      "imageWidth": 390,
-      "headerTop": 44
+      "status": "PASS",
+      "geometry": {
+        "top": 0,
+        "imageTop": 0,
+        "width": 390,
+        "imageWidth": 390,
+        "headerTop": 44
+      },
+      "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
     },
-    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
-  },
-  {
-    "width": 384,
-    "status": "PASS",
-    "geometry": {
-      "top": 0,
-      "imageTop": 0,
+    {
       "width": 384,
-      "imageWidth": 384,
-      "headerTop": 44
+      "status": "PASS",
+      "geometry": {
+        "top": 0,
+        "imageTop": 0,
+        "width": 384,
+        "imageWidth": 384,
+        "headerTop": 44
+      },
+      "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
     },
-    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
-  },
-  {
-    "width": 320,
-    "status": "PASS",
-    "geometry": {
-      "top": 0,
-      "imageTop": 0,
+    {
       "width": 320,
-      "imageWidth": 320,
-      "headerTop": 44
+      "status": "PASS",
+      "geometry": {
+        "top": 0,
+        "imageTop": 0,
+        "width": 320,
+        "imageWidth": 320,
+        "headerTop": 44
+      },
+      "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
+    }
+  ],
+  "phone": [
+    {
+      "name": "Home seam removed through physical deck gestures",
+      "status": "PASS"
     },
-    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
+    {
+      "name": "Native keyboard, profile save and persistence across app restart",
+      "status": "PASS"
+    },
+    {
+      "name": "Saved weight reused by all activities and isolated native workout start",
+      "status": "PASS"
+    },
+    {
+      "name": "Native artwork fills top edge and keeps original decode resolution",
+      "status": "PASS",
+      "detail": {
+        "source": [
+          675,
+          379
+        ],
+        "displayCss": [
+          384.0000305175781,
+          384.0000305175781
+        ],
+        "imageTop": 0,
+        "headerTop": 45.000003814697266,
+        "viewport": [
+          384,
+          832
+        ],
+        "pixelRatio": 3.75,
+        "scrimCount": 0
+      }
+    },
+    {
+      "name": "Actual music play/pause acknowledgement with independent workout state",
+      "status": "PASS",
+      "detail": {
+        "restoredPlaying": false
+      }
+    },
+    {
+      "name": "Previous/next native transport and original-track restoration",
+      "status": "PASS",
+      "detail": {
+        "originalTrackRestored": true
+      }
+    },
+    {
+      "name": "Swipe down/up and fixed transport targets through interrupted focus changes",
+      "status": "PASS",
+      "detail": {
+        "maxControlSizeChangePx": 0.000019073486328125
+      }
+    },
+    {
+      "name": "Pause, resume and exactly one saved native test record",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings remains usable with 130 percent native text size",
+      "status": "PASS",
+      "detail": {
+        "overflow": false,
+        "fields": [
+          {
+            "width": 344.0000305175781,
+            "height": 56.80000305175781,
+            "right": 364.00003242492676
+          },
+          {
+            "width": 344.0000305175781,
+            "height": 58.80000305175781,
+            "right": 364.00003242492676
+          },
+          {
+            "width": 165.00001525878906,
+            "height": 56.80000305175781,
+            "right": 185.0000171661377
+          },
+          {
+            "width": 165.00001525878906,
+            "height": 56.80000305175781,
+            "right": 364.0000305175781
+          }
+        ],
+        "width": 384
+      }
+    }
+  ],
+  "motionSweep": {
+    "results": [
+      "Launcher rapid reversals settle closed",
+      "Repeated Home period changes retain one globe",
+      "Rapid Body metric/range selection settles at final choice",
+      "Sleep stage/date transitions preserve selection",
+      "Health disclosure opens and closes cleanly",
+      "Date picker cancellation restores Home"
+    ],
+    "errors": []
+  },
+  "endpoints": [
+    {
+      "width": 390,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 390,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 390,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 390,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 390,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 390,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 384,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": false,
+      "pauseDelay": 0,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": true,
+      "pauseDelay": 500,
+      "open": false,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": true,
+      "deltas": []
+    },
+    {
+      "width": 320,
+      "paused": true,
+      "pauseDelay": 80,
+      "open": false,
+      "deltas": []
+    }
+  ],
+  "phoneEndpoints": [
+    {
+      "paused": false,
+      "open": true,
+      "maxEndpointJumpPx": 0.38153076171875,
+      "frames": 122
+    },
+    {
+      "paused": false,
+      "open": false,
+      "maxEndpointJumpPx": 0.2414093017578125,
+      "frames": 165
+    },
+    {
+      "paused": true,
+      "open": true,
+      "maxEndpointJumpPx": 0.36395263671875,
+      "frames": 129
+    },
+    {
+      "paused": true,
+      "open": false,
+      "maxEndpointJumpPx": 0.229736328125,
+      "frames": 157
+    }
+  ],
+  "phonePerformance": {
+    "frames": 2644,
+    "median": 8.299999999999272,
+    "p95": 8.400000000001455,
+    "max": 108.29999999999563,
+    "over25": 9,
+    "rasterMs": 2143.125999999998,
+    "largeImagePaints": 0,
+    "jank": "97 (8.00%)\r"
+  },
+  "release": {
+    "build": "20260912-223127",
+    "sha256": "2d0b07d8b16457c5715539d891779b7774e1de22e9d4aa0fb179780703d6483f",
+    "installedHashVerified": true,
+    "auditRemoved": true
   }
-]
+}

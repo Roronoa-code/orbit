@@ -63,6 +63,7 @@ public final class MainActivity extends Activity {
         // Only the bundled offline page can load; no remote page or frame receives this bridge.
         workouts = new WorkoutSession(this);
         web.addJavascriptInterface(workouts, "OrbitWorkouts");
+        web.addJavascriptInterface(new AppPreferences(this), "OrbitPreferences");
         music = new MusicSession(this, () -> {
             if (pageReady && activityVisible) web.evaluateJavascript("window.dispatchEvent(new Event('orbit-music-change'));", null);
         });
