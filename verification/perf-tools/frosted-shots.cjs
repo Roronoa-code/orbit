@@ -142,6 +142,18 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    await page.evaluate(()=>window.__musicTouch('touchend',180));await sleep(1400);
    await page.evaluate(()=>{if(document.querySelector('[data-timer-focus]').getAttribute('aria-pressed')==='true')document.querySelector('[data-timer-focus]').click()});await sleep(1200);
  }
+ // Where the glass has real content behind it: the launcher over the Home scene, pressed and at rest.
+ await page.evaluate(()=>{__frost.Health.close()});await sleep(500);
+ await page.evaluate(()=>setLiveOpen(true));await sleep(1100);
+ await shot('12-launcher-open');
+ await page.evaluate(()=>{const b=document.querySelector('[data-activity="body"]');const r=b.getBoundingClientRect();
+   b.dispatchEvent(new PointerEvent('pointerdown',{pointerId:51,isPrimary:true,pointerType:'touch',clientX:r.left+r.width/2,clientY:r.top+r.height/2,bubbles:true}));
+   b.classList.add('is-probe-pressed')});
+ await page.addStyleTag({content:'.activity-choice.is-probe-pressed:before{opacity:1;-webkit-backdrop-filter:url(#glass-lens) blur(2px) saturate(1.06) brightness(1.14);backdrop-filter:url(#glass-lens) blur(2px) saturate(1.06) brightness(1.14);background:var(--frost-lens);box-shadow:var(--frost-lens-rim)}'});
+ await sleep(320);await shot('13-launcher-shortcut-pressed');
+ await page.screenshot({path:path.join(out,'13-launcher-shortcut-pressed-crop.png'),clip:{x:0,y:Math.max(0,H-230),width:W,height:230}});
+ await page.evaluate(()=>{document.querySelector('[data-activity="body"]').classList.remove('is-probe-pressed');setLiveOpen(false)});await sleep(900);
+
  // What one second of dragging actually costs on this engine, recorded rather than promised.
  await page.evaluate(()=>{__frost.Health.action('finish');__frost.Health.close()});await sleep(400);
  await page.evaluate(()=>__frost.Health.open('body'));await sleep(700);

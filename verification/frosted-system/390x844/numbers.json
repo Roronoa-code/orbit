@@ -7,8 +7,8 @@
   "committed": "weight",
   "presented": {
    "left": 149.63,
-   "width": 90.73,
-   "centre": 195
+   "width": 90.75,
+   "centre": 195.01
   },
   "boundaryClient": 195,
   "raw": [
@@ -42,7 +42,7 @@
    "lean"
   ],
   "trackBackdrop": "blur(16px) saturate(0.95)",
-  "indicatorBackdrop": "none"
+  "indicatorBackdrop": "url(\"#glass-lens\") blur(2px) saturate(1.1) brightness(1.1)"
  },
  "distantHold": {
   "slot": 88.5,
@@ -63,7 +63,7 @@
   "scope": "one second of continuous dragging on the Body measurement selector, headless Chromium, no display",
   "frames": 61,
   "medianFrameMs": 16.7,
-  "longestFrameMs": 18.2,
+  "longestFrameMs": 18.3,
   "note": "Browser frame timing does not establish physical display cadence or touch latency."
  },
  "errors": []

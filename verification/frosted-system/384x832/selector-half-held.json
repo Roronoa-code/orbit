@@ -3,9 +3,9 @@
  "gesture": "body-metric drag, still held",
  "committed": "weight",
  "presented": {
-  "left": 146.92,
-  "width": 90.14,
-  "centre": 191.99
+  "left": 147.39,
+  "width": 89.22,
+  "centre": 192
  },
  "boundaryClient": 192,
  "raw": [
@@ -39,5 +39,5 @@
   "lean"
  ],
  "trackBackdrop": "blur(16px) saturate(0.95)",
- "indicatorBackdrop": "none"
+ "indicatorBackdrop": "url(\"#glass-lens\") blur(2px) saturate(1.1) brightness(1.1)"
 }

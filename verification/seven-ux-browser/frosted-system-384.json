@@ -15,11 +15,11 @@
   "measurements": {
     "material": {
       "trackFilter": "blur(16px) saturate(0.95)",
-      "indicatorBackdrop": "none",
-      "refraction": "none — no displacement pass on this backend"
+      "indicatorBackdrop": "url(\"#glass-lens\") blur(3px) saturate(1.06) brightness(1.07)",
+      "refraction": "edge-local SVG displacement on the indicator; pixel evidence in verification/frosted-system/refraction/"
     },
     "halfHeld": {
-      "centreError": -0.01,
+      "centreError": 0,
       "raw": [
         0,
         0.5,
@@ -39,7 +39,7 @@
         0
       ],
       "committed": "weight",
-      "width": 91.21
+      "width": 90
     },
     "distantHold": {
       "budget": 8.7,

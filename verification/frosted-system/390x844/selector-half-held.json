@@ -4,8 +4,8 @@
  "committed": "weight",
  "presented": {
   "left": 149.63,
-  "width": 90.73,
-  "centre": 195
+  "width": 90.75,
+  "centre": 195.01
  },
  "boundaryClient": 195,
  "raw": [
@@ -39,5 +39,5 @@
   "lean"
  ],
  "trackBackdrop": "blur(16px) saturate(0.95)",
- "indicatorBackdrop": "none"
+ "indicatorBackdrop": "url(\"#glass-lens\") blur(2px) saturate(1.1) brightness(1.1)"
 }

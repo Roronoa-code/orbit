@@ -6,8 +6,8 @@
   "gesture": "body-metric drag, still held",
   "committed": "weight",
   "presented": {
-   "left": 122.85,
-   "width": 74.3,
+   "left": 122.49,
+   "width": 75.02,
    "centre": 160
   },
   "boundaryClient": 160,
@@ -42,7 +42,7 @@
    "lean"
   ],
   "trackBackdrop": "blur(16px) saturate(0.95)",
-  "indicatorBackdrop": "none"
+  "indicatorBackdrop": "url(\"#glass-lens\") blur(2px) saturate(1.1) brightness(1.1)"
  },
  "distantHold": {
   "slot": 72.5,
@@ -63,7 +63,7 @@
   "scope": "one second of continuous dragging on the Body measurement selector, headless Chromium, no display",
   "frames": 61,
   "medianFrameMs": 16.6,
-  "longestFrameMs": 18.3,
+  "longestFrameMs": 20.1,
   "note": "Browser frame timing does not establish physical display cadence or touch latency."
  },
  "errors": []

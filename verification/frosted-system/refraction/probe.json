@@ -1,0 +1,23 @@
+{
+ "supports": {
+  "backdrop": true,
+  "urlBackdrop": true,
+  "computed": "url(\"#lens\") blur(6px) saturate(0.95)"
+ },
+ "blurOnly": {
+  "mean": 147.2,
+  "deviation": 12.6
+ },
+ "refract": {
+  "mean": 140.46,
+  "deviation": 15.59
+ },
+ "plain": {
+  "mean": 48.82,
+  "deviation": 22.02
+ },
+ "pattern": {
+  "mean": 134.76,
+  "deviation": 37.49
+ }
+}
