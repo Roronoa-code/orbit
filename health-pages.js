@@ -87,41 +87,81 @@ const Health = (() => {
     const means=[...weeks.values()].map(group=>({x:group.reduce((sum,p)=>sum+p.x,0)/group.length,y:group.reduce((sum,p)=>sum+p.y,0)/group.length}));
     return [{x:points[0].x,y:means[0].y},...means,{x:points.at(-1).x,y:means.at(-1).y}].filter((p,i,all)=>!i||p.x>all[i-1].x+.01);
   }
-  function positionBodySelection(picker){
-    const selected=picker?.querySelector('[aria-pressed="true"]');if(!selected)return;
-    picker.style.setProperty('--selection-x',selected.offsetLeft+'px');picker.style.setProperty('--selection-y',selected.offsetTop+'px');picker.style.setProperty('--selection-width',selected.offsetWidth+'px');picker.style.setProperty('--selection-height',selected.offsetHeight+'px');
-    void picker.offsetWidth;picker.classList.add('is-ready');
+  // Every selector on this page is one BlobTrack: it measures its own options, owns the capsule's geometry and
+  // reports each option's influence from the capsule actually on screen. The page keeps the committed value.
+  const tracks=new Map();let trackCommit=0;
+  const influenceLabel=(el,raw,eased)=>{el.style.setProperty('--blob-influence',eased.toFixed(3));el.style.setProperty('--blob-lift',eased.toFixed(3))};
+  function bindTrack(key,host,config){
+    tracks.get(key)?.destroy();tracks.delete(key);
+    if(!host)return null;
+    const track=BlobTrack.create(Object.assign({host,influence:influenceLabel},config));tracks.set(key,track);return track;
+  }
+  const releaseTracks=()=>{for(const track of tracks.values())track.destroy();tracks.clear()};
+  const remeasureTracks=()=>{for(const track of tracks.values())track.remeasure()};
+  // A physical commit already applied the choice; the click it generates must not apply it twice, while a keyboard
+  // or assistive activation (which carries no click detail) still goes through the ordinary handler.
+  const fromTrack=event=>Boolean(event.detail)&&performance.now()-trackCommit<400;
+  function bindTracks(){
+    releaseTracks();
+    bindTrack('body-metric',q('.body-metric-picker'),{optionSelector:'[data-body-metric]',idOf:el=>el.dataset.bodyMetric,
+      committed:()=>bodyMetric,commit:id=>{trackCommit=performance.now();lens.fromTrack=true;goBody(id);if(!lens.frame)lens.fromTrack=false}});
+    bindTrack('body-range',q('.body-timeline .segmented'),{optionSelector:'[data-body-range]',idOf:el=>el.dataset.bodyRange,
+      committed:()=>String(bodyRange),commit:id=>{trackCommit=performance.now();setBodyRange(Number(id))}});
+    bindTrack('setup-target',q('.setup-segments'),{optionSelector:'label',idOf:el=>el.querySelector('input').value,
+      committed:()=>q('.setup-segments input:checked')?.value||'open',commit:id=>{trackCommit=performance.now();setWorkoutTarget(id)}});
+    bindTrack('timer-mode',q('.timer-mode-picker'),{optionSelector:'[data-timer-mode]',idOf:el=>el.dataset.timerMode,
+      committed:()=>timerMode,commit:id=>{trackCommit=performance.now();setTimerMode(id)}});
+    bindTrack('workout-chart',q('.workout-chart-tabs'),{optionSelector:'[data-workout-chart]',idOf:el=>el.dataset.workoutChart,
+      committed:()=>workoutChart,commit:id=>{trackCommit=performance.now();setWorkoutChart(id)}});
+  }
+  function setBodyRange(next){
+    if(![7,30,90,365].includes(next)||next===bodyRange)return;
+    bodyRange=next;paintBody(true);
+  }
+  function setWorkoutTarget(value){
+    const input=q('.setup-segments input[value="'+value+'"]');
+    if(input&&!input.checked){input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}))}
+  }
+  function setTimerMode(mode){
+    if(!['elapsed','remaining'].includes(mode))return;
+    timerMode=mode;document.querySelectorAll('[data-timer-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.timerMode===timerMode)));
+    tracks.get('timer-mode')?.sync(timerMode);q('#timer-label').textContent=timerMode==='remaining'?'Remaining':'Duration';paintTimer();
+  }
+  function setWorkoutChart(mode){
+    if(!['route','speed','altitude'].includes(mode)||!record())return;
+    workoutChart=mode;const s=record();
+    q('.workout-route-group').innerHTML=WorkoutDetails.chart(s,elapsed(s),workoutChart);
+    bindTracks();q('[data-workout-chart="'+workoutChart+'"]').focus({preventScroll:true});
   }
   // The ring is a lens over a looping row of measurements. A horizontal drag slides the reading, grows or shrinks the
   // purple arc and carries the selector capsule together; a tap on the centre or on the selector runs the same move.
   // x is in lens widths: 0 rests on `from`, -1 has moved one place on (to the next measurement), +1 one place back.
   // toSlot is where the capsule heads: one past either end of the row when the move loops round.
-  const lens={x:{value:0,velocity:0},target:0,from:null,to:null,toSlot:0,pillFrom:null,frame:0,last:0,width:200,drag:null,dragged:0};
-  const pick={drag:null,slot:{value:0,velocity:0},target:0,frame:0,last:0};
+  const lens={x:{value:0,velocity:0},target:0,from:null,to:null,frame:0,last:0,width:200,drag:null,dragged:0,fromTrack:false};
   const lensLayers=()=>{const root=q('.body-lens');return [root.querySelector('.is-current'),root.querySelector('.is-next')]};
   const bodyNeighbour=(field,dir)=>bodyOrder[(bodyIndex(field)+dir+bodyOrder.length)%bodyOrder.length];
-  // Two capsules one track-width apart let the selection run off one end and back in at the other when the row loops.
-  function placePillSlot(slot,stretch=0){
-    const picker=q('.body-metric-picker'),pills=picker?.querySelectorAll('.selection-pill')||[],b=picker?.querySelector('[data-body-metric]');if(!b||!pills.length)return;
-    // The second capsule shows only while the first crosses the right end, or its edge would peek into the track's padding.
-    // Measured as fractions: the grid's columns are not whole pixels, and rounded offsets drift a pixel per column.
-    const n=bodyOrder.length,m=(slot%n+n)%n,base=picker.getBoundingClientRect(),cell=b.getBoundingClientRect();
-    pills.forEach((pill,k)=>Object.assign(pill.style,{visibility:k&&m<=n-1?'hidden':'',width:cell.width+'px',height:cell.height+'px',top:cell.top-base.top+'px',transform:`translate3d(${(cell.left-base.left+(m-k*n)*cell.width).toFixed(2)}px,0,0) scaleX(${(1+stretch).toFixed(3)})`}));
+  // The row still loops, but the capsule is one physical object: a wrap travels between the two measured end slots
+  // instead of running a second capsule round the back of the bar.
+  function placePill(fromIndex,toIndex,t){
+    const track=tracks.get('body-metric'),options=track?.options||[];
+    // A move that began on the track keeps its own release spring; only a ring swipe or tap drives the capsule.
+    if(!track||track.busy||lens.fromTrack||!options.length)return;
+    const a=options[BlobTrack.clamp(fromIndex,0,options.length-1)],b=options[BlobTrack.clamp(toIndex,0,options.length-1)];
+    track.setPose({cx:a.centre+(b.centre-a.centre)*t,width:a.width+(b.width-a.width)*t});
   }
-  const placePill=()=>placePillSlot(bodyIndex(bodyMetric));
   function paintLens(){
     const [current,next]=lensLayers(),x=lens.x.value,t=Math.min(1,Math.abs(x)),w=lens.width,side=x<0?1:-1,from=lens.from||bodyMetric,to=lens.to||from,d=sample('body',bodyDate);
     current.style.transform=`translate3d(${(x*w).toFixed(2)}px,0,0) scale(${(1-.05*t).toFixed(4)})`;current.style.opacity=String(1-t*.6);
     next.style.transform=`translate3d(${((x+side)*w).toFixed(2)}px,0,0) scale(${(.95+.05*t).toFixed(4)})`;next.style.opacity=String(lens.to?.4+t*.6:0);
     paintRing(bodyShare(from,d)+(bodyShare(to,d)-bodyShare(from,d))*t,mixTone(bodyRest(from),bodyRest(to),t));
-    if(!pick.drag?.active&&!pick.frame){const a=lens.pillFrom??bodyIndex(from),b=lens.to?lens.toSlot:a;placePillSlot(a+(b-a)*t)}
+    placePill(bodyIndex(from),bodyIndex(to),t);
   }
   function settleLens(){
     const [current,next]=lensLayers();lens.frame=0;
     if(lens.target&&lens.to)current.innerHTML=next.innerHTML;
-    next.innerHTML='';lens.x.value=lens.x.velocity=lens.target=0;lens.from=lens.to=lens.pillFrom=null;
+    next.innerHTML='';lens.x.value=lens.x.velocity=lens.target=0;lens.from=lens.to=null;
     for(const layer of [current,next]){layer.style.transform='';layer.style.opacity=''}
-    q('.body-lens').classList.remove('is-moving');paintHero();
+    q('.body-lens').classList.remove('is-moving');lens.fromTrack=false;paintHero();
   }
   function runLens(){
     cancelAnimationFrame(lens.frame);lens.last=performance.now();
@@ -139,14 +179,13 @@ const Health = (() => {
     runLens();
   }
   // dir (+1 or -1) steps round the loop as a swipe does; without it a selector tap slides straight to the chosen label.
-  // pillFrom starts the capsule where a selector drag left it.
-  function goBody(field,dir=0,pillFrom=null){
+  function goBody(field,dir=0){
     if(!Object.hasOwn(bodyFields,field)||lens.drag)return;
     const [current,next]=lensLayers();
     if(lens.frame&&lens.to&&Math.abs(lens.x.value)>=.5){current.innerHTML=next.innerHTML;lens.x.value+=lens.x.value<0?1:-1;lens.from=lens.to;lens.to=null}
     else if(!lens.frame)lens.from=bodyMetric;
     if(field===lens.from){if(lens.frame)aimLens(0);return}
-    const from=bodyIndex(lens.from);lens.pillFrom=pillFrom;lens.to=field;lens.toSlot=dir?from+dir:bodyIndex(field);
+    const from=bodyIndex(lens.from);lens.to=field;
     next.innerHTML=bodyReading(field,bodyDate);lens.width=q('.body-lens').clientWidth||200;q('.body-lens').classList.add('is-moving');
     aimLens(dir?-dir:bodyIndex(field)>from?-1:1);
   }
@@ -177,86 +216,19 @@ const Health = (() => {
   }
   // The selector is also a drag track: press and slide across the fixed labels and the glass capsule follows the finger
   // on a light spring, stretching slightly with speed; the release picks the label beneath it.
-  function runPick(){
-    if(pick.frame)return;pick.last=performance.now();
-    const step=time=>{
-      const dt=Math.min(.034,Math.max(.001,(time-pick.last)/1000));pick.last=time;springStep(pick.slot,pick.target,dt,26);
-      if(!pick.drag&&Math.abs(pick.slot.value-pick.target)<.003&&Math.abs(pick.slot.velocity)<.02){pick.frame=0;placePill();return}
-      placePillSlot(pick.slot.value,Math.min(.07,Math.abs(pick.slot.velocity)*.02));pick.frame=requestAnimationFrame(step);
-    };
-    pick.frame=requestAnimationFrame(step);
-  }
-  // The target segments obey the same press/drag/release rule as the Body selector: a short tap selects, a held
-  // horizontal move carries the capsule over the fixed labels, and the release commits whatever sits under the
-  // finger. A cancelled gesture, or a release away from the track, restores the selection the press started from.
-  const seg={drag:null,dragged:0};
-  const segLabels=track=>[...track.querySelectorAll('label')];
-  function segFraction(track,x){const labels=segLabels(track),first=labels[0].getBoundingClientRect(),last=labels.at(-1).getBoundingClientRect(),a=first.left+first.width/2,b=last.left+last.width/2;return Math.max(0,Math.min(labels.length-1,(x-a)/Math.max(1,(b-a)/(labels.length-1))))}
-  function segPlace(track,value){track.querySelector('.setup-capsule').style.setProperty('--seg-x',value.toFixed(4))}
-  function segRest(track){track.classList.remove('is-dragging');getComputedStyle(track).transform;track.querySelector('.setup-capsule').style.removeProperty('--seg-x');segLabels(track).forEach(label=>label.classList.remove('is-over','is-pressed'))}
-  function segDown(event){
-    const track=event.target.closest?.('.setup-segments');if(!track||!event.isPrimary||seg.drag)return;
-    const label=event.target.closest('label');label?.classList.add('is-pressed');
-    seg.drag={id:event.pointerId,x:event.clientX,y:event.clientY,track,label,active:false,from:track.querySelector('input:checked')?.value||'open'};
-  }
-  function segMove(event){
-    const g=seg.drag;if(!g||event.pointerId!==g.id)return;
-    if(!g.active){
-      const dx=event.clientX-g.x,dy=event.clientY-g.y;
-      if(Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)){g.label?.classList.remove('is-pressed');seg.drag=null;return} // a vertical gesture stays a scroll
-      if(Math.abs(dx)<6)return;
-      g.active=true;try{g.track.setPointerCapture(g.id)}catch{}g.track.classList.add('is-dragging');g.label?.classList.remove('is-pressed');
-    }
-    const at=segFraction(g.track,event.clientX);segPlace(g.track,at);
-    segLabels(g.track).forEach((label,i)=>label.classList.toggle('is-over',i===Math.round(at)));
-  }
-  function segUp(event){
-    const g=seg.drag;if(!g||event.pointerId!==g.id||event.type==='lostpointercapture'&&event.target!==g.track)return;
-    seg.drag=null;const track=g.track,labels=segLabels(track);
-    if(!g.active){labels.forEach(label=>label.classList.remove('is-pressed'));return} // a tap is left to the label and its radio
-    seg.dragged=performance.now();
-    const bounds=track.getBoundingClientRect(),inside=event.type==='pointerup'&&event.clientY>bounds.top-44&&event.clientY<bounds.bottom+44;
-    const index=inside?Math.round(segFraction(track,event.clientX)):labels.findIndex(label=>label.querySelector('input').value===g.from);
-    const input=labels[Math.max(0,index)].querySelector('input');
-    if(!input.checked){input.checked=true;input.dispatchEvent(new Event('change',{bubbles:true}))}
-    segRest(track); // the capsule travels to its resting place from wherever the finger left it
-  }
-  function pickDown(event){
-    const track=event.target.closest?.('.body-metric-picker');if(!track||!event.isPrimary||pick.drag||lens.drag)return;
-    pick.drag={id:event.pointerId,x:event.clientX,y:event.clientY,active:false,track};
-  }
-  function pickMove(event){
-    const g=pick.drag;if(!g||event.pointerId!==g.id)return;
-    if(!g.active){
-      const dx=event.clientX-g.x,dy=event.clientY-g.y;
-      if(Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)){pick.drag=null;return}
-      if(Math.abs(dx)<6)return;
-      const first=g.track.querySelector('[data-body-metric]'),n=bodyOrder.length,t=Math.min(1,Math.abs(lens.x.value)),a=lens.pillFrom??bodyIndex(lens.from||bodyMetric),b=lens.to?lens.toSlot:a;
-      g.active=true;g.left=first.getBoundingClientRect().left;g.col=first.getBoundingClientRect().width;try{g.track.setPointerCapture(g.id)}catch{}g.track.classList.add('is-dragging');
-      if(!pick.frame)pick.slot={value:((lens.frame?a+(b-a)*t:bodyIndex(bodyMetric))%n+n)%n,velocity:0}; // from wherever the capsule is shown
-    }
-    pick.target=Math.max(0,Math.min(bodyOrder.length-1,(event.clientX-g.left)/g.col-.5));
-    g.track.querySelectorAll('[data-body-metric]').forEach((label,i)=>label.classList.toggle('is-over',i===Math.round(pick.target)));runPick();
-  }
-  function pickUp(event){
-    const g=pick.drag;if(!g||event.pointerId!==g.id||event.type==='lostpointercapture'&&event.target!==g.track)return;pick.drag=null;if(!g.active)return;
-    lens.dragged=performance.now();g.track.classList.remove('is-dragging');g.track.querySelectorAll('.is-over').forEach(label=>label.classList.remove('is-over'));
-    const field=event.type==='pointerup'?bodyOrder[Math.round(pick.target)]:bodyMetric;
-    if(field===bodyMetric&&!lens.frame){pick.target=bodyIndex(field);runPick();return} // the capsule glides back under the current label
-    cancelAnimationFrame(pick.frame);pick.frame=0;goBody(field,0,pick.slot.value);
-  }
   function paintHero(){
     const d=sample('body',bodyDate),[label,unit]=bodyFields[bodyMetric];
-    if(!lens.frame&&!lens.drag){lensLayers()[0].innerHTML=bodyReading(bodyMetric,bodyDate);paintRing(bodyShare(bodyMetric,d),bodyRest(bodyMetric));if(!pick.drag?.active&&!pick.frame)placePill()}
+    if(!lens.frame&&!lens.drag){lensLayers()[0].innerHTML=bodyReading(bodyMetric,bodyDate);paintRing(bodyShare(bodyMetric,d),bodyRest(bodyMetric));tracks.get('body-metric')?.sync(bodyMetric)}
     document.querySelectorAll('[data-body-metric]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.bodyMetric===bodyMetric)));
+    if(!lens.frame)tracks.get('body-metric')?.sync(bodyMetric);
     q('[data-next-body]').setAttribute('aria-label',`${label}, ${bodyNumber(bodyMetric,d)} ${unit}. Tap for the next measurement, or swipe left or right`);
   }
   function bodyView(){
     const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);ringFills=[];cancelAnimationFrame(lens.frame);Object.assign(lens,{frame:0,drag:null,from:null,to:null,target:0,x:{value:0,velocity:0}});
     const chevron='<svg aria-hidden="true"><use href="#chevron"/></svg>';
     return `<section class="body-hero"><div class="body-composition" data-body-dial><span id="body-ring" aria-hidden="true">${bodyRing()}</span><span class="body-lens" aria-hidden="true"><span class="body-reading is-current"></span><span class="body-reading is-next"></span></span><button class="body-centre" data-next-body></button></div><span class="sr-only" id="body-announce" aria-live="polite"></span>
-    <div class="body-metric-picker health-glass" role="group" aria-label="Body measurement"><span class="selection-pill" aria-hidden="true"></span><span class="selection-pill" aria-hidden="true"></span>${bodyOrder.map(field=>`<button data-body-metric="${field}" aria-pressed="${field===bodyMetric}">${bodyFields[field][2]||bodyFields[field][0]}</button>`).join('')}</div></section>
-    <section class="health-tile health-glass body-timeline"><div class="health-section-head"><h2>History</h2><div class="segmented" role="group" aria-label="Body history period"><span class="selection-pill" aria-hidden="true"></span>${[[7,'7D'],[30,'30D'],[90,'3M'],[365,'1Y']].map(([n,name])=>`<button data-body-range="${n}" aria-pressed="${bodyRange===n}" aria-label="${n===365?'Last year':n===90?'Last three months':'Last '+n+' days'}">${name}</button>`).join('')}</div></div>
+    <div class="body-metric-picker glass-track blob-track" role="group" aria-label="Body measurement"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${bodyOrder.map(field=>`<button class="blob-option" data-body-metric="${field}" aria-pressed="${field===bodyMetric}">${bodyFields[field][2]||bodyFields[field][0]}</button>`).join('')}</div></section>
+    <section class="health-tile health-glass body-timeline"><div class="health-section-head"><h2>History</h2><div class="segmented glass-track blob-track" role="group" aria-label="Body history period"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${[[7,'7D'],[30,'30D'],[90,'3M'],[365,'1Y']].map(([n,name])=>`<button class="blob-option" data-body-range="${n}" aria-pressed="${bodyRange===n}" aria-label="${n===365?'Last year':n===90?'Last three months':'Last '+n+' days'}">${name}</button>`).join('')}</div></div>
     <div class="body-readout"><div class="body-readout-text"><p class="body-readout-value"><span id="body-reading"></span><small id="body-unit"></small></p><p class="body-readout-share" id="body-fat-share"></p><p class="body-readout-meta"><output id="body-date"></output><span id="body-change"></span></p></div><div class="body-date-stepper"><button data-body-step="-1" aria-label="Previous measurement">${chevron}</button><button data-body-step="1" aria-label="Next measurement">${chevron}</button></div></div>
     <figure class="body-chart"><svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="body-area-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b69cff" stop-opacity=".24"/><stop offset="1" stop-color="#b69cff" stop-opacity="0"/></linearGradient><linearGradient id="body-guide-fill" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="107"><stop stop-color="#cbb8ff" stop-opacity="0"/><stop offset=".45" stop-color="#cbb8ff" stop-opacity=".55"/><stop offset="1" stop-color="#cbb8ff" stop-opacity=".08"/></linearGradient></defs><path d="M10 32H290M10 97H290" stroke="#ffffff0c"/><path id="body-area" fill="url(#body-area-fill)"/><g id="body-dots" fill="#cdb9ff" fill-opacity=".5"></g><path id="body-line" stroke="#c3a9f7" stroke-width="2" stroke-linecap="round" fill="none"/><text id="body-gap" x="18" y="66" fill="#aeadb9" font-size="9"></text><path id="body-guide" stroke="url(#body-guide-fill)" stroke-width="1.2"/><circle id="body-halo" r="9" fill="#b69cff24"/><circle id="body-point" r="4" fill="#efe7ff" stroke="#3c304f" stroke-width="2"/></svg><input id="body-scrub" type="range" min="0" max="${bodyRange-1}" value="${bodyOffset(bodyDate)}" aria-label="Inspect body measurement date"/><figcaption><span id="body-range-start"></span><span id="body-range-middle"></span><span id="body-range-end"></span></figcaption></figure>
     <dl class="body-stats"><div><dt>Average</dt><dd id="body-average"></dd></div><div><dt>Lowest</dt><dd id="body-low"></dd></div><div><dt>Highest</dt><dd id="body-high"></dd></div></dl><p class="body-coverage" id="body-coverage"></p></section><p class="health-note">Each ring dot is 1% of body weight. Fat and lean mass are calculated from weight and body fat; muscle is part of lean mass.</p>`;
@@ -274,7 +246,7 @@ const Health = (() => {
   function paintBody(animate=false){
     const rows=bodyRows();if(!rows.includes(bodyDate))bodyDate=rows.at(-1);
     const points=bodyPlot(rows),trend=bodyTrend(rows,points),smooth=curve(trend),end=options.getDate(),start=dayOffset(end,1-bodyRange),[label,unit]=bodyFields[bodyMetric],values=rows.map(date=>sample('body',date)[bodyMetric]);
-    document.querySelectorAll('[data-body-range]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.bodyRange)===bodyRange)));positionBodySelection(q('.body-timeline .segmented'));
+    document.querySelectorAll('[data-body-range]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.bodyRange)===bodyRange)));tracks.get('body-range')?.sync(String(bodyRange));
     q('#body-line').setAttribute('d',smooth);q('#body-dots').setAttribute('fill-opacity',bodyRange>30?.32:.55);q('#body-dots').innerHTML=points.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${bodyRange>30?1.1:bodyRange>7?1.5:2.2}"/>`).join('');q('#body-area').setAttribute('d',`${smooth}L${trend.at(-1).x} 107L${trend[0].x} 107Z`);q('#body-scrub').max=bodyRange-1;q('.body-chart').setAttribute('aria-label',label+' history. Drag on the chart or use arrow keys to inspect recorded dates.');
     const axis=date=>bodyRange===365?dateLabel(date,{month:'short',year:'numeric'}):stamp(date+'T12:00:00');
     q('#body-range-start').textContent=axis(start);q('#body-range-end').textContent=axis(end);q('#body-range-middle').textContent=bodyRange>=90?axis(dayOffset(start,Math.floor(bodyRange/2))):'Drag to inspect';q('#body-gap').textContent=points[0].x>110?'No earlier measurements':'';
@@ -302,12 +274,12 @@ const Health = (() => {
   // One configuration flow for every activity: the header carries the name; the panel holds target, GPS and weight.
   function setupView(){
     const outdoor=setup.kind!=='Strength',timed=Boolean(setup.targetMs);
-    return `<section class="workout-setup"><form id="workout-setup-form"><div class="setup-panel"><fieldset class="setup-target"><legend>Workout target</legend><div class="setup-segments"><span class="setup-capsule" aria-hidden="true"></span><label><input type="radio" name="target" value="open" ${timed?'':'checked'}/><span>Open workout</span></label><label><input type="radio" name="target" value="time" ${timed?'checked':''}/><span>Time target</span></label></div></fieldset><div id="target-options" class="target-options" ${timed?'':'hidden'}><label class="target-minutes"><span>Duration</span><span class="setup-field"><input id="target-minutes" ${timed?'':'disabled'} type="number" min="1" max="1440" step="1" value="${timed?setup.targetMs/60000:30}" inputmode="numeric"/><small>min</small></span></label></div>${outdoor?`<label class="tracking-option"><span>Track outdoors<small>Phone GPS · route and distance</small></span><input id="workout-track" type="checkbox" role="switch" ${setup.trackLocation?'checked':''}/></label>`:''}<label class="workout-weight"><span>Weight<small>Optional · energy estimate</small></span><span class="setup-field"><input id="workout-weight" type="number" min="20" max="350" step="0.1" value="${setup.weightKg||''}" inputmode="decimal" placeholder="—"/><small>kg</small></span></label></div><p class="setup-help">${outdoor?'GPS is used only during this workout. Turn it off for an indoor session.':'Records active time, pauses and your session history.'}</p><p class="health-error" id="workout-error" role="alert"></p><button class="workout-primary" type="submit">Start ${setup.kind.toLowerCase()}</button></form>${window.OrbitMusic?'<button class="music-access" data-music-connect>Music access</button>':''}</section>`;
+    return `<section class="workout-setup"><form id="workout-setup-form"><div class="setup-panel"><fieldset class="setup-target"><legend>Workout target</legend><div class="setup-segments glass-track blob-track"><span class="selection-pill glass-indicator" aria-hidden="true"></span><label class="blob-option"><input type="radio" name="target" value="open" ${timed?'':'checked'}/><span>Open workout</span></label><label class="blob-option"><input type="radio" name="target" value="time" ${timed?'checked':''}/><span>Time target</span></label></div></fieldset><div id="target-options" class="target-options" ${timed?'':'hidden'}><label class="target-minutes"><span>Duration</span><span class="setup-field"><input id="target-minutes" ${timed?'':'disabled'} type="number" min="1" max="1440" step="1" value="${timed?setup.targetMs/60000:30}" inputmode="numeric"/><small>min</small></span></label></div>${outdoor?`<label class="tracking-option"><span>Track outdoors<small>Phone GPS · route and distance</small></span><input id="workout-track" type="checkbox" role="switch" ${setup.trackLocation?'checked':''}/></label>`:''}<label class="workout-weight"><span>Weight<small>Optional · energy estimate</small></span><span class="setup-field"><input id="workout-weight" type="number" min="20" max="350" step="0.1" value="${setup.weightKg||''}" inputmode="decimal" placeholder="—"/><small>kg</small></span></label></div><p class="setup-help">${outdoor?'GPS is used only during this workout. Turn it off for an indoor session.':'Records active time, pauses and your session history.'}</p><p class="health-error" id="workout-error" role="alert"></p><button class="workout-primary" type="submit">Start ${setup.kind.toLowerCase()}</button></form>${window.OrbitMusic?'<button class="music-access" data-music-connect>Music access</button>':''}</section>`;
   }
   function sessionView(){
     const a=store.active,t=elapsed(a),paused=a.resumedAt===null;
     if(!a.targetMs)timerMode='elapsed';
-    return `<section data-started-at="${a.startedAt}" class="workout-live ${timerFocused?'timer-focused':''} ${paused?'is-paused':''}"><div class="workout-live-top"><button class="workout-dot-play" data-dot-play aria-label="Change dot pattern">${HeroDots.pattern(dotPattern)}</button><p class="health-eyebrow" id="session-status">${paused?'Paused':'Recording'}</p></div><div class="workout-time-focus"><button class="timer-dial" data-timer-focus aria-pressed="${timerFocused}" aria-label="${timerFocused?'Show workout details':'Focus on timer and music'}"><svg class="timer-orbit" viewBox="0 0 320 300" aria-hidden="true">${Array.from({length:60},(_,i)=>{const a=(i/60*300-240)*Math.PI/180;return `<circle data-timer-dot="${i}" cx="${160+Math.cos(a)*143}" cy="${150+Math.sin(a)*132}" r="${i%5===0?2.5:1.7}"/>`}).join('')}</svg><span class="timer-center"><span id="timer-label">${timerMode==='remaining'?'Remaining':'Duration'}</span><output class="session-time" id="session-time" tabindex="-1" aria-label="Workout ${timerMode} time"><canvas id="focus-time-dots" aria-hidden="true"></canvas><span class="session-matrix">${HeroDots.markup(clock(timerMode==='remaining'?Math.max(0,a.targetMs-t):t))}</span></output><span class="timer-tap-hint">${timerFocused?'Tap to show details':'Tap to focus'}</span></span></button>${a.targetMs?`<div class="timer-mode-picker" role="group" aria-label="Timer reading"><button data-timer-mode="elapsed" aria-pressed="${timerMode==='elapsed'}">Elapsed</button><button data-timer-mode="remaining" aria-pressed="${timerMode==='remaining'}">Remaining</button></div><progress class="sr-only" id="session-progress" value="${Math.min(t,a.targetMs)}" max="${a.targetMs}" aria-label="Workout target progress"></progress><p class="target-remaining" id="target-remaining">${t>=a.targetMs?'Target reached':clock(a.targetMs-t)+' remaining'} · ${a.targetMs/60000} min target</p>`:'<p class="target-remaining">Open workout</p>'}</div><div class="workout-unconnected" id="live-workout-metrics">${WorkoutDetails.compact(a,t,total(a))}</div><section class="workout-music" aria-label="Music player" hidden></section><div class="session-actions"><button data-session="${paused?'resume':'pause'}">${paused?'Resume':'Pause'}</button><button data-session="finish">Finish</button></div>${window.OrbitWorkouts?.notificationStatus&&window.OrbitWorkouts.notificationStatus()==='disabled'?'<button class="notification-enable" data-notifications>Enable live notification</button>':''}</section>`;
+    return `<section data-started-at="${a.startedAt}" class="workout-live ${timerFocused?'timer-focused':''} ${paused?'is-paused':''}"><div class="workout-live-top"><button class="workout-dot-play" data-dot-play aria-label="Change dot pattern">${HeroDots.pattern(dotPattern)}</button><p class="health-eyebrow" id="session-status">${paused?'Paused':'Recording'}</p></div><div class="workout-time-focus"><button class="timer-dial" data-timer-focus aria-pressed="${timerFocused}" aria-label="${timerFocused?'Show workout details':'Focus on timer and music'}"><svg class="timer-orbit" viewBox="0 0 320 300" aria-hidden="true">${Array.from({length:60},(_,i)=>{const a=(i/60*300-240)*Math.PI/180;return `<circle data-timer-dot="${i}" cx="${160+Math.cos(a)*143}" cy="${150+Math.sin(a)*132}" r="${i%5===0?2.5:1.7}"/>`}).join('')}</svg><span class="timer-center"><span id="timer-label">${timerMode==='remaining'?'Remaining':'Duration'}</span><output class="session-time" id="session-time" tabindex="-1" aria-label="Workout ${timerMode} time"><canvas id="focus-time-dots" aria-hidden="true"></canvas><span class="session-matrix">${HeroDots.markup(clock(timerMode==='remaining'?Math.max(0,a.targetMs-t):t))}</span></output><span class="timer-tap-hint">${timerFocused?'Tap to show details':'Tap to focus'}</span></span></button>${a.targetMs?`<div class="timer-mode-picker glass-track blob-track" role="group" aria-label="Timer reading"><span class="selection-pill glass-indicator" aria-hidden="true"></span><button class="blob-option" data-timer-mode="elapsed" aria-pressed="${timerMode==='elapsed'}">Elapsed</button><button class="blob-option" data-timer-mode="remaining" aria-pressed="${timerMode==='remaining'}">Remaining</button></div><progress class="sr-only" id="session-progress" value="${Math.min(t,a.targetMs)}" max="${a.targetMs}" aria-label="Workout target progress"></progress><p class="target-remaining" id="target-remaining">${t>=a.targetMs?'Target reached':clock(a.targetMs-t)+' remaining'} · ${a.targetMs/60000} min target</p>`:'<p class="target-remaining">Open workout</p>'}</div><div class="workout-unconnected" id="live-workout-metrics">${WorkoutDetails.compact(a,t,total(a))}</div><section class="workout-music" aria-label="Music player" hidden></section><div class="session-actions"><button data-session="${paused?'resume':'pause'}">${paused?'Resume':'Pause'}</button><button data-session="finish">Finish</button></div>${window.OrbitWorkouts?.notificationStatus&&window.OrbitWorkouts.notificationStatus()==='disabled'?'<button class="notification-enable" data-notifications>Enable live notification</button>':''}</section>`;
   }
   function record(){return workoutRecord==='active'?store.active:store.history.find(s=>s.startedAt===workoutRecord)}
   function recordView(){const s=record();return s?`<div id="workout-record-body">${WorkoutDetails.view(s,elapsed(s),total(s),workoutChart)}</div>`:''}
@@ -330,6 +302,7 @@ const Health = (() => {
     q('#health-source').hidden=page==='workouts';q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;q('#health-page').dataset.workoutScreen=page!=='workouts'?'':workoutRecord!==null?'record':countdown!==null?'countdown':store.active?'active':setup?'setup':'picker';
     countDots?.stop();countDots=null;WorkoutFocus.dispose();MusicPlayer.stop();
     body.innerHTML=page==='body'?bodyView():page==='overview'?overview():page==='sleep'?sleepView():workoutRecord!==null?recordView():countdown!==null?`<div class="workout-countdown"><p class="countdown-heading">${setup.kind}</p><div class="countdown-play"><canvas id="countdown-dots" aria-hidden="true"></canvas><output class="sr-only" id="workout-count" aria-live="polite">${countdown}</output></div><p class="countdown-invitation">Touch the dots</p><div class="countdown-stages" aria-hidden="true">${[3,2,1].map(n=>`<i data-count-stage="${n}" class="${countdown<=n?'lit':''}"></i>`).join('')}</div><button data-cancel-countdown>Cancel</button></div>`:store.active?sessionView():setup?setupView():workoutHome();
+    bindTracks();
     if(page==='body')paintBody();
     if(q('#week-scrub'))inspectWeek(Math.max(0,Math.min(6,weekDay)));
     if(page==='workouts'&&countdown!==null)countDots=HeroDots.mount(q('#countdown-dots'),countdown);
@@ -362,7 +335,7 @@ const Health = (() => {
     if(workoutRecord!==null){SurfaceMotion.change(()=>{workoutRecord=null;render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true})});return true}
     if(countdown!==null){SurfaceMotion.change(()=>{cancelCountdown();render();q('.workout-primary').focus({preventScroll:true})});return true}
     if(setup){const kind=setup.kind;SurfaceMotion.change(()=>{setup=null;render();q('#health-scroll').scrollTop=0;q('[data-setup="'+kind+'"]').focus({preventScroll:true})});return true}
-    MusicPlayer.stop();WorkoutFocus.dispose();page=null;SurfaceMotion.dismiss(q('#health-page'),()=>{
+    MusicPlayer.stop();WorkoutFocus.dispose();releaseTracks();page=null;SurfaceMotion.dismiss(q('#health-page'),()=>{
       q('#health-page').hidden=true;q('.screen').classList.remove('is-detail');
       for(const selector of ['.masthead','.hero','#deck-scroll','#stack-open','#utility-island','#live-island'])q(selector).inert=false;
       options.onClose();if(returnFocus?.isConnected&&!returnFocus.closest('[inert]'))returnFocus.focus({preventScroll:true});else q('#live-bar').focus({preventScroll:true});
@@ -383,6 +356,7 @@ const Health = (() => {
     WorkoutFocus.bind(q('#health-page'),{target:value=>{timerFocused=value}});
     q('#health-content').addEventListener('click',event=>{
       const summary=event.target.closest('summary');if(summary){event.preventDefault();SurfaceMotion.toggleDetails(summary.closest('details'));if(summary.closest('.oxygen-tile'))q('.oxygen-week').scrollLeft=q('.oxygen-week').scrollWidth;return}
+      if(event.target.closest('.blob-track')&&fromTrack(event)){event.preventDefault();return} // the gesture already committed
       const b=event.target.closest('button');if(!b)return;
       if(b.dataset.session){
         const finish=b.dataset.session==='finish';
@@ -391,16 +365,16 @@ const Health = (() => {
       }
       else if(b.dataset.setup)SurfaceMotion.change(()=>{setup={kind:b.dataset.setup,targetMs:0,trackLocation:b.dataset.setup!=='Strength',weightKg:0};render();q('#health-scroll').scrollTop=0;q('input[name="target"]:checked').focus({preventScroll:true})});
       else if(b.dataset.workoutDetail){workoutRecord=b.dataset.workoutDetail==='active'?'active':Number(b.dataset.workoutDetail);if(!record()){workoutRecord=null;return}workoutChart='route';SurfaceMotion.change(()=>{render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true})})}
-      else if(b.dataset.workoutChart){workoutChart=b.dataset.workoutChart;if(['route','speed','altitude'].includes(workoutChart)){const s=record();q('.workout-route-group').innerHTML=WorkoutDetails.chart(s,elapsed(s),workoutChart);q('[data-workout-chart="'+workoutChart+'"]').focus({preventScroll:true})}}
+      else if(b.dataset.workoutChart)setWorkoutChart(b.dataset.workoutChart);
       else if(b.hasAttribute('data-music-connect'))MusicPlayer.connect();
       else if(b.hasAttribute('data-tracking'))window.OrbitWorkouts?.enableTracking();
-      else if(b.dataset.bodyMetric||b.hasAttribute('data-next-body')){if(event.detail&&performance.now()-lens.dragged<400)return;if(b.dataset.bodyMetric)goBody(b.dataset.bodyMetric);else goBody(bodyNeighbour(bodyMetric,1),1)}
-      else if(b.dataset.bodyRange){const next=Number(b.dataset.bodyRange);if(![7,30,90,365].includes(next)||next===bodyRange)return;bodyRange=next;paintBody(true)}
+      else if(b.dataset.bodyMetric||b.hasAttribute('data-next-body')){if(b.dataset.bodyMetric)goBody(b.dataset.bodyMetric);else goBody(bodyNeighbour(bodyMetric,1),1)}
+      else if(b.dataset.bodyRange)setBodyRange(Number(b.dataset.bodyRange));
       else if(b.dataset.bodyStep)inspectBody(bodyRows().indexOf(bodyDate)+Number(b.dataset.bodyStep));
       else if(b.dataset.nightDate){const date=options.dates[options.dates.indexOf(sleepDate)+Number(b.dataset.nightDate)];if(date){sleepDate=date;sleepMinute=0;render();q('[data-night-date="'+b.dataset.nightDate+'"]').focus({preventScroll:true})}}
       else if(b.dataset.nightPart){const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.inspect(night,SleepTimeline.part(night,sleepMinute,Number(b.dataset.nightPart)))}
       else if(b.dataset.nightStage){const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.inspect(night,SleepTimeline.stageMinute(night,b.dataset.nightStage))}
-      else if(b.dataset.timerMode){timerMode=b.dataset.timerMode;document.querySelectorAll('[data-timer-mode]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.timerMode===timerMode)));q('#timer-label').textContent=timerMode==='remaining'?'Remaining':'Duration';paintTimer()}
+      else if(b.dataset.timerMode)setTimerMode(b.dataset.timerMode);
       else if(b.hasAttribute('data-timer-focus'))setFocus(!timerFocused);
       else if(b.hasAttribute('data-music-expand'))setFocus(true);
       else if(b.hasAttribute('data-dot-play')){dotPattern=(dotPattern+1)%3;HeroDots.reshape(b,dotPattern)}
@@ -413,12 +387,11 @@ const Health = (() => {
     q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='week-scrub'){const day=Number(event.target.value);if(Number.isInteger(day)&&day>=0&&day<7)inspectWeek(day)}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
     q('#health-content').addEventListener('submit',event=>{if(event.target.id!=='workout-setup-form')return;event.preventDefault();const time=q('input[name="target"]:checked').value==='time',minutes=Number(q('#target-minutes').value);if(time&&(!Number.isInteger(minutes)||minutes<1||minutes>1440)){q('#workout-error').textContent='Choose between 1 and 1,440 minutes.';return}const weightKg=Number(q('#workout-weight').value||0),trackLocation=Boolean(q('#workout-track')?.checked);if(weightKg!==0&&(!Number.isFinite(weightKg)||weightKg<20||weightKg>350)){q('#workout-error').textContent='Enter a weight from 20 to 350 kg, or leave it empty.';return}startCountdown(setup.kind,time?minutes*60000:0,{trackLocation,weightKg})});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&countdown!==null){cancelCountdown();render()}schedule();if(!document.hidden)tick()});
-    const alignBody=()=>{if(page==='body'){placePill();positionBodySelection(q('.body-timeline .segmented'))}};window.addEventListener('resize',alignBody);document.fonts?.ready.then(alignBody);
-    const content=q('#health-content');for(const [type,fn] of [['pointerdown',pickDown],['pointerdown',lensDown],['pointerdown',segDown],['pointermove',pickMove],['pointermove',lensMove],['pointermove',segMove]])content.addEventListener(type,fn);for(const type of ['pointerup','pointercancel','lostpointercapture']){content.addEventListener(type,lensUp);content.addEventListener(type,pickUp);content.addEventListener(type,segUp)}
-    content.addEventListener('click',event=>{if(event.detail&&event.target.closest('.setup-segments')&&performance.now()-seg.dragged<400){event.preventDefault();event.stopPropagation()}},true);
+    const realign=()=>{if(page)remeasureTracks()};window.addEventListener('resize',realign);document.fonts?.ready.then(realign);
+    const content=q('#health-content');for(const [type,fn] of [['pointerdown',lensDown],['pointermove',lensMove]])content.addEventListener(type,fn);for(const type of ['pointerup','pointercancel','lostpointercapture'])content.addEventListener(type,lensUp);
     content.addEventListener('keydown',event=>{if(!event.target.closest?.('[data-body-dial]')||!['ArrowLeft','ArrowRight'].includes(event.key))return;const dir=event.key==='ArrowRight'?1:-1;event.preventDefault();goBody(bodyNeighbour(bodyMetric,dir),dir)});
     q('#health-scroll').addEventListener('scroll',frostHead,{passive:true});
     window.addEventListener('focus',refresh);schedule();
   }
-  return {init,open,close,render,live,action,sample,elapsed,clock,validSession,validTarget,refresh,startCountdown,get page(){return page},get state(){return store}};
+  return {init,open,close,render,live,action,sample,elapsed,clock,validSession,validTarget,refresh,startCountdown,bindTracks,get page(){return page},get state(){return store},get tracks(){return tracks}};
 })();

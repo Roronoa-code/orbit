@@ -29,6 +29,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','surface-motion.js'),'u
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','signal-orb.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','hero-dots.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','sleep-timeline.js'),'utf8'),sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','blob-track.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-focus.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-details.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8'),sandbox);

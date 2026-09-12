@@ -1,0 +1,70 @@
+{
+ "width": 320,
+ "height": 844,
+ "halfHeld": {
+  "pointerDownAt": 51.25,
+  "gesture": "body-metric drag, still held",
+  "committed": "weight",
+  "presented": {
+   "left": 122.85,
+   "width": 74.3,
+   "centre": 160
+  },
+  "boundaryClient": 160,
+  "raw": [
+   0,
+   0.5,
+   0.5,
+   0
+  ],
+  "eased": [
+   0,
+   0.5,
+   0.5,
+   0
+  ],
+  "renderedInfluence": [
+   0,
+   0.5,
+   0.5,
+   0
+  ],
+  "labelColours": [
+   "oklab(0.723201 0.00993791 -0.0179106)",
+   "oklab(0.836904 0.0117447 -0.0208577)",
+   "oklab(0.836904 0.0117447 -0.0208577)",
+   "oklab(0.723201 0.00993791 -0.0179106)"
+  ],
+  "candidate": [
+   "weight",
+   "fatMass",
+   "muscle",
+   "lean"
+  ],
+  "trackBackdrop": "blur(16px) saturate(0.95)",
+  "indicatorBackdrop": "none"
+ },
+ "distantHold": {
+  "slot": 72.5,
+  "budget": 7.25,
+  "worstLeadingExcursion": 6.84,
+  "committed": "weight",
+  "pressed": "lean"
+ },
+ "selectors": [
+  {
+   "label": "Workout chart",
+   "options": 3,
+   "backdrop": "blur(16px) saturate(0.95)",
+   "indicator": true
+  }
+ ],
+ "performance": {
+  "scope": "one second of continuous dragging on the Body measurement selector, headless Chromium, no display",
+  "frames": 61,
+  "medianFrameMs": 16.6,
+  "longestFrameMs": 18.3,
+  "note": "Browser frame timing does not establish physical display cadence or touch latency."
+ },
+ "errors": []
+}

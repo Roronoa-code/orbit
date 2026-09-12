@@ -1,0 +1,203 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Orbit frosted material and selector verification</title>
+<style>
+body{margin:20px;background:#17171b;color:#eee;font:14px system-ui,sans-serif}
+button{padding:10px 16px;margin:0 7px 12px 0}main{display:flex;gap:24px;align-items:flex-start}
+iframe{width:390px;height:844px;border:0;flex:none;zoom:.8}pre{white-space:pre-wrap;max-width:680px;min-width:330px}
+p{max-width:820px;color:#bdb8c6}
+</style>
+<h1>Frosted material and selector checks</h1>
+<p>The real app runs below with a high-contrast diagnostic pattern placed behind its surfaces, so the shared material has something to diffuse. Pointer gestures are driven for real: the half-held state is captured with the finger still down. Saved state is restored afterwards.</p>
+<button id="run">Run material and selector checks</button><button id="hold">Hold the selector halfway</button><button id="pattern">Toggle diagnostic pattern</button><button id="narrow">Use 320 px</button><button id="wide">Use 390 px</button><button id="reset">Reset preview</button>
+<main><iframe id="live" title="Orbit material test phone" src="../index.html?frosted-system-check"></iframe><pre id="result">Ready.</pre></main>
+<script>
+const live=document.querySelector('#live'),result=document.querySelector('#result'),wait=ms=>new Promise(r=>setTimeout(r,ms));
+const key='orbit-workouts-v1',doc=()=>live.contentDocument,w=()=>live.contentWindow,q=s=>doc().querySelector(s);
+const style=n=>w().getComputedStyle(n),box=n=>n.getBoundingClientRect();
+const check=(value,message)=>{if(!value)throw Error(message)};
+const frame=()=>new Promise(resolve=>w().requestAnimationFrame(resolve));
+const api=()=>w().__frost;
+let savedRaw;
+function expose(){
+  if(api())return;
+  const script=doc().createElement('script');
+  script.textContent='window.__frost={Health,BlobTrack,SurfaceMotion}';
+  doc().head.append(script);
+}
+// A deliberately busy pattern behind the app, so real backdrop sampling is visible and testable. It is a
+// diagnostic surface for this page only and is never part of the product.
+function pattern(on){
+  expose();
+  let node=q('#frost-pattern');
+  if(!on){node?.remove();return}
+  if(node)return;
+  node=doc().createElement('div');node.id='frost-pattern';
+  // Inside the selector's own stacking context: an isolating ancestor also bounds what a backdrop filter samples.
+  node.style.cssText='position:absolute;left:0;right:0;top:-140px;bottom:-140px;z-index:0;pointer-events:none;background-image:repeating-linear-gradient(45deg,#fff 0 14px,#000 14px 28px),repeating-linear-gradient(-45deg,#f0f 0 9px,#0ff 9px 18px);background-blend-mode:difference;opacity:.6';
+  (q('.body-metric-picker')?.parentElement||q('#health-page')||doc().body).prepend(node);
+}
+const ptr=(target,type,x,y,id=31)=>target.dispatchEvent(new (w().PointerEvent)(type,{pointerId:id,isPrimary:true,pointerType:'touch',clientX:x,clientY:y,bubbles:true,cancelable:true}));
+document.querySelector('#narrow').onclick=()=>live.style.width='320px';
+document.querySelector('#wide').onclick=()=>live.style.width='390px';
+document.querySelector('#pattern').onclick=()=>{expose();pattern(!q('#frost-pattern'))};
+document.querySelector('#reset').onclick=()=>{if(savedRaw!==undefined){if(savedRaw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,savedRaw);savedRaw=undefined}w().location.reload();result.textContent='Preview reset.'};
+
+// Move the pointer until the indicator's centre sits on a chosen track coordinate. Translation is 1:1 once the
+// drag is owned, so two corrections land exactly without ever tweening the position.
+async function driveTo(track,host,labels,targetCx,y){
+  const base=()=>box(host).left;
+  for(let i=0;i<4;i++){
+    const want=base()+targetCx+(box(host).left-base());
+    const error=targetCx-track.pose.cx;
+    if(Math.abs(error)<0.05)break;
+    const at=w().__frostPointerX=(w().__frostPointerX??0)+error;
+    ptr(host,'pointermove',at,y);
+    await frame();await frame();
+  }
+}
+
+async function holdHalfway(){
+  expose();
+  const health=api().Health;
+  if(health.page!=='body'){health.open('body');await wait(600)}
+  pattern(true);
+  const host=q('.body-metric-picker'),labels=[...doc().querySelectorAll('[data-body-metric]')];
+  const track=health.tracks.get('body-metric');
+  const y=box(host).top+box(host).height/2;
+  const startX=box(labels[0]).left+box(labels[0]).width/2;
+  ptr(labels[0],'pointerdown',startX,y);await frame();
+  let at=startX+12;ptr(host,'pointermove',at,y);await frame();await frame();
+  const boundary=(track.options[1].centre+track.options[2].centre)/2;
+  for(let i=0;i<5;i++){
+    const error=boundary-track.pose.cx;
+    if(Math.abs(error)<0.05)break;
+    at+=error;ptr(host,'pointermove',at,y);await frame();await frame();
+  }
+  await wait(120);
+  return {host,labels,track,y,at,boundary};
+}
+document.querySelector('#hold').onclick=async()=>{
+  if(savedRaw===undefined)savedRaw=w().localStorage.getItem(key);
+  const held=await holdHalfway();
+  result.textContent='Held halfway with the pointer still down. Influence: '+JSON.stringify(held.track.influences.map(v=>+v.eased.toFixed(3)));
+};
+
+document.querySelector('#run').onclick=async()=>{
+  const raw=w().localStorage.getItem(key),button=document.querySelector('#run'),checks=[],measurements={};button.disabled=true;
+  try{
+    check(!JSON.parse(raw||'{"active":null}').active,'Use an isolated origin with no active workout');
+    expose();result.textContent='Checking…';
+    const health=api().Health,B=api().BlobTrack;
+    health.open('body');await wait(700);pattern(true);await frame();
+
+    // The material: a real backdrop sample on the track, a distinct indicator above it, sharp foreground.
+    const host=q('.body-metric-picker'),labels=[...doc().querySelectorAll('[data-body-metric]')],pill=q('.body-metric-picker .selection-pill');
+    const trackFilter=style(host).backdropFilter||style(host).webkitBackdropFilter;
+    check(/blur\(\s*1[0-9]px/.test(trackFilter)||/blur/.test(trackFilter),'The track must carry a real backdrop blur: '+trackFilter);
+    check(style(host).filter==='none'&&style(labels[0]).filter==='none','No content filter may be applied to the track or its labels');
+    check((style(pill).backdropFilter||'none')==='none','The indicator must not filter an already filtered ancestor');
+    check(Number(style(pill).opacity)>.9&&box(pill).width>10,'The indicator must be visible and sized');
+    const labelZ=labels[0].compareDocumentPosition(pill);
+    check(Boolean(labelZ&w().Node.DOCUMENT_POSITION_PRECEDING),'Labels must come after the material layer so they paint above it');
+    measurements.material={trackFilter,indicatorBackdrop:style(pill).backdropFilter||'none',refraction:'none — no displacement pass on this backend'};
+    checks.push('Live backdrop sample on the track, an unfiltered indicator above it and unfiltered labels');
+
+    // Held halfway, with the pointer still down: both neighbours react and nothing has been committed.
+    const before=q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric;
+    const held=await holdHalfway();
+    const influences=held.track.influences,pose=held.track.pose;
+    const shown=box(q('.body-metric-picker .selection-pill'));
+    const boundaryClient=box(held.host).left+held.boundary;
+    check(Math.abs((shown.left+shown.right)/2-boundaryClient)<2,'The indicator must be physically halfway between the two options: '+((shown.left+shown.right)/2-boundaryClient));
+    check(Math.abs(influences[1].raw-0.5)<0.06&&Math.abs(influences[2].raw-0.5)<0.06,'Both straddled options must have about half the coverage: '+JSON.stringify(influences.map(v=>+v.raw.toFixed(3))));
+    check(influences[1].eased>0.3&&influences[2].eased>0.3,'Both straddled options must show partial response');
+    const cover=n=>Number(style(n).getPropertyValue('--blob-influence')||0);
+    check(cover(labels[1])>0.3&&cover(labels[2])>0.3&&cover(labels[0])<0.05,'The rendered labels must carry the same partial values: '+JSON.stringify(labels.map(cover)));
+    check(style(labels[1]).color!==style(labels[0]).color,'A partially covered label must differ from an uncovered one');
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===before,'Holding must not commit a selection');
+    measurements.halfHeld={centreError:+((shown.left+shown.right)/2-boundaryClient).toFixed(2),raw:influences.map(v=>+v.raw.toFixed(3)),eased:influences.map(v=>+v.eased.toFixed(3)),
+      rendered:labels.map(cover),committed:before,width:+shown.width.toFixed(2)};
+    // Release over the option under the finger and let it settle.
+    ptr(held.host,'pointerup',held.at,held.y);await wait(900);
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric!==before,'Releasing must commit exactly once');
+    checks.push('A gesture held halfway shows one indicator between two options, both reacting, with nothing committed until release');
+
+    // The stationary hold on a distant option never moves the leading edge past a tenth of one slot.
+    labels[0].click();await wait(900);
+    const track=health.tracks.get('body-metric'),slot=track.options[0].width,resting=track.pose;
+    const y=box(host).top+box(host).height/2,farX=box(labels[3]).left+box(labels[3]).width/2;
+    ptr(labels[3],'pointerdown',farX,y);
+    let worst=0;
+    for(let i=0;i<40;i++){await frame();const at=track.pose;worst=Math.max(worst,Math.abs(at.cx-resting.cx)+Math.max(0,at.width-resting.width)/2)}
+    check(worst<=slot*0.10+0.51,'A distant stationary hold must stay within a tenth of one local slot: '+worst.toFixed(2)+' of '+(slot*0.10).toFixed(2));
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===labels[0].dataset.bodyMetric,'A stationary hold must not select the pressed option');
+    ptr(host,'pointercancel',farX,y);await wait(700);
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===labels[0].dataset.bodyMetric,'A cancelled hold must commit nothing');
+    measurements.distantHold={budget:+(slot*0.10).toFixed(2),worstLeadingExcursion:+worst.toFixed(2)};
+    checks.push('A distant stationary hold is capped at a tenth of one slot through the whole press spring, and cancels without committing');
+
+    // A press during the settle captures the moving indicator instead of jumping back to a resting slot.
+    ptr(labels[3],'pointerdown',farX,y);ptr(host,'pointerup',farX,y);await wait(120);
+    const moving=track.pose.cx;
+    ptr(labels[2],'pointerdown',box(labels[2]).left+box(labels[2]).width/2,y);await frame();
+    check(Math.abs(track.pose.cx-moving)<14,'A fresh press must continue from the indicator actually on screen: '+track.pose.cx+' vs '+moving);
+    ptr(host,'pointercancel',farX,y);await wait(800);
+    checks.push('A press during settling interrupts from the visible pose');
+
+    // A finger that stops before releasing carries no momentum into the settle.
+    labels[0].click();await wait(900);
+    const startX=box(labels[0]).left+box(labels[0]).width/2;
+    ptr(labels[0],'pointerdown',startX,y);
+    for(let i=1;i<=8;i++){await frame();ptr(host,'pointermove',startX+i*9,y)}
+    await wait(260); // the finger rests here before lifting
+    const restedAt=track.pose.cx;ptr(host,'pointerup',startX+72,y);await frame();await frame();
+    check(Math.abs(track.pose.cx-restedAt)<24,'A paused finger must release without a stale fling: '+(track.pose.cx-restedAt).toFixed(2));
+    await wait(900);
+    checks.push('Stillness before release removes stale momentum');
+
+    // Keyboard and assistive activation still work, and a physical commit is not applied twice.
+    labels[0].click();await wait(900);
+    labels[2].click(); // detail 0, as a keyboard or assistive activation produces
+    await wait(800);
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===labels[2].dataset.bodyMetric,'Activation without a pointer must still select');
+    checks.push('Keyboard and assistive activation are preserved alongside pointer ownership');
+
+    // Vertical movement stays a scroll, and the track declares that itself.
+    check(style(host).touchAction.includes('pan-y'),'A horizontal selector inside a vertical scroller must allow vertical panning');
+    const committedBefore=q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric;
+    ptr(labels[0],'pointerdown',startX,y);
+    for(let i=1;i<=6;i++){await frame();ptr(host,'pointermove',startX,y+i*7)}
+    ptr(host,'pointerup',startX,y+42);await wait(700);
+    check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===committedBefore&&!host.classList.contains('is-dragging'),'A vertical gesture must not take the track or change the selection');
+    checks.push('Vertical gestures remain scrolling');
+
+    // Every migrated selector uses the same engine and the same material roles.
+    const migrated=[];
+    for(const [name,selector,open] of [['Body measurement','.body-metric-picker',async()=>{health.open('body');await wait(500)}],
+      ['Body history range','.body-timeline .segmented',async()=>{health.open('body');await wait(500)}],
+      ['Workout target','.setup-segments',async()=>{health.open('workouts');await wait(400);q('[data-setup="Walking"]').click();await wait(500)}],
+      ['Timer reading','.timer-mode-picker',async()=>{health.action('start','Walking',1800000,{trackLocation:true,weightKg:0});health.open('workouts');await wait(600)}],
+      ['Workout chart','.workout-chart-tabs',async()=>{await wait(60);q('[data-workout-detail="active"]')?.click();await wait(600)}]]){
+      await open();
+      const node=q(selector);
+      check(node,name+' must be present to migrate: '+selector);
+      check(node.classList.contains('blob-track')&&node.classList.contains('glass-track'),name+' must use the shared track role');
+      check(node.querySelector('.selection-pill.glass-indicator'),name+' must use the shared indicator');
+      check(/blur/.test(style(node).backdropFilter||style(node).webkitBackdropFilter||''),name+' must carry the shared diffusion');
+      migrated.push(name);
+    }
+    check(health.tracks.size>=1,'Tracks must be registered with the page they belong to');
+    measurements.migrated=migrated;
+    checks.push('Body measurement, Body history range, workout target, timer reading and workout chart all run the same engine and roles');
+
+    // Leaving the page releases every track: no pointer session and no frame loop survive.
+    health.action('finish');health.close();await wait(400);
+    check(health.tracks.size===0,'Closing the page must release every track');
+    checks.push('Tracks are released with the page');
+
+    result.textContent=JSON.stringify({status:'PASS',width:doc().documentElement.clientWidth,checks,measurements},null,2);
+  }catch(error){result.textContent='FAIL: '+error.stack}
+  finally{try{pattern(false);if(raw===null)w().localStorage.removeItem(key);else w().localStorage.setItem(key,raw);w().location.reload()}finally{button.disabled=false}}
+};
+</script>

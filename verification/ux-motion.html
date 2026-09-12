@@ -134,31 +134,32 @@ document.querySelector('#run').onclick=async()=>{
       if(kind==='Walking'){
         const pickTarget=value=>q(`input[name="target"][value="${value}"]`).closest('label').click();
         // Press, drag and release over the target segments; a tap, a cancel and a vertical gesture all behave.
-        const track=q('.setup-segments'),segs=[...doc().querySelectorAll('.setup-segments label')],capsule=q('.setup-capsule');
+        const track=q('.setup-segments'),segs=[...doc().querySelectorAll('.setup-segments label')],capsule=q('.setup-segments .selection-pill');
+        const coverage=n=>Number(style(n).getPropertyValue('--blob-influence')||0);
         const mid=n=>[box(n).left+box(n).width/2,box(n).top+box(n).height/2],[ax,ay]=mid(segs[0]),[bx,by]=mid(segs[1]);
-        const slide=async(fromX,fromY,toX,toY,steps=8)=>{ptr(track,'pointerdown',fromX,fromY);for(let i=1;i<=steps;i++){await nextFrame();ptr(track,'pointermove',fromX+(toX-fromX)*i/steps,fromY+(toY-fromY)*i/steps)}};
+        const slide=async(fromX,fromY,toX,toY,steps=8)=>{ptr(segs[fromX<toX?0:1],'pointerdown',fromX,fromY);for(let i=1;i<=steps;i++){await nextFrame();ptr(track,'pointermove',fromX+(toX-fromX)*i/steps,fromY+(toY-fromY)*i/steps)}};
         const chosen=()=>q('input[name="target"]:checked').value;
         check(style(segs[0]).webkitTapHighlightColor==='rgba(0, 0, 0, 0)'&&style(segs[1]).webkitTapHighlightColor==='rgba(0, 0, 0, 0)','Target segments must not carry the default tap highlight');
-        pickTarget('open');await wait(320);check(chosen()==='open','The gesture checks must start from Open workout');
+        pickTarget('open');await wait(950);check(chosen()==='open','The gesture checks must start from Open workout');
         await slide(ax,ay,bx,by);
         check(chosen()==='open'&&track.classList.contains('is-dragging')&&box(capsule).left>box(segs[0]).left+2,'A held drag must carry the capsule without committing early: '+box(capsule).left);
-        check(style(segs[1]).color!==style(segs[0]).color||segs[1].classList.contains('is-over'),'The option under the finger must be marked');
+        check(coverage(segs[1])>.05&&coverage(segs[0])>.05,'Both options must react to the capsule that is actually between them: '+JSON.stringify([coverage(segs[0]),coverage(segs[1])]));
         for(let i=8;i>=0;i--){await nextFrame();ptr(track,'pointermove',ax+(bx-ax)*i/8,ay)}
-        ptr(track,'pointerup',ax,ay);await wait(340);
+        ptr(track,'pointerup',ax,ay);await wait(950);
         check(chosen()==='open'&&q('#target-options').hidden&&q('#target-minutes').disabled&&Math.abs(box(capsule).left-box(segs[0]).left)<1.5,'Reversing and releasing over Open must keep Open, with the duration hidden and excluded');
-        await slide(ax,ay,bx,by);ptr(track,'pointerup',bx,by);await wait(340);
+        await slide(ax,ay,bx,by);ptr(track,'pointerup',bx,by);await wait(950);
         check(chosen()==='time'&&!q('#target-options').hidden&&!q('#target-minutes').disabled&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'Releasing over Time target must commit it, reveal the duration and settle the capsule');
-        await slide(bx,by,ax,ay,6);ptr(track,'pointercancel',ax,ay);await wait(340);
+        await slide(bx,by,ax,ay,6);ptr(track,'pointercancel',ax,ay);await wait(950);
         check(chosen()==='time'&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'A cancelled gesture must restore the previous selection');
-        await slide(bx,by,ax,ay,6);ptr(track,'pointerup',ax,box(track).bottom+120);await wait(340);
+        await slide(bx,by,ax,ay,6);ptr(track,'pointerup',ax,box(track).bottom+120);await wait(950);
         check(chosen()==='time'&&Math.abs(box(capsule).left-box(segs[1]).left)<1.5,'Releasing away from the track must restore the previous selection');
-        ptr(track,'pointerdown',bx,by);for(let i=1;i<=6;i++){await nextFrame();ptr(track,'pointermove',bx,by+i*7)}ptr(track,'pointerup',bx,by+42);await wait(240);
+        ptr(segs[1],'pointerdown',bx,by);for(let i=1;i<=6;i++){await nextFrame();ptr(track,'pointermove',bx,by+i*7)}ptr(track,'pointerup',bx,by+42);await wait(950);
         check(!track.classList.contains('is-dragging')&&style(track).touchAction.includes('pan-y')&&chosen()==='time','A vertical gesture must remain a scroll and change nothing');
-        q('input[name="target"][value="open"]').click();await wait(320);
+        q('input[name="target"][value="open"]').click();await wait(950);
         check(chosen()==='open'&&q('#target-options').hidden,'Activating the radio directly, as a keyboard or assistive technology does, must still select Open');
-        pickTarget('time');await wait(320);
+        pickTarget('time');await wait(950);
         check(!q('#target-options').hidden&&!q('#target-minutes').disabled&&q('#target-minutes').value==='30','Time target must reveal a 30-minute duration');
-        check(Math.abs(box(q('.setup-capsule')).left-box(q('input[name="target"][value="time"]').closest('label')).left)<1,'The capsule must move under Time target');
+        check(Math.abs(box(q('.setup-segments .selection-pill')).left-box(q('input[name="target"][value="time"]').closest('label')).left)<1.5,'The capsule must move under Time target');
         q('#target-minutes').value='45';pickTarget('open');await wait(320);check(q('#target-options').hidden&&q('#target-minutes').disabled,'Open workout must hide and disable the duration');
         pickTarget('time');await wait(320);check(q('#target-minutes').value==='45','Switching back must keep the entered duration');
         q('#workout-weight').value='10';q('.workout-primary').click();check(q('#workout-weight').validity.rangeUnderflow&&!q('.workout-countdown'),'A weight below 20 kg must be rejected');

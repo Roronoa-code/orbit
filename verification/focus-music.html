@@ -86,7 +86,7 @@ document.querySelector('#run').onclick=async()=>{
   // must never reach the transport controls at any progress value.
   f.snapshot.title='Would You Love Me the Same If I Were Somebody Else Entirely Different';f.snapshot.artist='A Deliberately Long Artist Name For Truncation';w().MusicPlayer.refresh();
   const cs=n=>w().getComputedStyle(n),vis=n=>cs(n).display==='none'?0:Number(cs(n).opacity),near=(a,b,slack=2)=>Math.abs(a-b)<=slack;
-  const shot=()=>{const matrix=q('.session-matrix'),canvas=q('#focus-time-dots'),head=q('.health-page-head .icon-button'),picked=q('.timer-mode-picker button[aria-pressed=true]'),action=q('.session-actions button:first-child');
+  const shot=()=>{const matrix=q('.session-matrix'),canvas=q('#focus-time-dots'),head=q('.health-page-head .icon-button'),picked=q('.timer-mode-picker .selection-pill'),action=q('.session-actions button:first-child');
     return {matrix:vis(matrix),canvas:vis(canvas),matrixBox:matrix.getBoundingClientRect(),canvasBox:canvas.getBoundingClientRect(),head:cs(head).backgroundColor,picker:cs(picked).backgroundColor,action:cs(action).backgroundColor,lit:q('#health-page').classList.contains('music-lit'),hint:q('.timer-tap-hint').textContent,pressed:q('[data-timer-focus]').getAttribute('aria-pressed'),orbit:q('.timer-orbit').getBoundingClientRect()}};
   const sameSkin=(a,b,where)=>{check(a.head===b.head&&a.picker===b.picker&&a.action===b.action&&a.lit===b.lit&&a.hint===b.hint&&a.pressed===b.pressed,where+' must already carry the settled treatment: '+JSON.stringify({held:[a.head,a.picker,a.action,a.lit,a.hint,a.pressed],settled:[b.head,b.picker,b.action,b.lit,b.hint,b.pressed]}))};
   const clockBox=s=>s.canvas>s.matrix?s.canvasBox:s.matrixBox;

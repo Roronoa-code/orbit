@@ -50,7 +50,8 @@
 @media(forced-colors:active){.stack-card>.stack-shell{background:Canvas;border-color:CanvasText;box-shadow:none}}
 
 /* Each surface stays at its source; only its shell changes shape. */
-.utility-island{position:absolute;right:13px;top:76px;width:min(300px,calc(100% - 26px));z-index:20;pointer-events:none;isolation:isolate}.island-surface{position:absolute;inset:0;border:1px solid #ffffff29;border-top-color:#ffffff59;border-bottom-color:#ffffff12;background:linear-gradient(135deg,#ffffff16,transparent 42%,#ffffff04);box-shadow:inset 0 1px 0 #ffffff24,inset 0 -1px 0 #0006,0 3px 5px #0004,0 18px 34px -8px #000a;pointer-events:none;will-change:transform;transform-origin:100% 0}.utility-island .more{border:0;position:absolute;top:0;right:0;width:40px;height:40px;z-index:2;pointer-events:auto;border-radius:50%;background:none;box-shadow:none}.more svg{transition:transform 180ms ease}.utility-island.is-open .more svg{transform:rotate(90deg)}.utility-body{position:relative;padding:13px 17px 17px;opacity:0;transform-origin:100% 0;will-change:transform,opacity;max-height:calc(100dvh - 150px);overflow:auto;overscroll-behavior:contain;pointer-events:none}.utility-island.is-open .utility-body{pointer-events:auto}.utility-page[hidden]{display:none}.utility-body h2{min-height:25px}.utility-body button:disabled{opacity:.35}.utility-body button:active{background:#35353e}.utility-body .primary:active{background:#c4afff}
+.utility-island{position:absolute;right:13px;top:76px;width:min(300px,calc(100% - 26px));z-index:20;pointer-events:none;isolation:isolate}.island-surface{position:absolute;inset:0;border:1px solid #ffffff29;border-top-color:#ffffff59;border-bottom-color:#ffffff12;background:linear-gradient(135deg,#ffffff16,transparent 42%,#ffffff04);box-shadow:inset 0 1px 0 #ffffff24,inset 0 -1px 0 #0006,0 3px 5px #0004,0 18px 34px -8px #000a;pointer-events:none;will-change:transform;transform-origin:100% 0}.utility-island .more{border:0;position:absolute;top:0;right:0;width:40px;height:40px;z-index:2;pointer-events:auto;border-radius:50%;background:none;box-shadow:none}.more svg{transition:transform 180ms ease}.utility-island.is-open .more svg{transform:rotate(90deg)}.utility-island .island-frost{background:var(--frost-grain),var(--frost-overlay);backdrop-filter:var(--frost-blur-panel);-webkit-backdrop-filter:var(--frost-blur-panel)}
+.utility-body{position:relative;padding:13px 17px 17px;opacity:0;transform-origin:100% 0;will-change:transform,opacity;max-height:calc(100dvh - 150px);overflow:auto;overscroll-behavior:contain;pointer-events:none}.utility-island.is-open .utility-body{pointer-events:auto}.utility-page[hidden]{display:none}.utility-body h2{min-height:25px}.utility-body button:disabled{opacity:.35}.utility-body button:active{background:#35353e}.utility-body .primary:active{background:#c4afff}
 .live-island{position:absolute;bottom:calc(10px + var(--safe-bottom));left:12px;right:12px;z-index:12;isolation:isolate;pointer-events:none}.live-island .island-surface{transform-origin:50% 100%}.live-island .live-bar{position:absolute;left:0;right:0;top:0;bottom:auto;height:62px;border:0;background:none;box-shadow:none;will-change:transform}.live-island .live-bar:before{top:-9px}.live-island-body{position:relative;margin-top:62px;padding:5px 14px 16px;opacity:0;will-change:opacity,transform;pointer-events:none}.live-island.is-open .live-island-body{pointer-events:auto}.activity-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:6px}.activity-choice{display:flex;min-width:0;height:52px;align-items:center;justify-content:center;gap:6px;border:0;border-radius:16px;background:none;padding:0 4px;line-height:1.2;font-size:13px;color:#e0dde6;white-space:nowrap;transition:background-color 160ms ease,color 160ms ease}.activity-choice>span{display:block;flex:none;width:22px;height:22px}.activity-choice svg{display:block;width:22px;height:22px}.activity-choice:active>span{opacity:.75}.live-island .live-chevron svg{transform:rotate(calc(-90deg + max(var(--deck-progress,0),var(--island-open,0))*180deg))}
 /* Frost diffuses the content behind the shell without scaling the blur texture. */
 .island-frost{position:absolute;inset:0;pointer-events:none;background:#c9cedd16;backdrop-filter:blur(14px) saturate(.55) brightness(1.25);-webkit-backdrop-filter:blur(14px) saturate(.55) brightness(1.25);will-change:clip-path}
@@ -100,7 +101,7 @@ body{background:#0a0a0c}
 .live-island .live-bar:before{content:none}
 .live-island .live-bar:focus-visible{outline-offset:-4px}
 /* Launcher glass: a lighter charcoal tint so the Home content behind it diffuses through, a thin rim, the shadow on the shell itself. */
-.live-island .island-frost{top:auto;height:var(--live-frost-height,62px);will-change:auto;background:var(--frost-grain),rgba(22,22,28,.58);backdrop-filter:blur(26px) saturate(.85);-webkit-backdrop-filter:blur(26px) saturate(.85)}
+.live-island .island-frost{top:auto;height:var(--live-frost-height,62px);will-change:auto;background:var(--frost-grain),var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
 .live-island .island-surface{border-color:rgba(255,255,255,.07);border-top-color:rgba(255,255,255,.18);border-bottom-color:rgba(255,255,255,.04);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01));box-shadow:none}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.live-island .island-frost{backdrop-filter:none;-webkit-backdrop-filter:none;background:#28262e}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.live-island .island-frost{background:#28262e}}
@@ -115,6 +116,7 @@ body{background:#0a0a0c}
 .stack-motion{position:absolute;top:0;left:14px;right:14px;z-index:var(--card-z);transform-origin:50% 0;will-change:transform;overflow:hidden}
 .stack-motion>.stack-card{position:absolute;top:0;left:0;right:0;z-index:0;transform:none;will-change:auto;clip-path:none}
 </style>
+<link rel="stylesheet" href="glass-material.css">
 <link rel="stylesheet" href="health-pages.css">
 </head>
 <body>
@@ -168,6 +170,7 @@ body{background:#0a0a0c}
 <script src="hero-dots.js"></script>
 <script src="sleep-timeline.js"></script>
 <script src="workout-focus.js"></script>
+<script src="blob-track.js"></script>
 <script src="workout-details.js"></script>
 <script src="health-pages.js"></script>
 <script id="app">

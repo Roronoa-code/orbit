@@ -21,7 +21,7 @@
 .health-source{margin:0 6px 16px;font-size:10px;color:#adadb5}
 .health-tile{border:0;border-radius:25px;background:#202023;padding:21px;margin:0 0 9px;min-width:0}
 /* Two surface roles on the workout screens: one raised panel material for grouped content, the page behind it. */
-.workout-week,.workout-history,.workout-detail-group,.workout-energy,.workout-route-group{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c}
+.workout-week,.workout-history,.workout-detail-group,.workout-energy,.workout-route-group,.workout-kinds,.setup-panel{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:var(--frost-rim),var(--frost-hairline)}
 .health-tile h2{font-size:15px;letter-spacing:-.2px;font-weight:500}
 .health-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .health-section-head>span{font-size:10px;color:#babac3}
@@ -58,7 +58,7 @@
 .oxygen-week strong{display:block;font-size:15px;font-weight:500;margin-top:6px}
 .oxygen-week strong>small{font-size:8px;margin-left:1px}
 .oxygen-week button[aria-pressed=true]{border-color:#b69cff55;background:#b69cff13}
-.selection-pill{position:absolute;top:0;left:0;z-index:0;pointer-events:none;border-radius:25px;background:var(--selection-fill,#b69cff);width:var(--selection-width,0px);height:var(--selection-height,44px);transform:translate(var(--selection-x,0px),var(--selection-y,0px))}
+.selection-pill{position:absolute;top:0;left:0;z-index:0;pointer-events:none;border-radius:25px;width:var(--selection-width,0px);height:var(--selection-height,44px);transform:translate(var(--selection-x,0px),var(--selection-y,0px))}
 .is-ready>.selection-pill{transition:transform 360ms cubic-bezier(.2,.8,.2,1),width 360ms cubic-bezier(.2,.8,.2,1),height 220ms ease}
 .health-note{font-size:10px;line-height:1.7;color:#b7b7c1;margin:15px 5px}
 .health-error{font-size:11px;color:#ffc0c8;line-height:1.5}
@@ -66,7 +66,7 @@
 /* The chooser is one surface of four rows; each whole row is the activity's setup button. */
 .workout-start{margin:4px 0 16px}
 .workout-start-title{margin:0 4px 10px;font-size:16px;font-weight:500;color:#ece9f2}
-.workout-kinds{border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c}
+.workout-kinds{border-radius:24px;overflow:hidden}
 .workout-kinds button{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:10px 14px;border:0;background:none;text-align:left;color:inherit;transition:background-color 160ms ease}
 .workout-kinds button+button:before{content:"";position:absolute;top:0;left:54px;right:14px;height:1px;background:#ffffff0f}
 .workout-kinds .workout-glyph{width:28px;height:28px;color:#cbbaff}
@@ -106,20 +106,14 @@
 .health-page[data-workout-screen=setup] .workout-setup{display:flex;flex-direction:column}
 .health-page[data-workout-screen=setup] #workout-setup-form{display:flex;flex-direction:column;flex:1;min-height:0}
 .health-page[data-workout-screen=setup] .setup-help{margin-top:auto;padding-top:18px}
-.setup-panel{padding:16px;border-radius:24px;background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c}
+.setup-panel{padding:16px;border-radius:24px}
 .setup-target{min-width:0;margin:0;padding:0;border:0}
 .setup-target legend{float:left;width:100%;margin:0 0 8px;padding:0;font-size:12px;color:#aeaab7}
-.setup-segments{clear:both;position:relative;isolation:isolate;display:grid;grid-template-columns:1fr 1fr;height:56px;padding:4px;border-radius:18px;background:#0000004d;box-shadow:inset 0 1px 2px #0000008c,inset 0 -1px 0 #ffffff0d;touch-action:pan-y;-webkit-user-select:none;user-select:none}
-.setup-segments label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;border-radius:14px;font-size:14px;color:#b4b0bd;white-space:nowrap;cursor:pointer;transition:color 200ms ease}
+.setup-segments{clear:both;display:grid;grid-template-columns:1fr 1fr;height:56px;padding:4px;border-radius:18px;--blob-inactive:#b4b0bd;--blob-active:#f4f0fb}
+.setup-segments label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;border-radius:14px;font-size:14px;white-space:nowrap;cursor:pointer}
 .setup-segments input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;pointer-events:none}
-.setup-segments label:has(input:checked){color:#f4f0fb}
 .setup-segments label:has(input:focus-visible){outline:2px solid #d1c2ff;outline-offset:-2px}
-.setup-capsule{position:absolute;z-index:0;top:4px;left:4px;width:calc(50% - 4px);height:48px;border-radius:14px;background:linear-gradient(180deg,#bca4ff42,#b69cff24);box-shadow:inset 0 1px 0 #efe6ff33,inset 0 0 0 1px #c6b3ff24;transform:translateX(calc(var(--seg-x,0)*100%));transition:transform 220ms cubic-bezier(.2,.8,.2,1)}
-.setup-segments:has(input[value=time]:checked) .setup-capsule{--seg-x:1}
-/* One rounded pressed treatment for touch and long press; the capsule follows the finger without a transition. */
-.setup-segments.is-dragging .setup-capsule{transition:none}
-.setup-segments label.is-pressed{background:#ffffff0f}
-.setup-segments label.is-over{color:#efeaf9}
+.setup-segments>.selection-pill{border-radius:14px;will-change:transform,width}
 .target-minutes{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff0f;font-size:14px;color:#ece9f1}
 .setup-field{display:flex;align-items:center;gap:6px;flex:none;width:112px;min-height:48px;padding:0 12px;border-radius:14px;background:#0000004d;box-shadow:inset 0 1px 2px #0000008c,inset 0 -1px 0 #ffffff0d}
 .setup-field:focus-within{box-shadow:inset 0 1px 2px #0000008c,0 0 0 2px #d1c2ff99}
@@ -130,7 +124,7 @@
 .setup-help{margin:16px 2px 0;font-size:12px;line-height:1.5;color:#aaa6b4}
 .workout-setup .health-error{margin:16px 2px 0}
 .workout-setup .health-error:empty{display:none}
-.workout-primary{display:flex;justify-content:center;align-items:center;width:100%;min-height:56px;margin-top:16px;padding:0 20px;border:0;border-radius:20px;background:#b69cff;color:#18131f;font-size:16px;font-weight:500;transition:transform 140ms ease,filter 140ms ease}
+.workout-primary{display:flex;justify-content:center;align-items:center;width:100%;min-height:56px;margin-top:16px;padding:0 20px;border:1px solid transparent;border-radius:20px;background:#b69cff;color:#18131f;box-shadow:var(--frost-rim);font-size:16px;font-weight:500;transition:transform 140ms ease,filter 140ms ease}
 .workout-primary:active{transform:scale(.985);filter:brightness(.95)}
 .workout-live{display:flex;flex-direction:column;flex:1;padding:9px 8px 4px;text-align:center}
 .workout-dot-play{display:block;width:130px;height:56px;margin:0 auto 5px;border:0;border-radius:30px;background:none;padding:0;color:#cbbaff}
@@ -151,9 +145,9 @@
 .is-paused .live-timer{opacity:.62;transform:scale(.965)}
 .session-time .matrix-reading{height:63px}
 .timer-tap-hint{font-size:9px;color:#a8a3b4;margin-top:21px}
-.timer-mode-picker{display:flex;background:#202024;padding:4px;border-radius:24px;margin-top:-14px;z-index:1}
-.timer-mode-picker button{border:0;min-height:38px;padding:8px 17px;border-radius:22px;background:none;font-size:10px;color:#bcb6c9}
-.timer-mode-picker button[aria-pressed=true]{background:#b69cff;color:#21162d}
+.timer-mode-picker{display:flex;padding:4px;border-radius:24px;margin-top:-14px;z-index:1;--blob-inactive:#bcb6c9;--blob-active:#f1ebff}
+.timer-mode-picker button{position:relative;z-index:1;border:0;min-height:38px;padding:8px 17px;border-radius:22px;background:none;font-size:10px}
+.timer-mode-picker>.selection-pill{border-radius:22px;will-change:transform,width}
 .timer-focused .workout-unconnected,.timer-focused .sensor-note,.timer-focused .workout-live-top{display:none}
 .timer-focused .workout-time-focus{flex:1;min-height:230px;padding:0 0 24px}
 .timer-focused .timer-dial{width:min(100%,360px);height:136px;aspect-ratio:auto;border-radius:24px}
@@ -172,8 +166,8 @@
 .workout-unconnected>span{background:#202023;border-radius:22px;padding:18px 20px;font-size:11px;color:#b9b9c4}
 .workout-unconnected strong{display:block;font-weight:400;font-size:29px;color:#e3e3e9;margin-top:8px}
 .session-actions{display:flex;gap:10px;margin-top:12px}
-.session-actions button{border:1px solid transparent;border-radius:33px;background:#252529;min-height:66px;font-size:16px;flex:1;text-align:center}
-.session-actions button:first-child{background:#b69cff;color:#18131f}
+.session-actions button{border:1px solid #ffffff14;border-radius:33px;background:#252529;box-shadow:var(--frost-rim);min-height:66px;font-size:16px;flex:1;text-align:center}
+.session-actions button:first-child{background:#b69cff;color:#18131f;border-color:transparent}
 .notification-enable{background:none;border:0;min-height:44px;font-size:11px;color:#cbbaff;margin-top:8px}
 .workout-countdown{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:450px}
 .workout-countdown .countdown-heading{font-size:20px;color:#ded9e9;letter-spacing:-.6px}
@@ -254,7 +248,7 @@
 /* A square box, centred and clipped by the page, shows the same crop as before and can shrink uniformly into the small cover. */
 .music-cover img{position:relative;flex:none;height:67%;aspect-ratio:1;min-width:100%;object-fit:cover;object-position:center 28%;display:block;mask-image:linear-gradient(#000 40%,#000b 64%,transparent);transform-origin:0 0;will-change:transform,opacity}
 .music-bottom{padding:0 8px 8px}
-.music-access{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;margin-top:16px;background:none;border:0;color:#bbb8c3;font-size:13px}
+.music-access{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;margin-top:16px;background:none;border:1px solid #ffffff10;border-radius:16px;color:#bbb8c3;font-size:13px}
 .timer-focused.has-music .workout-time-focus{min-height:clamp(225px,39dvh,365px);justify-content:flex-end;padding-bottom:24px}
 .timer-focused.has-music .timer-dial{width:min(100%,260px);height:96px}
 .timer-focused.has-music #focus-time-dots{height:82px}
@@ -293,8 +287,9 @@
 .health-page.music-focus{isolation:isolate}
 /* The full view's treatment belongs to the far half of the move, so a held gesture near an end already wears it. */
 .music-lit .health-page-head .icon-button{background:#0002}.music-lit .health-page-head{background:linear-gradient(#0003,transparent)}.music-lit .health-page-head h1{text-shadow:0 1px 10px #0009}
-.music-lit .timer-mode-picker{background:#0003}
-.music-lit .timer-mode-picker button[aria-pressed=true]{background:#e9e2e0;color:#272326}
+.music-lit .timer-mode-picker{background:#00000059}
+.music-lit .timer-mode-picker>.selection-pill{background:#e9e2e0;box-shadow:0 3px 9px -5px #000}
+.music-lit .timer-mode-picker{--blob-active:#272326;--blob-inactive:#d8d2dc}
 .music-lit .target-remaining{color:#dbd4d8;text-shadow:0 1px 7px #000000a6}
 .music-lit .music-heading h2,.music-lit .music-heading p,.music-lit .music-timeline>div{text-shadow:0 1px 8px #000000a6}
 .music-lit .music-controls button svg{filter:drop-shadow(0 1px 6px #000000a6)}
@@ -321,7 +316,7 @@
 /* An unavailable estimate explains itself once, quietly, instead of posing as a recorded reading. */
 .workout-stat dd.workout-stat-copy{margin:6px 0 0;font-size:11px;font-weight:400;line-height:1.45;letter-spacing:0;color:#a9a5b3;white-space:normal}
 .workout-live-actions{margin:16px 0 2px}
-.workout-unconnected>.workout-stat-grid{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 1px #ffffff0c;border-radius:23px;padding:3px 18px}
+.workout-unconnected>.workout-stat-grid{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:var(--frost-rim),var(--frost-hairline);border-radius:23px;padding:3px 18px}
 .workout-unconnected .workout-stat:nth-last-child(-n+2){border-bottom:0}
 .tracking-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
 .tracking-line>span{display:flex;align-items:center;gap:7px;font-size:9px;color:#b7afc1}
@@ -349,9 +344,9 @@
 .workout-target-track i{display:block;height:100%;background:#c7b3e6}
 .workout-target-copy{font-size:10px;color:#bfb2cc;margin:9px 0 0}
 .workout-route-group{padding:12px 13px 16px}
-.workout-chart-tabs{display:flex;gap:3px;border-bottom:1px solid #ffffff0c;padding:0 3px 7px}
-.workout-chart-tabs button{flex:1;border:0;border-radius:20px;background:none;color:#aaa1b6;font-size:11px;min-height:40px}
-.workout-chart-tabs button[aria-pressed=true]{background:#ffffff0a;color:#ece3f7}
+.workout-chart-tabs{display:flex;gap:3px;padding:3px;border-radius:22px;--blob-inactive:#aaa1b6;--blob-active:#ece3f7}
+.workout-chart-tabs button{position:relative;z-index:1;flex:1;border:0;border-radius:20px;background:none;font-size:11px;min-height:40px}
+.workout-chart-tabs>.selection-pill{border-radius:20px;will-change:transform,width}
 .workout-record-chart{margin:10px 0 0}
 .workout-record-chart svg{display:block;width:100%;height:auto}
 .workout-record-chart figcaption{font-size:9px;text-align:center;color:#a99db7;margin-top:5px}
@@ -424,7 +419,7 @@
 .live-title,.live-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* One frosted material for Orbit's raised surfaces and controls: a charcoal tint over visible diffusion, a rim that
    catches light along the top edge, and a soft drop that lifts it off the page. Used for containers and controls only. */
-.health-page,.live-island{--glass-tint:linear-gradient(180deg,#2a2a31b3,#1b1b21c2 55%,#1d1d23cc);--glass-blur:blur(22px) saturate(1.12);--glass-rim:linear-gradient(170deg,#ffffff3d,#ffffff12 26%,#ffffff06 55%,#ffffff12);--glass-lift:inset 0 1px 0 #ffffff12,0 20px 36px -24px #000,0 3px 10px -6px #000c}
+.health-page,.live-island{--glass-tint:linear-gradient(180deg,#2a2a31b3,#1b1b21c2 55%,var(--frost-panel));--glass-blur:var(--frost-blur-panel);--glass-rim:linear-gradient(170deg,#ffffff3d,#ffffff12 26%,#ffffff06 55%,#ffffff12);--glass-lift:var(--frost-rim),var(--frost-lift)}
 .health-glass{position:relative;isolation:isolate;background:var(--frost-grain),var(--glass-tint);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-lift)}
 .health-glass:before{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;padding:1px;background:var(--glass-rim);pointer-events:none;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
 
@@ -459,22 +454,17 @@
 
 /* The selector only chooses: fixed labels on a glass track, with a capsule that can be dragged across them. Two
    capsules sit one track-width apart, so a looping move leaves one end as it enters the other. */
-.body-metric-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 0;padding:4px;border-radius:24px;overflow:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none}
-.body-metric-picker button{position:relative;z-index:1;min-width:0;min-height:44px;padding:0 4px;border:0;border-radius:20px;background:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;letter-spacing:.1px;color:#a7a3b1;transition:color 220ms ease}
-.body-metric-picker button[aria-pressed=true],.body-metric-picker button.is-over{color:#f1ebff}
-.body-metric-picker.is-dragging button[aria-pressed=true]:not(.is-over){color:#a7a3b1}
-.body-metric-picker>.selection-pill{border-radius:20px;background:linear-gradient(180deg,#bca4ff38,#b69cff1c);box-shadow:inset 0 1px 0 #efe6ff38,inset 0 0 0 1px #c6b3ff24,0 6px 14px -8px #000;will-change:transform}
-.body-metric-picker.is-dragging>.selection-pill{background:linear-gradient(180deg,#c7b2ff4d,#b69cff2b);box-shadow:inset 0 1px 0 #f3ecff52,inset 0 0 0 1px #cdbbff3a,0 8px 18px -8px #000}
+.body-metric-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 0;padding:4px;border-radius:24px;overflow:hidden;--blob-inactive:#a7a3b1;--blob-active:#f1ebff}
+.body-metric-picker button{position:relative;z-index:1;min-width:0;min-height:44px;padding:0 4px;border:0;border-radius:20px;background:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;letter-spacing:.1px}
+.body-metric-picker>.selection-pill{border-radius:20px;will-change:transform,width}
 
 /* History: range, inspected reading, chart, then the period's average and extremes. */
 .body-timeline{margin:12px 0 0;padding:16px 16px 14px;border-radius:26px}
 .body-timeline .health-section-head h2{font-size:14px;letter-spacing:-.1px;color:#ece9f2}
-.segmented{display:flex;position:relative;isolation:isolate;padding:3px;border-radius:20px;background:#0000003b;box-shadow:inset 0 1px 2px #000b,inset 0 -1px 0 #ffffff0d;--selection-fill:linear-gradient(180deg,#ffffff26,#ffffff12)}
-.segmented button{position:relative;z-index:1;min-width:40px;min-height:34px;padding:0 9px;border:0;border-radius:17px;background:none;font-size:10.5px;color:#aeabb8;transition:color 220ms ease,transform 160ms ease}
+.segmented{display:flex;padding:3px;border-radius:20px;--blob-inactive:#aeabb8;--blob-active:#f5f1ff}
+.segmented button{position:relative;z-index:1;min-width:40px;min-height:34px;padding:0 9px;border:0;border-radius:17px;background:none;font-size:10.5px}
 .segmented button:after{content:"";position:absolute;inset:-5px -1px}
-.segmented button[aria-pressed=true]{color:#f5f1ff}
-.segmented button:active{transform:scale(.96)}
-.segmented>.selection-pill{border-radius:17px;box-shadow:inset 0 1px 0 #ffffff2e,0 3px 8px -4px #000}
+.segmented>.selection-pill{border-radius:17px;will-change:transform,width}
 .body-readout{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 2px 0}
 .body-readout-value{font-size:27px;font-weight:500;line-height:1.1;letter-spacing:-.9px;color:#f4f2f8;font-variant-numeric:tabular-nums;white-space:nowrap}
 .body-readout-value small{margin-left:5px;font-size:12px;font-weight:400;letter-spacing:0;color:#c5c0cf}
@@ -509,4 +499,4 @@
 .health-page[data-page=body] .health-note{margin:12px 6px 4px;font-size:9.5px;line-height:1.6;color:#9a96a4}
 @media(max-width:360px){.body-composition{width:min(100%,280px)}.body-value .matrix-reading{height:44px}.body-metric-picker button{font-size:11px}.body-timeline{padding-inline:13px}.body-hero:before{left:-11px;right:-11px}.body-readout-value{font-size:24px}.body-readout-meta{flex-direction:column;align-items:flex-start;gap:2px}.body-stats dd{font-size:14px}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-glass,.health-page[data-page=body] .health-page-head .icon-button{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}.health-page[data-page=body] .health-head-frost{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0a0a0c}}
-@media(forced-colors:active){.health-glass{background:Canvas;border:1px solid CanvasText}.health-glass:before,.health-page[data-page=body] .health-head-frost{display:none}.body-metric-picker>.selection-pill{background:Highlight}.body-share i{forced-color-adjust:none}}
+@media(forced-colors:active){.health-glass{background:Canvas;border:1px solid CanvasText}.health-glass:before,.health-page[data-page=body] .health-head-frost{display:none}.body-share i{forced-color-adjust:none}}

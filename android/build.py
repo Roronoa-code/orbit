@@ -20,15 +20,28 @@ def run(*args):
     subprocess.run([str(a) for a in args], check=True, env=env, cwd=build)
 
 html = (root.parent / 'index.html').read_text(encoding='utf-8')
-health_pages = (root.parent / 'health-pages.js').read_text(encoding='utf-8')
-html = html.replace('<script src="health-pages.js"></script>', '<script id="health-pages">' + health_pages + '</script>')
-html = html.replace('<link rel="stylesheet" href="health-pages.css">', '<style>' + (root.parent / 'health-pages.css').read_text(encoding='utf-8') + '</style>')
-html = html.replace('<script src="surface-motion.js"></script>', '<script>' + (root.parent / 'surface-motion.js').read_text(encoding='utf-8') + '</script>')
-html = html.replace('<script src="hero-dots.js"></script>', '<script>' + (root.parent / 'hero-dots.js').read_text(encoding='utf-8') + '</script>')
-html = html.replace('<script src="sleep-timeline.js"></script>', '<script>' + (root.parent / 'sleep-timeline.js').read_text(encoding='utf-8') + '</script>')
-html = html.replace('<script src="workout-focus.js"></script>', '<script>' + (root.parent / 'workout-focus.js').read_text(encoding='utf-8') + '</script>')
-html = html.replace('<script src="workout-details.js"></script>', '<script>' + (root.parent / 'workout-details.js').read_text(encoding='utf-8') + '</script>')
-html = html.replace('<script src="signal-orb.js"></script>', '<script>' + (root.parent / 'signal-orb.js').read_text(encoding='utf-8') + '</script>')
+
+def inline(reference, path, attributes=''):
+    """Inline one local asset for offline packaging, and fail the build if its reference is missing."""
+    global html
+    if reference not in html:
+        raise SystemExit(f'index.html no longer references {path}; update the bundler before building.')
+    source = (root.parent / path).read_text(encoding='utf-8')
+    opening = '<style>' if path.endswith('.css') else f'<script{attributes}>'
+    closing = '</style>' if path.endswith('.css') else '</script>'
+    html = html.replace(reference, opening + source + closing)
+
+# Every local stylesheet and script the page loads must be inlined here; nothing may remain a network reference.
+inline('<link rel="stylesheet" href="glass-material.css">', 'glass-material.css')
+inline('<link rel="stylesheet" href="health-pages.css">', 'health-pages.css')
+for name in ['surface-motion.js', 'hero-dots.js', 'sleep-timeline.js', 'blob-track.js', 'workout-focus.js', 'workout-details.js', 'signal-orb.js']:
+    inline(f'<script src="{name}"></script>', name)
+inline('<script src="health-pages.js"></script>', 'health-pages.js', ' id="health-pages"')
+import re as _re
+left_over = _re.findall(r'<script src="([^"]+)"></script>|<link rel="stylesheet" href="([^"]+)">', html)
+left_over = [name for pair in left_over for name in pair if name and '//' not in name]
+if left_over:
+    raise SystemExit(f'Unbundled local assets remain in the packaged page: {left_over}')
 native_style = '<style>.status,.home-indicator{display:none}.utility-island{top:47px}.health-page{top:0}.screen{height:100dvh!important;min-height:0!important}.phone{max-width:none;margin:0;padding:0;border:0;box-shadow:none}.screen{border-radius:0;padding-top:0}.copy-label{margin-bottom:16px}.masthead{padding-top:12px}body{background:#0a0a0c}</style>'
 html = html.replace('</head>', native_style + '</head>')
 (build / 'assets/index.html').write_text(html, encoding='utf-8')

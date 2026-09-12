@@ -1,0 +1,74 @@
+/* One frosted material family for Orbit. The page keeps its charcoal foundation; surfaces borrow a role from this
+   file rather than inventing their own tint, rim and shadow. Diffusion is real backdrop sampling where there is
+   something behind the surface to diffuse; where the page is flat charcoal the same role keeps its tint, rim and
+   elevation instead of paying for a sample that would show nothing. Foreground text, values, icons, charts and
+   focus rings always sit above the material and are never filtered. */
+
+:root{
+  /* Tints: more protection behind denser reading. */
+  --frost-floating:rgba(22,22,28,.58);
+  --frost-panel:rgba(23,23,29,.72);
+  --frost-overlay:rgba(19,19,24,.82);
+  --frost-track:rgba(6,6,9,.34);
+  --frost-indicator:linear-gradient(180deg,#cbb6ff66,#b69cff3d);
+  --frost-indicator-held:linear-gradient(180deg,#d6c5ff80,#bda6ff52);
+  /* Diffusion: recognisable frost, restrained saturation, no magnification and no channel splitting. */
+  --frost-blur-floating:blur(26px) saturate(.95);
+  --frost-blur-panel:blur(20px) saturate(.95);
+  --frost-blur-track:blur(16px) saturate(.95);
+  /* Shaped light rather than thick outlines. */
+  --frost-rim:inset 0 1px 0 #ffffff1f;
+  --frost-rim-low:inset 0 -1px 0 #ffffff0a;
+  --frost-hairline:inset 0 0 0 1px #ffffff0f;
+  --frost-lift:0 18px 34px -22px #000,0 3px 9px -6px #000b;
+  --frost-recess:inset 0 1px 2px #00000096;
+  --frost-indicator-rim:inset 0 1px 0 #f0e7ff4d,inset 0 0 0 1px #cbb9ff2e;
+  --frost-indicator-lift:0 6px 14px -8px #000;
+}
+
+/* Role: panel — grouped reading surfaces on the flat page. */
+.glass-panel{background:linear-gradient(180deg,#ffffff0b,#ffffff05),#17171c;box-shadow:var(--frost-rim),var(--frost-hairline)}
+/* Role: panel with something behind it worth diffusing. */
+.glass-panel.is-live{background:var(--frost-grain),var(--frost-panel);-webkit-backdrop-filter:var(--frost-blur-panel);backdrop-filter:var(--frost-blur-panel);box-shadow:var(--frost-rim),var(--frost-hairline),var(--frost-lift)}
+/* Role: overlay — menus and sheets, which need the most protection. */
+.glass-overlay{background:var(--frost-grain),var(--frost-overlay);-webkit-backdrop-filter:var(--frost-blur-panel);backdrop-filter:var(--frost-blur-panel);box-shadow:var(--frost-rim),var(--frost-hairline),var(--frost-lift)}
+
+/* Role: track — a recessed frosted enclosure. This is the one live sample in a selector, so the indicator above it
+   is a moving material layer rather than a second backdrop root filtering an already filtered ancestor. */
+.glass-track{position:relative;isolation:isolate;background:var(--frost-track);-webkit-backdrop-filter:var(--frost-blur-track);backdrop-filter:var(--frost-blur-track);box-shadow:var(--frost-recess),var(--frost-rim-low)}
+/* Role: indicator — the same family, a little more luminous, with its own edge and lift. */
+.glass-indicator{background:var(--frost-indicator);box-shadow:var(--frost-indicator-rim),var(--frost-indicator-lift)}
+.is-dragging>.glass-indicator{background:var(--frost-indicator-held)}
+
+/* Role: action — consistent edges; the established filled primary and neutral secondary keep their meaning. */
+.glass-action{border:1px solid #ffffff14;box-shadow:var(--frost-rim)}
+
+/* A track owned by BlobTrack has one geometry owner: the spring, not a CSS transition. */
+.blob-track.is-ready>.selection-pill,.blob-track>.selection-pill{transition:none}
+.blob-track{touch-action:pan-y;-webkit-user-select:none;user-select:none}
+/* Influence is written per frame as a number; the label reads it directly rather than lagging behind a class. */
+.blob-option{transition:none;color:var(--blob-inactive,#a7a3b1)}
+@supports (color:color-mix(in oklab,#fff 50%,#000)){
+  .blob-option{color:color-mix(in oklab,var(--blob-active,#f1ebff) calc(var(--blob-influence,0)*100%),var(--blob-inactive,#a7a3b1))}
+}
+@supports not (color:color-mix(in oklab,#fff 50%,#000)){
+  .blob-option[aria-pressed=true],.blob-option:has(input:checked){color:var(--blob-active,#f1ebff)}
+}
+.blob-option>span,.blob-option>strong{display:inline-block;transform:translateY(calc(var(--blob-lift,0)*-1.5px)) scale(calc(1 + var(--blob-lift,0)*.02));transform-origin:50% 50%}
+
+/* Honest fallbacks: the material degrades to a visible opaque surface, never to an empty indicator. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass-panel.is-live,.glass-overlay{background:#1d1d23}
+  .glass-track{background:#121216}
+  .glass-indicator{background:#463a63}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  .glass-panel.is-live,.glass-overlay{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}
+  .glass-track{-webkit-backdrop-filter:none;backdrop-filter:none;background:#121216}
+  .glass-indicator{background:#4b3f6b}
+}
+@media(forced-colors:active){
+  .glass-panel,.glass-panel.is-live,.glass-overlay,.glass-track{background:Canvas;border:1px solid CanvasText;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+  .glass-indicator{background:Highlight;box-shadow:none}
+  .blob-option>span,.blob-option>strong{transform:none}
+}

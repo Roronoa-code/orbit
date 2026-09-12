@@ -1,0 +1,18 @@
+{
+ "authorisation": "Standing rule from the user, 11 September 2026: \"from now on once done install on phone and push to github\"",
+ "device": "192.168.0.210:43951, serial R5CY13S5F8D, model SM-S938B",
+ "time": "2026-09-12 01:57",
+ "command": "adb -s 192.168.0.210:43951 install -r dist/Orbit.apk",
+ "result": "Success (streamed install, app data kept)",
+ "build": "android/build/20260912-015503",
+ "apkSha256": "2aa04f5629e8ce7b812d28983ab2bcd4c245b87f93f10815594db63612f34fcc",
+ "installedSha256": "2aa04f5629e8ce7b812d28983ab2bcd4c245b87f93f10815594db63612f34fcc",
+ "installedMatchesBuild": true,
+ "previousApk": {"sha256": "59adcb841e336e1de1fbe192732076fab916a3398ae40bad3122be852c4c4a64", "build": "android/build/20260911-235621", "backup": "verification/frosted-system/phone/phone-before.apk"},
+ "launched": false,
+ "workoutsStarted": 0,
+ "permissionsChanged": "none",
+ "musicControlled": false,
+ "hapticsRequested": "none — no native haptic bridge exists and none was added, so the adapter is a no-op",
+ "otherDevices": "BYZL25052900310864 not touched"
+}

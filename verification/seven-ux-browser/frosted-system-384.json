@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "width": 383,
+  "checks": [
+    "Live backdrop sample on the track, an unfiltered indicator above it and unfiltered labels",
+    "A gesture held halfway shows one indicator between two options, both reacting, with nothing committed until release",
+    "A distant stationary hold is capped at a tenth of one slot through the whole press spring, and cancels without committing",
+    "A press during settling interrupts from the visible pose",
+    "Stillness before release removes stale momentum",
+    "Keyboard and assistive activation are preserved alongside pointer ownership",
+    "Vertical gestures remain scrolling",
+    "Body measurement, Body history range, workout target, timer reading and workout chart all run the same engine and roles",
+    "Tracks are released with the page"
+  ],
+  "measurements": {
+    "material": {
+      "trackFilter": "blur(16px) saturate(0.95)",
+      "indicatorBackdrop": "none",
+      "refraction": "none — no displacement pass on this backend"
+    },
+    "halfHeld": {
+      "centreError": -0.01,
+      "raw": [
+        0,
+        0.5,
+        0.5,
+        0
+      ],
+      "eased": [
+        0,
+        0.5,
+        0.5,
+        0
+      ],
+      "rendered": [
+        0,
+        0.5,
+        0.5,
+        0
+      ],
+      "committed": "weight",
+      "width": 91.5
+    },
+    "distantHold": {
+      "budget": 8.7,
+      "worstLeadingExcursion": 8.2
+    },
+    "migrated": [
+      "Body measurement",
+      "Body history range",
+      "Workout target",
+      "Timer reading",
+      "Workout chart"
+    ]
+  }
+}
