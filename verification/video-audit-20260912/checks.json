@@ -1,0 +1,302 @@
+{
+  "date": "2026-09-12",
+  "baselineCommit": "6844c85fba24d56e7bc94534343f366aa8710843",
+  "release": {
+    "date": "2026-09-12T20:36:49.8703805+01:00",
+    "package": "com.mani.orbit",
+    "device": "Samsung Galaxy S25 Ultra SM-S938B",
+    "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260912-203608",
+    "apkSha256": "f50b25a1d6983be75c27a5f96b43acec5ec75d535a41538cb7ab78848520ae51",
+    "installedSha256": "f50b25a1d6983be75c27a5f96b43acec5ec75d535a41538cb7ab78848520ae51",
+    "previousApkSha256": "1d34dbaba29667369b137a07a8da343d5448b09ae6c0c4f5e8f3759fe285c450",
+    "install": "adb install -r",
+    "data": "preserved",
+    "backup": "release/phone-before.apk",
+    "smoke": "Home launched; screenshot inspected",
+    "auditAppRemoved": true,
+    "auditListenerRemoved": true,
+    "fontScaleRestored": 1.0,
+    "densityRestored": 600
+  },
+  "verification": {
+    "home": [
+      {
+        "width": 390,
+        "name": "F05 Explore opens destinations on the first tap from expanded detail",
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "name": "F07 overflow responds at centre and edges after launcher changes",
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "name": "F02 displayed averages and delta reconcile",
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "name": "F01 Intake comparison remains populated through 20 scroll and reversal cycles",
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "name": "F03 sample provenance is visible on every home metric",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "name": "F05 Explore opens destinations on the first tap from expanded detail",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "name": "F07 overflow responds at centre and edges after launcher changes",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "name": "F02 displayed averages and delta reconcile",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "name": "F01 Intake comparison remains populated through 20 scroll and reversal cycles",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "name": "F03 sample provenance is visible on every home metric",
+        "status": "PASS"
+      }
+    ],
+    "scenes": [
+      {
+        "width": 390,
+        "test": "F11/F12 Body metric and range identity",
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "test": "F10/F17/F20-F28 focus reversals, media states, pause, details, save, history, Health, reduced motion",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "test": "F11/F12 Body metric and range identity",
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "test": "F10/F17/F20-F28 focus reversals, media states, pause, details, save, history, Health, reduced motion",
+        "status": "PASS"
+      }
+    ],
+    "extras": [
+      {
+        "name": "65-record history keeps group, opened state and scroll after detail",
+        "status": "PASS"
+      },
+      {
+        "name": "Native browser accessibility tree has named controls; keyboard selection publishes pressed state",
+        "status": "PASS",
+        "names": [
+          "Back to dashboard",
+          "Previous measurement",
+          "Next measurement",
+          "Weight, 75.8 kg. Tap for the next measurement, or swipe left or right",
+          "Weight",
+          "Fat",
+          "Muscle",
+          "Lean mass",
+          "Last 7 days",
+          "Last 30 days",
+          "Last three months",
+          "Last year"
+        ]
+      },
+      {
+        "name": "Material diffusion changes pixels and follows underlay movement",
+        "status": "PASS",
+        "blurOnOffRms": 32.839379508616354,
+        "movingUnderlayRms": 15.406441328596959
+      }
+    ],
+    "fixedControls": [
+      {
+        "width": 390,
+        "maxButtonSizeChangePx": 3.0517578125e-05,
+        "status": "PASS"
+      },
+      {
+        "width": 390,
+        "status": "PASS",
+        "name": "Unacknowledged media command retains reported icon, times out visibly, and preserves workout; unavailable playback is explicit"
+      },
+      {
+        "width": 384,
+        "maxButtonSizeChangePx": 3.0517578125e-05,
+        "status": "PASS"
+      },
+      {
+        "width": 320,
+        "maxButtonSizeChangePx": 1.52587890625e-05,
+        "status": "PASS"
+      }
+    ],
+    "phone": [
+      {
+        "name": "Explore first tap from expanded deck",
+        "status": "PASS"
+      },
+      {
+        "name": "Twenty deck cycles and partial reversals",
+        "status": "PASS"
+      },
+      {
+        "name": "Intake comparison scroll and reversal twenty times",
+        "status": "PASS",
+        "detail": "Daily average comparison\n2,078 kcal\n2 Sept–8 Sept 2025 · daily average\n2,086 kcal\n26 Aug–1 Sept 2025 · daily average\n▼8\nkcal lower"
+      },
+      {
+        "name": "Metric and Body navigation plus chart inspection",
+        "status": "PASS"
+      },
+      {
+        "name": "Optional weight countdown starts native session",
+        "status": "PASS"
+      },
+      {
+        "name": "Real media callback and play pause acknowledgement",
+        "status": "PASS",
+        "detail": {
+          "originalPlaying": true,
+          "restored": true
+        }
+      },
+      {
+        "name": "Focus reversals and readable timer",
+        "status": "PASS"
+      },
+      {
+        "name": "Pause resume across normal focus details",
+        "status": "PASS"
+      },
+      {
+        "name": "Background and screen off keep native elapsed authority",
+        "status": "PASS",
+        "detail": {
+          "advancedMs": 3929
+        }
+      },
+      {
+        "name": "Finish paused session creates exactly one reconciled record",
+        "status": "PASS",
+        "detail": {
+          "elapsedMs": 150068,
+          "totalMs": 155964,
+          "pausedMs": 5896
+        }
+      },
+      {
+        "name": "Final overflow taps from closed open and recently closed Explore",
+        "status": "PASS"
+      }
+    ],
+    "phoneExtras": [
+      {
+        "name": "Real notification access revoked and recovered with correct setup status",
+        "status": "PASS"
+      },
+      {
+        "name": "Eight Elapsed/Remaining changes preserve native session identity",
+        "status": "PASS"
+      },
+      {
+        "name": "Revoked access preserves paused workout and recovery; exactly one save",
+        "status": "PASS"
+      },
+      {
+        "name": "130 percent font / 650 dpi body",
+        "status": "PASS",
+        "width": 354
+      },
+      {
+        "name": "130 percent font / 650 dpi workouts",
+        "status": "PASS",
+        "width": 354
+      },
+      {
+        "name": "130 percent font / 650 dpi overview",
+        "status": "PASS",
+        "width": 354
+      },
+      {
+        "name": "Keyboard and revealed system bars preserve input and header clearance",
+        "status": "PASS",
+        "topInset": 34.13
+      }
+    ],
+    "phonePerformanceBefore": {
+      "frames": 2724,
+      "median": 8.300000000000182,
+      "p95": 8.400000000001455,
+      "max": 166.70000000000073,
+      "over25": 54,
+      "rasterMs": 2939.5400000000036,
+      "jank": "83 (6.91%)\r"
+    },
+    "phonePerformanceAfter": {
+      "frames": 2762,
+      "median": 8.30000000000291,
+      "p95": 8.400000000001455,
+      "max": 133.09999999999854,
+      "over25": 13,
+      "rasterMs": 2442.8199999999974,
+      "jank": "106 (8.71%)\r"
+    }
+  },
+  "existingChecks": {
+    "logic": "PASS",
+    "workoutDetails": "PASS",
+    "blobMathAssertions": 390,
+    "native": "PASS",
+    "renderedSuites": {
+      "ux-motion": [
+        390,
+        384,
+        320
+      ],
+      "focus-music": [
+        390,
+        384,
+        320
+      ],
+      "workout-details": [
+        390,
+        384,
+        320
+      ],
+      "frosted-system": [
+        390,
+        384,
+        320
+      ]
+    },
+    "exactBundledSources": "PASS",
+    "releaseSignature": "v3 PASS"
+  },
+  "limitations": [
+    "Native jank counter 6.91% before vs 8.71% after; smoother native frames are not qualified",
+    "Real forced slow/offline music provider conditions not qualified",
+    "Audible output and spoken TalkBack not qualified"
+  ],
+  "recording": {
+    "path": "phone/after/sequence.mp4",
+    "durationSeconds": 237.899489,
+    "width": 720,
+    "height": 1560,
+    "audio": false
+  }
+}

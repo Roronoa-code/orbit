@@ -2,6 +2,10 @@ package com.mani.orbit;
 import java.lang.reflect.Method;
 public final class NativeFinalCheck {
     public static void main(String[] args) throws Exception {
+        if (!MusicSession.playbackName(7).equals("error") || !MusicSession.playbackName(6).equals("buffering")
+                || !MusicSession.playbackName(8).equals("buffering") || !MusicSession.playbackName(3).equals("playing")
+                || !MusicSession.playbackName(2).equals("paused") || !MusicSession.playbackName(0).equals("unavailable"))
+            throw new AssertionError("Media playback states must remain distinct");
         Method altitude = WorkoutSession.class.getDeclaredMethod("validAltitude", double.class);
         Method make = WorkoutSession.class.getDeclaredMethod("resumeToken");
         Method valid = WorkoutSession.class.getDeclaredMethod("validResumeToken", String.class);

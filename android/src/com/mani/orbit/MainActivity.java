@@ -51,6 +51,7 @@ public final class MainActivity extends Activity {
             return insets;
         });
         web = new WebView(this);
+        WebView.setWebContentsDebuggingEnabled((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0);
         web.setBackgroundColor(Color.rgb(8, 15, 21));
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);

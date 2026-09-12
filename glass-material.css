@@ -6,11 +6,11 @@
 
 :root{
   /* Tints: more protection behind denser reading. */
-  --frost-floating:rgba(22,22,28,.58);
-  --frost-panel:rgba(23,23,29,.72);
+  --frost-floating:rgba(22,22,28,.42);
+  --frost-panel:rgba(23,23,29,.88);
   --frost-overlay:rgba(19,19,24,.82);
   --frost-track:rgba(6,6,9,.34);
-  --frost-indicator:linear-gradient(180deg,#cbb6ff66,#b69cff3d);
+  --frost-indicator:linear-gradient(180deg,#d1c9e540,#b9adc32b);
   --frost-indicator-held:linear-gradient(180deg,#d6c5ff80,#bda6ff52);
   /* Diffusion: recognisable frost, restrained saturation, no magnification and no channel splitting. */
   --frost-blur-floating:blur(26px) saturate(.95);
@@ -21,14 +21,10 @@
   --frost-rim-low:inset 0 -1px 0 #ffffff0a;
   --frost-hairline:inset 0 0 0 1px #ffffff0f;
   --frost-lift:0 18px 34px -22px #000,0 3px 9px -6px #000b;
-  --frost-recess:inset 0 1px 2px #00000096;
+  --frost-recess:inset 0 0 0 1px #ffffff0d;
   --frost-indicator-rim:inset 0 1px 0 #f0e7ff4d,inset 0 0 0 1px #cbb9ff2e;
   --frost-indicator-lift:0 6px 14px -8px #000;
-  /* The lens variant: the glass carries the material, so the tint only warms it. */
-  --frost-lens:linear-gradient(180deg,#d5c6ff2b,#b69cff14);
-  --frost-lens-held:linear-gradient(180deg,#e0d4ff38,#c3adff1f);
-  --frost-lens-rim:inset 0 1.2px 0 #ffffff96,inset 0 -1.2px 0 #ffffff26,inset 0 0 0 1px #ffffff3d,inset 0 -7px 14px -10px #ffffff40;
-  --frost-lens-lift:0 8px 18px -10px #000e,0 2px 5px -3px #0009;
+
 }
 
 /* Role: panel — grouped reading surfaces on the flat page. */
@@ -44,17 +40,6 @@
 /* Role: indicator — the same family, a little more luminous, with its own edge and lift. */
 .glass-indicator{background:var(--frost-indicator);box-shadow:var(--frost-indicator-rim),var(--frost-indicator-lift)}
 .is-dragging>.glass-indicator{background:var(--frost-indicator-held)}
-/* Where the engine can actually displace backdrop pixels, the indicator becomes a lens: a light diffusion so the
-   background stays readable through it, refraction only where the shape curves, and a brighter shaped edge. The
-   tint drops out of the way, because the glass itself now carries the material. */
-.has-glass-lens .glass-indicator{
-  background:var(--frost-lens);
-  -webkit-backdrop-filter:url(#glass-lens) blur(3px) saturate(1.06) brightness(1.07);
-  backdrop-filter:url(#glass-lens) blur(3px) saturate(1.06) brightness(1.07);
-  box-shadow:var(--frost-lens-rim),var(--frost-lens-lift);
-}
-.has-glass-lens .is-dragging>.glass-indicator{background:var(--frost-lens-held);-webkit-backdrop-filter:url(#glass-lens) blur(2px) saturate(1.1) brightness(1.1);backdrop-filter:url(#glass-lens) blur(2px) saturate(1.1) brightness(1.1)}
-
 /* Role: action — consistent edges; the established filled primary and neutral secondary keep their meaning. */
 .glass-action{border:1px solid #ffffff14;box-shadow:var(--frost-rim)}
 
@@ -69,21 +54,21 @@
 @supports not (color:color-mix(in oklab,#fff 50%,#000)){
   .blob-option[aria-pressed=true],.blob-option:has(input:checked){color:var(--blob-active,#f1ebff)}
 }
-.blob-option>span,.blob-option>strong{display:inline-block;transform:translateY(calc(var(--blob-lift,0)*-1.5px)) scale(calc(1 + var(--blob-lift,0)*.02));transform-origin:50% 50%}
+.blob-option>span,.blob-option>strong{display:inline-block;transform:none;transform-origin:50% 50%}
 
 /* Honest fallbacks: the material degrades to a visible opaque surface, never to an empty indicator. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .glass-panel.is-live,.glass-overlay{background:#1d1d23}
   .glass-track{background:#121216}
-  .glass-indicator,.has-glass-lens .glass-indicator{background:#463a63;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass-indicator{background:#463a63;-webkit-backdrop-filter:none;backdrop-filter:none}
 }
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
   .glass-panel.is-live,.glass-overlay{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}
   .glass-track{-webkit-backdrop-filter:none;backdrop-filter:none;background:#121216}
-  .glass-indicator,.has-glass-lens .glass-indicator{background:#4b3f6b;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass-indicator{background:#4b3f6b;-webkit-backdrop-filter:none;backdrop-filter:none}
 }
 @media(forced-colors:active){
   .glass-panel,.glass-panel.is-live,.glass-overlay,.glass-track{background:Canvas;border:1px solid CanvasText;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
-  .glass-indicator,.has-glass-lens .glass-indicator{background:Highlight;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass-indicator{background:Highlight;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   .blob-option>span,.blob-option>strong{transform:none}
 }

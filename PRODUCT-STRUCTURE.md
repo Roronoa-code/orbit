@@ -53,13 +53,13 @@ Further categories to assess include routes/laps/zones, routines and targets, bo
 
 ## Current standalone delivery
 
-The seven UX fixes and follow-up launcher/background corrections are installed; see `HANDOFF.md` and `verification/seven-ux-result.json`. The user requested control of the phone after installation, so further phone checks stopped. No new test workout was started for the final patch.
+The full 12 September video-audit repair is installed. Current evidence and limits: `verification/video-audit-20260912/RESULTS.md` and `HANDOFF.md`. The user authorized separate Audit phone workouts/media tests; production history was preserved. Full-screen artwork with fixed-size controls is the explicit current choice.
 
 Body has animated metric/range selection and 7D/30D/3M/1Y history. Show the 90 available demo records at their actual dates within the year; do not invent earlier readings. Home has animated orb selection, a temporary chart badge and a softened scrolling edge.
 
 The bottom launcher is one upward-growing clipped surface with a fixed bottom, staged controls, stable-size icons and no duplicate status dots. Its blur texture remains at its full size; timer/state updates change only values that actually differ. Preserve the charcoal material and the clear Pause pill.
 
-Workout pause/resume retains the timer and player, with a slight brightness/size change around a frozen clock. Focus retains touch-responsive dot numbers and full-width real artwork. Keep workout and music controls independent. Missing track/permission/error hides the player; missing artwork retains real metadata and supported controls. The user explicitly wants full motion, with manual orb pause and background/offscreen cleanup.
+Workout pause/resume retains the timer and player, with a slight brightness/size change around a frozen clock. Focus retains touch-responsive dot numbers and full-width real artwork. Keep workout and music controls independent. Missing track/permission/error hides the player; missing artwork retains real metadata and supported controls. Full motion is the default, with manual orb pause, a persistent Reduce motion option and background/offscreen cleanup.
 
 Music now pushes metadata/artwork changes into the page, decodes artwork off the UI thread and prefetches up to three eligible accessible local queue covers. The checked BitChord queue exposed no eligible upcoming local art, so this provider did not populate the prefetch cache. Current artwork is bounded at 2048 px/JPEG 94, without enlargement or remote downloads. Audio buffering stays with the music provider.
 

@@ -1,4 +1,15 @@
-# Orbit — handoff (updated 11 September 2026)
+# Orbit — handoff (updated 12 September 2026)
+
+## Full video audit — 12 September 2026, current release
+
+- Implemented the supplied `Orbit_BitChord_Full_Video_Audit.md` in the standalone WebView copy from clean baseline `6844c85`. Full F01–F28 mapping, every regression row, commands, evidence and limits: [RESULTS.md](verification/video-audit-20260912/RESULTS.md). This section supersedes the earlier lens, variable button size, artwork-coloured actions and no-phone-operation notes for this batch.
+- The user explicitly gave full permission for an isolated Audit installation, navigation, workout recording, music control and notification access. These tests used `com.mani.orbit.audit`, never the production history. Font/density were restored to 1.0/600; music play state was restored after each transport test. The separate Audit app was removed when testing finished.
+- Live feedback rejected the large/small transition resizing its buttons. The user then chose “Keep full-screen artwork with fixed-size controls.” Music buttons are now 48 px in both modes; workout buttons are 56 px high; the shared transition translates those controls without scaling. A frame-by-frame check at 390/384/320 px limits size variation to under 0.00004 px. Preserve this explicit decision.
+- Comparison content stays mounted with full opacity and local occlusion clipping; Explore acts on the first tap; displayed averages reconcile; dates/provenance are explicit. Shared frost, quiet history, clear durations, countdown/status, stable semantic actions, a protected dot clock and measured insets complete the existing routes. Manual Reduce motion is available; full motion remains default.
+- Installed production `com.mani.orbit` at 20:36 using `install -r`; build `20260912-203608`, SHA256 `f50b25a1d6983be75c27a5f96b43acec5ec75d535a41538cb7ab78848520ae51`. Installed APK bytes match. Previous installed APK (`1d34dbaba29667369b137a07a8da343d5448b09ae6c0c4f5e8f3759fe285c450`) is backed up locally in `verification/video-audit-20260912/release/phone-before.apk`. App launched for a Home smoke check.
+- Existing logic/native/rendered suites pass. The isolated Galaxy suite passes native pause/save/history, real music acknowledgement, permission recovery, background/screen-off timing and 1.3 font/650 dpi checks. New phone recording: `verification/video-audit-20260912/phone/after/sequence.mp4`. Device captures/metadata/APK backups stay local; sanitized evidence is in [checks.json](verification/video-audit-20260912/checks.json).
+- Performance is mixed: matched JS median/p95 remain 8.3/8.4 ms, >25 ms gaps fall 54→13 and raster work falls 2939.5→2442.8 ms, but Android jank rises 6.91%→8.71%. Smooth native 120 Hz is unqualified. Audible output, actual forced slow/offline provider behavior and spoken TalkBack remain unqualified. The original comparison disappearance was not reproduced in baseline stress; the risky content/ancestor-mask coupling was removed and repaired-state stress passes.
+
 
 ## Current state
 

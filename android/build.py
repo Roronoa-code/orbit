@@ -5,13 +5,18 @@ import os
 import shutil
 import subprocess
 import zipfile
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--audit', action='store_true', help='Build a separate debuggable Orbit Audit app with isolated data')
+audit = parser.parse_args().audit
 
 root = Path(__file__).resolve().parent
 sdk = Path(os.environ.get('ANDROID_HOME', str(Path.home() / 'AppData/Local/Android/Sdk')))
 java = Path(os.environ.get('JAVA_HOME', r'C:\HA\HEALTH APP\.local\toolchains\jdk-17.0.20.1+1'))
 bt = sdk / 'build-tools/36.0.0'
 platform = sdk / 'platforms/android-37.0/android.jar'
-build = root / 'build' / datetime.now().strftime('%Y%m%d-%H%M%S')
+build = root / 'build' / (datetime.now().strftime('%Y%m%d-%H%M%S') + ('-audit' if audit else ''))
 for name in ['classes', 'assets', 'dex']:
     (build / name).mkdir(parents=True)
 env = dict(os.environ, JAVA_HOME=str(java))
@@ -42,12 +47,17 @@ left_over = _re.findall(r'<script src="([^"]+)"></script>|<link rel="stylesheet"
 left_over = [name for pair in left_over for name in pair if name and '//' not in name]
 if left_over:
     raise SystemExit(f'Unbundled local assets remain in the packaged page: {left_over}')
-native_style = '<style>.status,.home-indicator{display:none}.utility-island{top:47px}.health-page{top:0}.screen{height:100dvh!important;min-height:0!important}.phone{max-width:none;margin:0;padding:0;border:0;box-shadow:none}.screen{border-radius:0;padding-top:0}.copy-label{margin-bottom:16px}.masthead{padding-top:12px}body{background:#0a0a0c}</style>'
+native_style = '<style>.status,.home-indicator{display:none}.utility-island{top:calc(var(--safe-top) + 62px)}.health-page{top:var(--safe-top)}.screen{height:100dvh!important;min-height:0!important}.phone{max-width:none;margin:0;padding:0;border:0;box-shadow:none}.screen{border-radius:0;padding-top:var(--safe-top)}.copy-label{margin-bottom:16px}.masthead{padding-top:12px}body{background:#0a0a0c}</style>'
 html = html.replace('</head>', native_style + '</head>')
 (build / 'assets/index.html').write_text(html, encoding='utf-8')
 shutil.copy2(root.parent / 'Manrope-OFL.txt', build / 'assets/Manrope-OFL.txt')
 run(bt / 'aapt2.exe', 'compile', '--dir', root / 'res', '-o', build / 'resources.zip')
-run(bt / 'aapt2.exe', 'link', '-o', build / 'unsigned.apk', '-I', platform, '--manifest', root / 'AndroidManifest.xml', '-A', build / 'assets', build / 'resources.zip')
+manifest = root / 'AndroidManifest.xml'
+if audit:
+    diagnostic_manifest = manifest.read_text(encoding='utf-8').replace('package="com.mani.orbit"', 'package="com.mani.orbit.audit"').replace('<application android:label="Orbit"', '<application android:debuggable="true" android:label="Orbit Audit"')
+    manifest = build / 'AndroidManifest.xml'
+    manifest.write_text(diagnostic_manifest, encoding='utf-8')
+run(bt / 'aapt2.exe', 'link', '-o', build / 'unsigned.apk', '-I', platform, '--manifest', manifest, '-A', build / 'assets', build / 'resources.zip')
 run(java / 'bin/javac.exe', '--release', '8', '-encoding', 'UTF-8', '-classpath', platform, '-d', build / 'classes', *sorted((root / 'src').rglob('*.java')))
 run(bt / 'd8.bat', '--release', '--min-api', '30', '--lib', platform, '--output', build / 'dex', *sorted((build / 'classes').rglob('*.class')))
 with zipfile.ZipFile(build / 'unsigned.apk', 'a', zipfile.ZIP_DEFLATED) as apk:
@@ -61,8 +71,9 @@ run(bt / 'apksigner.bat', 'sign', '--ks', key, '--ks-key-alias', 'orbit', '--ks-
 run(bt / 'apksigner.bat', 'verify', '--verbose', build / 'Orbit.apk')
 dist = root.parent / 'dist'
 dist.mkdir(exist_ok=True)
-if (dist / 'Orbit.apk').exists():
-    shutil.copy2(dist / 'Orbit.apk', build / 'previous-Orbit.apk')
-shutil.copy2(build / 'Orbit.apk', dist / 'Orbit.apk')
-(root / 'last-build.txt').write_text(str(build), encoding='utf-8')
-print('APK:', dist / 'Orbit.apk')
+output_name = 'Orbit-Audit.apk' if audit else 'Orbit.apk'
+if (dist / output_name).exists():
+    shutil.copy2(dist / output_name, build / ('previous-' + output_name))
+shutil.copy2(build / 'Orbit.apk', dist / output_name)
+(root / ('last-audit-build.txt' if audit else 'last-build.txt')).write_text(str(build), encoding='utf-8')
+print('APK:', dist / output_name)

@@ -33,8 +33,9 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','blob-track.js'),'utf8'
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-focus.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-details.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8'),sandbox);
-vm.runInContext(script+`;globalThis.model={set:(d,n,k='steps')=>{selected=d;days=n;metric=k},windowRows,movement,week,dayOffset,anchor,render,renderCharts,extras,deckSwipeTarget,liveSummary,setDeckExpanded,SignalOrb,springStep,reveal,deckMotion,orbPose,getProgress:()=>deckProgress,getExpanded:()=>deckExpanded,islands,setLiveOpen,closeInline,show,Health,cyclePeriod,getPeriod:()=>days,setDateChoice,dateOptions,pause:p=>orb.setPaused(p),hide:h=>{document.hidden=h;document.fire('visibilitychange')}}`,sandbox);
+vm.runInContext(script+`;globalThis.model={set:(d,n,k='steps')=>{selected=d;days=n;metric=k},periodComparison,windowRows,movement,week,dayOffset,anchor,render,renderCharts,extras,deckSwipeTarget,liveSummary,setDeckExpanded,SignalOrb,springStep,reveal,deckMotion,orbPose,getProgress:()=>deckProgress,getExpanded:()=>deckExpanded,islands,setLiveOpen,closeInline,show,Health,cyclePeriod,getPeriod:()=>days,setDateChoice,dateOptions,pause:p=>orb.setPaused(p),hide:h=>{document.hidden=h;document.fire('visibilitychange')}}`,sandbox);
 const m=sandbox.model;
+for(const [a,b,delta] of [[[2077.6],[2085.5],-8],[[1.5],[1.49],1],[[1.49],[1.5],-1],[[0],[0],0],[[3.4],[3.49],0],[[],[4],null],[[4],[],null]])assert.equal(m.periodComparison(a,b).delta,delta);
 assert.equal(nodes.get('#steps').textContent, '8,420');
 assert.equal(nodes.get('#current-average').innerHTML, '6,794 <span>steps</span>');
 assert.equal(nodes.get('#previous-average').innerHTML, '7,520 <span>steps</span>');
@@ -71,7 +72,7 @@ for (const metric of ['heart','sleep','intake']) for(let ago=0;ago<30;ago++) {
       assert.equal(nodes.get('#steps').textContent,expected);
       assert.equal(m.liveSummary().title,'Explore');
       assert(nodes.get('.facts').innerHTML.includes(Math.round(total/days).toLocaleString('en-GB')+' kcal'));
-      if(days===30){assert.equal(nodes.get('#hero-label').textContent,'Average daily intake');assert.equal(nodes.get('#goal-label').textContent,'kcal / day · last 30 days');assert.equal(nodes.get('#metric-announcement').textContent,'Intake, Last 30 days, '+expected+', kcal / day · last 30 days');}
+      if(days===30){assert.equal(nodes.get('#hero-label').textContent,'Average daily intake');assert.equal(nodes.get('#goal-label').textContent,'kcal / day · last 30 days');assert.equal(nodes.get('#metric-announcement').textContent,'Intake, 30-day sample, '+expected+', kcal / day · last 30 days');}
     }
   }
 }
@@ -133,7 +134,7 @@ function touchSwipe(from,to,target=barTarget){
 touchSwipe(600,520,stackTarget);assert.equal(m.getExpanded(),true,'finger-up must commit upward swipe');
 const closeTarget=barTarget;
 deckNode.fire('touchstart',{touches:[finger(340,300)],target:closeTarget});deckNode.fire('touchend',{changedTouches:[finger(340,300)]});
-nodes.get('#live-bar').fire('click',{detail:1});assert.equal(m.getExpanded(),false,'A fresh live-bar tap must collapse the cards after a swipe');
+nodes.get('#live-bar').fire('click',{detail:1});assert.equal(m.getExpanded(),false,'Explore coordinates deck collapse');assert.equal(m.islands.live.open,true,'Explore must also open destinations on that same tap');
 touchSwipe(600,520,stackTarget);assert.equal(m.getExpanded(),true);
 touchSwipe(520,600);assert.equal(m.getExpanded(),false,'finger-up must commit downward swipe');assert.equal(m.islands.live.open,false,'pulling down on the bar folds the cards without opening the launcher');
 touchSwipe(600,520);assert.equal(m.islands.live.open,true,'swiping up on the bar opens the launcher');

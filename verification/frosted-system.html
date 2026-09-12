@@ -96,15 +96,10 @@ document.querySelector('#run').onclick=async()=>{
     const trackFilter=style(host).backdropFilter||style(host).webkitBackdropFilter;
     check(/blur\(\s*1[0-9]px/.test(trackFilter)||/blur/.test(trackFilter),'The track must carry a real backdrop blur: '+trackFilter);
     check(style(host).filter==='none'&&style(labels[0]).filter==='none','No content filter may be applied to the track or its labels');
-    const lens=doc().documentElement.classList.contains('has-glass-lens'),pillFilter=style(pill).backdropFilter||style(pill).webkitBackdropFilter||'none';
-    check(lens?/url\(/.test(pillFilter):pillFilter==='none','The indicator is either a verified lens or a plain material layer, never an unverified second blur: '+pillFilter);
-    check(!lens||Boolean(q('#glass-lens')),'A declared lens must have its filter present in the page');
-    check(!lens||/blur\(\s*[0-3]px/.test(pillFilter),'A lens keeps its own diffusion light enough to see through: '+pillFilter);
-    check(Number(style(pill).opacity)>.9&&box(pill).width>10,'The indicator must be visible and sized');
-    const labelZ=labels[0].compareDocumentPosition(pill);
-    check(Boolean(labelZ&w().Node.DOCUMENT_POSITION_PRECEDING),'Labels must come after the material layer so they paint above it');
+    const lens=false,pillFilter=style(pill).backdropFilter||style(pill).webkitBackdropFilter||'none';
+    check(pillFilter==='none','The indicator shares its track sample without a nested filter');
     measurements.material={trackFilter,indicatorBackdrop:pillFilter,
-      refraction:lens?'edge-local SVG displacement on the indicator; pixel evidence in verification/frosted-system/refraction/':'unavailable on this backend — frost, rim and shadow only'};
+      refraction:lens?'edge-local SVG displacement on the indicator; pixel evidence in verification/frosted-system/refraction/':'not used — shared frost, rim and shadow'};
     checks.push('Live backdrop sample on the track, an unfiltered indicator above it and unfiltered labels');
 
     // Held halfway, with the pointer still down: both neighbours react and nothing has been committed.

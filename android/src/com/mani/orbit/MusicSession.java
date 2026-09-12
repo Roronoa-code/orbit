@@ -298,7 +298,7 @@ public final class MusicSession {
             position = Math.max(0, duration > 0 ? Math.min(duration, position) : position);
             JSONObject result = new JSONObject().put("status", "ready").put("id", sessionId + ":" + artVersion)
                 .put("title", title).put("artist", artist).put("source", source).put("duration", duration).put("position", position)
-                .put("playing", playing).put("buffering", buffering).put("canOpen", controller.getSessionActivity() != null)
+                .put("playing", playing).put("buffering", buffering).put("playback", playbackName(state == null ? PlaybackState.STATE_NONE : state.getState())).put("canOpen", controller.getSessionActivity() != null)
                 .put("canToggle", (actions & (PlaybackState.ACTION_PLAY_PAUSE | (playing ? PlaybackState.ACTION_PAUSE : PlaybackState.ACTION_PLAY))) != 0)
                 .put("canPrevious", (actions & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0)
                 .put("canNext", (actions & PlaybackState.ACTION_SKIP_TO_NEXT) != 0)
@@ -308,6 +308,14 @@ public final class MusicSession {
             if (artworkTask == null && !Long.toString(artVersion).equals(knownArt)) result.put("art", art);
             return result.toString();
         } catch (Exception unavailable) { clear(); return "{\"status\":\"error\"}"; }
+    }
+
+    static String playbackName(int state) {
+        if (state == PlaybackState.STATE_ERROR) return "error";
+        if (state == PlaybackState.STATE_BUFFERING || state == PlaybackState.STATE_CONNECTING) return "buffering";
+        if (state == PlaybackState.STATE_PLAYING) return "playing";
+        if (state == PlaybackState.STATE_PAUSED) return "paused";
+        return "unavailable";
     }
 
     @JavascriptInterface public synchronized boolean command(String id, String action, double value) {

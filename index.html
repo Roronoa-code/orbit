@@ -50,9 +50,9 @@
 @media(forced-colors:active){.stack-card>.stack-shell{background:Canvas;border-color:CanvasText;box-shadow:none}}
 
 /* Each surface stays at its source; only its shell changes shape. */
-.utility-island{position:absolute;right:13px;top:76px;width:min(300px,calc(100% - 26px));z-index:20;pointer-events:none;isolation:isolate}.island-surface{position:absolute;inset:0;border:1px solid #ffffff29;border-top-color:#ffffff59;border-bottom-color:#ffffff12;background:linear-gradient(135deg,#ffffff16,transparent 42%,#ffffff04);box-shadow:inset 0 1px 0 #ffffff24,inset 0 -1px 0 #0006,0 3px 5px #0004,0 18px 34px -8px #000a;pointer-events:none;will-change:transform;transform-origin:100% 0}.utility-island .more{border:0;position:absolute;top:0;right:0;width:40px;height:40px;z-index:2;pointer-events:auto;border-radius:50%;background:none;box-shadow:none}.more svg{transition:transform 180ms ease}.utility-island.is-open .more svg{transform:rotate(90deg)}.utility-island .island-frost{background:var(--frost-grain),var(--frost-overlay);backdrop-filter:var(--frost-blur-panel);-webkit-backdrop-filter:var(--frost-blur-panel)}
+.utility-island{position:absolute;right:13px;top:76px;width:min(300px,calc(100% - 26px));z-index:20;pointer-events:none;isolation:isolate}.island-surface{position:absolute;inset:0;border:1px solid #ffffff29;border-top-color:#ffffff59;border-bottom-color:#ffffff12;background:linear-gradient(135deg,#ffffff16,transparent 42%,#ffffff04);box-shadow:inset 0 1px 0 #ffffff24,inset 0 -1px 0 #0006,0 3px 5px #0004,0 18px 34px -8px #000a;pointer-events:none;will-change:transform;transform-origin:100% 0}.utility-island .more{border:0;position:absolute;top:0;right:0;width:48px;height:48px;z-index:2;pointer-events:auto;border-radius:50%;background:none;box-shadow:none}.more svg{transition:transform 180ms ease}.utility-island.is-open .more svg{transform:rotate(90deg)}.utility-island .island-frost{background:var(--frost-grain),var(--frost-overlay);backdrop-filter:var(--frost-blur-panel);-webkit-backdrop-filter:var(--frost-blur-panel)}
 .utility-body{position:relative;padding:13px 17px 17px;opacity:0;transform-origin:100% 0;will-change:transform,opacity;max-height:calc(100dvh - 150px);overflow:auto;overscroll-behavior:contain;pointer-events:none}.utility-island.is-open .utility-body{pointer-events:auto}.utility-page[hidden]{display:none}.utility-body h2{min-height:25px}.utility-body button:disabled{opacity:.35}.utility-body button:active{background:#35353e}.utility-body .primary:active{background:#c4afff}
-.live-island{position:absolute;bottom:calc(10px + var(--safe-bottom));left:12px;right:12px;z-index:12;isolation:isolate;pointer-events:none}.live-island .island-surface{transform-origin:50% 100%}.live-island .live-bar{position:absolute;left:0;right:0;top:0;bottom:auto;height:62px;border:0;background:none;box-shadow:none;will-change:transform}.live-island .live-bar:before{top:-9px}.live-island-body{position:relative;margin-top:62px;padding:5px 14px 16px;opacity:0;will-change:opacity,transform;pointer-events:none}.live-island.is-open .live-island-body{pointer-events:auto}.activity-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:6px}.activity-choice{display:flex;min-width:0;height:52px;align-items:center;justify-content:center;gap:6px;border:0;border-radius:16px;background:none;padding:0 4px;line-height:1.2;font-size:13px;color:#e0dde6;white-space:nowrap;transition:background-color 160ms ease,color 160ms ease}.activity-choice>span{display:block;flex:none;width:22px;height:22px}.activity-choice svg{display:block;width:22px;height:22px}.activity-choice:active>span{opacity:.75}.activity-choice:before{content:"";position:absolute;inset:0;border-radius:16px;opacity:0;pointer-events:none;transition:opacity 120ms ease}.activity-choice{position:relative}.has-glass-lens .activity-choice:active:before{opacity:1;-webkit-backdrop-filter:url(#glass-lens) blur(2px) saturate(1.06) brightness(1.14);backdrop-filter:url(#glass-lens) blur(2px) saturate(1.06) brightness(1.14);background:var(--frost-lens);box-shadow:var(--frost-lens-rim)}.live-island .live-chevron svg{transform:rotate(calc(-90deg + max(var(--deck-progress,0),var(--island-open,0))*180deg))}
+.live-island{position:absolute;bottom:calc(10px + var(--safe-bottom));left:12px;right:12px;z-index:12;isolation:isolate;pointer-events:none}.live-island .island-surface{transform-origin:50% 100%}.live-island .live-bar{position:absolute;left:0;right:0;top:0;bottom:auto;height:62px;border:0;background:none;box-shadow:none;will-change:transform}.live-island .live-bar:before{top:-9px}.live-island-body{position:relative;margin-top:62px;padding:5px 14px 16px;opacity:0;will-change:opacity,transform;pointer-events:none}.live-island.is-open .live-island-body{pointer-events:auto}.activity-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:6px}.activity-choice{display:flex;min-width:0;height:52px;align-items:center;justify-content:center;gap:6px;border:0;border-radius:16px;background:none;padding:0 4px;line-height:1.2;font-size:13px;color:#e0dde6;white-space:nowrap;transition:background-color 160ms ease,color 160ms ease}.activity-choice>span{display:block;flex:none;width:22px;height:22px}.activity-choice svg{display:block;width:22px;height:22px}.activity-choice:active>span{opacity:.75}.activity-choice:before{content:"";position:absolute;inset:0;border-radius:16px;opacity:0;pointer-events:none;transition:opacity 120ms ease}.activity-choice{position:relative}.activity-choice:active:before{opacity:1;background:#ffffff0d}.live-island .live-chevron svg{transform:rotate(calc(-90deg + max(var(--deck-progress,0),var(--island-open,0))*180deg))}
 /* Frost diffuses the content behind the shell without scaling the blur texture. */
 .island-frost{position:absolute;inset:0;pointer-events:none;background:#c9cedd16;backdrop-filter:blur(14px) saturate(.55) brightness(1.25);-webkit-backdrop-filter:blur(14px) saturate(.55) brightness(1.25);will-change:clip-path}
 .utility-body{padding:17px 18px 14px}.utility-body #options h2{font-size:12px;letter-spacing:.4px;color:#dddfe6;font-weight:500;margin-bottom:9px}.utility-body .menu-action{border:0;border-radius:0;background:none;margin:0;padding:13px 1px;min-height:49px;box-shadow:none;display:flex;align-items:center;gap:12px}.utility-body .menu-action:last-child{box-shadow:none}.utility-body .menu-action:active{background:#ffffff0d}.menu-action>svg{width:18px;height:18px;color:#cacbd4;flex-shrink:0}
@@ -110,7 +110,7 @@ body{background:#0a0a0c}
 </style>
 <style>
 /* Per-frame deck and live-bar changes stay on the compositor: moving card contents are not repainted. */
-.stack-card>*{will-change:transform,opacity}
+.stack-content{position:relative;opacity:1}.stack-card .facts-footer{will-change:transform,opacity}
 #stack-open{will-change:transform}
 /* The motion box owns the card's position, fold clip, fade and z-order; the card inside stays static. */
 .stack-motion{position:absolute;top:0;left:14px;right:14px;z-index:var(--card-z);transform-origin:50% 0;will-change:transform;overflow:hidden}
@@ -124,7 +124,7 @@ body{background:#0a0a0c}
 <!-- Edge-local refraction for the moving indicator: the normal deviates only in a tenth of the shape at each
      edge, so the background bends where the glass curves and stays put through the middle. No interior
      magnification and no channel splitting. -->
-<filter id="glass-lens" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB"><feImage href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%2760%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27x%27%20x1%3D%270%27%20x2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27rgb%28255%2C128%2C0%29%27%2F%3E%3Cstop%20offset%3D%270.1%27%20stop-color%3D%27rgb%28128%2C128%2C0%29%27%2F%3E%3Cstop%20offset%3D%270.9%27%20stop-color%3D%27rgb%28128%2C128%2C0%29%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27rgb%280%2C128%2C0%29%27%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%27y%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27rgb%280%2C255%2C0%29%27%2F%3E%3Cstop%20offset%3D%270.16000000000000003%27%20stop-color%3D%27rgb%280%2C128%2C0%29%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%270.84%27%20stop-color%3D%27rgb%280%2C128%2C0%29%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27rgb%280%2C0%2C0%29%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%27160%27%20height%3D%2760%27%20fill%3D%27url%28%23x%29%27%2F%3E%3Crect%20width%3D%27160%27%20height%3D%2760%27%20fill%3D%27url%28%23y%29%27%20style%3D%27mix-blend-mode%3Ascreen%27%2F%3E%3C%2Fsvg%3E" result="lens-map" preserveAspectRatio="none" x="0" y="0" width="1" height="1"/><feDisplacementMap in="SourceGraphic" in2="lens-map" scale="0.07" xChannelSelector="R" yChannelSelector="G"/></filter><defs>
+<defs>
 <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="route" viewBox="0 0 24 24"><path d="M6 13c0 4 2 7 5 5s3-5 6-4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6c0 3-3 6-3 6S3 9 3 6a3 3 0 0 1 6 0Zm12-3c0 3-3 6-3 6s-3-3-3-6a3 3 0 0 1 6 0Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="18" cy="3" r="1" fill="currentColor"/></symbol>
 <symbol id="flame" viewBox="0 0 24 24"><path d="M13 1c2 6-5 8-3 12 1-1 2-2 2-4 5 3 9 10 2 14 2-4-1-5-2-7-1 3-4 3-3 7C1 19 4 11 7 8c0 4 2 4 2 4-2-6 3-6 4-11Z" fill="currentColor"/></symbol>
@@ -138,7 +138,7 @@ body{background:#0a0a0c}
 <div class="screen">
 <div class="status" aria-hidden="true"><span>10:24</span><i class="camera"></i><div class="status-right"><svg viewBox="0 0 18 16"><path d="M1 14V11h2v3m2 0V8h2v6m2 0V5h2v9m2 0V1h2v13" stroke="currentColor" stroke-width="1.5"/></svg><svg viewBox="0 0 20 16"><path d="M1 5q9-8 18 0M4 8q6-5 12 0M7 11q3-3 6 0" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="14" r="1" fill="currentColor"/></svg><svg viewBox="0 0 10 18"><rect x="1" y="3" width="8" height="14" rx="1.5" fill="currentColor"/><path d="M3 1h4" stroke="currentColor" stroke-width="2"/></svg><span>100%</span></div></div>
 <header class="masthead"><button class="icon-button back" id="back" aria-label="Return to today's steps" title="Return to today's steps" disabled><svg style="transform:rotate(180deg)"><use href="#chevron"/></svg></button><h1>Steps</h1><button class="date" id="date-button" aria-label="Choose date">Mon, 8 Sept</button></header>
-<div class="utility-island" id="utility-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="icon-button more" id="more" aria-label="Metric options" aria-expanded="false" aria-controls="utility-body"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="utility-body" id="utility-body" inert><section class="utility-page" hidden id="options" aria-label="Metric options"><h2>Options</h2><button class="menu-action" id="edit-goal"><svg aria-hidden="true"><use href="#target"/></svg><span>Edit daily step goal</span></button><button class="menu-action" id="toggle-motion" aria-pressed="false"><svg aria-hidden="true"><use href="#rotation"/></svg><span>Pause globe rotation</span></button><button class="menu-action" id="open-about"><svg aria-hidden="true"><use href="#info"/></svg><span>About this copy</span></button></section>
+<div class="utility-island" id="utility-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="icon-button more" id="more" aria-label="Metric options" aria-expanded="false" aria-controls="utility-body"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button><div class="utility-body" id="utility-body" inert><section class="utility-page" hidden id="options" aria-label="Metric options"><h2>Options</h2><button class="menu-action" id="edit-goal"><svg aria-hidden="true"><use href="#target"/></svg><span>Edit daily step goal</span></button><button class="menu-action" id="toggle-motion" aria-pressed="false"><svg aria-hidden="true"><use href="#rotation"/></svg><span>Pause globe rotation</span></button><button class="menu-action" id="reduce-motion" aria-pressed="false"><span>Reduce motion</span></button><button class="menu-action" id="open-about"><svg aria-hidden="true"><use href="#info"/></svg><span>About this copy</span></button></section>
 <section class="utility-page" hidden id="goal-dialog" aria-label="Daily step goal"><form id="goal-form"><h2>Your daily goal</h2><p>This changes only this standalone copy.</p><label for="goal-input">Steps per day</label><input id="goal-input" type="number" min="100" max="100000" step="100" required><p class="error" id="goal-error" role="alert"></p><div class="actions"><button type="button" class="cancel">Cancel</button><button class="primary" type="submit">Save goal</button></div></form></section>
 <section class="utility-page" hidden id="date-dialog" aria-label="Choose date"><form id="date-form"><h2>Choose a day</h2><p>Explore 30 days of saved demonstration data.</p><input id="date-input" type="hidden"><div class="date-choice"><button type="button" id="date-prev" aria-label="Previous day">‹</button><output id="date-choice" for="date-range" aria-live="polite"></output><button type="button" id="date-next" aria-label="Next day">›</button></div><input id="date-range" type="range" min="0" max="29" step="1" value="29" aria-label="Choose demonstration day"><div class="date-limits"><span>10 Aug</span><span>8 Sept</span></div><div class="actions"><button type="button" class="cancel">Cancel</button><button class="primary" type="submit">View day</button></div></form></section>
 <section class="utility-page" hidden id="about" aria-label="About Orbit"><h2>About Orbit</h2><p>Explore Steps, Heart rate, Sleep and Intake with 30 days of demonstration data ending 8 September 2025.</p><p>Works offline. Your daily step goal stays on this device.</p></section>
@@ -154,7 +154,7 @@ body{background:#0a0a0c}
 </div><div class="facts-footer"><div><strong id="remaining">1,580 steps</strong><small id="remaining-label">To your goal</small></div><div><strong id="recorded">18:42</strong><small id="recorded-label">Recorded through</small></div></div></section>
 <section class="horizon hourly"><div class="panel-head"><h2 id="movement-heading">Movement through the day</h2></div><p class="subtitle" id="movement-subtitle">Most active: 18:00 – 19:00 · 3,180 steps</p><figure aria-labelledby="movement-heading"><div class="plot" id="hour-plot"><div class="axis-y" aria-hidden="true"><span id="bar-max">4K</span><span id="bar-half">2K</span><span>0</span></div><svg id="bars" viewBox="0 0 350 80" preserveAspectRatio="none" aria-hidden="true"></svg><output class="selection-tip" id="bar-tip">3,180</output><input class="chart-input" id="bar-range" type="range" min="0" max="23" value="18" aria-label="Inspect hourly steps"></div><div class="ticks" id="bar-ticks" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></figure></section>
 <section class="horizon weekly"><div class="panel-head"><h2 id="week-heading">Last 7 days</h2></div><figure aria-labelledby="week-heading"><div class="plot"><div class="axis-y" aria-hidden="true"><span id="line-max">12K</span><span id="line-half">6K</span><span>0</span></div><svg id="line" viewBox="0 0 350 62" preserveAspectRatio="none" aria-hidden="true"></svg><input class="chart-input" id="line-range" type="range" min="0" max="6" value="6" aria-label="Inspect daily steps"></div><div class="ticks week" id="line-ticks" aria-hidden="true"></div><p class="subtitle sr-only" id="line-readout" aria-live="polite"></p></figure></section>
-<section class="horizon comparison"><h2>Compared with the previous period</h2><div class="comparison-grid"><div><strong id="current-average">6,794 <span>steps</span></strong><small>Current daily average</small></div><div><strong id="previous-average">7,520 <span>steps</span></strong><small>Previous daily average</small></div><div class="difference"><strong><i id="direction">▼</i><b id="difference" style="font-weight:inherit">726</b></strong><small id="difference-label">steps lower</small></div></div></section>
+<section class="horizon comparison"><h2>Daily average comparison</h2><div class="comparison-grid"><div><strong id="current-average">6,794 <span>steps</span></strong><small id="current-period">Current daily average</small></div><div><strong id="previous-average">7,520 <span>steps</span></strong><small id="previous-period">Previous daily average</small></div><div class="difference"><strong><i id="direction">▼</i><b id="difference" style="font-weight:inherit">726</b></strong><small id="difference-label">steps lower</small></div></div></section>
 </div></div>
 <button class="stack-open" id="stack-open" aria-label="Expand four panels" aria-controls="period-content"></button>
 <div class="live-island" id="live-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="live-bar" id="live-bar" aria-expanded="false" aria-controls="live-choices"><span class="live-icon" aria-hidden="true"><svg><use id="live-symbol" href="#stairs"/></svg></span><span class="live-copy"><strong class="live-title" id="live-title">1,580 steps to go</strong><span class="live-meta" id="live-meta">Today · 84% of your goal</span></span><output class="live-timer" id="live-timer" hidden></output><span class="live-chevron" aria-hidden="true"><svg><use href="#chevron"/></svg></span></button>
@@ -174,9 +174,7 @@ body{background:#0a0a0c}
 <script src="hero-dots.js"></script>
 <script src="sleep-timeline.js"></script>
 <script src="workout-focus.js"></script>
-<script>/* The lens is only used where the engine accepts a filter reference in a backdrop filter; the rendered
-   proof lives in verification/frosted-system.html, because accepting a value is not producing pixels. */
-(()=>{const ok=CSS.supports('backdrop-filter','url(#glass-lens)')||CSS.supports('-webkit-backdrop-filter','url(#glass-lens)');document.documentElement.classList.toggle('has-glass-lens',ok)})();</script>
+
 <script src="blob-track.js"></script>
 <script src="workout-details.js"></script>
 <script src="health-pages.js"></script>
@@ -236,7 +234,7 @@ function renderMetric(){
   const rows=windowRows(days),list=rows.map(r=>extras.get(r.date)),x=extras.get(selected);
   const total=rows.reduce((s,r)=>s+dailyMetric(r),0),primary=metric==='heart'?(days===1?x.latest:total/rows.length):metric==='sleep'?total/rows.length:intakeCalories(rows);
   $('#steps').textContent=metricText(primary);
-  $('#hero-label').textContent=metric==='sleep'?(days===1?'Time asleep':'Average sleep'):metric==='heart'?(days===1?'Heart rate':'Average heart rate'):(days===30?'Average daily intake':days===1?'Intake':days+'-day intake');
+  $('#hero-label').textContent=metric==='sleep'?(days===1?'Time asleep':'Average sleep'):metric==='heart'?(days===1?'Heart rate':'Average heart rate'):(days===30?'Average daily intake':days===1?'Sample-day intake':days+'-day intake');
   $('#goal-label').textContent=metric==='heart'?'bpm · '+(days===1?'latest reading':'period average'):metric==='sleep'?(days===1?'asleep · '+duration(x.awake)+' awake':'per night'):days===30?'kcal / day · last 30 days':'kcal logged';
   const avg=k=>average(list.map(v=>v[k]));
   let cards,footer;
@@ -258,24 +256,38 @@ function renderMetric(){
   $('.facts').innerHTML='<div class="metrics">'+cards.map(([label,value,unit,icon])=>`<div class="metric" ${metric==='sleep'?`data-sleep-stage="${label.toLowerCase()}"`:''}><svg aria-hidden="true"><use href="#${icon}"/></svg><p class="metric-summary-value">${value} <span>${unit}</span></p><small class="metric-summary-label">${label}</small></div>`).join('')+'</div><div class="facts-footer">'+footer.map(([value,label])=>`<div><strong>${value}</strong><small>${label}</small></div>`).join('')+'</div>';
   $('#movement-subtitle').textContent=days===1?(metric==='heart'?'Hourly averages · bpm':metric==='sleep'?'Stage totals · time asleep excludes awake':'Four demonstration food entries'):'Select a reading to explore this period';
   $('#week-heading').textContent=(metric==='sleep'?'Last ':'Last ')+(days===30?'30':'7')+(metric==='sleep'?' nights':' days');
-  const count=days===30?30:7,a=average(windowRows(count).map(dailyMetric)),b=average(windowRows(count,dayOffset(selected,-count)).map(dailyMetric)),delta=a-b;
-  $('#current-average').innerHTML=metricText(a)+` <span>${metricUnit()}</span>`;
-  $('#previous-average').innerHTML=metricText(b)+` <span>${metricUnit()}</span>`;
-  $('#difference').textContent=metricText(Math.abs(delta));
-  $('#direction').textContent=delta<0?'▼':delta>0?'▲':'–';
-  $('#difference-label').textContent=(metricUnit()+' '+(delta<0?'lower':delta>0?'higher':'no change')).trim();
+
 }
-function changeMetric(delta){metric=metricOrder[(metricOrder.indexOf(metric)+delta+metricOrder.length)%metricOrder.length];render();SurfaceMotion.reveal($('.hero-copy'),{x:Math.sign(delta)*22,y:0},420);SurfaceMotion.reveal($('.masthead h1'),{x:Math.sign(delta)*10,y:0},320)}
-function periodLabel(){return days===1?(selected===anchor?'Today':'Selected day'):days===7?'Last 7 days':'Last 30 days'}
-function cyclePeriod(){days=[1,7,30][([1,7,30].indexOf(days)+1)%3];render();orb?.turnPeriod();SurfaceMotion.reveal($('.hero-copy'),{x:0,y:12},420)}
+function changeMetric(delta){metric=metricOrder[(metricOrder.indexOf(metric)+delta+metricOrder.length)%metricOrder.length];render();SurfaceMotion.shift($('.hero-copy'),{x:Math.sign(delta)*16,y:0},240)}
+function periodLabel(){return days===1?'Sample day':days+'-day sample'}
+function cyclePeriod(){days=[1,7,30][([1,7,30].indexOf(days)+1)%3];render();orb?.turnPeriod();SurfaceMotion.shift($('.hero-copy'),{x:0,y:8},240)}
+// Round each displayed daily average once; the displayed delta uses those same integers.
+function periodComparison(current,previous){
+  const mean=rows=>rows.length?Math.round(average(rows)):null,a=mean(current),b=mean(previous);
+  return {current:a,previous:b,delta:a===null||b===null?null:a-b};
+}
+function renderComparison(){
+  const count=days===30?30:7,current=windowRows(count),previous=windowRows(count,dayOffset(selected,-count));
+  const result=periodComparison(current.map(dailyMetric),previous.map(dailyMetric)),unit=metricUnit();
+  const bounds=rows=>rows.length?dateLabel(rows[0].date,{day:'numeric',month:'short'})+'–'+dateLabel(rows.at(-1).date,{day:'numeric',month:'short',year:'numeric'}):'No samples';
+  for(const [id,value,rows] of [['current',result.current,current],['previous',result.previous,previous]]){
+    $('#'+id+'-average').innerHTML=value===null?'—':metricText(value)+` <span>${unit}</span>`;
+    $('#'+id+'-period').textContent=bounds(rows)+' · daily average';
+  }
+  const delta=result.delta;$('#difference').textContent=delta===null?'—':metricText(Math.abs(delta));
+  $('#direction').textContent=delta===null||delta===0?'–':delta<0?'▼':'▲';
+  $('#difference-label').textContent=delta===null?'Comparison unavailable':delta===0?'No change':`${unit} ${delta<0?'lower':'higher'}`.trim();
+}
 let orb;
 function initOrb(){
   const button=$('#orb-button');
   $('#globe').innerHTML=SignalOrb.markup(metric);
-  orb=SignalOrb.attach(button,{selected:metric,keys:metricOrder,onSelect:key=>changeMetric(metricOrder.indexOf(key)-metricOrder.indexOf(metric)),onOpen:cyclePeriod});
+  paused=SurfaceMotion.reduced;
+  $('#toggle-motion span').textContent=paused?'Resume globe rotation':'Pause globe rotation';$('#toggle-motion').setAttribute('aria-pressed',String(paused));
+  orb=SignalOrb.attach(button,{selected:metric,keys:metricOrder,onSelect:key=>changeMetric(metricOrder.indexOf(key)-metricOrder.indexOf(metric)),onOpen:cyclePeriod});orb.setPaused(paused);
 }
 
-function renderSteps(){const rows=windowRows(days),total=rows.reduce((s,r)=>s+r.steps,0),sumFloors=rows.reduce((s,r)=>s+r.floors,0),target=goal*rows.length,remaining=target-total;$('#steps').textContent=fmt(total);$('#hero-label').textContent=days===1?'Steps':`${days}-day steps`;$('#goal-label').textContent=`of ${fmt(target)} steps`;$('#distance').textContent=(total*.00075).toFixed(2);$('#energy').textContent=fmt(total*.04);$('#floors').textContent=sumFloors;$('#completion').textContent=fmt(total/target*100)+'%';$('#goal-caption').textContent='Goal completion';$('#remaining').textContent=fmt(Math.abs(remaining))+' steps';$('#remaining-label').textContent=remaining>=0?'To your goal':'Beyond your goal';$('#recorded').textContent=days===1?(selected===anchor?'18:42':'23:59'):`${rows.length} days`;$('#recorded-label').textContent=days===1?'Recorded through':'In this period';$('#date-button').textContent=dateLabel(selected);$('#date-input').value=selected;$('#back').disabled=days===1&&selected===anchor&&metric==='steps';$('#movement-heading').textContent=days===1?'Movement through the day':'Movement through the period';$('#week-heading').textContent=days===30?'Last 30 days':'Last 7 days';const count=days===30?30:7,current=windowRows(count),previous=windowRows(count,dayOffset(selected,-count)),avg=a=>Math.round(a.reduce((s,r)=>s+r.steps,0)/a.length),a=avg(current),b=avg(previous),delta=a-b;$('#current-average').innerHTML=`${fmt(a)} <span>steps</span>`;$('#previous-average').innerHTML=`${fmt(b)} <span>steps</span>`;$('#difference').textContent=fmt(Math.abs(delta));$('#direction').textContent=delta<0?'▼':delta>0?'▲':'–';$('#difference-label').textContent=delta<0?'steps lower':delta>0?'steps higher':'no change';barIndex=days===1?18:rows.length-1;scheduleCharts()}
+function renderSteps(){const rows=windowRows(days),total=rows.reduce((s,r)=>s+r.steps,0),sumFloors=rows.reduce((s,r)=>s+r.floors,0),target=goal*rows.length,remaining=target-total;$('#steps').textContent=fmt(total);$('#hero-label').textContent=days===1?'Steps':`${days}-day steps`;$('#goal-label').textContent=`of ${fmt(target)} steps`;$('#distance').textContent=(total*.00075).toFixed(2);$('#energy').textContent=fmt(total*.04);$('#floors').textContent=sumFloors;$('#completion').textContent=fmt(total/target*100)+'%';$('#goal-caption').textContent='Goal completion';$('#remaining').textContent=fmt(Math.abs(remaining))+' steps';$('#remaining-label').textContent=remaining>=0?'To your goal':'Beyond your goal';$('#recorded').textContent=days===1?(selected===anchor?'18:42':'23:59'):`${rows.length} days`;$('#recorded-label').textContent=days===1?'Recorded through':'In this period';$('#date-button').textContent=dateLabel(selected);$('#date-input').value=selected;$('#back').disabled=days===1&&selected===anchor&&metric==='steps';$('#movement-heading').textContent=days===1?'Movement through the day':'Movement through the period';$('#week-heading').textContent=days===30?'Last 30 days':'Last 7 days';barIndex=days===1?18:rows.length-1;scheduleCharts()}
 // The two charts live in folded cards that are invisible until the deck opens. Draw them in idle time,
 // or the moment the deck starts to open, so a period or metric change never waits on hidden work.
 let chartsDirty=false,chartsIdle=0;
@@ -296,7 +308,7 @@ function scheduleCharts(){
 }
 const dateOptions=records.slice(-30).map(r=>r.date);
 let islandFrame=0;
-const islands={utility:{el:$('#utility-island'),body:$('#utility-body'),trigger:$('#more'),closed:40},live:{el:$('#live-island'),body:$('#live-choices'),trigger:$('#live-bar'),closed:62}};
+const islands={utility:{el:$('#utility-island'),body:$('#utility-body'),trigger:$('#more'),closed:48},live:{el:$('#live-island'),body:$('#live-choices'),trigger:$('#live-bar'),closed:62}};
 for(const item of Object.values(islands))Object.assign(item,{open:false,value:0,velocity:0,height:{value:item.closed,velocity:0},fullHeight:item.closed,width:300,page:'#options',content:{value:1,velocity:0}});
 function measureIsland(item){
   const live=item===islands.live,width=item.el.clientWidth,height=Math.max(item.closed,(live?item.body.firstElementChild.offsetHeight:item.body.offsetHeight)+(live?62:0));
@@ -305,7 +317,7 @@ function measureIsland(item){
 }
 function layoutIsland(item){
   const p=clamp(item.value),live=item===islands.live,w=item.width||300,h=item.fullHeight;
-  const sx=live?1:(40+(w-40)*reveal(p,0,.72))/w,sy=Math.max(item.closed,item.height.value)/h,r=live?Math.round(31-3*p):20+8*p;
+  const sx=live?1:(item.closed+(w-item.closed)*reveal(p,0,.72))/w,sy=Math.max(item.closed,item.height.value)/h,r=live?Math.round(31-3*p):24+4*p;
   const shell=item.el.querySelector('.island-surface');shell.style.transform=live?'none':`scale(${sx},${sy})`;shell.style.borderRadius=live?r+'px':`${r/sx}px / ${r/sy}px`;
   if(live){item.el.style.height=Math.max(item.closed,item.height.value)+'px';item.el.style.borderRadius=r+'px'}
   if(!live)item.el.querySelector('.island-frost').style.clipPath=`inset(0px 0 ${h-item.height.value}px ${w-sx*w}px round ${r}px)`;
@@ -316,7 +328,7 @@ function layoutIsland(item){
   if(live)item.body.querySelectorAll('.activity-choice').forEach((button,i)=>{const q=reveal(Math.min(p,growth),.58+i*.04,.98);button.style.opacity=String(q);button.style.transform=`translateY(${6*(1-q)}px)`});
 }
 function animateIslands(){
-  if(document.hidden){cancelAnimationFrame(islandFrame);islandFrame=0;for(const item of Object.values(islands)){item.value=+item.open;item.velocity=0;item.height.value=item.open?item.fullHeight:item.closed;item.height.velocity=0;item.content.value=1;item.content.velocity=0;layoutIsland(item)}return}
+  if(document.hidden||SurfaceMotion.reduced){cancelAnimationFrame(islandFrame);islandFrame=0;for(const item of Object.values(islands)){item.value=+item.open;item.velocity=0;item.height.value=item.open?item.fullHeight:item.closed;item.height.velocity=0;item.content.value=1;item.content.velocity=0;layoutIsland(item)}return}
   if(islandFrame)return;let last=performance.now();orb?.setSuspended(true);
   function tick(time){
     const dt=Math.min(.05,Math.max(0,(time-last)/1000));last=time;let moving=false;
@@ -352,6 +364,7 @@ function initIslands(){
   document.querySelectorAll('.utility-body .cancel').forEach(button=>button.addEventListener('click',closeUtility));
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&closeInline())event.preventDefault()});
   document.addEventListener('click',event=>{if(islands.utility.open&&!event.target.closest('#utility-island,#date-button,#about-link'))closeUtility(false)});
+  document.addEventListener('click',event=>{if(islands.live.open&&!event.target.closest('#live-island,#utility-island')){setLiveOpen(false);event.preventDefault();event.stopImmediatePropagation()}},true);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)animateIslands()});
   window.addEventListener('resize',()=>{for(const item of Object.values(islands))measureIsland(item);animateIslands()});
 }
@@ -367,6 +380,8 @@ $('#back').addEventListener('click',()=>{selected=anchor;days=1;metric='steps';r
 $('#edit-goal').addEventListener('click',e=>{$('#goal-input').value=goal;$('#goal-error').textContent=storageError?'Saved settings could not be read. Saving will replace only this copy’s goal.':'';show('#goal-dialog',e.currentTarget)});$('#goal-form').addEventListener('submit',e=>{e.preventDefault();const n=Number($('#goal-input').value);if(!Number.isInteger(n)||n<100||n>100000||n%100){$('#goal-error').textContent='Choose 100–100,000 steps, in increments of 100.';return}try{localStorage.setItem(key,String(n));if(localStorage.getItem(key)!==String(n))throw Error('Save not confirmed')}catch{$('#goal-error').textContent='Could not save. Your previous goal is unchanged; try again.';return}goal=n;storageError=false;render();closeUtility();toast('Daily goal saved')});
 $('#bar-range').addEventListener('input',e=>{inspectBar(Number(e.target.value),true);measureDeck()});$('#line-range').addEventListener('input',e=>inspectLine(Number(e.target.value)));$('#line-range').addEventListener('change',()=>{$('#line-readout').classList.remove('sr-only');measureDeck()});
 for(const id of ['#open-about','#about-link'])$(id).addEventListener('click',e=>{e.preventDefault();show('#about',e.currentTarget)});
+$('#reduce-motion').setAttribute('aria-pressed',String(SurfaceMotion.reduced));
+$('#reduce-motion').addEventListener('click',()=>{try{SurfaceMotion.setReduced(!SurfaceMotion.reduced);$('#reduce-motion').setAttribute('aria-pressed',String(SurfaceMotion.reduced));paused=SurfaceMotion.reduced;orb.setPaused(paused);$('#toggle-motion span').textContent=paused?'Resume globe rotation':'Pause globe rotation';$('#toggle-motion').setAttribute('aria-pressed',String(paused));animateDeck();animateIslands()}catch{toast('Could not save the motion setting. Try again.')}});
 $('#toggle-motion').addEventListener('click',()=>{paused=!paused;$('#toggle-motion span').textContent=paused?'Resume globe rotation':'Pause globe rotation';$('#toggle-motion').setAttribute('aria-pressed',String(paused));orb.setPaused(paused)});
 let deckExpanded=false,deckProgress=0,deckReady=false;
 const deck=$('#panel-deck'),deckScroller=$('#deck-scroll'),panelContent=$('#period-content'),liveBar=$('#live-bar');
@@ -381,11 +396,12 @@ function ensureShell(card){
   const shell=document.createElement('div');shell.className='stack-shell';shell.setAttribute('aria-hidden','true');card.prepend(shell);return shell;
 }
 let scrollReturn=null;
-let motionFrame=0,motionTime=0,cardHeights=[],deckClosedSpace=180,heroClosed=300,heroOpen=220;
+let motionFrame=0,motionTime=0,cardHeights=[],cardContentTop=[],deckClosedSpace=180,heroClosed=300,heroOpen=220;
 const clamp=n=>Math.max(0,Math.min(1,n));
 const reveal=(p,start,end)=>{const t=clamp((p-start)/(end-start));return t*t*(3-2*t)};
 // Kaito's exact critically damped step: a new target keeps current position and momentum.
 function springStep(state,target,dt,omega=18){
+  if(SurfaceMotion.reduced){state.value=target;state.velocity=0;return}
   const offset=state.value-target,c=state.velocity+omega*offset,decay=Math.exp(-omega*dt);
   state.value=target+(offset+c*dt)*decay;state.velocity=(state.velocity-omega*c*dt)*decay;
 }
@@ -395,6 +411,7 @@ function measureDeck(){
   heroClosed=Math.max(215,available-closedHeight);heroOpen=Math.min(heroClosed,220);
   deckClosedSpace=closedHeight-82;
   deckCards.forEach(card=>card.style.height='auto');cardHeights=deckCards.map(card=>card.offsetHeight);
+  cardContentTop=deckCards.map(card=>card.querySelector?.('.stack-content')?.offsetTop||0);
   $('.hero').style.setProperty('--hero-height',heroClosed+'px');
   deck.style.height=(closedHeight+heroClosed-heroOpen)+'px';
   $('#stack-open').style.height=(closedHeight-80)+'px';
@@ -406,9 +423,9 @@ function stopDeckMotion(){cancelAnimationFrame(motionFrame);motionFrame=0;motion
 // Hit testing, focusability and the scroller with its edge mask change only while the stack rests. Each of
 // them re-records every card shell, which repainted the whole stack on the first frame of a tap and at the
 // release of a swipe. While the cards move they keep the structure they started from.
-function settleDeckStructure(){deck.classList.toggle('is-scrollable',deckExpanded);deckCards.forEach(card=>{if(card.inert===deckExpanded)card.inert=!deckExpanded})}
+function settleDeckStructure(){deck.classList.toggle('is-scrollable',deckExpanded);deckCards.forEach(card=>{card.inert=!deckExpanded||islands.live.open})}
 function animateDeck(){
-  if(document.hidden){stopDeckMotion();deckMotion.value=orbPose.value=deckExpanded?1:0;deckMotion.velocity=orbPose.velocity=0;deckProgress=deckMotion.value;layoutDeck();deck.classList.remove('is-moving');settleDeckStructure();return}
+  if(document.hidden||SurfaceMotion.reduced){stopDeckMotion();deckMotion.value=orbPose.value=deckExpanded?1:0;deckMotion.velocity=orbPose.velocity=0;deckProgress=deckMotion.value;layoutDeck();deck.classList.remove('is-moving');settleDeckStructure();return}
   if(motionFrame)return;
   motionTime=performance.now();deck.classList.add('is-moving');orb?.setSuspended(true);
   function tick(now){
@@ -431,9 +448,10 @@ function updateLiveReadout(){
 function updateLiveBar(){
   updateLiveReadout();const live=Health.live(),controls=$('#live-session-controls'),pause=$('#live-pause'),label=live?.paused?'Resume':'Pause';$('#live-island').classList.toggle('has-activity',Boolean(live));if(controls.hidden===Boolean(live))controls.hidden=!live;
   if(pause.textContent!==label)pause.textContent=label;if(pause.dataset.session!==label.toLowerCase())pause.dataset.session=label.toLowerCase();
-  for(const [name,value] of [['aria-expanded',String(deckExpanded||islands.live.open)],['aria-label',deckExpanded?'Collapse four panels':(islands.live.open?'Close':'Expand')+' '+(live?'live workout':'health launcher')]])if(liveBar.getAttribute(name)!==value)liveBar.setAttribute(name,value);
+  $('.screen').classList.toggle('launcher-open',islands.live.open);
+  for(const [name,value] of [['aria-expanded',String(islands.live.open)],['aria-label',(islands.live.open?'Close':'Open')+' '+(live?'live workout controls and destinations':'Explore destinations')]])if(liveBar.getAttribute(name)!==value)liveBar.setAttribute(name,value);
 }
-function render(){renderMetric();$('#orb-period').textContent=periodLabel();$('#period-content').setAttribute('aria-label',metricNames[metric]+' · '+periodLabel()+' details');Health.render();orb?.select(metric);if(deckReady)measureDeck();updateLiveBar();$('#metric-announcement').textContent=metricNames[metric]+', '+periodLabel()+', '+$('#steps').textContent+', '+$('#goal-label').textContent}
+function render(){renderMetric();renderComparison();$('#date-button').textContent='Demo · '+dateLabel(selected,{day:'numeric',month:'short',year:'numeric'});$('#orb-period').textContent=periodLabel();$('#period-content').setAttribute('aria-label',metricNames[metric]+' · '+periodLabel()+' details');Health.render();orb?.select(metric);if(deckReady)measureDeck();updateLiveBar();$('#metric-announcement').textContent=metricNames[metric]+', '+periodLabel()+', '+$('#steps').textContent+', '+$('#goal-label').textContent}
 function layoutDeck(){
   if(!deckReady)return;
   const p=clamp(deckProgress),pose=clamp(orbPose.value),travel=heroClosed-heroOpen;
@@ -444,22 +462,26 @@ function layoutDeck(){
   panelContent.style.transform='translateY('+(travel*(1-p))+'px)';
   $('#stack-open').style.transform='translateY('+(travel*(1-p))+'px)';
   liveBar.style.setProperty('--deck-progress',String(p));
-  let next=0;
+  let next=0,previousBottom=0;
   deckCards.forEach((card,i)=>{
     const q=reveal(p,i*.045,1),height=cardHeights[i]||146,closedY=22-i*6;
     // Inline values on the card and the exact elements they move, not inherited custom properties: a
     // custom property changing on the card re-resolves the style of every descendant (and the shell's
     // grain background) on every frame, which repainted all four shells throughout the fold.
     const box=cardMotion[i]||card;
-    box.style.transform=`translateY(${closedY+(next-closedY)*q}px) scaleX(${1-i*.025*(1-q)})`;
-    const lift=reveal(q,.35,.94),details=reveal(p,.4,.94);
-    if(i)for(const child of card.children||[]){if(child.classList.contains('stack-shell'))continue;child.style.opacity=String(lift);child.style.transform=`translateY(${(1-lift)*9}px)`}
+    const y=closedY+(next-closedY)*q;
+    box.style.transform=`translateY(${y}px) scaleX(${1-i*.025*(1-q)})`;
+    const details=reveal(p,.4,.94);
+    // Keep loaded headings and values as one foreground. Reveal only the region below the preceding shell.
+    const content=card.querySelector?.('.stack-content');
+    if(content){content.style.clipPath=`inset(${Math.max(0,previousBottom-y-(cardContentTop[i]||0))}px 0 0)`;content.style.opacity='1';content.style.transform='none'}
     for(const footer of card.getElementsByClassName?.('facts-footer')||[])if(!i||footer.parentElement!==card){footer.style.opacity=String(details);footer.style.transform=`translateY(${(1-details)*7}px)`}
     for(const icon of card.querySelectorAll?.('.metric svg')||[])icon.style.opacity=String(details*.45);
     const shown=146+(height-146)*q;
     box.style.opacity=String(i?.3+.7*q:1);
     const shell=ensureShell(card);if(shell)shell.style.transform=`scaleY(${shown/height})`;else card.style.setProperty('--shell-scale',String(shown/height));
     if(box!==card)box.style.height=shown+'px';else card.style.clipPath='inset(0 0 '+(height-shown)+'px 0)';
+    previousBottom=Math.max(previousBottom,y+shown);
     next+=height+12;
   });
   if(scrollReturn)deckScroller.scrollTop=scrollReturn.top*clamp(p/scrollReturn.progress);
@@ -524,14 +546,15 @@ function initDeck(){
   const openSleep=event=>{if(metric==='sleep'&&deckExpanded&&!ignoreDeckClick){Health.open('sleep',$('.facts'),event.target.closest('[data-sleep-stage]')?.dataset.sleepStage)}};
   $('.facts').addEventListener('click',openSleep);$('.facts').addEventListener('keydown',event=>{if(metric==='sleep'&&['Enter',' '].includes(event.key)){event.preventDefault();ignoreDeckClick=false;openSleep(event)}});
   deckCards=[...panelContent.querySelectorAll(':scope > .horizon')];
+  deckCards.forEach((card,i)=>{if(!i||!card.append)return;const content=document.createElement('div');content.className='stack-content';while(card.firstChild)content.append(card.firstChild);card.append(content)});
   deckCards.forEach(card=>{card.classList.add('stack-card');card.inert=true});
   // Each card sits in its own motion box. Only the box moves, fades and clips per frame; the card, its
   // shell and its contents are never re-styled by the fold, so nothing inside is repainted.
   cardMotion=deckCards.map((card,i)=>{const parent=card.parentNode,box=parent?.insertBefore?document.createElement('div'):card;if(box!==card){box.className='stack-motion';parent.insertBefore(box,card);box.append(card)}box.style.setProperty('--card-z',String(4-i));return box});
   deckCards.forEach(ensureShell);
   deckReady=true;
-  for(const button of [liveBar,$('#stack-open')])button.addEventListener('click',event=>{if(ignoreDeckClick&&event.detail!==0){ignoreDeckClick=false;return}ignoreDeckClick=false;if(button===liveBar){if(deckExpanded)setDeckExpanded(false);else setLiveOpen(!islands.live.open)}else setDeckExpanded(!deckExpanded,event.detail===0)});
-  liveBar.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();if(deckExpanded)setDeckExpanded(false);else setLiveOpen(!islands.live.open)});
+  for(const button of [liveBar,$('#stack-open')])button.addEventListener('click',event=>{if(ignoreDeckClick&&event.detail!==0){ignoreDeckClick=false;return}ignoreDeckClick=false;if(button===liveBar)setLiveOpen(!islands.live.open);else setDeckExpanded(!deckExpanded,event.detail===0)});
+  liveBar.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();setLiveOpen(event.key==='ArrowUp')});
   // A drag that began on a launcher shortcut or workout control must not also press it.
   islands.live.body.addEventListener('click',event=>{if(ignoreDeckClick&&event.detail!==0){ignoreDeckClick=false;event.preventDefault();event.stopPropagation()}},true);
   deck.addEventListener('pointerdown',event=>{if(event.pointerType==='touch'||!event.isPrimary||event.button!==0)return;startDeckGesture(event.clientX,event.clientY,event.target,event.pointerId)});

@@ -6,3 +6,14 @@ android/signing/
 *.keystore
 
 __pycache__/
+
+# Isolated phone-test builds, recordings and device metadata remain local.
+android/build/
+android/last-audit-build.txt
+dist/Orbit-Audit.apk
+verification/video-audit-20260912/*
+!verification/video-audit-20260912/PLAN.md
+!verification/video-audit-20260912/RESULTS.md
+!verification/video-audit-20260912/checks.json
+verification/perf-tools/measure12-audit-*.json
+/measure12-audit-*.json
