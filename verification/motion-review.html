@@ -18,7 +18,7 @@ document.querySelector('#run').onclick=async()=>{
   result.textContent='Checking...';
   check(!JSON.parse(savedWorkouts||'{"active":null}').active,'Use an isolated verification origin with no active workout');
   if(!q('#health-page').hidden)q('#health-back').click();
-  if(q('#more').getAttribute('aria-expanded')==='true')q('#more').click();
+  if(q('#date-button').getAttribute('aria-expanded')==='true')q('#date-dialog .cancel').click();
   if(q('#live-bar').getAttribute('aria-expanded')==='true')q('#live-bar').click();
   if(q('#stack-open').hidden)closeCards();await wait(700);q('#back').click();
   check(!q('.periods')&&!q('[data-days]'),'Separate time controls must be removed');
@@ -48,22 +48,12 @@ document.querySelector('#run').onclick=async()=>{
   openCards();await wait(700);q('#deck-scroll').scrollTop=10000;await wait(50);
   check(rect('.comparison').bottom<=rect('#live-bar').top-5,'Last card must clear the floating dock');check(rect('#deck-scroll').bottom>=rect('#live-bar').bottom,'Content viewport must continue behind the frost');
   closeCards();await wait(700);check(q('#deck-scroll').scrollTop===0,'Collapse must reset scroll');
-  const anchor=rect('#more'),surface=q('#utility-island .island-surface');
-  q('#more').click();await wait(90);const middle=rect('#utility-island .island-surface');
-  check(Math.abs(middle.width-q('#utility-island').clientWidth)<1,'Utility must open at its final size');
-  check(Math.abs(middle.top-anchor.top)<.1&&Math.abs(middle.right-anchor.right)<.1,'Utility must stay attached to its circle');
-  await wait(650);check(!q('dialog'),'No modal dialogs');
-  check(w.getComputedStyle(q('#more')).borderTopWidth==='0px','Dot button must not leave an extra outlined circle');
-  check(w.getComputedStyle(q('#utility-island .island-frost')).transform==='none','Frost layer must not stretch');
-  q('#edit-goal').click();await wait(700);check(!q('#goal-dialog').hidden,'Goal editor must open in place');
-  const expectedGoal=q('#goal-input').value;q('#goal-form').requestSubmit();await wait(700);
-  check(q('#utility-body').inert&&store.getItem('orbit-steps-goal-v1')===expectedGoal,'Same goal must save and close');
+  q('#settings-open').click();await wait(300);check(q('#health-title').textContent==='Settings'&&!q('#options'),'Settings must be a dedicated page');
+  const expectedGoal=q('#settings-goal').value;q('#settings-goal-form').requestSubmit();await wait(300);
+  check(store.getItem('orbit-steps-goal-v1')===expectedGoal&&q('#profile-form'),'Goal saves without replacing the profile form');
+  q('#health-back').click();await wait(300);
   q('#date-button').click();await wait(700);q('#date-prev').click();q('#date-form').requestSubmit();await wait(700);
   check(q('#utility-body').inert&&q('#date-button').textContent.includes('7'),'Date selection must apply');q('#back').click();
-  q('#more').click();await wait(650);q('#open-about').click();await wait(650);check(!q('#about').hidden,'About must open inline');
-  q('#more').click();await wait(650);q('#more').click();await wait(90);q('#more').click();await wait(700);
-  check(q('#utility-body').inert&&Math.abs(rect('#utility-island .island-surface').width-40)<.1,'Mid-opening close must return to circle');
-  check(surface===q('#utility-island .island-surface'),'Utility surface must remain mounted');
   check(!q('#stack-close')&&!q('.dot-value'),'Extra arrow and scattered dot text must be gone');
   const pages=[];
   for(const key of ['body','workouts','overview']){

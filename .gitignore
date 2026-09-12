@@ -17,3 +17,8 @@ verification/video-audit-20260912/*
 !verification/video-audit-20260912/checks.json
 verification/perf-tools/measure12-audit-*.json
 /measure12-audit-*.json
+
+# Desktop review images use synthetic data; keep bulky generated captures local.
+verification/player-settings-20260912/*
+!verification/player-settings-20260912/RESULTS.md
+!verification/player-settings-20260912/checks.json

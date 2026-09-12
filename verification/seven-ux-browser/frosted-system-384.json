@@ -19,7 +19,7 @@
       "refraction": "not used — shared frost, rim and shadow"
     },
     "halfHeld": {
-      "centreError": 0,
+      "centreError": -0.01,
       "raw": [
         0,
         0.5,
@@ -39,7 +39,7 @@
         0
       ],
       "committed": "weight",
-      "width": 91.33
+      "width": 91.23
     },
     "distantHold": {
       "budget": 8.7,

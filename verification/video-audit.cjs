@@ -14,7 +14,7 @@ fs.mkdirSync(out,{recursive:true});
       const page=await context.newPage(),errors=[];
       page.on('pageerror',e=>errors.push(e.message));
       const run=async(name,fn)=>{try{await fn();results.push({width,name,status:'PASS'})}catch(e){results.push({width,name,status:'FAIL',error:e.message})}};
-      const ready=()=>page.waitForFunction(()=>!motionFrame&&!islandFrame);
+      const ready=()=>page.waitForFunction(()=>!motionFrame&&!islandFrame&&!SurfaceMotion.active);
       await page.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');
       await page.locator('#live-bar').waitFor();await ready();
       await page.screenshot({path:path.join(out,`${width}-home.png`)});
@@ -23,15 +23,15 @@ fs.mkdirSync(out,{recursive:true});
         await page.locator('#live-bar').click();await ready();
         assert(await page.evaluate(()=>islands.live.open));
       });
-      await run('F07 overflow responds at centre and edges after launcher changes',async()=>{
+      await run('F07 Settings responds at centre and edges after launcher changes',async()=>{
         for(const state of [false,true,false,true,false]){
           await page.evaluate(value=>setLiveOpen(value),state);await ready();
-          const button=page.locator('#more');await button.click();await ready();
-          assert(await page.evaluate(()=>islands.utility.open));
-          await page.evaluate(()=>closeUtility());await ready();
+          const button=page.locator('#settings-open');await button.click();await ready();
+          assert(await page.evaluate(()=>Health.page==='settings'));
+          await page.evaluate(()=>Health.close());await ready();
         }
-        const box=await page.locator('#more').boundingBox();assert(box.width>=48&&box.height>=48,'Overflow target is smaller than 48 CSS px');
-        for(const position of [{x:3,y:24},{x:45,y:24}]){await page.locator('#more').click({position});await ready();assert(await page.evaluate(()=>islands.utility.open));await page.evaluate(()=>closeUtility());await ready()}
+        const box=await page.locator('#settings-open').boundingBox();assert(box.width>=48&&box.height>=48,'Settings target is smaller than 48 CSS px');
+        for(const position of [{x:3,y:24},{x:45,y:24}]){await page.locator('#settings-open').click({position});await ready();assert(await page.evaluate(()=>Health.page==='settings'));await page.evaluate(()=>Health.close());await ready()}
       });
       await page.evaluate(()=>{setLiveOpen(false);metric='intake';days=1;render();setDeckExpanded(true)});await ready();
       await run('F02 displayed averages and delta reconcile',async()=>{

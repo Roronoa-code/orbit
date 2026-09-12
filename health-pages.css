@@ -11,10 +11,10 @@
 .has-activity .live-chevron{width:16px}
 .live-session-controls button{min-height:48px;font-size:13px}
 .live-session-controls #live-pause{background:#c1abef;color:#20182d;border-color:transparent}
-/* The page starts below the room the system bars occupy, so a transiently shown bar never covers the header. */
-.health-page{position:absolute;inset:var(--safe-top,0px) 0 0;z-index:22;background:#0a0a0c;display:flex;flex-direction:column;min-height:0}
+/* Backgrounds reach the screen edge; only foreground controls reserve the system inset. */
+.health-page{position:absolute;inset:0;z-index:22;background:#0a0a0c;display:flex;flex-direction:column;min-height:0}
 .health-page[hidden]{display:none}
-.health-page-head{display:flex;align-items:center;flex-shrink:0;padding:10px 14px 12px;gap:10px}
+.health-page-head{display:flex;align-items:center;flex-shrink:0;padding:calc(10px + var(--safe-top,0px)) 14px 12px;gap:10px}
 .health-page-head .icon-button{width:48px;height:48px;background:var(--frost-control)}
 .health-page h1{font-size:22px;letter-spacing:-.5px;line-height:1.2}
 .health-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior-y:contain;padding:0 14px 28px;scrollbar-width:none}
@@ -246,8 +246,8 @@
 .music-art-layer.is-visible{opacity:1}
 .music-glow{position:absolute;inset:-45px;background-image:var(--art);background-size:cover;background-position:center 34%;filter:blur(38px);opacity:.8;will-change:opacity}
 .music-shade{position:absolute;inset:0;background:linear-gradient(rgb(9 9 12/calc(.16 + var(--art-veil,.24)*.56)),transparent 20%,rgb(16 15 20/calc(var(--art-veil,.24)*.62)) 44%,rgb(12 12 15/calc(.54 + var(--art-veil,.24)*.32)) 100%);will-change:opacity}
-/* A square box, centred and clipped by the page, shows the same crop as before and can shrink uniformly into the small cover. */
-.music-cover img{position:relative;flex:none;height:67%;aspect-ratio:1;min-width:100%;object-fit:cover;object-position:center 28%;display:block;mask-image:linear-gradient(#000 40%,#000b 64%,transparent);transform-origin:0 0;will-change:transform,opacity}
+/* Show the whole square cover at screen width instead of enlarging and cropping it to a tall page. */
+.music-cover img{position:relative;flex:none;width:100%;height:auto;aspect-ratio:1;object-fit:cover;object-position:center;display:block;mask-image:linear-gradient(#000 55%,#000b 78%,transparent);transform-origin:0 0;will-change:transform,opacity}
 .music-bottom{padding:0 8px 8px}
 .music-access{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;margin-top:16px;background:none;border:1px solid #ffffff10;border-radius:16px;color:#bbb8c3;font-size:13px}
 .timer-focused.has-music .workout-time-focus{min-height:clamp(225px,39dvh,365px);justify-content:flex-end;padding-bottom:24px}
@@ -269,12 +269,15 @@
 .music-timeline>div{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:0;font-size:10px;color:#efe7f0;font-variant-numeric:tabular-nums}
 .music-source{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:center;font-size:9px;color:#e0d6e5}
 .music-controls{display:flex;justify-content:center;gap:22px;align-items:center;margin-top:6px}
-/* Square targets with the glyph at their centre; a press shrinks and dims the glyph itself, with no halo. */
+/* Transport targets never resize; the icon supplies directional press and playback feedback. */
 .music-controls button{display:grid;place-items:center;background:none;border:0;width:48px;height:48px;border-radius:50%;padding:0;color:#fff}
-.music-controls button svg{display:block;width:21px;height:21px;transition:opacity 160ms ease}
+.music-controls button svg{display:block;width:21px;height:21px;transition:opacity 160ms ease,transform 160ms ease}
 .music-controls [data-music=toggle] svg{width:28px;height:28px}
 .workout-music button:active{background:none}
 .music-controls button:active svg{opacity:.72}
+.music-controls [data-music=previous]:active svg{transform:translateX(-3px)}
+.music-controls [data-music=next]:active svg{transform:translateX(3px)}
+.music-controls [data-music=toggle]:active svg{transform:rotate(-8deg)}
 .workout-music button:disabled{opacity:.3;cursor:default}
 .timer-focused .session-actions button{min-height:56px;font-size:14px}
 @media(max-height:750px){.timer-focused.has-music .workout-time-focus{min-height:210px;padding-bottom:14px}.music-bottom{padding-bottom:4px}.music-heading h2{font-size:20px}.music-controls{margin-top:5px}}
@@ -364,9 +367,6 @@
 
 /* The workout view keeps the same player as one small row above the workout controls. Its cover and
    title open the page-wide artwork view; the header chevron returns from it. */
-.health-minimize{margin-left:auto}
-.health-minimize[hidden]{display:none}
-.health-minimize svg{transform:rotate(90deg)}
 /* With music on the workout view the dial gives up a little height, so Pause and Finish stay on screen. */
 .workout-live.has-music:not(.timer-focused) .workout-dot-play{height:40px;margin-bottom:2px}
 .workout-live.has-music:not(.timer-focused) .workout-time-focus{min-height:0;padding:2px 0 10px}
@@ -397,7 +397,7 @@
 @media(max-height:750px){.workout-live .workout-live-top.is-held .workout-dot-play{height:36px}}
 /* Everything the two views move or fade is its own compositor layer, so no frame of the move repaints it. */
 .workout-live .timer-dial,.workout-live .session-time,.workout-live .timer-mode-picker,.workout-live .session-actions,.workout-music .music-heading h2,.workout-music .music-heading p,.workout-music .music-controls button{will-change:transform}
-.workout-live-top,.workout-unconnected,.target-remaining,.music-thumb,.music-tile,.music-timeline,.music-heading [data-music=open],#focus-time-dots,.timer-orbit,#timer-label,.timer-tap-hint,.session-matrix,.health-minimize{will-change:opacity}
+.workout-live-top,.workout-unconnected,.target-remaining,.music-thumb,.music-tile,.music-timeline,.music-heading [data-music=open],#focus-time-dots,.timer-orbit,#timer-label,.timer-tap-hint,.session-matrix{will-change:opacity}
 .session-actions button{transition:background-color 440ms ease,color 440ms ease,border-color 440ms ease,box-shadow 440ms ease}
 .timer-mode-picker,.health-page-head .icon-button{transition:background-color 440ms ease}
 .health-page h1{transition:text-shadow 240ms ease}
@@ -505,13 +505,11 @@
 .masthead .icon-button{width:48px;height:48px;background:var(--frost-control)}
 .date{font-size:11px;letter-spacing:0;min-height:48px}
 .utility-island{top:calc(var(--safe-top,0px) + 62px)}
-.utility-island .more:active{background:#ffffff24}
+.utility-island .settings-open:active{background:#ffffff24}
 .launcher-open #period-content{opacity:.16;pointer-events:none}
 #period-content{transition:opacity 180ms ease}
 .launcher-open #stack-open{pointer-events:none}
 .deck-scroll{scroll-padding-bottom:calc(96px + var(--safe-bottom,0px))}
-.panel-deck:before{content:"";position:absolute;inset:0 0 auto;height:14px;background:linear-gradient(#0a0a0c,transparent);z-index:7;pointer-events:none;opacity:0}
-.panel-deck.is-scrollable:before{opacity:1}
 .stack-card>.stack-shell{background:var(--frost-grain),var(--frost-panel);border-color:#ffffff0d;border-top-color:#ffffff1a;box-shadow:var(--frost-rim)}
 .stack-card .comparison-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
 .comparison-grid .difference{grid-column:1/-1;display:flex;align-items:baseline;gap:9px}
@@ -533,8 +531,6 @@
 #workout-record-body{display:flex;flex-direction:column;min-height:100%}
 #workout-record-body>.session-actions{position:sticky;bottom:0;margin-top:auto;padding:14px 0 6px;background:linear-gradient(transparent,#0a0a0c 22%);z-index:4}
 .session-time{position:relative;isolation:isolate}
-.timer-scrim{position:absolute;inset:-7px -10px;border-radius:24px;background:#08080ddd;box-shadow:0 8px 28px #0003;z-index:-1;opacity:0;pointer-events:none}
-.timer-focused .timer-scrim{opacity:1}
 .is-paused .session-time{opacity:1}
 .is-paused #focus-time-dots,.is-paused .session-matrix{opacity:.82}
 .music-source{font-size:11px}
@@ -544,7 +540,7 @@
 .music-cover .music-unmasked{position:absolute;left:0;right:0;margin:auto;mask-image:none;opacity:0;border-radius:var(--music-art-radius,0px)}
 .body-chart figcaption,.body-coverage,.body-readout-meta{font-size:11px;color:#c2bdcd}
 @media(max-width:360px){.session-actions button{font-size:12px}.masthead h1{font-size:20px}.date{font-size:10px}.activity-choice{font-size:12px}.stack-card.comparison strong{font-size:17px}}
-@media(forced-colors:active){.timer-scrim{background:Canvas}.session-actions button{background:ButtonFace!important;color:ButtonText!important}.glass-indicator{background:Highlight!important}}
+@media(forced-colors:active){.session-actions button{background:ButtonFace!important;color:ButtonText!important}.glass-indicator{background:Highlight!important}}
 
 .glass-control,.masthead .icon-button,.health-page-head .icon-button{background:var(--frost-control);box-shadow:var(--frost-rim),var(--frost-hairline)}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more),(forced-colors:active){.glass-control,.masthead .icon-button,.health-page-head .icon-button{backdrop-filter:none;-webkit-backdrop-filter:none;background:Canvas;border:1px solid CanvasText}}
@@ -555,3 +551,26 @@
 .body-timeline .segmented{height:auto;min-height:56px}
 .workout-live>.session-actions{margin-top:auto;padding-top:14px}
 .workout-live .session-actions button{min-height:56px}
+
+/* Settings uses the same page navigation and fields as workout setup. */
+.settings-profile,.settings-section{padding:18px 6px 24px}
+.settings-profile{padding-top:4px}
+.settings-section{border-top:1px solid #ffffff12}
+.settings-profile h2,.settings-section h2{font-size:17px;font-weight:550;margin-bottom:10px}
+.settings-note,.settings-about p{font-size:12px;line-height:1.6;color:#b7b1c1}
+.settings-fields{display:grid;gap:18px;margin:22px 0 16px}
+.settings-fields label,.settings-goal{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;color:#e2dce9}
+.settings-fields input,.settings-goal input{display:block;width:100%;min-width:0;min-height:50px;padding:12px 14px;border:1px solid #ffffff16;border-radius:14px;background:#1d1c23;color:#f2edf8;font:inherit;font-size:16px;color-scheme:dark;box-sizing:border-box}
+.settings-fields input:focus-visible,.settings-goal input:focus-visible{outline:2px solid #bfa7f2;outline-offset:2px}
+.settings-measurements{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.settings-measurements label>span{position:relative}
+.settings-measurements input{padding-right:38px}
+.settings-measurements small{position:absolute;right:14px;top:17px;color:#b9b2c4;pointer-events:none}
+.settings-saved{color:#d2bef5;font-size:13px;min-height:0}
+.settings-saved:not(:empty){margin:12px 0}
+.settings-profile .workout-primary{margin-top:16px;width:100%}
+.settings-action{min-height:48px;border:1px solid #ffffff20;background:#24212d;border-radius:14px;padding:10px 20px;margin-top:12px;color:#e7dafb;font:inherit;font-size:13px}
+.settings-action:active{background:#393143}
+.settings-section .tracking-option{margin-top:0;padding:12px 0;border-top:0}
+.settings-section .music-access{margin-top:0}
+.utility-island.is-open .settings-open{display:none}

@@ -52,9 +52,9 @@ document.querySelector('#run').onclick=async()=>{
   q('[data-timer-focus]').click();await wait(100);const midTint=Number(w().getComputedStyle(q('.music-tint')).opacity),midScale=new (w().DOMMatrix)(w().getComputedStyle(q('.music-cover img')).transform).a;
   check(w().MusicPlayer.active&&!q('.workout-music').hidden&&!q('#health-page').classList.contains('music-focus')&&midTint>0&&midTint<=1&&midScale<1&&midScale>.08&&q('.music-heading h2').style.transform,'Leaving focus must move the artwork, title and controls into the small player instead of cutting to it: '+JSON.stringify({midTint,midScale}));
   q('[data-timer-focus]').click();await settled();check(w().MusicPlayer.active&&Number(w().getComputedStyle(q('.music-cover')).opacity)===1&&Number(w().getComputedStyle(q('.music-tint')).opacity)===1&&q('#health-page').classList.contains('music-focus')&&!q('.music-heading h2').style.transform,'Reversing mid-way must return to the page-wide artwork');
-  // The workout view keeps the music small: the header chevron leads there from focus, the small cover leads back.
-  const minimise=q('#health-minimize');check(!minimise.hidden&&w().getComputedStyle(minimise).display!=='none','Focus must offer a visible way back to the workout view');minimise.click();await settled();
-  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='false'&&w().getComputedStyle(q('.workout-unconnected')).display!=='none'&&minimise.hidden&&w().getComputedStyle(minimise).display==='none','The header chevron must return to the workout details and belong to focus only');
+  // The dial is the keyboard alternative to swipe-down; there is no redundant header chevron.
+  check(!q('#health-minimize'),'The redundant header chevron must be removed');q('[data-timer-focus]').click();await settled();
+  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='false'&&w().getComputedStyle(q('.workout-unconnected')).display!=='none'&&!q('#health-minimize'),'The dial must return to workout details without a header chevron');
   const mini=q('.workout-music'),miniRect=mini.getBoundingClientRect(),miniLayer=q('.music-thumb i.is-visible'),actionsTop=q('.session-actions').getBoundingClientRect().top;
   check(q('.session-actions').getBoundingClientRect().bottom<=q('#health-scroll').getBoundingClientRect().bottom+1,'Pause and Finish must stay on screen next to the small player: '+JSON.stringify({actions:q('.session-actions').getBoundingClientRect().bottom,viewport:q('#health-scroll').getBoundingClientRect().bottom}));
   check(w().MusicPlayer.active&&!mini.hidden&&miniRect.height<90&&miniRect.width>250&&miniRect.bottom<=actionsTop+1,'The workout view must keep a small full-width player above the workout controls: '+JSON.stringify({height:miniRect.height,width:miniRect.width}));
@@ -63,7 +63,7 @@ document.querySelector('#run').onclick=async()=>{
   check(w().getComputedStyle(q('.music-timeline')).display==='none'&&w().getComputedStyle(q('.music-heading [data-music="open"]')).display==='none','The small player must stay one uncluttered row');
   const playingBefore=f.snapshot.playing;q('.workout-music [data-music="toggle"]').click();check(f.commands.at(-1).action===(playingBefore?'pause':'play'),'The small player must control playback');w().MusicPlayer.refresh();check(w().Health.state.active.resumedAt!==null,'Music control from the small player must not pause the workout');q('.workout-music [data-music="toggle"]').click();w().MusicPlayer.refresh();
   check(live.contentDocument.documentElement.scrollWidth<=w().innerWidth,'The small player must not overflow sideways');
-  q('[data-music-expand]').click();await settled();check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&q('#health-page').classList.contains('music-focus')&&Number(w().getComputedStyle(q('.music-cover')).opacity)===1&&!minimise.hidden,'The small cover must open the page-wide artwork view');
+  q('[data-music-expand]').click();await settled();check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&q('#health-page').classList.contains('music-focus')&&Number(w().getComputedStyle(q('.music-cover')).opacity)===1&&!q('#health-minimize'),'The small cover must open the page-wide artwork view');
   // Transport controls: square targets, the glyph at their centre, no halo behind it.
   for(const button of q('.music-controls').querySelectorAll('button')){const b=button.getBoundingClientRect(),g=button.querySelector('svg').getBoundingClientRect();check(Math.abs(b.width-b.height)<.5&&Math.abs((b.left+b.right)-(g.left+g.right))<1&&Math.abs((b.top+b.bottom)-(g.top+g.bottom))<1&&w().getComputedStyle(button).backgroundColor==='rgba(0, 0, 0, 0)','Transport glyphs must sit at the centre of square targets without a halo: '+button.dataset.music)}
   // Workout colours remain stable over artwork; contrast still meets the original check.
@@ -78,9 +78,9 @@ document.querySelector('#run').onclick=async()=>{
   fireAt(heading,'touchstart',headTop);for(let i=1;i<=8;i++){await frame();fireAt(heading,'touchmove',headTop+i*15)}
   const dragged=new (w().DOMMatrix)(w().getComputedStyle(q('.music-cover img')).transform).a;check(w().WorkoutFocus.active>0&&dragged<1&&dragged>.1,'The artwork must follow the finger down: '+dragged);
   fireAt(heading,'touchend',headTop+120);await settled();
-  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='false'&&!q('#health-page').classList.contains('music-focus')&&!q('.workout-music').hidden&&w().getComputedStyle(q('.music-cover')).visibility==='hidden'&&minimise.hidden,'Swiping the page-wide view down must settle in the small player');
+  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='false'&&!q('#health-page').classList.contains('music-focus')&&!q('.workout-music').hidden&&w().getComputedStyle(q('.music-cover')).visibility==='hidden'&&!q('#health-minimize'),'Swiping the page-wide view down must settle in the small player');
   const small=q('.music-heading h2'),smallTop=small.getBoundingClientRect().top;await drag(small,smallTop,smallTop-160,10);await settled();
-  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&q('#health-page').classList.contains('music-focus')&&!minimise.hidden,'Swiping the small player up must open the page-wide view');
+  check(q('[data-timer-focus]').getAttribute('aria-pressed')==='true'&&q('#health-page').classList.contains('music-focus')&&!q('#health-minimize'),'Swiping the small player up must open the page-wide view');
   // Endpoint agreement: a gesture held near either end already renders that end. Releasing must not swap the
   // timer's rendering, the header surfaces, the selected reading control or the action material, and the title
   // must never reach the transport controls at any progress value.

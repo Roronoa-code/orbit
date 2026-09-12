@@ -6,7 +6,7 @@
     "Launcher follows the finger both ways, closes from anywhere on it and is named apart from its shortcuts",
     "Globe and reading transitions survive rapid input",
     "Stack drag starts from rest; its structure changes only while it rests",
-    "Temporary chart value and intentional scroll fade",
+    "Temporary chart value and no Home overlay seam",
     "Four label-only measurements in order, looping ring drag and tap, spring-back, draggable glass selector, fat in kg with its share",
     "Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps",
     "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
@@ -19,7 +19,7 @@
   "measurements": {
     "liveBar": {
       "closedHeight": 61.9921875,
-      "intermediateHeight": 99.78515625,
+      "intermediateHeight": 97.91015625,
       "expandedHeight": 133.984375
     },
     "idleLauncher": {

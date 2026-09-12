@@ -1,6 +1,15 @@
 # Orbit — handoff (updated 12 September 2026)
 
-## Full video audit — 12 September 2026, current release
+## Player corrections and saved Settings — 12 September 2026, ready for phone review
+
+- **Phone control is paused by the user's latest explicit instruction:** "dont control the phone for now, its being used. just focus on code stuff and lmk when done i will tell you when you can control phone". Do not query, install, launch, navigate, record or change playback on the phone until the user says it is available. This overrides the standing install rule for now. This batch used desktop browsers and local builds only.
+- Clean recoverable source baseline: `4fab983`. The user's four screenshots supersede the previous audit's clock backing, Home fade and top-right minimise control. The giant clock scrim and its transition code are removed. Home has no overlay fade or unused scroll-fade listener. The full-page background starts at the screen edge; safe-top padding belongs to the foreground header. The redundant top-right down button is removed; swipe-down and the timer button's accessible action remain.
+- Music targets retain the user's fixed 48 × 48 px size. Previous/next icons move in their direction; play/pause icons turn and fade on acknowledgement, with immediate activation feedback. Interrupted animations clean up. Reduce motion uses opacity feedback. Artwork now displays at screen width, removing the tall-page enlargement and crop; original supplied artwork remains decoded at its available resolution. Native source quality still depends on the provider; no phone media was inspected in this batch.
+- A gear opens dedicated Settings: optional name, birth date, height and weight; daily goal, motion, music access and About. Profile data lives in `orbit-profile-v1`, separate from sample measurements and workout history. All four activities prefill saved weight, allow a session override and retain that snapshot in the workout. Validation and failed/corrupt-storage paths preserve saved data; background updates do not replace an edited form.
+- Prepared signed build `android/build/20260912-210604`, `dist/Orbit.apk` SHA256 `596272664570bd7c38bbf8d612a3087c1148775cfb1a7174b685284fdab3f801`. **Not installed.** Previous installed build remains the 20:36 audit release below; current phone state was not queried. Desktop checks and remaining device qualification are recorded in [RESULTS.md](verification/player-settings-20260912/RESULTS.md).
+
+
+## Full video audit — 12 September 2026, previous installed release
 
 - Implemented the supplied `Orbit_BitChord_Full_Video_Audit.md` in the standalone WebView copy from clean baseline `6844c85`. Full F01–F28 mapping, every regression row, commands, evidence and limits: [RESULTS.md](verification/video-audit-20260912/RESULTS.md). This section supersedes the earlier lens, variable button size, artwork-coloured actions and no-phone-operation notes for this batch.
 - The user explicitly gave full permission for an isolated Audit installation, navigation, workout recording, music control and notification access. These tests used `com.mani.orbit.audit`, never the production history. Font/density were restored to 1.0/600; music play state was restored after each transport test. The separate Audit app was removed when testing finished.

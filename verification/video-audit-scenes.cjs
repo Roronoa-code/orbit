@@ -53,22 +53,22 @@ async function main(){
       for(let i=0;i<4;i++){
         await page.locator('[data-music-expand]').click();await page.waitForTimeout(120);
         if(i===0)await shot('focus-mid');
-        await page.locator('#health-minimize').evaluate(n=>n.click());await page.waitForTimeout(90);
+        await page.locator('[data-timer-focus]').evaluate(n=>n.click());await page.waitForTimeout(90);
         await page.evaluate(()=>document.querySelector('[data-timer-focus]').click());await settle();
         if(!await page.locator('.timer-focused').count()){await page.locator('[data-timer-focus]').click();await settle()}
         assert.equal(await page.evaluate(()=>Health.state.active.startedAt),started);
-        await page.locator('#health-minimize').click();await settle();assert.equal(await page.locator('.is-held').count(),0);
+        await page.locator('[data-timer-focus]').click();await settle();assert.equal(await page.locator('.is-held').count(),0);
       }
       await page.locator('[data-music-expand]').click();await settle();await shot('focus');
       assert.equal(await page.locator('.session-actions button:first-child').evaluate(n=>getComputedStyle(n).backgroundColor),normalColour);
-      assert.equal(await page.locator('.timer-scrim').evaluate(n=>getComputedStyle(n).opacity),'1');
+      assert.equal(await page.locator('.timer-scrim').count(),0);
       for(const tone of ['bright','dark']){await page.evaluate(tone=>{auditMedia.art=auditCover(tone);auditMedia.artKey=tone;MusicPlayer.refresh()},tone);await page.waitForTimeout(700);await shot(`focus-${tone}`)}
       await page.locator('#health-content [data-session="pause"]').click();assert(await page.locator('#health-content [data-session="resume"]').count());await shot('paused');
       const paused=await page.evaluate(()=>Health.live().elapsed);await page.locator('[data-music="toggle"]').click();assert.equal(await page.evaluate(()=>Health.live().elapsed),paused);assert.equal(await page.locator('[data-music="toggle"]').getAttribute('aria-label'),'Pause music');
       await page.evaluate(()=>{auditMedia.playing=false;auditMedia.buffering=true;MusicPlayer.refresh()});assert.match(await page.locator('.music-source').innerText(),/Buffering/);
       await page.evaluate(()=>{auditMedia.buffering=false;auditMedia.playback='error';MusicPlayer.refresh()});assert.match(await page.locator('.music-source').innerText(),/Playback error/);
       await page.evaluate(()=>{delete auditMedia.playback;MusicPlayer.refresh()});await page.locator('#health-content [data-session="resume"]').click();
-      await page.locator('#health-minimize').click();await settle();await page.locator('[data-workout-detail="active"]').click();await settle();await shot('details');
+      await page.locator('[data-timer-focus]').click();await settle();await page.locator('[data-workout-detail="active"]').click();await settle();await shot('details');
       const dock=await page.locator('#workout-record-body .session-actions').boundingBox();assert(dock.bottom<=844||dock.y+dock.height<=844);
       await page.locator('#health-back').click();await settle();assert.equal(await page.evaluate(()=>Health.state.active.startedAt),started);
       await page.locator('#health-content [data-session="finish"]').click();await settle();assert.equal(await page.evaluate(started=>Health.state.history.filter(s=>s.startedAt===started).length,started),1);await shot('saved');

@@ -32,6 +32,7 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','sleep-timeline.js'),'u
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','blob-track.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-focus.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-details.js'),'utf8'),sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','orbit-settings.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8'),sandbox);
 vm.runInContext(script+`;globalThis.model={set:(d,n,k='steps')=>{selected=d;days=n;metric=k},periodComparison,windowRows,movement,week,dayOffset,anchor,render,renderCharts,extras,deckSwipeTarget,liveSummary,setDeckExpanded,SignalOrb,springStep,reveal,deckMotion,orbPose,getProgress:()=>deckProgress,getExpanded:()=>deckExpanded,islands,setLiveOpen,closeInline,show,Health,cyclePeriod,getPeriod:()=>days,setDateChoice,dateOptions,pause:p=>orb.setPaused(p),hide:h=>{document.hidden=h;document.fire('visibilitychange')}}`,sandbox);
 const m=sandbox.model;

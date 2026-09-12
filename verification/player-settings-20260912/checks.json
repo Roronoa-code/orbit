@@ -1,0 +1,38 @@
+[
+  {
+    "width": 390,
+    "status": "PASS",
+    "geometry": {
+      "top": 0,
+      "imageTop": 0,
+      "width": 390,
+      "imageWidth": 390,
+      "headerTop": 44
+    },
+    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
+  },
+  {
+    "width": 384,
+    "status": "PASS",
+    "geometry": {
+      "top": 0,
+      "imageTop": 0,
+      "width": 384,
+      "imageWidth": 384,
+      "headerTop": 44
+    },
+    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
+  },
+  {
+    "width": 320,
+    "status": "PASS",
+    "geometry": {
+      "top": 0,
+      "imageTop": 0,
+      "width": 320,
+      "imageWidth": 320,
+      "headerTop": 44
+    },
+    "checks": "Profile persistence, validation, save failure, draft preservation, goal, motion, back/date navigation, defaults for four activities, session override, edge-to-edge artwork, fixed animated buttons, swipe-down and seam removal"
+  }
+]

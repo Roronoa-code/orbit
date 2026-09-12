@@ -14,6 +14,8 @@ Direction confirmed by the user, 10 September 2026: replace their everyday Samsu
 | Trends | Longer history and comparisons across related metrics | Compare periods with coverage; open original observations |
 | Devices & Settings | Watch, sources, permissions, goals, units, appearance, backup/export and storage | Review connection and freshness; choose sources; manage preferences and history |
 
+Implemented Settings now has its own page, opened by the Home gear: name, birth date, height, weight, daily goal, motion, music access and About. Saved profile weight prefills workout setup; each session retains its own weight. Profile data is distinct from demonstration Body measurements. Watch, units, backup/export and connected sources in the table remain future work.
+
 The three flat launcher shortcuts open Body, Workouts and Health overview. The raised circles and wrapped labels were rejected; the launcher now shares the stack's charcoal material. Oxygen is a compact expandable tile in the overview, not a separate page. The overview no longer repeats Heart, Sleep, Intake or Steps; those stay on Home. Tap the Sleep summary on Home for a timed night view.
 
 The user rejected log-first pages. Lead with a visual summary and a few useful values. Body has a chart and date scrubber; completed workouts use a recent summary with history behind an explicit expansion. Future real records must retain source, time, quality and correction paths. Sparse measurements remain sparse.

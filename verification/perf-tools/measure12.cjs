@@ -33,7 +33,7 @@ const WINDOW_US=900000;
  }
  // A real tap (touch down, lift, click), as on the phone.
  await scenario('tap-open',async()=>{const at=await page.evaluate(()=>{const b=document.querySelector('[data-music-expand]').getBoundingClientRect();return {x:Math.round(b.left+b.width/2),y:Math.round(b.top+b.height/2)}});await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[at]});await sleep(90);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})});
- await scenario('tap-close',()=>page.evaluate(()=>document.querySelector('#health-minimize').click()));
+ await scenario('tap-close',()=>page.evaluate(()=>document.querySelector('[data-timer-focus]').click()));
  await page.evaluate(()=>document.querySelector('[data-music-expand]').click());await sleep(1200);
  const start=await page.evaluate(()=>{const r=document.querySelector('.music-heading h2').getBoundingClientRect();return {x:Math.round(r.left+40),y:Math.round(r.top+10)}});
  await scenario('drag-close',async()=>{

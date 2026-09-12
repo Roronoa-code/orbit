@@ -12,7 +12,7 @@ const WorkoutFocus=(()=>{
   }
   function dispose(){finish();settle();dots?.stop();dots=null;dotsCanvas=null}
   function settle(){for(const animation of animations)animation.cancel();animations.clear()}
-  function animate(node,frames,duration=500){if(document.hidden)return;const animation=node.animate(frames,{duration,easing:'cubic-bezier(.2,.75,.2,1)'});animations.add(animation);animation.onfinish=()=>{animations.delete(animation);animation.cancel()}}
+  function animate(node,frames,duration=500){if(document.hidden)return;const animation=node.animate(frames,{duration,easing:'cubic-bezier(.2,.75,.2,1)'});animations.add(animation);animation.oncancel=()=>animations.delete(animation);animation.onfinish=()=>{animations.delete(animation);animation.cancel()}}
   function layout(live,update){
     finish();
     const nodes=[live.querySelector('.timer-dial'),live.querySelector('.session-actions')],before=nodes.map(n=>n.getBoundingClientRect()),page=document.querySelector('#health-page'),scale=page.getBoundingClientRect().width/page.offsetWidth||1;
@@ -69,7 +69,7 @@ const WorkoutFocus=(()=>{
     live.classList.toggle('timer-focused',!focused);const there=measure(live,g);live.classList.toggle('timer-focused',focused);
     const compact=focused?there:here,focus=focused?here:there,page=host(),cover=page.querySelector('.music-cover'),img=cover?.querySelector('img'),thumb=live.querySelector('.music-thumb');
     const m={live,start:focused,p:focused?1:0,v:0,target:focused,shared:[],leaving:[],held:[],cover,thumb,imgRect:img?rect(img,g):null,thumbRect:thumb?compact.only.get(thumb)?.rect:null,
-      chevron:page.querySelector('#health-minimize'),scrim:live.querySelector('.timer-scrim'),radius:thumb?parseFloat(getComputedStyle(thumb).borderRadius)||12:12,range:Math.max(200,Math.min(420,g.box.height/g.scale*.42)),k:1};
+      radius:thumb?parseFloat(getComputedStyle(thumb).borderRadius)||12:12,range:Math.max(200,Math.min(420,g.box.height/g.scale*.42)),k:1};
     m.flying=Boolean(m.imgRect&&m.thumbRect);
     for(const [node,c] of compact.shared){const f=focus.shared.get(node);if(f){Object.assign(node.style,{transformOrigin:'0 0',transition:'none'});m.shared.push({node,c,f,uniform:node.matches(UNIFORM),centred:node.id==='session-time',text:node.matches(TEXT),control:node.matches(CONTROL)})}}
     // One clock, two renderings: the ring's dot matrix and the focus canvas cross over during the move, each at the
@@ -84,7 +84,6 @@ const WorkoutFocus=(()=>{
     for(const node of here.only.keys())if(!there.only.has(node))m.leaving.push(node);
     for(const [node,info] of there.only)if(!here.only.has(node)){hold(node,info,g);m.held.push(node)}
     if(cover){Object.assign(cover.style,{transition:'none',opacity:'1',visibility:'visible'});cover.style.setProperty('--music-art-radius',(m.radius/(m.thumbRect?.w/m.imgRect?.w||1))+'px')};
-    if(m.chevron)m.chevron.hidden=false;
     morph=m;apply();return m;
   }
   function apply(){
@@ -104,7 +103,6 @@ const WorkoutFocus=(()=>{
     for(const node of m.leaving)node.style.opacity=String(node===m.thumb&&m.flying?1-swap:going);
     for(const node of m.held)node.style.opacity=String(node===m.thumb&&m.flying?1-swap:coming);
     for(const node of [...m.leaving,...m.held])if(node.classList.contains('workout-unconnected'))node.style.opacity=String(1-smooth(p,0,.2));
-    if(m.scrim)m.scrim.style.opacity=String(smooth(p,0,.25));
     if(m.clockOver){
       const fade=smooth(p,.25,.75),toCanvas=!m.start;
       m.clockOver.style.opacity=String(toCanvas?fade:1-fade);m.clockFlow.style.opacity=String(toCanvas?1-fade:fade);
@@ -114,7 +112,6 @@ const WorkoutFocus=(()=>{
     // not to the release: a gesture held near either end already carries that end's treatment.
     if(m.cover)host().classList.toggle('music-lit',p>=.5);
     dialState(m.live,p>=.5);
-    if(m.chevron)m.chevron.style.opacity=String(smooth(p,.5,1));
     if(!m.cover)return;
     for(const node of m.cover.querySelectorAll('.music-tint,.music-shade'))node.style.opacity=String(smooth(p,.08,.45));
     for(const node of m.cover.querySelectorAll('.music-glow'))node.style.opacity=String(.8*smooth(p,.08,.45));
@@ -136,8 +133,6 @@ const WorkoutFocus=(()=>{
     if(m.clockOver){for(const name of ['display','position','left','top','width','height','margin','pointer-events','z-index','transform','opacity'])m.clockOver.style.removeProperty(name);m.clockFlow.style.removeProperty('opacity')}
     if(m.cover)host().classList.toggle('music-lit',final);
     dialState(live,final);
-    if(m.chevron){m.chevron.style.removeProperty('opacity');m.chevron.hidden=!final}
-    m.scrim?.style.removeProperty('opacity');
     if(m.cover){
       // Hide first, then restore the cover's own values out of sight so nothing flashes back to full size.
       const cover=m.cover;if(!final)Object.assign(cover.style,{opacity:'0',visibility:'hidden'});
@@ -303,7 +298,7 @@ const MusicPlayer=(()=>{
     if(next.art!==undefined){artKey=next.artKey;artwork(next.art)}
     if(previous?.status==='ready'&&(previous.title!==next.title||previous.artist!==next.artist))WorkoutFocus.animate(q('.music-heading'),[{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'none'}],340);
     if(previous&&previous.status!=='ready')WorkoutFocus.animate(q('.music-bottom'),[{opacity:0,transform:'translateY(22px)'},{opacity:1,transform:'none'}],480);
-    root.classList.toggle('music-playing',next.playing);const toggle=q('[data-music="toggle"]'),action=next.playing?'pause':'play';if(toggle.dataset.state!==action){toggle.innerHTML=icon(action);toggle.dataset.state=action}toggle.setAttribute('aria-label',next.playing?'Pause music':'Play music');toggle.disabled=!next.canToggle;
+    root.classList.toggle('music-playing',next.playing);const toggle=q('[data-music="toggle"]'),action=next.playing?'pause':'play';if(toggle.dataset.state!==action){const changed=Boolean(toggle.dataset.state);toggle.innerHTML=icon(action);toggle.dataset.state=action;if(changed)feedback(toggle,true)}toggle.setAttribute('aria-label',next.playing?'Pause music':'Play music');toggle.disabled=!next.canToggle;
     for(const [action,key] of [['previous','canPrevious'],['next','canNext'],['open','canOpen']])q(`[data-music="${action}"]`).disabled=!next[key];
     const range=q('input');range.disabled=!next.canSeek;range.max=String(next.duration||1);if(!scrubbing){range.value=String(next.position);range.style.setProperty('--music-progress',Math.min(100,next.position/(next.duration||1)*100)+'%');q('.music-position').textContent=clock(next.position);range.setAttribute('aria-valuetext',clock(next.position)+' of '+clock(next.duration))}q('.music-duration').textContent=next.duration?clock(next.duration):'Live';
   }
@@ -311,7 +306,14 @@ const MusicPlayer=(()=>{
   function refresh(){const access=document.querySelector('[data-music-connect]');if(access)access.textContent=accessLabel();if(!root||document.hidden)return;try{const next=window.OrbitMusic?JSON.parse(window.OrbitMusic.read(artKey)):{status:'browser'};if(!valid(next))throw Error('Invalid media response');paint(next)}catch{paint({status:'error'})}}
   function send(action,value=0){if(state?.status!=='ready')return false;try{if(!window.OrbitMusic?.command(state.id,action,value))throw Error('Unavailable');if(action==='play'||action==='pause')requested={id:state.id,action,until:performance.now()+8000};refresh();return true}catch{requested=null;notice('Music control unavailable. Check the music app.');return false}}
   function connect(){try{const s=JSON.parse(window.OrbitMusic.read(artKey));if(s.status==='ready'&&s.canOpen){if(!window.OrbitMusic.command(s.id,'open',0))throw Error('Unavailable')}else if(s.status==='idle')notice('Open your music app and choose a track, then return to Orbit.');else window.OrbitMusic.connect()}catch{notice('Open Android Settings > Notification access > Orbit.')}}
-  function click(event){const button=event.target.closest('button');if(button&&!button.disabled&&button.dataset.music)send(button.dataset.music==='toggle'?(state.playing?'pause':'play'):button.dataset.music)}
+  function feedback(button,changed=false){
+    const glyph=button.querySelector('svg');if(!glyph)return;
+    for(const animation of glyph.getAnimations())animation.cancel();
+    const direction=button.dataset.music==='previous'?-1:1;
+    const frames=SurfaceMotion.reduced?[{opacity:.55},{opacity:1}]:changed?[{opacity:.25,transform:'rotate(-24deg)'},{opacity:1,transform:'rotate(0deg)'}]:[{transform:'translateX(0)',opacity:1},{transform:`translateX(${direction*6}px)`,opacity:.45,offset:.35},{transform:'translateX(0)',opacity:1}];
+    WorkoutFocus.animate(glyph,frames,SurfaceMotion.reduced?100:280);
+  }
+  function click(event){const button=event.target.closest('button');if(!button||button.disabled||!button.dataset.music)return;if(['previous','next','toggle'].includes(button.dataset.music))feedback(button,button.dataset.music==='toggle');send(button.dataset.music==='toggle'?(state.playing?'pause':'play'):button.dataset.music)}
   function input(event){if(event.target.type!=='range')return;if(!scrubbing)scrubId=state?.id;scrubbing=true;const value=Number(event.target.value);event.target.style.setProperty('--music-progress',Math.min(100,value/(state?.duration||1)*100)+'%');root.querySelector('.music-position').textContent=clock(value);event.target.setAttribute('aria-valuetext',clock(value)+' of '+clock(state?.duration||0))}
   function change(event){if(event.target.type==='range'){if(scrubId===state?.id)send('seek',Number(event.target.value));else notice('The track changed. Choose a position in the new track.');scrubbing=false}}
   function cancel(){scrubbing=false;refresh()}

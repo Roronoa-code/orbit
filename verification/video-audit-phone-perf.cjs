@@ -11,7 +11,7 @@ const phase=process.argv[2],out=path.join(__dirname,'video-audit-20260912','phon
   cmd('shell','dumpsys gfxinfo com.mani.orbit.audit reset');
   await p.evaluate(()=>{window.auditFrames=[];let last=performance.now();function tick(t){auditFrames.push(t-last);last=t;auditFrame=requestAnimationFrame(tick)}window.auditFrame=requestAnimationFrame(tick)});
   await b.startTracing(p,{screenshots:false,categories:['devtools.timeline','blink','cc']});
-  for(let i=0;i<8;i++){await p.evaluate(()=>document.querySelector('[data-music-expand]').click());await p.waitForTimeout(850);await p.evaluate(()=>document.querySelector('#health-minimize').click());await p.waitForTimeout(850)}
+  for(let i=0;i<8;i++){await p.evaluate(()=>document.querySelector('[data-music-expand]').click());await p.waitForTimeout(850);await p.evaluate(()=>document.querySelector('[data-timer-focus]').click());await p.waitForTimeout(850)}
   const trace=JSON.parse((await b.stopTracing()).toString()),result=await p.evaluate(()=>{cancelAnimationFrame(auditFrame);const f=auditFrames.slice(1).sort((a,b)=>a-b);return {frames:f.length,median:f[Math.floor(f.length*.5)],p95:f[Math.floor(f.length*.95)],max:f.at(-1),over25:f.filter(x=>x>25).length}});
   result.rasterMs=trace.traceEvents.filter(e=>e.ph==='X'&&/RasterTask|ImageDecodeTask/.test(e.name)).reduce((s,e)=>s+(e.dur||0)/1000,0);
   result.largeImagePaints=trace.traceEvents.filter(e=>e.name==='PaintImage'&&e.args?.data?.srcWidth===600).length;
