@@ -79,8 +79,8 @@ const BlobTrack=(()=>{
   }
   const TUNING={
     pressShrink:8,pressStiffness:260,pressDamping:.78,
-    settleStiffness:160,settleDamping:.74,shapeStiffness:500,shapeDamping:1,
-    slop:6,maxStretch:.16,squash:.45,stretchSlotsPerSecond:8,stretchTau:.035,
+    settleStiffness:320,settleDamping:.72,shapeStiffness:500,shapeDamping:1,
+    slop:6,maxStretch:.16,squash:.5,stretchSlotsPerSecond:8,stretchTau:.035,
     velocityWindow:.1,stillness:.06,projectionHorizon:.12,holdCap:.10,
   };
 

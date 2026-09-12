@@ -224,6 +224,7 @@ async function runChecks(){
     // Inspect calendar days without expanding every record in storage.
     const at=(back,hour,minutes,kind)=>{const end=new Date();end.setDate(end.getDate()-back);end.setHours(hour,20,0,0);return {kind,startedAt:end.getTime()-minutes*60000,endedAt:end.getTime(),elapsed:minutes*60000,totalMs:minutes*60000,targetMs:0,weightKg:0,trackLocation:false}};
     state=installFixture({active:null,history:[at(0,9,25,'Walking'),at(0,7,12,'Strength'),at(7,8,40,'Walking')]});await openWorkouts();
+    click('.workout-tabs [data-workout-tab=history]');await wait(220);
     check(qa('[data-week-day]').length===7,'History must show seven selectable calendar days');
     const weekTotal=text('.history-week-metrics');check(/37/.test(weekTotal),'Week active time must total its records');
     check(qa('.history-session').length===2,'Only selected-day records should appear');
@@ -240,6 +241,6 @@ async function runChecks(){
 document.querySelector('#narrow').onclick=()=>live.style.width='320px';
 document.querySelector('#wide').onclick=()=>live.style.width='390px';
 document.querySelector('#run').onclick=runChecks;
-document.querySelector('#preview').onclick=async()=>{try{await frameReady();expose();installFixture({active:null,history:[previewRecord()]});await openWorkouts();const row=qa('.history-session')[0];check(row,'Preview record is missing');row.click();await wait(260);result.textContent='Preview only. Recorded workout and GPS points are fixture data in this verification page.'}catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}};
+document.querySelector('#preview').onclick=async()=>{try{await frameReady();expose();installFixture({active:null,history:[previewRecord()]});await openWorkouts();click('.workout-tabs [data-workout-tab=history]');await wait(200);const row=qa('.history-session')[0];check(row,'Preview record is missing');row.click();await wait(260);result.textContent='Preview only. Recorded workout and GPS points are fixture data in this verification page.'}catch(error){result.textContent='FAIL: '+error.stack+'\nRendered: '+text('#health-content')}};
 document.querySelector('#reset').onclick=()=>{restoreFrame();result.textContent='Preview reset. Fixture data was removed from the child page.'};
 </script>

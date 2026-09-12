@@ -94,15 +94,15 @@ body{background:#0a0a0c}
 .screen{height:100dvh;min-height:0;border-radius:0}
 .copy-label{display:none}
 .deck-scroll{bottom:0;scroll-padding-bottom:92px}
-.live-island{overflow:hidden;border-radius:31px;box-shadow:0 -2px 22px -8px #0000008c,0 12px 30px -10px #000000b8}
-.live-island-body{position:absolute;inset:0 0 62px;margin:0;padding:0;overflow:hidden}
+.live-island{overflow:visible}
+.live-island-body{position:absolute;inset:0 0 62px;margin:0;padding:0;overflow:hidden;transform-origin:50% 0}
 .live-island-content{padding:12px 12px 8px}
 .live-island .live-bar{top:auto;bottom:0;transform:none}
 .live-island .live-bar:before{content:none}
 .live-island .live-bar:focus-visible{outline-offset:-4px}
 /* Launcher glass: a lighter charcoal tint so the Home content behind it diffuses through, a thin rim, the shadow on the shell itself. */
-.live-island .island-frost{top:auto;height:var(--live-frost-height,62px);will-change:auto;background:var(--frost-grain),var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
-.live-island .island-surface{border-color:rgba(255,255,255,.07);border-top-color:rgba(255,255,255,.18);border-bottom-color:rgba(255,255,255,.04);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01));box-shadow:none}
+.live-island .island-frost{top:auto;height:var(--live-frost-height,62px);background:var(--frost-grain),var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
+.live-island .island-surface{top:auto;bottom:0;border-color:rgba(255,255,255,.07);border-top-color:rgba(255,255,255,.18);border-bottom-color:rgba(255,255,255,.04);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01));box-shadow:0 -2px 22px -8px #0000008c,0 12px 30px -10px #000000b8}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.live-island .island-frost{backdrop-filter:none;-webkit-backdrop-filter:none;background:#28262e}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.live-island .island-frost{background:#28262e}}
 @media(forced-colors:active){.live-island .island-frost{backdrop-filter:none;background:Canvas}.live-island .island-surface{border:1px solid CanvasText}}
@@ -113,17 +113,14 @@ body{background:#0a0a0c}
 .stack-content{position:relative;opacity:1}.stack-card .facts-footer{will-change:transform,opacity}
 #stack-open{will-change:transform}
 /* The motion box owns the card's position, fold clip, fade and z-order; the card inside stays static. */
-.stack-motion{position:absolute;top:0;left:14px;right:14px;z-index:var(--card-z);transform-origin:50% 0;will-change:transform;overflow:hidden}
+.stack-motion{position:absolute;top:0;left:14px;right:14px;z-index:var(--card-z);transform-origin:50% 0;will-change:transform,clip-path;overflow:hidden}
 .stack-motion>.stack-card{position:absolute;top:0;left:0;right:0;z-index:0;transform:none;will-change:auto;clip-path:none}
 </style>
-<link rel="stylesheet" href="glass-material.css">
 <link rel="stylesheet" href="health-pages.css">
+<link rel="stylesheet" href="glass-material.css">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
-<!-- Edge-local refraction for the moving indicator: the normal deviates only in a tenth of the shape at each
-     edge, so the background bends where the glass curves and stays put through the middle. No interior
-     magnification and no channel splitting. -->
 <defs>
 <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="route" viewBox="0 0 24 24"><path d="M6 13c0 4 2 7 5 5s3-5 6-4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6c0 3-3 6-3 6S3 9 3 6a3 3 0 0 1 6 0Zm12-3c0 3-3 6-3 6s-3-3-3-6a3 3 0 0 1 6 0Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="18" cy="3" r="1" fill="currentColor"/></symbol>
@@ -176,6 +173,7 @@ body{background:#0a0a0c}
 <script src="workout-focus.js"></script>
 
 <script src="blob-track.js"></script>
+<script src="liquid-glass.js"></script>
 <script src="workout-details.js"></script>
 <script src="orbit-settings.js"></script>
 <script src="health-pages.js"></script>
@@ -312,17 +310,19 @@ for(const item of Object.values(islands))Object.assign(item,{open:false,value:0,
 function measureIsland(item){
   const live=item===islands.live,width=item.el.clientWidth,height=Math.max(item.closed,(live?item.body.firstElementChild.offsetHeight:item.body.offsetHeight)+(live?62:0));
   if(item.width===width&&item.fullHeight===height)return false;item.width=width;item.fullHeight=height;
-  if(live)item.el.style.setProperty('--live-frost-height',height+'px');else item.el.style.height=height+'px';layoutIsland(item);return true;
+  if(live)item.el.style.setProperty('--live-frost-height',height+'px');item.el.style.height=height+'px';layoutIsland(item);return true;
 }
 function layoutIsland(item){
   const p=clamp(item.value),live=item===islands.live,w=item.width||300,h=item.fullHeight;
-  const sx=live?1:(item.closed+(w-item.closed)*reveal(p,0,.72))/w,sy=Math.max(item.closed,item.height.value)/h,r=live?Math.round(31-3*p):24+4*p;
+  const height=Math.max(item.closed,Math.min(h,item.height.value)),sx=live?1:(item.closed+(w-item.closed)*reveal(p,0,.72))/w,sy=height/h,r=live?31-3*p:24+4*p;
   const shell=item.el.querySelector('.island-surface');shell.style.transform=live?'none':`scale(${sx},${sy})`;shell.style.borderRadius=live?r+'px':`${r/sx}px / ${r/sy}px`;
-  if(live){item.el.style.height=Math.max(item.closed,item.height.value)+'px';item.el.style.borderRadius=r+'px'}
+  // Only the decorative rim changes height; the backdrop and controls retain their full layout.
+  if(live){shell.style.height=height+'px';item.el.querySelector('.island-frost').style.clipPath=`inset(${h-height}px 0 0 round ${r}px)`}
   if(!live)item.el.querySelector('.island-frost').style.clipPath=`inset(0px 0 ${h-item.height.value}px ${w-sx*w}px round ${r}px)`;
   const growth=live?clamp((item.height.value-item.closed)/(h-item.closed||1)):p;
-  const visible=reveal(Math.min(p,growth),live?.56:.32,.98)*reveal(item.content.value,.22,.92),offset=0;
-  item.body.style.opacity=String(visible);item.body.style.transform=`translateY(${offset+(live?8:-6)*(1-visible)}px)`;
+  const visible=reveal(Math.min(p,growth),live?.56:.32,.98)*reveal(item.content.value,.22,.92),offset=live?h-height+8*(1-visible):-6*(1-visible);
+  item.body.style.opacity=String(visible);item.body.style.transform=`translateY(${offset}px)`;
+  if(live)item.body.style.clipPath=`inset(0 0 ${offset}px)`;
   item.trigger.style.setProperty('--island-open',String(p));
   if(live)item.body.querySelectorAll('.activity-choice').forEach((button,i)=>{const q=reveal(Math.min(p,growth),.58+i*.04,.98);button.style.opacity=String(q);button.style.transform=`translateY(${6*(1-q)}px)`});
 }
@@ -387,8 +387,9 @@ $('#about-link').addEventListener('click',e=>{e.preventDefault();Health.open('se
 let deckExpanded=false,deckProgress=0,deckReady=false;
 const deck=$('#panel-deck'),deckScroller=$('#deck-scroll'),panelContent=$('#period-content'),liveBar=$('#live-bar');
 const deckFrost=deck.querySelector('.deck-frost');
-function frostDeck(){if(deckFrost)deckFrost.style.opacity=String(Math.min(1,deckScroller.scrollTop/24)*deckProgress)}
-deckScroller.addEventListener('scroll',frostDeck,{passive:true});
+let deckScrollTop=0;
+function frostDeck(){if(deckFrost)deckFrost.style.opacity=String(Math.min(1,deckScrollTop/24)*deckProgress)}
+deckScroller.addEventListener('scroll',()=>{deckScrollTop=deckScroller.scrollTop;frostDeck()},{passive:true});
 let deckCards=[],cardMotion=[],deckGesture=null,ignoreDeckClick=false;
 const deckMotion={value:0,velocity:0},orbPose={value:0,velocity:0};
 // The folded card shell is a child element rather than ::before: every per-frame change to a card
@@ -420,7 +421,7 @@ function measureDeck(){
   deck.style.height=(closedHeight+heroClosed-heroOpen)+'px';
   $('#stack-open').style.height=(closedHeight-80)+'px';
   panelContent.style.height=(Math.max(deckClosedSpace+heroClosed-heroOpen,cardHeights.reduce((sum,h)=>sum+h+12,0))+82)+'px';
-  deckCards.forEach((card,i)=>card.style.height=cardHeights[i]+'px');
+  deckCards.forEach((card,i)=>{card.style.height=cardHeights[i]+'px';if(cardMotion[i]!==card)cardMotion[i].style.height=cardHeights[i]+'px'});
   layoutDeck();
 }
 function stopDeckMotion(){cancelAnimationFrame(motionFrame);motionFrame=0;motionTime=0;orb?.setSuspended(Boolean(islandFrame)||Boolean(Health.page))}
@@ -434,10 +435,11 @@ function animateDeck(){
   motionTime=performance.now();deck.classList.add('is-moving');orb?.setSuspended(true);
   function tick(now){
     const dt=Math.min(.05,Math.max(0,(now-motionTime)/1000));motionTime=now;
-    if(!deckGesture?.dragging)springStep(deckMotion,deckExpanded?1:0,dt);
-    springStep(orbPose,deckGesture?.dragging?deckMotion.value:(deckExpanded?1:0),dt,17);deckProgress=clamp(deckMotion.value);layoutDeck();
+    const held=deckGesture?.dragging&&deckGesture.mode==='deck';
+    if(!held)springStep(deckMotion,deckExpanded?1:0,dt);
+    springStep(orbPose,held?deckMotion.value:(deckExpanded?1:0),dt,17);deckProgress=clamp(deckMotion.value);layoutDeck();
     const target=deckExpanded?1:0,settled=Math.abs(deckMotion.value-target)<.001&&Math.abs(deckMotion.velocity)<.02&&Math.abs(orbPose.value-target)<.001&&Math.abs(orbPose.velocity)<.02;
-    if(!deckGesture?.dragging&&settled){deckMotion.value=orbPose.value=target;deckMotion.velocity=orbPose.velocity=0;deckProgress=target;layoutDeck();stopDeckMotion();deck.classList.remove('is-moving');settleDeckStructure();return}
+    if(!held&&settled){deckMotion.value=orbPose.value=target;deckMotion.velocity=orbPose.velocity=0;deckProgress=target;layoutDeck();stopDeckMotion();deck.classList.remove('is-moving');settleDeckStructure();return}
     motionFrame=requestAnimationFrame(tick);
   }
   motionFrame=requestAnimationFrame(tick);
@@ -484,11 +486,11 @@ function layoutDeck(){
     const shown=146+(height-146)*q;
     box.style.opacity=String(i?.3+.7*q:1);
     const shell=ensureShell(card);if(shell)shell.style.transform=`scaleY(${shown/height})`;else card.style.setProperty('--shell-scale',String(shown/height));
-    if(box!==card)box.style.height=shown+'px';else card.style.clipPath='inset(0 0 '+(height-shown)+'px 0)';
+    box.style.clipPath='inset(0 0 '+(height-shown)+'px 0)';
     previousBottom=Math.max(previousBottom,y+shown);
     next+=height+12;
   });
-  if(scrollReturn)deckScroller.scrollTop=scrollReturn.top*clamp(p/scrollReturn.progress);
+  if(scrollReturn){deckScrollTop=scrollReturn.top*clamp(p/scrollReturn.progress);deckScroller.scrollTop=deckScrollTop}
   if(p===0)scrollReturn=null;
   frostDeck();
 }
@@ -525,7 +527,7 @@ function startDeckGesture(x,y,target,id,input='pointer'){
 function moveDeckGesture(x,y,event){
   const g=deckGesture;if(!g)return;const dx=x-g.x,dy=y-g.y,vertical=Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)*1.2;
   // Anywhere on the launcher its shell follows the finger both ways; pulling down on the bar of the open stack folds the stack.
-  if(!g.mode&&vertical){g.mode=g.fromIsland&&!(deckExpanded&&dy>0)?'live':'deck';g.slop=Math.sign(dy)*8}
+  if(!g.mode&&vertical){g.mode=g.fromIsland&&!(deckExpanded&&dy>0)?'live':'deck';g.slop=Math.sign(dy)*8;g.progress=deckProgress;g.liveStart=islands.live.value}
   const allowed=g.dragging||vertical&&(g.mode==='live'||!deckExpanded&&dy<0||deckExpanded&&dy>0&&(g.fromBar||g.scrollTop<=0));
   if(!allowed){if(Math.abs(dx)>12||Math.abs(dy)>12){ignoreDeckClick=true;deckGesture=null}return}
   if(event.cancelable)event.preventDefault();if(event.pointerType&&event.pointerType!=='touch'&&!deck.hasPointerCapture(event.pointerId))deck.setPointerCapture(event.pointerId);
@@ -541,6 +543,8 @@ function moveDeckGesture(x,y,event){
 }
 function endDeckGesture(x,y,cancelled=false){
   if(!deckGesture)return;const g=deckGesture;deckGesture=null;
+  // A finger held still has no release momentum, even if its last move was a fast one.
+  if(performance.now()-g.lastTime>=90){g.velocity=0;if(g.mode==='live'){islands.live.velocity=0;islands.live.height.velocity=0}else{deckMotion.velocity=0;orbPose.velocity=0}}
   if(g.mode==='live'){
     const dy=y-g.y,commit=!cancelled&&Math.abs(dy)>=24&&Math.abs(dy)>Math.abs(x-g.x)*1.2,projection=islands.live.value+(performance.now()-g.lastTime<90?islands.live.velocity*.16:0);setLiveOpen(commit?projection>.5:g.liveWasOpen);return;
   }
@@ -584,6 +588,7 @@ initOrb();
 initDeck();
 initIslands();
 render();
+window.LiquidGlass?.enhance();
 </script>
 </body>
 </html>

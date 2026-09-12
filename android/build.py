@@ -39,7 +39,7 @@ def inline(reference, path, attributes=''):
 # Every local stylesheet and script the page loads must be inlined here; nothing may remain a network reference.
 inline('<link rel="stylesheet" href="glass-material.css">', 'glass-material.css')
 inline('<link rel="stylesheet" href="health-pages.css">', 'health-pages.css')
-for name in ['settings-store.js', 'surface-motion.js', 'hero-dots.js', 'sleep-timeline.js', 'blob-track.js', 'workout-focus.js', 'workout-details.js', 'orbit-settings.js', 'signal-orb.js']:
+for name in ['settings-store.js', 'surface-motion.js', 'hero-dots.js', 'sleep-timeline.js', 'blob-track.js', 'liquid-glass.js', 'workout-focus.js', 'workout-details.js', 'orbit-settings.js', 'signal-orb.js']:
     inline(f'<script src="{name}"></script>', name)
 inline('<script src="health-pages.js"></script>', 'health-pages.js', ' id="health-pages"')
 import re as _re
@@ -51,6 +51,8 @@ native_style = '<style>.status,.home-indicator{display:none}.utility-island{top:
 html = html.replace('</head>', native_style + '</head>')
 (build / 'assets/index.html').write_text(html, encoding='utf-8')
 shutil.copy2(root.parent / 'Manrope-OFL.txt', build / 'assets/Manrope-OFL.txt')
+shutil.copy2(root.parent / 'licenses/Kyant-backdrop-LICENSE.txt', build / 'assets/Kyant-backdrop-LICENSE.txt')
+shutil.copy2(root.parent / 'THIRD-PARTY-NOTICES.md', build / 'assets/THIRD-PARTY-NOTICES.md')
 run(bt / 'aapt2.exe', 'compile', '--dir', root / 'res', '-o', build / 'resources.zip')
 manifest = root / 'AndroidManifest.xml'
 if audit:

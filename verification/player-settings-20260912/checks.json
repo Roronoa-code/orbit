@@ -452,5 +452,99 @@
     "sha256": "2d0b07d8b16457c5715539d891779b7774e1de22e9d4aa0fb179780703d6483f",
     "installedHashVerified": true,
     "auditRemoved": true
+  },
+  "motionGlassWorkouts": {
+    "date": "2026-09-13",
+    "baseline": "c6404d8",
+    "package": {
+      "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260913-003840",
+      "sha256": "c59a4e20c2143ff9b2d7341630a41ce0f7a85650e588a62dfc025f78ba0a5a8c",
+      "bytes": 276049,
+      "auditBuild": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260913-003844-audit",
+      "auditSha256": "f2c69b6e171d5df73ef42e18eea8200dfd11c6dc467116623d37c8a7c53ef199",
+      "htmlParity": true,
+      "licenseBundled": true,
+      "installed": true,
+      "installedSha256": "c59a4e20c2143ff9b2d7341630a41ce0f7a85650e588a62dfc025f78ba0a5a8c",
+      "installedAtUtc": "2026-09-12T23:44:19.806266+00:00",
+      "deviceModel": "SM-S938B",
+      "installMode": "adb install -r; app data preserved",
+      "phoneLaunched": false,
+      "phoneTested": false,
+      "auditInstalled": false,
+      "previousApkSha256": "9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b"
+    },
+    "workoutFlow": [
+      {
+        "width": 390,
+        "status": "PASS",
+        "checks": "Train grid, rapid navigation identity, selected date return, week bounds, seconds, all activities, profile, target, pause/resume/save, contrast, overflow"
+      },
+      {
+        "width": 384,
+        "status": "PASS",
+        "checks": "Train grid, rapid navigation identity, selected date return, week bounds, seconds, all activities, profile, target, pause/resume/save, contrast, overflow"
+      },
+      {
+        "width": 320,
+        "status": "PASS",
+        "checks": "Train grid, rapid navigation identity, selected date return, week bounds, seconds, all activities, profile, target, pause/resume/save, contrast, overflow"
+      }
+    ],
+    "endpointCases": 18,
+    "endpointFailures": 0,
+    "homeGeometry": {
+      "maxControlDriftCssPx": 6.103515625e-05,
+      "cardHeightDriftCssPx": 0,
+      "secondSwipe": "PASS",
+      "heldRelease": "PASS",
+      "coordinatedDrag": "PASS"
+    },
+    "glass": {
+      "referenceCommit": "70394304ee718d160cd25e41fbcbaef39c05b45c",
+      "shader": "Apache-2.0 Kyant backdrop",
+      "mapUpdatesDuringSelection": 0,
+      "browserPixelEffect": "PASS",
+      "forcedColors": "PASS",
+      "nativeRunBeforeWorkoutsRework": {
+        "deck": {
+          "frames": 670,
+          "median": 16.600000000000364,
+          "p95": 16.700000000000728,
+          "max": 17,
+          "over25": 0
+        },
+        "live": {
+          "frames": 655,
+          "median": 16.69999999999709,
+          "p95": 16.799999999999272,
+          "max": 17.200000000000728,
+          "over25": 0
+        },
+        "active-live": {
+          "frames": 654,
+          "median": 16.60000000000582,
+          "p95": 16.700000000004366,
+          "max": 17,
+          "over25": 0
+        },
+        "jank": "375 (36.69%)\r",
+        "errors": []
+      }
+    },
+    "verification": [
+      "workout-rework 390/384/320 including 34px/8px insets",
+      "rendered ux-motion 390/384/320",
+      "rendered focus-music 390/384/320",
+      "rendered workout-details 390/384/320",
+      "workout-endpoints 18 cases",
+      "body-history 390/320",
+      "home-motion 390/384/320",
+      "liquid-glass 390/320",
+      "workout-details model",
+      "native-check",
+      "signed production and Audit build; HTML parity; source and license presence"
+    ],
+    "physicalWorkoutsRework": "SKIPPED at explicit user request: install only, no app launch or phone testing"
   }
 }

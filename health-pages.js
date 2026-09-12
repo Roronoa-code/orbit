@@ -5,7 +5,7 @@ const Health = (() => {
   const key='orbit-workouts-v1',q=s=>document.querySelector(s);
   let page=null,store={active:null,history:[]},storageFault=false,options,timer=0,returnFocus;
   let bodyMetric='weight',bodyRange=30,bodyDate=null,setup=null,countdown=null,countTimer=0,countDots=null;
-  let timerMode='elapsed',timerFocused=false,dotPattern=0,historyDate=null;
+  let timerMode='elapsed',timerFocused=false,dotPattern=0,historyDate=null,workoutTab='train';
   let sleepDate=null,sleepMinute=0,workoutRecord=null,workoutChart='route',workoutReturn=null;
   const now=()=>performance.timeOrigin+performance.now();
   const stamp=(date,full=false)=>new Date(date).toLocaleDateString('en-GB',full?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
@@ -103,6 +103,8 @@ const Health = (() => {
   const fromTrack=event=>Boolean(event.detail)&&performance.now()-trackCommit<400;
   function bindTracks(){
     releaseTracks();
+    bindTrack('workout-tab',q('.workout-tabs'),{optionSelector:'[data-workout-tab]',idOf:el=>el.dataset.workoutTab,
+      committed:()=>workoutTab,commit:id=>{trackCommit=performance.now();setWorkoutTab(id)}});
     bindTrack('body-metric',q('.body-metric-picker'),{optionSelector:'[data-body-metric]',idOf:el=>el.dataset.bodyMetric,
       committed:()=>bodyMetric,commit:id=>{trackCommit=performance.now();lens.fromTrack=true;goBody(id);if(!lens.frame)lens.fromTrack=false}});
     bindTrack('body-range',q('.body-timeline .segmented'),{optionSelector:'[data-body-range]',idOf:el=>el.dataset.bodyRange,
@@ -131,7 +133,7 @@ const Health = (() => {
     if(!['route','speed','altitude'].includes(mode)||!record())return;
     workoutChart=mode;const s=record();
     q('.workout-route-group').innerHTML=WorkoutDetails.chart(s,elapsed(s),workoutChart);
-    bindTracks();q('[data-workout-chart="'+workoutChart+'"]').focus({preventScroll:true});
+    bindTracks();window.LiquidGlass?.enhance();q('[data-workout-chart="'+workoutChart+'"]').focus({preventScroll:true});
   }
   // The ring is a lens over a looping row of measurements. A horizontal drag slides the reading, grows or shrinks the
   // purple arc and carries the selector capsule together; a tap on the centre or on the selector runs the same move.
@@ -267,20 +269,21 @@ const Health = (() => {
   const weekStart=value=>{const d=dayStart(value);d.setDate(d.getDate()-(d.getDay()+6)%7);return d};
   const addDays=(date,n)=>{const d=new Date(date);d.setDate(d.getDate()+n);return d};
   const hhmm=ms=>new Date(ms).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  const duration=ms=>{const seconds=Math.floor(ms/1000),minutes=Math.floor(seconds/60);return minutes>=60?`${Math.floor(minutes/60)}h ${minutes%60}m`:minutes?`${minutes}m${seconds%60?' '+seconds%60+'s':''}`:`${seconds}s`};
   function weekBins(){
     if(historyDate===null)historyDate=dayStart(store.history[0]?.startedAt??now()).getTime();
     const start=weekStart(historyDate);
     return Array.from({length:7},(_,i)=>{const date=addDays(start,i),end=addDays(date,1).getTime(),records=store.history.filter(r=>r.startedAt>=date.getTime()&&r.startedAt<end);return {date,records,minutes:records.reduce((n,r)=>n+r.elapsed,0)/60000}});
   }
   function historySessions(bin){
-    return `<h3 class="history-day">${bin.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</h3>${bin.records.length?bin.records.map(r=>{const v=WorkoutDetails.readings(r,r.elapsed);return `<button class="history-session" data-workout-detail="${r.startedAt}">${activityIcon(r.kind)}<span><strong>${r.kind}<small>${hhmm(r.startedAt)}</small></strong><span class="history-session-metrics">${clock(r.elapsed)} active${v.distance!==null?' · '+(v.distance/1000).toFixed(2)+' km':''}${v.calories!==null?' · '+Math.round(v.calories)+' kcal est.':''}</span></span><span class="history-arrow" aria-hidden="true">›</span></button>`}).join(''):'<p class="history-empty">No workouts this day</p>'}`;
+    return `<h3 class="history-day">${bin.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</h3>${bin.records.length?bin.records.map(r=>{const v=WorkoutDetails.readings(r,r.elapsed);return `<button class="history-session" data-workout-detail="${r.startedAt}">${activityIcon(r.kind)}<span><strong>${r.kind}<small>${hhmm(r.startedAt)}</small></strong><span class="history-session-metrics"><b>${duration(r.elapsed)}</b>${v.distance!==null?' · '+(v.distance/1000).toFixed(2)+' km':''}${v.calories!==null?' · '+Math.round(v.calories)+' kcal est.':''}</span></span><span class="history-arrow" aria-hidden="true">↗</span></button>`}).join(''):'<div class="history-empty"><p>No workouts this day</p><span>Choose a marked date to see a session.</span></div>'}`;
   }
   function historyCalendar(){
-    const bins=weekBins(),start=bins[0].date,end=bins[6].date,count=bins.reduce((n,b)=>n+b.records.length,0),mins=Math.round(bins.reduce((n,b)=>n+b.minutes,0)),today=dayStart(now());
+    const bins=weekBins(),start=bins[0].date,end=bins[6].date,count=bins.reduce((n,b)=>n+b.records.length,0),ms=bins.reduce((n,b)=>n+b.minutes*60000,0),today=dayStart(now()),max=Math.max(1,...bins.map(b=>b.minutes));
     const earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt))),selected=bins.find(b=>b.date.getTime()===historyDate)||bins[0];
-    return `<div class="history-week-nav"><button data-history-week="-1" aria-label="Previous week" ${start<=earliest?'disabled':''}>‹</button><div><h2>Workout history</h2><p>${stamp(start)} – ${stamp(end,true)}</p></div><button data-history-week="1" aria-label="Next week" ${end>=today?'disabled':''}>›</button></div>
-    <div class="history-week-metrics"><p><strong>${count}</strong><small>${count===1?'session':'sessions'}</small></p><p><strong>${mins}</strong><small>active min</small></p></div>
-    <div class="history-days" role="group" aria-label="Choose workout day">${bins.map((b,i)=>`<button data-week-day="${i}" aria-pressed="${b.date.getTime()===historyDate}" aria-label="${stamp(b.date,true)}, ${b.records.length} sessions" ${b.date>today?'disabled':''}><small>${b.date.toLocaleDateString('en-GB',{weekday:'short'}).slice(0,1)}</small><strong>${b.date.getDate()}</strong><i class="${b.records.length?'has-records':''}" aria-hidden="true"></i></button>`).join('')}</div>
+    return `<div class="history-week-nav"><div><h2>${start.getTime()===weekStart(now()).getTime()?'This week':'Training week'}</h2><p>${stamp(start)} – ${stamp(end,true)}</p></div><button data-history-week="-1" aria-label="Previous week" ${start<=earliest?'disabled':''}>‹</button><button data-history-week="1" aria-label="Next week" ${end>=today?'disabled':''}>›</button></div>
+    <div class="history-week-metrics"><p><strong>${duration(ms)}</strong><small>Active time</small></p><p><strong>${count}</strong><small>${count===1?'Session':'Sessions'}</small></p></div>
+    <div class="history-days" role="group" aria-label="Choose workout day">${bins.map((b,i)=>`<button data-week-day="${i}" aria-pressed="${b.date.getTime()===historyDate}" aria-label="${stamp(b.date,true)}, ${b.records.length} sessions, ${duration(b.minutes*60000)} active" ${b.date>today?'disabled':''}><small>${b.date.toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${b.date.getDate()}</strong><span class="history-day-bar" aria-hidden="true"><i class="${b.records.length?'has-records':''}" style="height:${b.records.length?Math.max(4,b.minutes/max*24):2}px"></i></span></button>`).join('')}</div>
     <div id="history-sessions" aria-live="polite">${historySessions(selected)}</div>`;
   }
   function inspectWeek(index){
@@ -293,15 +296,26 @@ const Health = (() => {
     const next=addDays(historyDate,step*7),earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt)));
     if(weekStart(next)<earliest||weekStart(next)>weekStart(now()))return;
     historyDate=Math.min(next.getTime(),dayStart(now()).getTime());q('#workout-calendar').innerHTML=historyCalendar();
-    SurfaceMotion.shift(q('#workout-calendar'),{x:step*10,y:0},200);q('[data-history-week="'+step+'"]').focus({preventScroll:true});
+    SurfaceMotion.shift(q('#workout-calendar'),{x:step*10,y:0},200);const nextFocus=q('[data-history-week="'+step+'"]');(nextFocus.disabled?q('[data-week-day][aria-pressed=true]'):nextFocus).focus({preventScroll:true});
   }
   function workoutHome(){
-    return `<section class="workout-start"><h2 class="workout-start-title">Start a session</h2><div class="workout-kinds">${kinds.map(kind=>{const last=store.history.find(r=>r.kind===kind);return `<button data-setup="${kind}" ${storageFault?'disabled':''}>${activityIcon(kind)}<span><strong>${kind}</strong><small>${last?'Last '+stamp(last.endedAt)+' · '+clock(last.elapsed):'No sessions yet'}</small></span></button>`}).join('')}</div></section>${storageFault?'<p class="health-error">Saved workouts could not be read. Recording is disabled to preserve them.</p>':''}<section class="health-tile workout-history" id="workout-calendar">${historyCalendar()}</section>`;
+    return `<div class="workout-tabs glass-track blob-track" role="group" aria-label="Workouts view"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${[['train','Train'],['history','History']].map(([id,label])=>`<button class="blob-option" data-workout-tab="${id}" aria-pressed="${workoutTab===id}" aria-controls="workout-hub-content">${label}</button>`).join('')}</div><div id="workout-hub-content">${workoutHub()}</div>`;
+  }
+  function workoutHub(){
+    if(workoutTab==='history'&&storageFault)return '<p class="health-error">Saved workouts could not be read. Your history has been preserved.</p>';
+    if(workoutTab==='history')return `<section class="workout-history" id="workout-calendar" aria-label="Workout history">${historyCalendar()}</section>`;
+    const start=weekStart(now()).getTime(),end=addDays(start,7).getTime(),records=store.history.filter(r=>r.startedAt>=start&&r.startedAt<end),ms=records.reduce((n,r)=>n+r.elapsed,0);
+    return `<section class="workout-start"><h2 class="workout-start-title">Choose your workout</h2><div class="workout-kinds">${kinds.map(kind=>`<button data-setup="${kind}" ${storageFault?'disabled':''}>${activityIcon(kind)}<strong>${kind}</strong><span class="workout-kind-arrow" aria-hidden="true">↗</span></button>`).join('')}</div></section>${storageFault?'<p class="health-error">Saved workouts could not be read. Recording is disabled to preserve them.</p>':''}<button class="workout-week-link" data-workout-tab="history"><span><small>This week</small><strong>${duration(ms)} <span>· ${records.length} ${records.length===1?'session':'sessions'}</span></strong></span><span aria-hidden="true">↗</span></button>${store.history[0]?`<div class="workout-last"><h2>Last workout</h2>${historySessions({date:new Date(store.history[0].startedAt),records:[store.history[0]]})}</div>`:''}`;
+  }
+  function setWorkoutTab(tab){
+    if(!['train','history'].includes(tab)||tab===workoutTab)return;
+    workoutTab=tab;document.querySelectorAll('.workout-tabs button').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.workoutTab===tab)));tracks.get('workout-tab')?.sync(tab);
+    q('#workout-hub-content').innerHTML=workoutHub();q('#health-scroll').scrollTop=0;SurfaceMotion.reveal(q('#workout-hub-content'),{x:tab==='history'?8:-8,y:0},180);
   }
   // One configuration flow for every activity: the header carries the name; the panel holds target, GPS and weight.
   function setupView(){
     const outdoor=setup.kind!=='Strength',timed=Boolean(setup.targetMs);
-    return `<section class="workout-setup"><form id="workout-setup-form"><div class="setup-panel"><fieldset class="setup-target"><legend>Workout target</legend><div class="setup-segments glass-track blob-track"><span class="selection-pill glass-indicator" aria-hidden="true"></span><label class="blob-option"><input type="radio" name="target" value="open" ${timed?'':'checked'}/><span>Open workout</span></label><label class="blob-option"><input type="radio" name="target" value="time" ${timed?'checked':''}/><span>Time target</span></label></div></fieldset><div id="target-options" class="target-options" ${timed?'':'hidden'}><label class="target-minutes"><span>Duration</span><span class="setup-field"><input id="target-minutes" ${timed?'':'disabled'} type="number" min="1" max="1440" step="1" value="${timed?setup.targetMs/60000:30}" inputmode="numeric"/><small>min</small></span></label></div>${outdoor?`<label class="tracking-option"><span>Track outdoors<small>Phone GPS · route and distance</small></span><input id="workout-track" type="checkbox" role="switch" ${setup.trackLocation?'checked':''}/></label>`:''}<label class="workout-weight"><span>Weight<small>Energy estimate · session weight</small></span><span class="setup-field"><input id="workout-weight" type="number" min="20" max="350" step="0.1" value="${setup.weightKg||''}" inputmode="decimal" placeholder="—"/><small>kg</small></span></label></div><p class="setup-help">${outdoor?'GPS is used only during this workout. Turn it off for an indoor session.':'Records active time, pauses and your session history.'}</p><p class="health-error" id="workout-error" role="alert"></p><button class="workout-primary" type="submit">Start ${setup.kind.toLowerCase()}</button></form><button class="music-access" data-music-connect ${window.OrbitMusic?'':'disabled'}>${MusicPlayer.accessLabel()}</button></section>`;
+    return `<section class="workout-setup"><form id="workout-setup-form"><div class="setup-panel"><div class="setup-activity" aria-hidden="true">${activityIcon(setup.kind)}</div><fieldset class="setup-target"><legend>Choose a goal</legend><div class="setup-segments glass-track blob-track"><span class="selection-pill glass-indicator" aria-hidden="true"></span><label class="blob-option"><input type="radio" name="target" value="open" ${timed?'':'checked'}/><span>No target</span></label><label class="blob-option"><input type="radio" name="target" value="time" ${timed?'checked':''}/><span>Time</span></label></div></fieldset><div class="setup-goal"><p class="setup-open-note" ${timed?'hidden':''}>Go at your own pace.<br><span>Finish whenever you’re ready.</span></p><div id="target-options" class="target-options" ${timed?'':'hidden'}><label class="target-minutes"><span>Duration</span><span class="setup-field"><input id="target-minutes" ${timed?'':'disabled'} type="number" min="1" max="1440" step="1" value="${timed?setup.targetMs/60000:30}" inputmode="numeric"/><small>min</small></span></label></div></div>${outdoor?`<label class="tracking-option"><span>Track outdoors<small>Phone GPS · route and distance</small></span><input id="workout-track" type="checkbox" role="switch" ${setup.trackLocation?'checked':''}/></label>`:''}<label class="workout-weight"><span>Weight<small>For the energy estimate</small></span><span class="setup-field"><input id="workout-weight" type="number" min="20" max="350" step="0.1" value="${setup.weightKg||''}" inputmode="decimal" placeholder="—"/><small>kg</small></span></label></div><p class="setup-help">${outdoor?'Turn GPS off for an indoor workout.':'Active time and pauses are saved with your workout.'}</p><p class="health-error" id="workout-error" role="alert"></p><button class="workout-primary" type="submit">Start ${setup.kind.toLowerCase()}</button></form><button class="music-access" data-music-connect ${window.OrbitMusic?'':'disabled'}>${MusicPlayer.accessLabel()}</button></section>`;
   }
   function sessionView(){
     const a=store.active,t=elapsed(a),paused=a.resumedAt===null;
@@ -328,7 +342,7 @@ const Health = (() => {
     q('#health-title').textContent=page==='workouts'?(record()?.kind||store.active?.kind||setup?.kind||titles[page]):titles[page];
     q('#health-back').setAttribute('aria-label',workoutRecord!==null?'Back to workouts':countdown!==null?'Cancel countdown':setup?'Back to workouts':page==='sleep'?'Back to sleep summary':'Back to dashboard');
     q('#health-source').textContent=page==='settings'?'Your profile · saved on this device':page==='workouts'?'Recorded locally on this phone':page==='sleep'?'Demo night · stage timing illustration':'Demo data · '+stamp(options.getDate()+'T12:00:00',true);
-    q('#health-source').hidden=page==='settings'||page==='workouts'&&Boolean(focus||workoutRecord!==null);q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;q('#health-page').dataset.workoutScreen=page!=='workouts'?'':workoutRecord!==null?'record':countdown!==null?'countdown':store.active?'active':setup?'setup':'picker';
+    q('#health-source').hidden=page==='settings'||page==='workouts';q('#health-page').classList.toggle('workout-focus',Boolean(focus));q('#health-page').dataset.page=page;q('#health-page').dataset.workoutScreen=page!=='workouts'?'':workoutRecord!==null?'record':countdown!==null?'countdown':store.active?'active':setup?'setup':'picker';
     countDots?.stop();countDots=null;WorkoutFocus.dispose();MusicPlayer.stop();
     body.innerHTML=page==='settings'?OrbitSettings.view():page==='body'?bodyView():page==='overview'?overview():page==='sleep'?sleepView():workoutRecord!==null?recordView():countdown!==null?`<div class="workout-countdown"><p class="countdown-heading">${setup.kind}</p><div class="countdown-play"><canvas id="countdown-dots" aria-hidden="true"></canvas><output class="sr-only" id="workout-count" aria-live="polite">${countdown}</output></div><p class="countdown-invitation">Starts automatically · touch dots to play</p><div class="countdown-stages" aria-hidden="true">${[3,2,1].map(n=>`<i data-count-stage="${n}" class="${countdown<=n?'lit':''}"></i>`).join('')}</div><button data-cancel-countdown>Cancel</button></div>`:store.active?sessionView():setup?setupView():workoutHome();
     bindTracks();
@@ -336,7 +350,7 @@ const Health = (() => {
     if(page==='settings')OrbitSettings.mount(options.settings);
     if(page==='workouts'&&countdown!==null)countDots=HeroDots.mount(q('#countdown-dots'),countdown);
     if(page==='workouts'&&store.active&&workoutRecord===null){paintTimer();if(timerFocused)WorkoutFocus.attach(q('.workout-live'),true);MusicPlayer.mount(q('.workout-music'),timerFocused)}
-    q('#health-scroll').scrollTop=scroll;frostHead();
+    q('#health-scroll').scrollTop=scroll;frostHead();window.LiquidGlass?.enhance();
   }
   function cancelCountdown(){clearInterval(countTimer);countTimer=0;countdown=null;countDots?.stop();countDots=null}
   function startCountdown(kind,targetMs,recording={}){
@@ -351,7 +365,7 @@ const Health = (() => {
   function open(which,source=q('#live-bar'),stage){
     if(!Object.hasOwn(titles,which))return false;
     const enter=()=>{
-      if(!page)returnFocus=source||document.activeElement;page=which;setup=null;workoutRecord=null;if(which==='workouts')historyDate=null;cancelCountdown();options.beforeOpen();q('#health-page').hidden=false;q('.screen').classList.add('is-detail');
+      if(!page)returnFocus=source||document.activeElement;page=which;setup=null;workoutRecord=null;if(which==='workouts'){historyDate=null;workoutTab='train'}cancelCountdown();options.beforeOpen();q('#health-page').hidden=false;q('.screen').classList.add('is-detail');
       if(which==='sleep'){sleepDate=options.getDate();const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.valid(night)?SleepTimeline.stageMinute(night,stage):0}
       for(const selector of ['.masthead','.hero','#deck-scroll','#stack-open','#utility-island','#live-island'])q(selector).inert=true;
       render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true});q('#health-page').setAttribute('aria-label',titles[which]);return true;
@@ -386,13 +400,14 @@ const Health = (() => {
       const b=event.target.closest('button');if(!b)return;
       if(b.dataset.session){
         const finish=b.dataset.session==='finish';
-        const saved=finish?SurfaceMotion.change(()=>{const saved=action('finish');if(saved){workoutRecord=store.history[0].startedAt;historyDate=dayStart(workoutRecord).getTime();workoutChart='route';render();q('#health-scroll').scrollTop=0}return saved}):action(b.dataset.session);
+        const saved=finish?SurfaceMotion.change(()=>{const saved=action('finish');if(saved){workoutTab='history';workoutRecord=store.history[0].startedAt;historyDate=dayStart(workoutRecord).getTime();workoutChart='route';render();q('#health-scroll').scrollTop=0}return saved}):action(b.dataset.session);
         if(saved){if(finish){options.notice('Workout saved');q('#health-back').focus({preventScroll:true})}else q('#health-content [data-session="'+(store.active.resumedAt===null?'resume':'pause')+'"]').focus({preventScroll:true})}
       }
       else if(b.dataset.setup)SurfaceMotion.change(()=>{setup={kind:b.dataset.setup,targetMs:0,trackLocation:b.dataset.setup!=='Strength',weightKg:OrbitSettings.profile().weightKg||0};if(OrbitSettings.error)options.notice(OrbitSettings.error);render();q('#health-scroll').scrollTop=0;q('input[name="target"]:checked').focus({preventScroll:true})});
       else if(b.dataset.workoutDetail){workoutReturn={scroll:q('#health-scroll').scrollTop};workoutRecord=b.dataset.workoutDetail==='active'?'active':Number(b.dataset.workoutDetail);if(!record()){workoutRecord=null;return}workoutChart='route';SurfaceMotion.change(()=>{render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true})})}
       else if(b.dataset.workoutChart)setWorkoutChart(b.dataset.workoutChart);
       else if(b.dataset.historyWeek)changeWeek(Number(b.dataset.historyWeek));
+      else if(b.dataset.workoutTab)setWorkoutTab(b.dataset.workoutTab);
       else if(b.dataset.weekDay!==undefined)inspectWeek(Number(b.dataset.weekDay));
       else if(b.hasAttribute('data-music-connect'))MusicPlayer.connect();
       else if(b.hasAttribute('data-tracking'))window.OrbitWorkouts?.enableTracking();
@@ -411,7 +426,7 @@ const Health = (() => {
       else if(b.hasAttribute('data-cancel-countdown'))close();
       else if(b.hasAttribute('data-notifications'))window.OrbitWorkouts?.enableNotifications();
     });
-    q('#health-content').addEventListener('change',event=>{if(event.target.name==='target'){const open=event.target.value==='time';q('#target-minutes').disabled=!open;SurfaceMotion.expand(q('#target-options'),open)}});
+    q('#health-content').addEventListener('change',event=>{if(event.target.name==='target'){const open=event.target.value==='time';q('#target-minutes').disabled=!open;q('.setup-open-note').hidden=open;q('#target-options').hidden=!open;SurfaceMotion.reveal(q(open?'#target-options':'.setup-open-note'),{x:0,y:4},180)}});
     q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
     q('#health-content').addEventListener('submit',event=>{if(event.target.id!=='workout-setup-form')return;event.preventDefault();const time=q('input[name="target"]:checked').value==='time',minutes=Number(q('#target-minutes').value);if(time&&(!Number.isInteger(minutes)||minutes<1||minutes>1440)){q('#workout-error').textContent='Choose between 1 and 1,440 minutes.';return}const weightKg=Number(q('#workout-weight').value||0),trackLocation=Boolean(q('#workout-track')?.checked);if(weightKg!==0&&(!Number.isFinite(weightKg)||weightKg<20||weightKg>350)){q('#workout-error').textContent='Enter a weight from 20 to 350 kg, or leave it empty.';return}startCountdown(setup.kind,time?minutes*60000:0,{trackLocation,weightKg})});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&countdown!==null){cancelCountdown();render()}schedule();if(!document.hidden)tick()});

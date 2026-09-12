@@ -12,14 +12,14 @@
     "Active workout opens inside one clipped shell, with stable-size controls and no duplicate dots",
     "Compact active launcher: measured height, action order, status line, hours-long timer, pause/resume/open",
     "Pause/resume preserves the clock, freezes time and eases brightness/size",
-    "Shared chooser rows; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel",
+    "Four activity choices; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel",
     "Target segments answer tap, hold, drag, reversal, cancellation, release outside the track and vertical scrolling, with no default tap highlight",
     "Reported system-bar room moves the header clear of transient bars (browser only; device insets are not verifiable here)"
   ],
   "measurements": {
     "liveBar": {
       "closedHeight": 61.9921875,
-      "intermediateHeight": 97.94921875,
+      "intermediateHeight": 95.46875,
       "expandedHeight": 133.984375
     },
     "idleLauncher": {

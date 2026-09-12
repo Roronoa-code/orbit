@@ -1,4 +1,22 @@
-# Orbit — handoff (updated 12 September 2026)
+# Orbit — handoff (updated 13 September 2026)
+
+## Workouts rework, BitChord glass and Home gesture follow-up — 13 September 2026
+
+Baseline `c6404d8`. The Workouts-only scope was confirmed by the user after rejecting the screenshot of the activity list plus large history card. Research and design reasoning: `WORKOUT-DIRECTION.md`.
+
+- **Workouts:** separate Train / History views with an interruptible, draggable shared selector. Four activity tiles, a weekly at-a-glance link and last session. History leads with active time, seven dates and daily workload; selected-day summaries open full records, and Back retains week/day. Short workouts show seconds. Setup gives goal selection a stable-height stage; GPS and saved optional weight remain. The live view removes the enclosing statistics card, keeps the interactive dots, fixed actions and full-screen music. Saved records use lighter sections with expandable energy-method detail.
+- **Home motion:** rebase a new drag when it crosses touch slop, discard stale release velocity after holding, and allow a returning deck to continue while dragging the live bar. Card wrappers and live backdrop keep measured heights; only clipping and the decorative rim follow the fold. Removed the background fade behind glass. Browser regression reproduced a 0.4495 travel jump before the fix versus a 0.01163 movement (the intended beyond-slop distance) afterward. Measured deck layout events fell from 445 to 12 in the initial device comparison.
+- **Glass:** actual BitChord source at `70394304ee718d160cd25e41fbcbaef39c05b45c` informed 8px blur, 1.5 saturation, 40% dark tint, subtle highlights and a dark selector. Ported Kyant's Apache-2.0 rounded-rectangle lens math into a cached displacement map below foreground content. This is a non-dispersive web adaptation, not Compose's renderer. Source notice and full license are bundled. Pixel checks show the filter changes the backdrop; selector movement does not regenerate the map.
+
+### Verified and remaining
+
+Workouts flow at 390/384/320px (including 34px top / 8px bottom insets), rapid navigation, selected date return, week bounds, profile defaults, all four activities, goals, pause/resume/save, expanded energy detail, contrast and overflow pass. The goal change keeps setup rows stationary. Existing rendered focus/music, detailed workout/GPS and UX-motion suites pass at all three widths; all 18 music endpoint cases have no geometry deltas. Body/history regression, Home gesture checks, model/native checks, APK signature and source/bundle parity pass. A regression caught in verification (missing-weight copy inheriting the large metric font and pushing music controls down) was fixed at the shared selector.
+
+Native Home/glass checks ran on the Galaxy **before this Workouts rework**. The last sample was at 60Hz: median 16.6–16.7ms, max 17.2ms, no RAF gaps above 25.1ms. Android's separate counter still reported 36.69% jank while tracing. Earlier baseline was 120Hz, so these are not comparable proof of faster delivery or universal smoothness. No display setting was changed. Physical motion acceptance remains open.
+
+Final production build `20260913-003840`, SHA256 `c59a4e20c2143ff9b2d7341630a41ce0f7a85650e588a62dfc025f78ba0a5a8c` (276049 bytes), **installed on the Galaxy S25 Ultra (SM-S938B)** through `192.168.0.210:46215` using `install -r`, preserving app data. The installed APK hash matches. Previous production APK `20260912-232234` is backed up at `workout-rework/phone-before-install.apk` (SHA256 `9c402a8e89d03a3dcc71ece9f57ebca93dc216a10c2a2bf4aade75cfb2bd904b`). The user's latest instruction is **install only, do not test on the phone**; this supersedes earlier phone-testing authorization. No app launch, navigation, workout, music or phone test was performed after reconnecting. Physical Workouts rework testing was skipped at the user's request. Final Audit `20260913-003844-audit` has identical HTML but was not installed; any older Audit installation was left alone. This is the current release status; older entries below are historical.
+
+Evidence images/traces/APK backups stay in ignored local folders `workout-rework/`, `glass-port/` and `home-motion/`. Compact results are committed under `motionGlassWorkouts` in `checks.json`.
 
 ## Latest installed follow-up — 12 September 2026 23:22
 

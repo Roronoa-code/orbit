@@ -39,9 +39,9 @@ async function main(){
     await p.evaluate(()=>{
       const t=new Date();t.setHours(10,0,0,0);window.testHistory=[0,0,2,7,14].map((ago,i)=>{const d=new Date(t);d.setDate(d.getDate()-ago);d.setMinutes(i*10);return {kind:i%2?'Walking':'Strength',startedAt:d.getTime(),endedAt:d.getTime()+1800000,elapsed:1800000,weightKg:75,targetMs:0}});
       localStorage.setItem('orbit-workouts-v1',JSON.stringify({active:null,history:testHistory}));
-    });await p.reload();await p.evaluate(()=>Health.open('workouts'));await p.waitForTimeout(650);
+    });await p.reload();await p.evaluate(()=>Health.open('workouts'));await p.waitForTimeout(300);await p.locator('.workout-tabs [data-workout-tab=history]').click();await p.waitForTimeout(350);
     assert.equal(await p.locator('details.workout-history').count(),0);assert.equal(await p.locator('[data-week-day]').count(),7);assert.equal(await p.locator('.history-session').count(),2);
-    assert.match(await p.locator('.history-week-metrics').textContent(),/active min/);await p.locator('#workout-calendar').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(out,width+'-history.png')});
+    assert.match(await p.locator('.history-week-metrics').textContent(),/Active time/);await p.locator('#workout-calendar').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(out,width+'-history.png')});
     await p.locator('[data-history-week="-1"]').click();await p.waitForTimeout(350);assert.equal(await p.locator('.history-session').count(),1);
     const label=await p.locator('.history-week-nav p').textContent();await p.locator('.history-session').click();await p.waitForTimeout(500);assert.equal(await p.locator('#workout-record-body').count(),1);
     await p.locator('#health-back').click();await p.waitForTimeout(500);assert.equal(await p.locator('.history-week-nav p').textContent(),label);assert.equal(await p.locator('.history-session').count(),1);

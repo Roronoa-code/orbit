@@ -100,7 +100,7 @@ document.querySelector('#run').onclick=async()=>{
     q('#body-scrub').value=0;q('#body-scrub').dispatchEvent(new (w().Event)('input',{bubbles:true}));check(q('#body-date').textContent.includes('Jun'),'Scrubbing missing history must select an existing date');check(Number(q('#body-scrub').value)>270,'Scrubber must align with the recorded date, not invent earlier readings');
     checks.push('Animated Body tabs,7/30/90/365-day history, preserved dates and visible gaps');measurements.body={firstPlotX:Number(q('#body-line').getAttribute('d').match(/^M([\d.]+)/)[1]),coverage:q('#body-coverage').textContent};
     api().Health.action('start','Strength');api().Health.close();await wait(300);api().setLiveOpen(true);
-    for(let i=0;i<24;i++){await nextFrame();check(style(q('#live-island')).overflow==='hidden'&&style(q('#live-choices')).overflow==='hidden','Live controls must remain clipped within the growing shell');if(Number(style(q('#live-choices')).opacity)>.1)check(box(q('#live-pause')).top>=box(shell).top,'Workout actions must enter inside the shell')}
+    for(let i=0;i<24;i++){await nextFrame();check(style(q('#live-choices')).overflow==='hidden'&&style(q('#live-choices')).clipPath!=='none'&&style(q('#live-island .island-frost')).clipPath!=='none','Live controls and backdrop must remain clipped within the growing shell');if(Number(style(q('#live-choices')).opacity)>.1)check(box(q('#live-pause')).top>=box(shell).top,'Workout actions must enter inside the shell')}
     await wait(650);const activeBounds=box(shell),actionsBounds=box(q('#live-session-controls')),navBounds=box(q('.activity-choices'));
     check(actionsBounds.top>=activeBounds.top&&navBounds.bottom<=box(bar).top,'All active-workout actions and navigation must fit inside the expanded shell');
     check(['none','normal'].includes(w().getComputedStyle(q('.live-icon'),'::after').content)&&['none','normal'].includes(w().getComputedStyle(q('.live-meta'),'::before').content),'The live bar must have no duplicate status dots');
@@ -122,12 +122,12 @@ document.querySelector('#run').onclick=async()=>{
     q('[data-session="resume"]').click();await wait(450);check(q('#focus-time-dots')===canvas&&Number(style(time).opacity)>.99,'Resume must restore the same clock');check(Math.abs(box(time).width-center.width)<.5,'Resume must restore the original reading size');checks.push('Pause/resume preserves the clock, freezes time and eases brightness/size');
     api().Health.close();await wait(300);api().setLiveOpen(true);await wait(900);q('#live-session-controls [data-session="finish"]').click();await wait(300);
     check(api().Health.live()===null&&q('#live-session-controls').hidden,'Launcher Finish & save must finish the workout');api().setLiveOpen(false);await wait(700);
-    // Shared chooser and setup: four rows on one surface; each setup has one title, no illustration, GPS only outdoors.
+    // Reworked hub: all four actions visible in a two-column grid; setup retains goals, profile and GPS.
     api().Health.open('workouts');await wait(400);const rows=[...doc().querySelectorAll('.workout-kinds [data-setup]')];
-    check(rows.map(r=>r.dataset.setup).join()==='Walking,Running,Cycling,Strength'&&rows.every(r=>box(r).height>67.5&&r.parentElement===rows[0].parentElement)&&q('.workout-start-title').textContent==='Start a session'&&!doc().querySelector('.workout-kinds small')?.textContent.includes('↗'),'The chooser must be one surface of four rows');
+    check(rows.map(r=>r.dataset.setup).join()==='Walking,Running,Cycling,Strength'&&rows.every(r=>box(r).height>67.5&&r.parentElement===rows[0].parentElement)&&q('.workout-start-title').textContent==='Choose your workout'&&!doc().querySelector('.workout-kinds small')?.textContent.includes('↗'),'The chooser must expose all four activity actions');
     for(const kind of ['Walking','Running','Cycling','Strength']){
       q(`[data-setup="${kind}"]`).click();await wait(420);
-      check(q('#health-page').dataset.workoutScreen==='setup'&&q('#health-title').textContent===kind&&!q('.workout-art')&&!q('.workout-setup h2')&&!q('.workout-setup-intro'),kind+' setup must have one title, no illustration and no repeated intro copy');
+      check(q('#health-page').dataset.workoutScreen==='setup'&&q('#health-title').textContent===kind&&q('.setup-activity .workout-glyph')&&!q('.workout-setup h2'),kind+' setup must have one title and its activity glyph');
       check(Boolean(q('#workout-track'))===(kind!=='Strength')&&q('.workout-primary').textContent.trim()==='Start '+kind.toLowerCase(),kind+' setup must offer GPS only outdoors');
       const scroller=q('#health-scroll'),panel=box(q('.setup-panel'));const outside=[...doc().querySelectorAll('.setup-segments label,.setup-field,.tracking-option input')].filter(n=>n.getClientRects().length).filter(n=>box(n).right>panel.right+.5||box(n).left<panel.left-.5).map(n=>n.className||n.id||n.tagName);
       check(scroller.scrollWidth<=scroller.clientWidth+1&&!outside.length,kind+' setup must not clip or overflow: '+JSON.stringify({scrollWidth:scroller.scrollWidth,clientWidth:scroller.clientWidth,outside}));
@@ -168,7 +168,7 @@ document.querySelector('#run').onclick=async()=>{
       }
       api().Health.close();await wait(400);
     }
-    checks.push('Shared chooser rows; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel');
+    checks.push('Four activity choices; one-title setup for every activity; open/time with kept duration; GPS only outdoors; weight validation; countdown cancel');
     checks.push('Target segments answer tap, hold, drag, reversal, cancellation, release outside the track and vertical scrolling, with no default tap highlight');
     // The page reserves whatever room the host reports for the system bars, rather than an assumed bar height.
     api().Health.open('workouts');await wait(360);const headTop=box(q('.health-page-head .icon-button')).top;
