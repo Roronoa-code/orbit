@@ -1,5 +1,13 @@
 # Orbit — handoff (updated 13 September 2026)
 
+## Dual App clone removed — 13 September 2026
+
+The previous package check covered only the main profile and missed Samsung's Dual App profile. `com.mani.orbit` was installed for Owner (user 0) and DUAL_APP (user 95); the clone had never been launched. Removed only the user-95 installation. Package state now confirms installed=true for user 0 and installed=false for users 95 and 150 (Secure Folder). The main app and APK hash are unchanged. No app was opened or tested on the phone.
+
+**Every future phone update must use `adb -s <confirmed-device> install --user 0 -r dist/Orbit.apk`.** Verify the package installation flags across all profiles after updating; a user-0-only listing does not establish that there are no clones. Never remove the Dual App profile itself or touch its other apps.
+
+Data-source clarification: Orbit reads through Health Connect, with every record and aggregate request filtered to `com.sec.android.app.shealth` and incoming source metadata validated again. Thus only Samsung Health-shared records are accepted. This does not provide direct access to Samsung's private database or prove complete Samsung history. The user's actual imported coverage has not been inspected. [Samsung's supported sharing route](https://developer.samsung.com/health/health-connect-faq.html).
+
 ## Samsung Health import and demo retirement — 13 September 2026
 
 Baseline `cc57dfd`. The user confirmed Samsung Health is the source of truth and all existing Orbit measurements and workouts are demo data. Only production `com.mani.orbit` remains on the phone; earlier Audit/old Health clones were removed. The current boundary is **all tests local, phone installation only**.
@@ -315,7 +323,7 @@ This is the current entry point for continuing Orbit. Read the constraints below
 
 ## Decisions that supersede older directions
 
-- 11 September (standing rule from the user: "from now on once done install on phone and push to github"): when a batch is finished and verified, build, install on the phone (back up the phone APK, `install -r`, verify the hash, do not launch) and commit + push `main` without asking. Launching, navigating, recording, workouts, permissions and music control still need an explicit request. This supersedes the older "installing needs a fresh request each time" and "commit or push only when asked" notes.
+- 11 September (standing rule from the user: "from now on once done install on phone and push to github"): when a batch is finished and verified, build, install on the phone (back up the phone APK, `install --user 0 -r`, verify the hash and all profile installation flags, do not launch) and commit + push `main` without asking. Launching, navigating, recording, workouts, permissions and music control still need an explicit request. This supersedes the older "installing needs a fresh request each time" and "commit or push only when asked" notes.
 
 - 11 September (Body refinement): the Body selector shows labels only — Weight, Fat, Muscle, Lean mass in that order — and the row loops; "Body fat" is no longer a separate metric (Fat reads in kg with its percentage alongside); the ring's chevrons are removed and must not return in another form; the selector capsule can be dragged. This supersedes the 20:37 selector that listed values and the edge resistance.
 
