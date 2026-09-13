@@ -27,6 +27,7 @@ const sandbox = {setInterval:()=>1,clearInterval:noop,document,getComputedStyle:
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','settings-store.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','surface-motion.js'),'utf8'),sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','orbit-interaction.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','signal-orb.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','hero-dots.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','sleep-timeline.js'),'utf8'),sandbox);
@@ -136,9 +137,9 @@ function touchSwipe(from,to,target=barTarget){
 touchSwipe(600,520,stackTarget);assert.equal(m.getExpanded(),true,'finger-up must commit upward swipe');
 const closeTarget=barTarget;
 deckNode.fire('touchstart',{touches:[finger(340,300)],target:closeTarget});deckNode.fire('touchend',{changedTouches:[finger(340,300)]});
-nodes.get('#live-bar').fire('click',{detail:1});assert.equal(m.getExpanded(),false,'Explore coordinates deck collapse');assert.equal(m.islands.live.open,true,'Explore must also open destinations on that same tap');
+nodes.get('#live-bar').fire('click',{detail:1});assert.equal(m.getExpanded(),true,'Explore remains available over expanded cards');assert.equal(m.islands.live.open,true,'Explore must also open destinations on that same tap');
 touchSwipe(600,520,stackTarget);assert.equal(m.getExpanded(),true);
-touchSwipe(520,600);assert.equal(m.getExpanded(),false,'finger-up must commit downward swipe');assert.equal(m.islands.live.open,false,'pulling down on the bar folds the cards without opening the launcher');
+touchSwipe(520,600);assert.equal(m.getExpanded(),true,'A live-bar pull must not fold the cards');assert.equal(m.islands.live.open,false,'pulling down on the bar closes only its launcher');
 touchSwipe(600,520);assert.equal(m.islands.live.open,true,'swiping up on the bar opens the launcher');
 const shortcutTarget={closest:s=>s==='#live-island'?node(s):s==='button,a,summary'?node('.activity-choice'):null};
 touchSwipe(520,600,shortcutTarget);assert.equal(m.islands.live.open,false,'swiping down anywhere on the open launcher, over a shortcut too, closes it');

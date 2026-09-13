@@ -108,8 +108,8 @@ async function runChecks(){
     check(q('.tracking-option')?.textContent.includes('Track outdoors'),'Outdoors setup label is missing');
     check(q('#workout-track')?.checked===true,'Outdoors must be selected for this fixture');
     check(contextMenu(q('.screen')).defaultPrevented,'The app screen must block context menus');
-    check(!contextMenu(weight).defaultPrevented,'Weight input must allow its native text interaction');
-    check((win().getComputedStyle(weight).userSelect||'').includes('text'),'Weight input must allow text selection');
+    check(contextMenu(weight).defaultPrevented,'Short weight input must suppress its text-touch menu');
+    weight.focus();check(doc().activeElement===weight,'Short weight input must still focus for keyboard editing');
     weight.value='10';click('#workout-setup-form button[type="submit"]');
     check(weight.validity.rangeUnderflow,'Native weight range validation must reject values below 20 kg');
     check(text('#workout-error')==='','Native weight validation should run before the custom submit guard');

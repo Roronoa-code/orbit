@@ -191,6 +191,7 @@ const WorkoutFocus=(()=>{
     const hint=live.querySelector('.timer-tap-hint');if(hint)hint.textContent=focused?'Tap to show details':'Tap to focus';
   }
   function target(live,final){
+    if(final!==live.classList.contains('timer-focused'))OrbitInteraction.haptic('select');
     const m=begin(live);m.target=final;
     MusicPlayer.setFocused(final);hooks.target(final);
     if(document.hidden||SurfaceMotion.reduced){m.p=final?1:0;apply();finish()}else run();

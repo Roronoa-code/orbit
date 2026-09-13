@@ -167,6 +167,7 @@ body{background:#0a0a0c}
 <p class="toast" role="status" id="toast"></p>
 <script src="settings-store.js"></script>
 <script src="surface-motion.js"></script>
+<script src="orbit-interaction.js"></script>
 <script src="signal-orb.js"></script>
 <script src="hero-dots.js"></script>
 <script src="sleep-timeline.js"></script>
@@ -256,9 +257,9 @@ function renderMetric(){
   $('#week-heading').textContent=(metric==='sleep'?'Last ':'Last ')+(days===30?'30':'7')+(metric==='sleep'?' nights':' days');
 
 }
-function changeMetric(delta){metric=metricOrder[(metricOrder.indexOf(metric)+delta+metricOrder.length)%metricOrder.length];render();SurfaceMotion.shift($('.hero-copy'),{x:Math.sign(delta)*16,y:0},240)}
+function changeMetric(delta){OrbitInteraction.haptic('select');metric=metricOrder[(metricOrder.indexOf(metric)+delta+metricOrder.length)%metricOrder.length];render();SurfaceMotion.shift($('.hero-copy'),{x:Math.sign(delta)*16,y:0},240)}
 function periodLabel(){return days===1?'Sample day':days+'-day sample'}
-function cyclePeriod(){days=[1,7,30][([1,7,30].indexOf(days)+1)%3];render();orb?.turnPeriod();SurfaceMotion.shift($('.hero-copy'),{x:0,y:8},240)}
+function cyclePeriod(){OrbitInteraction.haptic('select');days=[1,7,30][([1,7,30].indexOf(days)+1)%3];render();orb?.turnPeriod();SurfaceMotion.shift($('.hero-copy'),{x:0,y:8},240)}
 // Round each displayed daily average once; the displayed delta uses those same integers.
 function periodComparison(current,previous){
   const mean=rows=>rows.length?Math.round(average(rows)):null,a=mean(current),b=mean(previous);
@@ -310,14 +311,14 @@ for(const item of Object.values(islands))Object.assign(item,{open:false,value:0,
 function measureIsland(item){
   const live=item===islands.live,width=item.el.clientWidth,height=Math.max(item.closed,(live?item.body.firstElementChild.offsetHeight:item.body.offsetHeight)+(live?62:0));
   if(item.width===width&&item.fullHeight===height)return false;item.width=width;item.fullHeight=height;
-  if(live)item.el.style.setProperty('--live-frost-height',height+'px');item.el.style.height=height+'px';layoutIsland(item);return true;
+  if(live)item.el.style.setProperty('--live-frost-height',height+'px');item.el.style.height=height+'px';item.el.querySelector('.island-surface').style.height=height+'px';layoutIsland(item);return true;
 }
 function layoutIsland(item){
   const p=clamp(item.value),live=item===islands.live,w=item.width||300,h=item.fullHeight;
   const height=Math.max(item.closed,Math.min(h,item.height.value)),sx=live?1:(item.closed+(w-item.closed)*reveal(p,0,.72))/w,sy=height/h,r=live?31-3*p:24+4*p;
-  const shell=item.el.querySelector('.island-surface');shell.style.transform=live?'none':`scale(${sx},${sy})`;shell.style.borderRadius=live?r+'px':`${r/sx}px / ${r/sy}px`;
-  // Only the decorative rim changes height; the backdrop and controls retain their full layout.
-  if(live){shell.style.height=height+'px';item.el.querySelector('.island-frost').style.clipPath=`inset(${h-height}px 0 0 round ${r}px)`}
+  const shell=item.el.querySelector('.island-surface');shell.style.transform=`scale(${sx},${sy})`;shell.style.borderRadius=`${r/sx}px / ${r/sy}px`;
+  // Scale only the decorative rim; backdrop, text and hit targets keep fixed layout sizes.
+  if(live){item.el.querySelector('.island-frost').style.clipPath=`inset(${h-height}px 0 0 round ${r}px)`}
   if(!live)item.el.querySelector('.island-frost').style.clipPath=`inset(0px 0 ${h-item.height.value}px ${w-sx*w}px round ${r}px)`;
   const growth=live?clamp((item.height.value-item.closed)/(h-item.closed||1)):p;
   const visible=reveal(Math.min(p,growth),live?.56:.32,.98)*reveal(item.content.value,.22,.92),offset=live?h-height+8*(1-visible):-6*(1-visible);
@@ -338,12 +339,12 @@ function animateIslands(){
       if(held||Math.abs(item.value-target)>.001||Math.abs(item.velocity)>.02||Math.abs(item.height.value-height)>.15||Math.abs(item.height.velocity)>.2||Math.abs(item.content.value-1)>.001)moving=true;
       else{item.value=target;item.velocity=0;item.height.value=height;item.height.velocity=0;item.content.value=1;item.content.velocity=0;layoutIsland(item)}
     }
-    if(moving)islandFrame=requestAnimationFrame(tick);else{islandFrame=0;orb?.setSuspended(Boolean(motionFrame)||Boolean(Health.page))}
+    if(moving)islandFrame=requestAnimationFrame(tick);else{islandFrame=0;orb?.setSuspended(Boolean(motionFrame)||Boolean(Health.page)||islands.live.open)}
   }
   islandFrame=requestAnimationFrame(tick);
 }
 function setIslandOpen(item,value){
-  item.open=Boolean(value);item.el.classList.toggle('is-open',item.open);item.body.inert=!item.open;item.trigger.setAttribute('aria-expanded',String(item.open));
+  if(item.open!==Boolean(value))OrbitInteraction.haptic('select');item.open=Boolean(value);item.el.classList.toggle('is-open',item.open);item.body.inert=!item.open;item.trigger.setAttribute('aria-expanded',String(item.open));
   if(!item.open&&item.body.contains(document.activeElement))item.trigger.focus({preventScroll:true});
   measureIsland(item);animateIslands();
 }
@@ -354,7 +355,7 @@ function show(id,source=$('#date-button')){
   setIslandOpen(islands.live,false);setIslandOpen(item,true);
 }
 function closeUtility(focus=true){const item=islands.utility;if(!item.open)return;setIslandOpen(item,false);if(focus&&item.returnFocus?.isConnected)item.returnFocus.focus({preventScroll:true})}
-function setLiveOpen(value){if(value){closeUtility(false);if(deckExpanded)setDeckExpanded(false)}setIslandOpen(islands.live,value);updateLiveBar()}
+function setLiveOpen(value){if(value)closeUtility(false);setIslandOpen(islands.live,value);settleDeckStructure();updateLiveBar()}
 function closeInline(){if(islands.utility.open){closeUtility();return true}if(islands.live.open){setLiveOpen(false);return true}return Health.close()}
 function initIslands(){
   islands.utility.body.querySelectorAll('.utility-page').forEach(page=>page.hidden=page.id!=='date-dialog');
@@ -398,7 +399,7 @@ const deckMotion={value:0,velocity:0},orbPose={value:0,velocity:0};
 function ensureShell(card){
   if(!card.prepend)return null;
   const first=card.firstElementChild;if(first?.classList?.contains('stack-shell'))return first;
-  const shell=document.createElement('div');shell.className='stack-shell';shell.setAttribute('aria-hidden','true');card.prepend(shell);return shell;
+  const shell=document.createElement('div');shell.className='stack-shell';shell.setAttribute('aria-hidden','true');card.prepend(shell);const glass=document.createElement('div');glass.className='stack-glass';glass.setAttribute('aria-hidden','true');shell.after(glass);return shell;
 }
 let scrollReturn=null;
 let motionFrame=0,motionTime=0,cardHeights=[],cardContentTop=[],deckClosedSpace=180,heroClosed=300,heroOpen=220;
@@ -424,7 +425,7 @@ function measureDeck(){
   deckCards.forEach((card,i)=>{card.style.height=cardHeights[i]+'px';if(cardMotion[i]!==card)cardMotion[i].style.height=cardHeights[i]+'px'});
   layoutDeck();
 }
-function stopDeckMotion(){cancelAnimationFrame(motionFrame);motionFrame=0;motionTime=0;orb?.setSuspended(Boolean(islandFrame)||Boolean(Health.page))}
+function stopDeckMotion(){cancelAnimationFrame(motionFrame);motionFrame=0;motionTime=0;orb?.setSuspended(Boolean(islandFrame)||Boolean(Health.page)||islands.live.open)}
 // Hit testing, focusability and the scroller with its edge mask change only while the stack rests. Each of
 // them re-records every card shell, which repainted the whole stack on the first frame of a tap and at the
 // release of a swipe. While the cards move they keep the structure they started from.
@@ -500,7 +501,7 @@ function setDeckExpanded(value,keyboard=false){
   const wasFocused=panelContent.contains(document.activeElement),changed=deckExpanded!==Boolean(value);
   if(!value&&!scrollReturn&&deckProgress>0)scrollReturn={top:deckScroller.scrollTop,progress:deckProgress};
   if(value)scrollReturn=null;
-  deckExpanded=Boolean(value);
+  if(changed)OrbitInteraction.haptic('select');deckExpanded=Boolean(value);
   deck.classList.toggle('is-open',deckExpanded);deck.classList.remove('is-dragging');
   $('#stack-open').hidden=deckExpanded;
   if(!deckExpanded&&wasFocused)$('#stack-open').focus({preventScroll:true});
@@ -527,11 +528,11 @@ function startDeckGesture(x,y,target,id,input='pointer'){
 function moveDeckGesture(x,y,event){
   const g=deckGesture;if(!g)return;const dx=x-g.x,dy=y-g.y,vertical=Math.abs(dy)>8&&Math.abs(dy)>Math.abs(dx)*1.2;
   // Anywhere on the launcher its shell follows the finger both ways; pulling down on the bar of the open stack folds the stack.
-  if(!g.mode&&vertical){g.mode=g.fromIsland&&!(deckExpanded&&dy>0)?'live':'deck';g.slop=Math.sign(dy)*8;g.progress=deckProgress;g.liveStart=islands.live.value}
+  if(!g.mode&&vertical){g.mode=g.fromIsland?'live':'deck';g.slop=Math.sign(dy)*8;g.progress=deckProgress;g.liveStart=islands.live.value}
   const allowed=g.dragging||vertical&&(g.mode==='live'||!deckExpanded&&dy<0||deckExpanded&&dy>0&&(g.fromBar||g.scrollTop<=0));
   if(!allowed){if(Math.abs(dx)>12||Math.abs(dy)>12){ignoreDeckClick=true;deckGesture=null}return}
   if(event.cancelable)event.preventDefault();if(event.pointerType&&event.pointerType!=='touch'&&!deck.hasPointerCapture(event.pointerId))deck.setPointerCapture(event.pointerId);
-  if(!g.dragging&&g.mode==='live'){closeUtility(false);if(deckExpanded)setDeckExpanded(false);islands.live.el.classList.add('is-open');islands.live.body.inert=false;measureIsland(islands.live)}
+  if(!g.dragging&&g.mode==='live'){closeUtility(false);islands.live.el.classList.add('is-open');islands.live.body.inert=false;measureIsland(islands.live)}
   if(!g.dragging&&g.mode!=='live')flushCharts();g.dragging=true;ignoreDeckClick=true;const now=performance.now(),dt=Math.max(.008,(now-g.lastTime)/1000),speed=(y-g.lastY)/dt;g.velocity=speed/1000;g.lastY=y;g.lastTime=now;
   // Movement starts from rest at the edge of the touch slop instead of jumping to the finger.
   const travel=dy-g.slop;

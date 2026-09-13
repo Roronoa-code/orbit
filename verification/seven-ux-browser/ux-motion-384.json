@@ -18,12 +18,12 @@
   ],
   "measurements": {
     "liveBar": {
-      "closedHeight": 61.9921875,
-      "intermediateHeight": 95.46875,
+      "closedHeight": 61.9927978515625,
+      "intermediateHeight": 97.82485961914062,
       "expandedHeight": 133.984375
     },
     "idleLauncher": {
-      "collapsed": 61.9921875,
+      "collapsed": 61.9927978515625,
       "expanded": 133.984375
     },
     "stackDrag": {

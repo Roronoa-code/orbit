@@ -1,5 +1,26 @@
 # Player and Settings corrections — 12 September 2026
 
+## Haptics, deeper gestures, live-bar access and running-workout cost — 13 September 2026
+
+Baseline `8fcbac5`. All six requests are implemented in the standalone Orbit app. The phone restriction remains **install only, no launching or testing**.
+
+| Request | Implementation and evidence |
+| --- | --- |
+| More haptics | Shared Android `performHapticFeedback` bridge for taps, selector detents/commits, chart scrubs, page/card/bar gestures, Body changes, countdown and music focus. Semantic effects respect Android settings; unknown effects and hidden-window calls are rejected. Desktop bridge-call checks pass; physical feel is untested. |
+| Dashboard glass | The card backdrop and Settings button share the existing tint, diffusion and highlight family. Card readings stay above a fixed backdrop, separate from the folding rim. Rendered narrow/wide screenshots and high-contrast fallback pass. |
+| Live bar with four cards open | The launcher opens above the expanded deck; its swipes no longer fold the cards. Taps, held swipes and active/idle states pass at 390/384/320px. |
+| Deeper swipe / hold / drag | History days, sleep stages and oxygen days now use BlobTrack alongside existing selectors. Content swipes navigate workout tabs/weeks, Body metrics and nights; rightward swipes return from setup, records and Settings. Gesture cancellation and implicit capture transfer are handled. The shared selector now retains movement beyond touch slop instead of dropping a narrow date slot. |
+| Short-input text handles | Numeric and decimal fields, including birthday, suppress the native text-touch/context action while retaining focus, caret, typing, IME, keyboard paste and validation. Name retains ordinary selection. Desktop focus/edit/context checks pass; Android handle presentation remains untested. |
+| Running-workout lag | One native clock/state sample replaces repeated synchronous elapsed/total/history reads. Unchanged history is neither decoded again nor sent over the bridge. Clock readings reuse the monotonic sample; actions and notification/location updates remain authoritative. The decorative launcher rim now scales without per-frame layout; large expanding backdrops use the shared blur without the SVG displacement pass. |
+
+Matched desktop probe: 25 bridge calls → 3 and 177 layout events → 3 over the same four launcher transitions. Paint events 693 → 674; maximum sampled frame gap 16.8ms in both. These are desktop structural measurements, **not phone smoothness or a claim of improved FPS**. The new snapshot checks cover advancing/paused clocks, mismatched state, corrupt responses, migration and failed-save preservation.
+
+Verification: `interaction-followup.cjs` 390/384/320 PASS; existing Home motion 390/384/320, Body/history 390/320, rendered UX-motion/music/details at all three widths, 18 music endpoint cases, glass pixel/fallback checks, 390 blob-math assertions and model checks PASS. Signed Android build, existing native validation/arithmetic checks and changed-source/bundle parity PASS. The old native-selection assertion and coupled deck/launcher assertions were updated to the user's new requested behaviour; input validation and stored-data checks remain.
+
+Installed production build `20260913-012113`, SHA256 `f8511588d87f98f82188a9324fab191f9ed0d3c90afd105b33692cdbe85c8555` (280145 bytes), using `install -r`; installed hash matches and app data is preserved. Previous APK is backed up locally in `interaction-followup/phone-before.apk`. No app launch, workout, music operation, screenshot, vibration test or performance test was run on the phone. Audit was left alone. Native haptic feel, insertion-handle presentation and final physical smoothness remain unqualified at the user's request.
+
+Android haptic reference: [View feedback and system settings](https://developer.android.com/develop/ui/views/haptics/haptic-feedback). Local captures/probes remain ignored under `interaction-followup/`; compact evidence is recorded in `checks.json` under `interactionFollowup`. This section supersedes older release and interaction descriptions below.
+
 ## Workouts rework, BitChord glass and Home gesture follow-up — 13 September 2026
 
 Baseline `c6404d8`. The Workouts-only scope was confirmed by the user after rejecting the screenshot of the activity list plus large history card. Research and design reasoning: `WORKOUT-DIRECTION.md`.

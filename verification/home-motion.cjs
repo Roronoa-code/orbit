@@ -23,7 +23,7 @@ const phone=process.argv.includes('--phone'),out=path.join(__dirname,'player-set
     await wait(900);setLiveOpen(false);setDeckExpanded(false);await wait(1000);
    }
    // A launcher drag must not freeze a stack that is returning underneath it.
-   setDeckExpanded(true);await wait(300);startDeckGesture(200,700,bar,9);moveDeckGesture(200,660,event);
+   setDeckExpanded(true);await wait(900);setDeckExpanded(false);await wait(80);startDeckGesture(200,700,bar,9);moveDeckGesture(200,660,event);
    const before=deckProgress;await wait(200);check(deckProgress<before-.05,'Live drag froze the returning cards');endDeckGesture(200,660);await wait(1000);setLiveOpen(false);await wait(1000);
    const motionHeights=[...document.querySelectorAll('.stack-motion')].map(n=>n.offsetHeight);
    let maxControlDrift=0,maxCardHeightDrift=0;

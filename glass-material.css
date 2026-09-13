@@ -57,7 +57,7 @@
 .blob-option>span,.blob-option>strong{display:inline-block;transform:none;transform-origin:50% 50%}
 
 /* BitChord's material on navigation and controls. The single backdrop pass stays below the unfiltered labels. */
-.glass-track,.masthead .icon-button,.health-page-head .icon-button{background:var(--frost-floating);border-color:transparent;box-shadow:0 4px 24px #0000001a,inset 0 .5px 0 #ffffff59,inset 0 -.5px 0 #ffffff26}
+.glass-track,.masthead .icon-button,.health-page-head .icon-button,#settings-open{background:var(--frost-floating);border-color:transparent;box-shadow:0 4px 24px #0000001a,inset 0 .5px 0 #ffffff59,inset 0 -.5px 0 #ffffff26}
 .liquid-surface{backdrop-filter:blur(8px) saturate(1.5) var(--glass-lens,blur(0px))!important;-webkit-backdrop-filter:blur(8px) saturate(1.5) var(--glass-lens,blur(0px))!important}
 .live-island .island-frost,.utility-island .island-frost{background:var(--frost-floating)}
 .live-island .island-surface,.utility-island .island-surface{border-width:.5px;border-color:#ffffff26;border-top-color:#ffffff59;border-bottom-color:#ffffff40;background:none;box-shadow:0 4px 24px #0000001a}
@@ -65,9 +65,24 @@
 .glass-track .selection-pill{border:0}
 .glass-control{background:var(--frost-floating);box-shadow:inset 0 .5px 0 #ffffff59,0 4px 24px #0000001a;backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
 
+/* The dashboard's glass sits beneath its readings at a fixed size; only the separate rim folds. */
+.stack-card>.stack-glass{position:absolute;inset:0;z-index:-2;pointer-events:none;border-radius:inherit;background:var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
+.stack-card>.stack-shell{background:linear-gradient(130deg,#ffffff0c,transparent 58%);border-color:#ffffff26;border-top-color:#ffffff59;box-shadow:inset 0 .5px 0 #ffffff26}
+.history-days,.night-stage-totals,.oxygen-week{position:relative}
+.history-days>.selection-pill,.night-stage-totals>.selection-pill,.oxygen-week>.selection-pill{position:absolute;left:0;top:0;pointer-events:none;z-index:0;transform:translate(var(--selection-x,0px),var(--selection-y,0px));width:var(--selection-width,0px);height:var(--selection-height,0px);border-radius:16px}
+.history-days>button,.night-stage-totals>button,.oxygen-week>button{position:relative;z-index:1;background:none;border-color:transparent}
+.history-days>button[aria-pressed=true],.night-stage-totals>button[aria-pressed=true],.oxygen-week>button[aria-pressed=true]{background:none;border-color:transparent}
+.night-stage-totals{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:4px;border-radius:20px}
+.night-stage-totals button{padding:12px 3px;gap:6px;flex-direction:column;text-align:center;min-height:88px}
+.night-stage-totals i{width:18px;height:3px}.night-stage-totals strong{font-size:15px;white-space:nowrap;letter-spacing:-.4px}
+.health-page-head,.health-scroll{touch-action:pan-y}
+input[type=number],input[inputmode=numeric],input[inputmode=decimal]{-webkit-user-select:none;user-select:none}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
 /* Honest fallbacks: the material degrades to a visible opaque surface, never to an empty indicator. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .glass-panel.is-live,.glass-overlay{background:#1d1d23}
+  .stack-card>.stack-glass{background:#1d1d23}
   .glass-track{background:#121216}
   .glass-indicator{background:#463a63;-webkit-backdrop-filter:none;backdrop-filter:none}
 }
@@ -76,6 +91,7 @@
   .glass-track{-webkit-backdrop-filter:none;backdrop-filter:none;background:#121216}
   .glass-indicator{background:#4b3f6b;-webkit-backdrop-filter:none;backdrop-filter:none}
   .liquid-surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .stack-card>.stack-glass{backdrop-filter:none;-webkit-backdrop-filter:none;background:#222228}
 }
 @media(forced-colors:active){
   .glass-panel,.glass-panel.is-live,.glass-overlay,.glass-track{background:Canvas;border:1px solid CanvasText;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
@@ -83,4 +99,5 @@
   .blob-option>span,.blob-option>strong{transform:none}
   .liquid-surface,.glass-control{background:Canvas;border:1px solid CanvasText;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
   .liquid-surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .stack-card>.stack-glass{backdrop-filter:none;-webkit-backdrop-filter:none;background:Canvas}
 }

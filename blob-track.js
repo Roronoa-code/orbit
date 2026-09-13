@@ -238,11 +238,13 @@ const BlobTrack=(()=>{
       if(!session.owned){
         if(Math.abs(dy)>tuning.slop&&Math.abs(dy)>=Math.abs(dx)){cancel('vertical');return} // the scroller keeps it
         if(Math.abs(dx)<tuning.slop)return;
-        session.owned=true;session.baseWidth=rest.width;
+        session.owned=true;haptics.tick();session.baseWidth=rest.width;
         try{host.setPointerCapture(session.id)}catch{}
         host.classList.add('is-dragging');
         // Rebase from the pose actually on screen, so a press on a distant option never teleports the indicator.
-        session.grabDx=event.clientX-(host.getBoundingClientRect().left+pose.cx);
+        // Keep the movement beyond touch slop, even when the first event spans a narrow date slot.
+        const beyondSlop=dx-Math.sign(dx)*tuning.slop;
+        session.grabDx=event.clientX-beyondSlop-(host.getBoundingClientRect().left+pose.cx);
         session.samples=[];sample(session,event);
       }
       if(event.cancelable)event.preventDefault();
@@ -321,7 +323,7 @@ const BlobTrack=(()=>{
     host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);
     host.addEventListener('pointerup',up);host.addEventListener('pointercancel',lost);host.addEventListener('lostpointercapture',lost);
     if(measure()){const target=restingPose();pose={...target};targets={...target};render()}
-    return {sync,remeasure,setPose,cancel:()=>cancel('external'),destroy,
+    return {host,sync,remeasure,setPose,cancel:()=>cancel('external'),destroy,
       get busy(){return Boolean(session)},get dragging(){return Boolean(session?.owned)},
       get pose(){return {...pose}},get influences(){return lastInfluences.map(v=>({...v}))},
       get options(){return opts.map(o=>({id:o.id,centre:o.centre,width:o.width}))},get bounds(){return {...bounds}}};

@@ -37,6 +37,9 @@ public final class WorkoutSession {
     private final MainActivity activity;
     private final SharedPreferences preferences;
     private final WorkoutNotification notification;
+    private String sampledRaw;
+    private JSONObject sampledActive;
+    private long sampleRevision;
 
     WorkoutSession(Context context) {
         this.context = context;
@@ -287,26 +290,25 @@ public final class WorkoutSession {
         return row.put("resumedAt", now).put("resumedRealtime", SystemClock.elapsedRealtime()).put("bootCount", bootCount());
     }
 
-    @JavascriptInterface public double elapsedMs() {
+    /** One clock sample per UI tick; unchanged history never crosses the bridge or gets decoded again. */
+    @JavascriptInterface public String snapshot(String knownRevision) {
         synchronized (LOCK) {
             try {
-                JSONObject active = activeLocked();
-                return active == null ? 0 : elapsed(active, System.currentTimeMillis());
+                String raw = read();
+                if (sampleRevision == 0 || !java.util.Objects.equals(raw, sampledRaw)) {
+                    JSONObject value = raw == null ? null : decode(raw);
+                    sampledActive = value == null ? null : value.optJSONObject("active");
+                    sampledRaw = raw;
+                    sampleRevision++;
+                }
+                long time = System.currentTimeMillis(), active = sampledActive == null ? 0 : elapsed(sampledActive, time);
+                String revision = Long.toString(sampleRevision);
+                return new JSONObject().put("revision", revision).put("empty", sampledRaw == null)
+                    .put("store", revision.equals(knownRevision) ? JSONObject.NULL : sampledRaw == null ? "{\"active\":null,\"history\":[]}" : sampledRaw)
+                    .put("startedAt", sampledActive == null ? JSONObject.NULL : sampledActive.getLong("startedAt"))
+                    .put("elapsedMs", active).put("totalMs", sampledActive == null ? 0 : Math.max(active, totalElapsed(sampledActive, time))).toString();
             } catch (Exception error) {
-                return -1;
-            }
-        }
-    }
-
-    @JavascriptInterface public double totalMs() {
-        synchronized (LOCK) {
-            try {
-                JSONObject active = activeLocked();
-                if (active == null) return 0;
-                long now = System.currentTimeMillis();
-                return Math.max(elapsed(active, now), totalElapsed(active, now));
-            } catch (Exception error) {
-                return -1;
+                return "{\"error\":\"Workout state unavailable\"}";
             }
         }
     }

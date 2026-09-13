@@ -546,5 +546,48 @@
       "signed production and Audit build; HTML parity; source and license presence"
     ],
     "physicalWorkoutsRework": "SKIPPED at explicit user request: install only, no app launch or phone testing"
+  },
+  "interactionFollowup": {
+    "baseline": "8fcbac5",
+    "release": {
+      "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260913-012113",
+      "sha256": "f8511588d87f98f82188a9324fab191f9ed0d3c90afd105b33692cdbe85c8555",
+      "bytes": 280145,
+      "bundleParity": true,
+      "phoneLaunched": false,
+      "phoneTested": false,
+      "installed": true,
+      "installedSha256": "f8511588d87f98f82188a9324fab191f9ed0d3c90afd105b33692cdbe85c8555",
+      "previousSha256": "c59a4e20c2143ff9b2d7341630a41ce0f7a85650e588a62dfc025f78ba0a5a8c"
+    },
+    "flows": {
+      "widths": [
+        390,
+        384,
+        320
+      ],
+      "status": "PASS",
+      "clock": {
+        "calls": 0,
+        "advance": 162.20000004768372,
+        "paused": 30000,
+        "held": 30000,
+        "rejected": true
+      },
+      "migrationAndFailurePreservation": true,
+      "phoneTested": false
+    },
+    "desktopProbe": {
+      "beforeBridgeCalls": 25,
+      "afterBridgeCalls": 3,
+      "beforeLayoutEvents": 177,
+      "afterLayoutEvents": 3,
+      "beforePaintEvents": 693,
+      "afterPaintEvents": 674,
+      "beforeMaxFrameGapMs": 16.800000000000182,
+      "afterMaxFrameGapMs": 16.800000000000182
+    },
+    "phoneQualification": "Not run: explicit install-only instruction",
+    "profileFields": "Birthday formatting, height/weight/goal context suppression and normal name selection verified on desktop"
   }
 }

@@ -9,28 +9,41 @@ const Health = (() => {
   let sleepDate=null,sleepMinute=0,workoutRecord=null,workoutChart='route',workoutReturn=null;
   const now=()=>performance.timeOrigin+performance.now();
   const stamp=(date,full=false)=>new Date(date).toLocaleDateString('en-GB',full?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
-  const elapsed=(session,time=now())=>{if(session&&session===store.active&&window.OrbitWorkouts?.elapsedMs){const value=window.OrbitWorkouts.elapsedMs();if(Number.isFinite(value)&&value>=0)return value}return session?Math.max(0,session.elapsed+(session.resumedAt==null?0:Math.max(0,time-session.resumedAt))):0};
-  const total=session=>{if(session===store.active&&window.OrbitWorkouts?.totalMs){const value=window.OrbitWorkouts.totalMs();if(Number.isFinite(value)&&value>=0)return Math.max(elapsed(session),value)}return Math.max(elapsed(session),session.totalMs??((session.endedAt??now())-session.startedAt))};
+  let nativeClock=null,nativeRevision='',lastRaw;
+  const sampledTime=(session,key)=>nativeClock&&nativeClock.startedAt===session?.startedAt?nativeClock[key]+(key==='totalMs'||session.resumedAt!==null?Math.max(0,performance.now()-nativeClock.at):0):null;
+  const elapsed=(session,time=now())=>{if(session===store.active){const value=sampledTime(session,'elapsedMs');if(value!==null)return value}return session?Math.max(0,session.elapsed+(session.resumedAt==null?0:Math.max(0,time-session.resumedAt))):0};
+  const total=session=>{if(session===store.active){const value=sampledTime(session,'totalMs');if(value!==null)return Math.max(elapsed(session),value)}return Math.max(elapsed(session),session.totalMs??((session.endedAt??now())-session.startedAt))};
   const clock=ms=>{const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s/60)%60;return (h?h+':':'')+String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
   const validNumber=n=>Number.isFinite(n)&&n>=0;
   const validTarget=n=>n===undefined||n===0||Number.isInteger(n)&&n>=60000&&n<=86400000;
   function validSession(s,active){return s&&WorkoutDetails.valid(s)&&kinds.includes(s.kind)&&validNumber(s.startedAt)&&validNumber(s.elapsed)&&validTarget(s.targetMs)&&(active?(s.resumedAt===null||validNumber(s.resumedAt)):validNumber(s.endedAt))}
   function decode(raw){const v=JSON.parse(raw);if(!v||!Array.isArray(v.history)||(v.active!==null&&!validSession(v.active,true))||!v.history.every(row=>validSession(row,false)))throw Error('Invalid workout history');return v}
   function readStore(){
-    try{const native=window.OrbitWorkouts,nativeRaw=native?native.read():null,raw=nativeRaw??localStorage.getItem(key);if(raw===null){storageFault=false;return}const value=decode(raw);if(native&&nativeRaw===null&&!native.write(raw))throw Error('Migration not saved');store=value;storageFault=false}
-    catch{storageFault=true}
+    try{
+      const native=window.OrbitWorkouts;
+      if(native?.snapshot){
+        let sample=JSON.parse(native.snapshot(nativeRevision));
+        if(sample.empty){const legacy=localStorage.getItem(key);if(legacy!==null){decode(legacy);if(!native.write(legacy))throw Error('Migration not saved');sample=JSON.parse(native.snapshot(''))}}
+        if(sample.error||typeof sample.revision!=='string'||!validNumber(sample.elapsedMs)||!validNumber(sample.totalMs)||sample.startedAt!==null&&!validNumber(sample.startedAt))throw Error('Invalid clock sample');
+        const value=sample.store===null?store:decode(sample.store);
+        if(sample.startedAt!==(value.active?.startedAt??null))throw Error('Clock belongs to another workout');
+        store=value;nativeClock={startedAt:sample.startedAt,elapsedMs:sample.elapsedMs,totalMs:sample.totalMs,at:performance.now()};nativeRevision=sample.revision;storageFault=false;return;
+      }
+      const nativeRaw=native?native.read():null,raw=nativeRaw??localStorage.getItem(key);
+      if(raw===null){storageFault=false;return}if(raw!==lastRaw){const value=decode(raw);if(native&&nativeRaw===null&&!native.write(raw))throw Error('Migration not saved');store=value;lastRaw=raw}storageFault=false;
+    }catch{storageFault=true}
   }
   function changed(){if(!paintLive())render();options.onChange();schedule()}
   function commit(value){
     try{const encoded=JSON.stringify(value),native=window.OrbitWorkouts;if(native){if(!native.write(encoded)||native.read()!==encoded)throw Error('Save not confirmed')}else{localStorage.setItem(key,encoded);if(localStorage.getItem(key)!==encoded)throw Error('Save not confirmed')}}
     catch{options.notice('Could not save. The previous workout state is unchanged.');return false}
-    store=value;changed();return true;
+    store=value;OrbitInteraction.haptic('select');changed();return true;
   }
   function action(name,kind,targetMs=0,recording={}){
     if(storageFault){options.notice('Saved workouts could not be read. Your data has been preserved.');return false}
     if(name==='start'&&(!kinds.includes(kind)||!validTarget(targetMs)||!WorkoutDetails.valid(recording)||recording.trackLocation&&kind==='Strength'))return false;
     const native=window.OrbitWorkouts;
-    if(native?.action){try{const raw=name==='start'&&native.start?native.start(kind,targetMs,Boolean(recording.trackLocation),recording.weightKg||0):native.action(name,kind||'',targetMs);if(raw===null)throw Error('Save failed');store=decode(raw);changed();return true}catch{options.notice('Could not update the workout. Open it and try again.');return false}}
+    if(native?.action){try{const raw=name==='start'&&native.start?native.start(kind,targetMs,Boolean(recording.trackLocation),recording.weightKg||0):native.action(name,kind||'',targetMs);if(raw===null)throw Error('Save failed');store=decode(raw);nativeRevision='';nativeClock=null;readStore();OrbitInteraction.haptic(name==='finish'?'confirm':'select');changed();return true}catch{options.notice('Could not update the workout. Open it and try again.');return false}}
     const active=store.active,time=now();
     if(name==='start'){if(active)return false;return commit({...store,active:{kind,startedAt:time,elapsed:0,resumedAt:time,targetMs,weightKg:recording.weightKg||0,trackLocation:Boolean(recording.trackLocation),...(recording.trackLocation?{metrics:{state:'unavailable',distanceM:0,maxSpeedMps:0,speedMps:null,altitudeMinM:null,altitudeMaxM:null,accuracyM:null,points:[]}}:{})}})}
     if(!active)return false;
@@ -55,9 +68,11 @@ const Health = (() => {
   function overview(){
     const date=options.getDate(),oxygen=sample('oxygen',date),recent=options.dates.filter(r=>r<=date).slice(-7);
     return `<p class="health-overview-intro">Measurements and activity</p><div class="health-grid health-destinations"><button class="health-tile health-tile-button" data-open="body"><h2>Body composition</h2><p class="tile-value">${sample('body',date).weight.toFixed(1)}<small>kg</small></p>${spark(options.dates.filter(r=>r<=date).slice(-10).map(r=>sample('body',r).weight))}<small>Sample measurements · view history ›</small></button><button class="health-tile health-tile-button" data-open="workouts"><h2>Workouts</h2><div class="tile-art">${activityIcon('Running')}<span class="round-arrow">↗</span></div><small>${store.active?'Workout in progress':store.history.length+' local sessions'} · open ›</small></button></div>
-    <details class="health-tile oxygen-tile"><summary><span class="oxygen-symbol" aria-hidden="true">O₂</span><span class="oxygen-label"><h2>Blood oxygen</h2><small>Sample · ${stamp(date+'T12:00:00',true)}</small></span><p class="tile-value">${oxygen.value}<small>%</small></p><span class="oxygen-chevron">⌄</span></summary><div class="details-body"><div class="oxygen-detail-head"><span>Recent readings</span><output id="oxygen-date">${stamp(date+'T12:00:00')} · ${oxygen.value}%</output></div><div class="oxygen-week" role="group" aria-label="Blood oxygen readings by day">${recent.map(day=>`<button data-oxygen-day="${day}" aria-pressed="${day===date}" aria-label="${stamp(day+'T12:00:00',true)}, ${sample('oxygen',day).value}%"><small>${new Date(day+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${sample('oxygen',day).value}<small>%</small></strong></button>`).join('')}</div></div></details><p class="health-note">Body and oxygen use demonstration measurements. Workouts are recorded on this phone. Connected health measurements are not available in this copy.</p>`;
+    <details class="health-tile oxygen-tile"><summary><span class="oxygen-symbol" aria-hidden="true">O₂</span><span class="oxygen-label"><h2>Blood oxygen</h2><small>Sample · ${stamp(date+'T12:00:00',true)}</small></span><p class="tile-value">${oxygen.value}<small>%</small></p><span class="oxygen-chevron">⌄</span></summary><div class="details-body"><div class="oxygen-detail-head"><span>Recent readings</span><output id="oxygen-date">${stamp(date+'T12:00:00')} · ${oxygen.value}%</output></div><div class="oxygen-week glass-track blob-track" role="group" aria-label="Blood oxygen readings by day"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${recent.map(day=>`<button class="blob-option" data-oxygen-day="${day}" aria-pressed="${day===date}" aria-label="${stamp(day+'T12:00:00',true)}, ${sample('oxygen',day).value}%"><small>${new Date(day+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${sample('oxygen',day).value}<small>%</small></strong></button>`).join('')}</div></div></details><p class="health-note">Body and oxygen use demonstration measurements. Workouts are recorded on this phone. Connected health measurements are not available in this copy.</p>`;
   }
   function bodyRows(){const end=options.getDate(),start=dayOffset(end,1-bodyRange);return (options.historyDates||options.dates).filter(date=>date>=start&&date<=end)}
+  function setSleepMinute(value){sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,value);tracks.get('sleep-stage')?.sync(q('[data-night-stage][aria-pressed=true]')?.dataset.nightStage)}
+  function setOxygenDay(date){if(!options.dates.includes(date))return;q('#oxygen-date').textContent=stamp(date+'T12:00:00')+' · '+sample('oxygen',date).value+'%';document.querySelectorAll('[data-oxygen-day]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.oxygenDay===date)));tracks.get('oxygen-day')?.sync(date)}
   function sleepView(){const index=options.dates.indexOf(sleepDate);return `<div class="sleep-date-nav"><button data-night-date="-1" aria-label="Previous night" ${index<=0?'disabled':''}>‹</button><span>${stamp(sleepDate+'T12:00:00',true)}</span><button data-night-date="1" aria-label="Next night" ${index>=options.dates.length-1?'disabled':''}>›</button></div>`+SleepTimeline.view(options.getDaily(sleepDate).night,sleepMinute)}
   // Each of the ring's 100 dots is 1% of body weight: purple is the selected measurement's share, with Weight filling the whole ring.
   const bodyOrder=Object.keys(bodyFields),bodyTone={purple:[182,156,255],rest:[52,50,60]};
@@ -92,9 +107,10 @@ const Health = (() => {
   const tracks=new Map();let trackCommit=0;
   const influenceLabel=(el,raw,eased)=>{el.style.setProperty('--blob-influence',eased.toFixed(3));el.style.setProperty('--blob-lift',eased.toFixed(3))};
   function bindTrack(key,host,config){
+    if(host&&tracks.get(key)?.host===host)return tracks.get(key);
     tracks.get(key)?.destroy();tracks.delete(key);
     if(!host)return null;
-    const track=BlobTrack.create(Object.assign({host,influence:influenceLabel},config));tracks.set(key,track);return track;
+    const track=BlobTrack.create(Object.assign({host,influence:influenceLabel,haptics:{tick:()=>OrbitInteraction.haptic('tick'),select:()=>OrbitInteraction.haptic('select')}},config));tracks.set(key,track);return track;
   }
   const releaseTracks=()=>{for(const track of tracks.values())track.destroy();tracks.clear()};
   const remeasureTracks=()=>{for(const track of tracks.values())track.remeasure()};
@@ -102,7 +118,7 @@ const Health = (() => {
   // or assistive activation (which carries no click detail) still goes through the ordinary handler.
   const fromTrack=event=>Boolean(event.detail)&&performance.now()-trackCommit<400;
   function bindTracks(){
-    releaseTracks();
+    for(const [key,track] of tracks)if(!track.host?.isConnected){track.destroy();tracks.delete(key)}
     bindTrack('workout-tab',q('.workout-tabs'),{optionSelector:'[data-workout-tab]',idOf:el=>el.dataset.workoutTab,
       committed:()=>workoutTab,commit:id=>{trackCommit=performance.now();setWorkoutTab(id)}});
     bindTrack('body-metric',q('.body-metric-picker'),{optionSelector:'[data-body-metric]',idOf:el=>el.dataset.bodyMetric,
@@ -113,6 +129,9 @@ const Health = (() => {
       committed:()=>q('.setup-segments input:checked')?.value||'open',commit:id=>{trackCommit=performance.now();setWorkoutTarget(id)}});
     bindTrack('timer-mode',q('.timer-mode-picker'),{optionSelector:'[data-timer-mode]',idOf:el=>el.dataset.timerMode,
       committed:()=>timerMode,commit:id=>{trackCommit=performance.now();setTimerMode(id)}});
+    bindTrack('history-day',q('.history-days'),{optionSelector:'[data-week-day]:not(:disabled)',idOf:el=>el.dataset.weekDay,committed:()=>q('[data-week-day][aria-pressed=true]')?.dataset.weekDay,commit:id=>{trackCommit=performance.now();inspectWeek(Number(id))}});
+    bindTrack('sleep-stage',q('.night-stage-totals'),{optionSelector:'[data-night-stage]',idOf:el=>el.dataset.nightStage,committed:()=>q('[data-night-stage][aria-pressed=true]')?.dataset.nightStage,commit:id=>{trackCommit=performance.now();setSleepMinute(SleepTimeline.stageMinute(options.getDaily(sleepDate).night,id))}});
+    bindTrack('oxygen-day',q('.oxygen-week'),{optionSelector:'[data-oxygen-day]',idOf:el=>el.dataset.oxygenDay,committed:()=>q('[data-oxygen-day][aria-pressed=true]')?.dataset.oxygenDay,commit:id=>{trackCommit=performance.now();setOxygenDay(id)}});
     bindTrack('workout-chart',q('.workout-chart-tabs'),{optionSelector:'[data-workout-chart]',idOf:el=>el.dataset.workoutChart,
       committed:()=>workoutChart,commit:id=>{trackCommit=performance.now();setWorkoutChart(id)}});
   }
@@ -183,6 +202,7 @@ const Health = (() => {
   // dir (+1 or -1) steps round the loop as a swipe does; without it a selector tap slides straight to the chosen label.
   function goBody(field,dir=0){
     if(!Object.hasOwn(bodyFields,field)||lens.drag)return;
+    if(field!==bodyMetric)OrbitInteraction.haptic('select');
     if(SurfaceMotion.reduced){cancelAnimationFrame(lens.frame);lens.frame=0;lens.from=lens.to=null;lens.target=0;bodyMetric=field;paintBody(false);return}
     const [current,next]=lensLayers();
     if(lens.frame&&lens.to&&Math.abs(lens.x.value)>=.5){current.innerHTML=next.innerHTML;lens.x.value+=lens.x.value<0?1:-1;lens.from=lens.to;lens.to=null}
@@ -283,19 +303,19 @@ const Health = (() => {
     const earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt))),selected=bins.find(b=>b.date.getTime()===historyDate)||bins[0];
     return `<div class="history-week-nav"><div><h2>${start.getTime()===weekStart(now()).getTime()?'This week':'Training week'}</h2><p>${stamp(start)} – ${stamp(end,true)}</p></div><button data-history-week="-1" aria-label="Previous week" ${start<=earliest?'disabled':''}>‹</button><button data-history-week="1" aria-label="Next week" ${end>=today?'disabled':''}>›</button></div>
     <div class="history-week-metrics"><p><strong>${duration(ms)}</strong><small>Active time</small></p><p><strong>${count}</strong><small>${count===1?'Session':'Sessions'}</small></p></div>
-    <div class="history-days" role="group" aria-label="Choose workout day">${bins.map((b,i)=>`<button data-week-day="${i}" aria-pressed="${b.date.getTime()===historyDate}" aria-label="${stamp(b.date,true)}, ${b.records.length} sessions, ${duration(b.minutes*60000)} active" ${b.date>today?'disabled':''}><small>${b.date.toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${b.date.getDate()}</strong><span class="history-day-bar" aria-hidden="true"><i class="${b.records.length?'has-records':''}" style="height:${b.records.length?Math.max(4,b.minutes/max*24):2}px"></i></span></button>`).join('')}</div>
+    <div class="history-days glass-track blob-track" role="group" aria-label="Choose workout day"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${bins.map((b,i)=>`<button class="blob-option" data-week-day="${i}" aria-pressed="${b.date.getTime()===historyDate}" aria-label="${stamp(b.date,true)}, ${b.records.length} sessions, ${duration(b.minutes*60000)} active" ${b.date>today?'disabled':''}><small>${b.date.toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${b.date.getDate()}</strong><span class="history-day-bar" aria-hidden="true"><i class="${b.records.length?'has-records':''}" style="height:${b.records.length?Math.max(4,b.minutes/max*24):2}px"></i></span></button>`).join('')}</div>
     <div id="history-sessions" aria-live="polite">${historySessions(selected)}</div>`;
   }
   function inspectWeek(index){
     const bin=weekBins()[index];if(!bin||bin.date>dayStart(now()))return;
     historyDate=bin.date.getTime();document.querySelectorAll('[data-week-day]').forEach(n=>n.setAttribute('aria-pressed',String(Number(n.dataset.weekDay)===index)));
-    q('#history-sessions').innerHTML=historySessions(bin);SurfaceMotion.shift(q('#history-sessions'),{x:0,y:5},180);
+    tracks.get('history-day')?.sync(String(index));q('#history-sessions').innerHTML=historySessions(bin);SurfaceMotion.shift(q('#history-sessions'),{x:0,y:5},180);
   }
   function changeWeek(step){
     if(![-1,1].includes(step))return;
     const next=addDays(historyDate,step*7),earliest=weekStart(Math.min(now(),...store.history.map(r=>r.startedAt)));
     if(weekStart(next)<earliest||weekStart(next)>weekStart(now()))return;
-    historyDate=Math.min(next.getTime(),dayStart(now()).getTime());q('#workout-calendar').innerHTML=historyCalendar();
+    historyDate=Math.min(next.getTime(),dayStart(now()).getTime());q('#workout-calendar').innerHTML=historyCalendar();bindTracks();window.LiquidGlass?.enhance();
     SurfaceMotion.shift(q('#workout-calendar'),{x:step*10,y:0},200);const nextFocus=q('[data-history-week="'+step+'"]');(nextFocus.disabled?q('[data-week-day][aria-pressed=true]'):nextFocus).focus({preventScroll:true});
   }
   function workoutHome(){
@@ -310,7 +330,7 @@ const Health = (() => {
   function setWorkoutTab(tab){
     if(!['train','history'].includes(tab)||tab===workoutTab)return;
     workoutTab=tab;document.querySelectorAll('.workout-tabs button').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.workoutTab===tab)));tracks.get('workout-tab')?.sync(tab);
-    q('#workout-hub-content').innerHTML=workoutHub();q('#health-scroll').scrollTop=0;SurfaceMotion.reveal(q('#workout-hub-content'),{x:tab==='history'?8:-8,y:0},180);
+    q('#workout-hub-content').innerHTML=workoutHub();bindTracks();window.LiquidGlass?.enhance();q('#health-scroll').scrollTop=0;SurfaceMotion.reveal(q('#workout-hub-content'),{x:tab==='history'?8:-8,y:0},180);
   }
   // One configuration flow for every activity: the header carries the name; the panel holds target, GPS and weight.
   function setupView(){
@@ -357,7 +377,7 @@ const Health = (() => {
     if(store.active||!kinds.includes(kind)||!validTarget(targetMs)||!WorkoutDetails.valid(recording)||recording.trackLocation&&kind==='Strength')return false;
     cancelCountdown();setup={...recording,kind,targetMs};timerMode='elapsed';timerFocused=false;SurfaceMotion.change(()=>{countdown=3;render()});
     countTimer=setInterval(()=>{
-      countdown--;
+      countdown--;OrbitInteraction.haptic(countdown>0?'tick':'confirm');
       if(countdown<=0)SurfaceMotion.change(()=>{cancelCountdown();if(action('start',kind,targetMs,recording)){setup=null;render();q('#session-time').focus({preventScroll:true});return true}render();return false});
       else{q('#workout-count').textContent=countdown;countDots?.set(countdown);document.querySelectorAll('[data-count-stage]').forEach(n=>n.classList.toggle('lit',countdown<=Number(n.dataset.countStage)))}
     },1000);return true;
@@ -384,7 +404,7 @@ const Health = (() => {
       options.onClose();if(returnFocus?.isConnected&&!returnFocus.closest('[inert]'))returnFocus.focus({preventScroll:true});else q('#live-bar').focus({preventScroll:true});
     });return true;
   }
-  function refresh(){const before=JSON.stringify(store),structure=JSON.stringify([store.active?.startedAt,store.active?.resumedAt,store.history.length]);if(window.OrbitWorkouts)readStore();if(before!==JSON.stringify(store)){if(structure!==JSON.stringify([store.active?.startedAt,store.active?.resumedAt,store.history.length])){if(workoutRecord==='active'&&!store.active)workoutRecord=store.history[0]?.startedAt??null;if(!paintLive())render();schedule()}else paintMetrics();options.onChange()}}
+  function refresh(){const before=store,structure=JSON.stringify([store.active?.startedAt,store.active?.resumedAt,store.history.length]);if(window.OrbitWorkouts)readStore();if(before!==store){if(structure!==JSON.stringify([store.active?.startedAt,store.active?.resumedAt,store.history.length])){if(workoutRecord==='active'&&!store.active)workoutRecord=store.history[0]?.startedAt??null;if(page==='workouts'&&!paintLive())render();schedule()}else paintMetrics();options.onChange()}}
   function paintTimer(){if(!store.active||!q('#session-time'))return;const t=elapsed(store.active),target=store.active.targetMs||0,reading=clock(timerMode==='remaining'?Math.max(0,target-t):t),ratio=target?Math.min(1,t/target):t%60000/60000;if(q('#session-time').dataset.reading!==reading){const slot=q('#session-time .session-matrix')||q('#session-time');let svg=slot.querySelector('.matrix-reading');if(svg)svg.outerHTML=HeroDots.markup(reading);else slot.insertAdjacentHTML('beforeend',HeroDots.markup(reading));WorkoutFocus.reading(reading);q('#session-time').dataset.reading=reading;q('#session-time').setAttribute('aria-label',`${timerMode==='remaining'?'Remaining':'Duration'}: ${reading}`)}document.querySelectorAll('[data-timer-dot]').forEach(n=>n.classList.toggle('lit',Number(n.dataset.timerDot)/60<ratio));if(target){q('#session-progress').value=Math.min(t,target);q('#target-remaining').textContent=(t>=target?'Target reached':clock(Math.max(0,target-t))+' remaining')+' · '+target/60000+' min target'}}
   function tick(){refresh();if(page==='workouts'){paintTimer();if(workoutRecord!==null&&record())WorkoutDetails.updateTimes(q('#workout-record-body'),record(),elapsed(record()),total(record()));else if(store.active&&q('#live-workout-metrics'))WorkoutDetails.updateCompact(q('#live-workout-metrics'),store.active,elapsed(store.active),total(store.active))}options.onTick()}
   function schedule(){clearInterval(timer);timer=0;if(store.active&&!document.hidden)timer=setInterval(tick,1000)}
@@ -415,24 +435,33 @@ const Health = (() => {
       else if(b.dataset.bodyRange)setBodyRange(Number(b.dataset.bodyRange));
       else if(b.dataset.bodyStep)inspectBody(bodyRows().indexOf(bodyDate)+Number(b.dataset.bodyStep));
       else if(b.dataset.nightDate){const date=options.dates[options.dates.indexOf(sleepDate)+Number(b.dataset.nightDate)];if(date){sleepDate=date;sleepMinute=0;render();q('[data-night-date="'+b.dataset.nightDate+'"]').focus({preventScroll:true})}}
-      else if(b.dataset.nightPart){const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.inspect(night,SleepTimeline.part(night,sleepMinute,Number(b.dataset.nightPart)))}
-      else if(b.dataset.nightStage){const night=options.getDaily(sleepDate).night;sleepMinute=SleepTimeline.inspect(night,SleepTimeline.stageMinute(night,b.dataset.nightStage))}
+      else if(b.dataset.nightPart){const night=options.getDaily(sleepDate).night;setSleepMinute(SleepTimeline.part(night,sleepMinute,Number(b.dataset.nightPart)))}
+      else if(b.dataset.nightStage){const night=options.getDaily(sleepDate).night;setSleepMinute(SleepTimeline.stageMinute(night,b.dataset.nightStage))}
       else if(b.dataset.timerMode)setTimerMode(b.dataset.timerMode);
       else if(b.hasAttribute('data-timer-focus'))setFocus(!timerFocused);
       else if(b.hasAttribute('data-music-expand'))setFocus(true);
       else if(b.hasAttribute('data-dot-play')){dotPattern=(dotPattern+1)%3;HeroDots.reshape(b,dotPattern)}
-      else if(b.dataset.oxygenDay){const date=b.dataset.oxygenDay;if(options.dates.includes(date)){q('#oxygen-date').textContent=stamp(date+'T12:00:00')+' · '+sample('oxygen',date).value+'%';document.querySelectorAll('[data-oxygen-day]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.oxygenDay===date)))}}
+      else if(b.dataset.oxygenDay)setOxygenDay(b.dataset.oxygenDay);
       else if(b.dataset.open)open(b.dataset.open,b);
       else if(b.hasAttribute('data-cancel-countdown'))close();
       else if(b.hasAttribute('data-notifications'))window.OrbitWorkouts?.enableNotifications();
     });
     q('#health-content').addEventListener('change',event=>{if(event.target.name==='target'){const open=event.target.value==='time';q('#target-minutes').disabled=!open;q('.setup-open-note').hidden=open;q('#target-options').hidden=!open;SurfaceMotion.reveal(q(open?'#target-options':'.setup-open-note'),{x:0,y:4},180)}});
-    q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='night-scrub')sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).night,Number(event.target.value))});
+    q('#health-content').addEventListener('input',event=>{if(event.target.id==='body-scrub'){const day=Number(event.target.value),rows=bodyRows();if(Number.isInteger(day)&&day>=0&&day<bodyRange)inspectBody(rows.reduce((best,date,i)=>Math.abs(bodyOffset(date)-day)<Math.abs(bodyOffset(rows[best])-day)?i:best,0))}if(event.target.id==='night-scrub')setSleepMinute(Number(event.target.value))});
     q('#health-content').addEventListener('submit',event=>{if(event.target.id!=='workout-setup-form')return;event.preventDefault();const time=q('input[name="target"]:checked').value==='time',minutes=Number(q('#target-minutes').value);if(time&&(!Number.isInteger(minutes)||minutes<1||minutes>1440)){q('#workout-error').textContent='Choose between 1 and 1,440 minutes.';return}const weightKg=Number(q('#workout-weight').value||0),trackLocation=Boolean(q('#workout-track')?.checked);if(weightKg!==0&&(!Number.isFinite(weightKg)||weightKg<20||weightKg>350)){q('#workout-error').textContent='Enter a weight from 20 to 350 kg, or leave it empty.';return}startCountdown(setup.kind,time?minutes*60000:0,{trackLocation,weightKg})});
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&countdown!==null){cancelCountdown();render()}schedule();if(!document.hidden)tick()});
     const realign=()=>{if(page)remeasureTracks()};window.addEventListener('resize',realign);document.fonts?.ready.then(realign);
     const content=q('#health-content');for(const [type,fn] of [['pointerdown',lensDown],['pointermove',lensMove]])content.addEventListener(type,fn);for(const type of ['pointerup','pointercancel','lostpointercapture'])content.addEventListener(type,lensUp);
     content.addEventListener('keydown',event=>{if(!event.target.closest?.('[data-body-dial]')||!['ArrowLeft','ArrowRight'].includes(event.key))return;const dir=event.key==='ArrowRight'?1:-1;event.preventDefault();goBody(bodyNeighbour(bodyMetric,dir),dir)});
+    OrbitInteraction.swipe(q('#health-page'),target=>{
+      if(!page)return null;
+      const body=q('#health-content'),head=target.closest('.health-page-head');
+      if(head||page==='settings'||page==='overview'||page==='workouts'&&(workoutRecord!==null||setup||store.active||countdown!==null))return {node:body,commit:dir=>{if(dir>0)close()}};
+      if(page==='body')return {node:body,commit:dir=>goBody(bodyNeighbour(bodyMetric,-dir),-dir)};
+      if(page==='sleep')return {node:body,commit:dir=>q('[data-night-date="'+(-dir)+'"]')?.click()};
+      if(page==='workouts')return {node:body,commit:dir=>target.closest('.history-week-nav,.history-week-metrics')?changeWeek(-dir):setWorkoutTab(dir<0?'history':'train')};
+      return null;
+    });
     q('#health-scroll').addEventListener('scroll',frostHead,{passive:true});
     window.addEventListener('focus',refresh);schedule();
   }

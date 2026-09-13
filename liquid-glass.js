@@ -5,7 +5,7 @@
  */
 'use strict';
 window.LiquidGlass=(()=>{
-  const ns='http://www.w3.org/2000/svg',entries=new Map(),selector='.glass-track,.masthead .icon-button,.health-page-head .icon-button,.island-frost';
+  const ns='http://www.w3.org/2000/svg',entries=new Map(),selector='.glass-track,.masthead .icon-button,.health-page-head .icon-button,#settings-open';
   const preference=matchMedia('(prefers-reduced-transparency:reduce), (prefers-contrast:more), (forced-colors:active)');
   let defs,serial=0;
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
