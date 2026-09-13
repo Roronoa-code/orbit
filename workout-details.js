@@ -8,7 +8,7 @@ const WorkoutDetails=(()=>{
   const states=['off','permission','searching','tracking','paused','unavailable','error','finished'];
   const met={Walking:3.5,Running:7.5,Cycling:4,Strength:3.5};
   const clock=ms=>{const s=Math.floor(Math.max(0,ms)/1000),h=Math.floor(s/3600);return(h?h+':':'')+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
-  const pace=mps=>mps>0?clock(1000000/mps):'—';
+  const pace=mps=>mps>=.3?clock(1000000/mps):'—';
   function valid(s){
     if(s.weightKg!==undefined&&!(s.weightKg===0||finite(s.weightKg)&&s.weightKg>=20&&s.weightKg<=350))return false;
     if(s.trackLocation!==undefined&&typeof s.trackLocation!=='boolean'||!optional(s.totalMs))return false;
@@ -32,7 +32,7 @@ const WorkoutDetails=(()=>{
   function route(points){
     if(points.length<2)return '<div class="workout-chart-empty">Your route appears after a few GPS readings.</div>';
     const first=points[0],radians=Math.PI/180,xy=points.map(p=>({x:((p.lon-first.lon+540)%360-180)*Math.cos(first.lat*radians),y:-(p.lat-first.lat),breakBefore:p.breakBefore}));
-    const xs=xy.map(p=>p.x),ys=xy.map(p=>p.y),minX=Math.min(...xs),minY=Math.min(...ys),dx=Math.max(...xs)-minX,dy=Math.max(...ys)-minY,scale=Math.min(264/Math.max(dx,.000001),142/Math.max(dy,.000001));
+    const xs=xy.map(p=>p.x),ys=xy.map(p=>p.y),minX=Math.min(...xs),minY=Math.min(...ys),dx=Math.max(...xs)-minX,dy=Math.max(...ys)-minY,scale=Math.min(264/Math.max(dx,.00045),142/Math.max(dy,.00045));
     const map=p=>({x:160+(p.x-minX-dx/2)*scale,y:96+(p.y-minY-dy/2)*scale}),mapped=xy.map(map),path=mapped.map((p,i)=>(i===0||xy[i].breakBefore?'M':'L')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' '),start=mapped[0],end=mapped.at(-1);
     return `<svg viewBox="0 0 320 192" role="img" aria-label="Recorded route, north upwards"><path d="M20 48H300M20 96H300M20 144H300M80 18V178M160 18V178M240 18V178" stroke="#ffffff07"/><text x="294" y="21" fill="#bbb4c4" font-size="9">N ↑</text><path d="${path}" fill="none" stroke="#cbb8ed" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${start.x}" cy="${start.y}" r="5" fill="#232327" stroke="#ece4f5" stroke-width="2"/><circle cx="${end.x}" cy="${end.y}" r="5" fill="#ece4f5" stroke="#232327" stroke-width="2"/></svg>`;
   }
@@ -61,13 +61,26 @@ const WorkoutDetails=(()=>{
       ${s.notes?`<section class="health-tile workout-detail-group"><h2>Notes</h2><p>${esc(s.notes)}</p></section>`:''}
       <p class="health-note">Samsung Health measurements within the recorded start and end times. Duration includes any pauses. ${s.hasRoute?'A route exists in Samsung Health but has not been shared with Orbit.':'No route shared.'} Missing values stay empty.</p>`;
   }
-  function setValue(root,name,value){const node=root.querySelector('[data-workout-value="'+name+'"] dd>span');if(node)node.textContent=value}
-  function updateCompact(root,s,activeMs,totalMs=activeMs){const r=readings(s,activeMs);setValue(root,'average-pace',pace(r.average));setValue(root,'average-speed',r.average===null?'—':(r.average*3.6).toFixed(1));setValue(root,'paused',clock(Math.max(0,totalMs-activeMs)));if(r.calories!==null||!timeOnly(s))setValue(root,'energy-estimate',r.calories===null?'—':Math.round(r.calories))}
+  function setValue(root,name,value){const node=root.querySelector('[data-workout-value="'+name+'"] dd>span');if(node&&node.textContent!==String(value))node.textContent=value}
+  function updateCompact(root,s,activeMs,totalMs=activeMs){
+    const r=readings(s,activeMs);setValue(root,'distance',r.distance===null?'—':(r.distance/1000).toFixed(2));setValue(root,'average-pace',pace(r.average));setValue(root,'average-speed',r.average===null?'—':(r.average*3.6).toFixed(1));setValue(root,'paused',clock(Math.max(0,totalMs-activeMs)));if(r.calories!==null||!timeOnly(s))setValue(root,'energy-estimate',r.calories===null?'—':Math.round(r.calories));
+    const line=root.querySelector('.tracking-line>span'),label=status(s);if(line&&line.dataset.status!==label){line.innerHTML=`<i class="${s.metrics?.state==='tracking'?'tracking':''}"></i>${label}`;line.dataset.status=label}
+    const retry=root.querySelector('[data-tracking]'),needs=s.trackLocation&&['permission','unavailable','error'].includes(s.metrics?.state)&&window.OrbitWorkouts?.enableTracking;
+    if(retry&&!needs)retry.remove();else if(needs&&!retry)root.insertAdjacentHTML('beforeend','<button class="notification-enable" data-tracking>Enable GPS tracking</button>');
+  }
+  function updateRecord(root,s,activeMs,totalMs,mode){
+    if(s.imported)return;updateTimes(root,s,activeMs,totalMs);const r=readings(s,activeMs),m=s.metrics;
+    for(const [name,value] of [['maximum-speed',r.max===null?'—':(r.max*3.6).toFixed(1)],['best-pace',pace(r.max)],['lowest-elevation',m?.altitudeMinM==null?'—':Math.round(m.altitudeMinM)],['highest-elevation',m?.altitudeMaxM==null?'—':Math.round(m.altitudeMaxM)]])setValue(root,name,value);
+    const hero=root.querySelector('[data-workout-hero]'),reading=r.distance===null?clock(activeMs):(r.distance/1000).toFixed(2);
+    if(hero&&hero.dataset.reading!==reading){hero.innerHTML=HeroDots.markup(reading);hero.dataset.reading=reading;hero.dataset.workoutHero=r.distance===null?'time':'distance';hero.setAttribute('aria-label',reading+(r.distance===null?' active time':' kilometres'));hero.nextElementSibling.textContent=r.distance===null?'active time':'km'}
+    const figure=root.querySelector('.workout-record-chart'),points=m?.points||[],signature=mode+':'+points.length+':'+points.at(-1)?.elapsedMs;
+    if(figure&&figure.dataset.points!==signature){figure.innerHTML=(mode==='route'?route(points):plot(points,mode,activeMs))+`<figcaption>${mode==='route'?'Recorded on this phone · no street map':'Active time · gaps in GPS are left open'}</figcaption>`;figure.dataset.points=signature}
+  }
   function updateTimes(root,s,activeMs,totalMs){
     setValue(root,'active',clock(activeMs));setValue(root,'total',clock(totalMs));setValue(root,'paused',clock(Math.max(0,totalMs-activeMs)));updateCompact(root,s,activeMs,totalMs);
     const hero=root.querySelector('[data-workout-hero="time"]'),reading=clock(activeMs);if(hero&&hero.dataset.reading!==reading){hero.innerHTML=HeroDots.markup(reading);hero.dataset.reading=reading;hero.setAttribute('aria-label',reading+' active time')}
     const energy=root.querySelector('.workout-energy-number>span'),r=readings(s,activeMs);if(energy)energy.textContent=r.calories===null?'—':Math.round(r.calories);
     if(s.targetMs){root.querySelector('.workout-target-track i').style.width=Math.min(100,activeMs/s.targetMs*100)+'%';root.querySelector('.workout-target-copy').textContent=(activeMs>=s.targetMs?'Target reached':clock(s.targetMs-activeMs)+' to target')+' · '+Math.round(activeMs/s.targetMs*100)+'%'}
   }
-  return {valid,readings,compact,actions,view,chart,clock,pace,status,updateCompact,updateTimes};
+  return {valid,readings,compact,actions,view,chart,clock,pace,status,updateCompact,updateTimes,updateRecord};
 })();

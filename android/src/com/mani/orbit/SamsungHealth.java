@@ -16,6 +16,9 @@ final class SamsungHealth {
     private final MainActivity activity;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final HealthConnectReader reader;
+    private final LiveSamsungSteps live;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable refresh = () -> sync(true);
     private final AtomicBoolean syncing = new AtomicBoolean();
     private volatile String data = "null", status = "Connect Samsung Health", revision = "0";
     private volatile boolean visible, closed;
@@ -26,6 +29,7 @@ final class SamsungHealth {
 
     SamsungHealth(MainActivity activity) {
         this.activity = activity;
+        live = new LiveSamsungSteps(activity, this::notifyPage);
         reader = Build.VERSION.SDK_INT >= 34 ? new HealthConnectReader(activity) : null;
         if (reader == null || !reader.available()) status = "Health Connect needs Android 14 or later";
         load(selected.toString());
@@ -34,7 +38,7 @@ final class SamsungHealth {
 
     @JavascriptInterface public synchronized String snapshot(String knownRevision) {
         try {
-            String info = new JSONObject().put("revision", revision).put("status", status).put("syncing", syncing.get()).put("scanned", imported)
+            String info = new JSONObject().put("revision", revision).put("status", status).put("syncing", syncing.get()).put("scanned", imported).put("live", new JSONObject(live.snapshot()))
                 .put("available", reader != null && reader.available()).put("permitted", reader != null && !reader.grantedTypes().isEmpty()).toString();
             return info.substring(0, info.length() - 1) + ",\"data\":" + (revision.equals(knownRevision) ? "null" : data) + "}";
         } catch (Exception error) { return "{\"error\":\"Health data could not be read\"}"; }
@@ -47,6 +51,7 @@ final class SamsungHealth {
             catch (RuntimeException failure) { status = "Could not open health permissions"; notifyPage(); }
         });
     }
+    @JavascriptInterface public void connectLive() { activity.runOnUiThread(live::connect); }
     @JavascriptInterface public void permissions() {
         activity.runOnUiThread(() -> {
             if (!visible || closed || reader == null) return;
@@ -57,15 +62,19 @@ final class SamsungHealth {
     void permissionResult() { importAfterConsent = true; if (visible) { importAfterConsent = false; sync(); } }
 
     @JavascriptInterface public void sync() {
+        sync(false);
+    }
+    private void sync(boolean recent) {
         if (!visible || closed || reader == null || !reader.available() || !syncing.compareAndSet(false, true)) return;
-        imported = 0; status = "Importing Samsung Health…"; notifyPage();
+        if (recent && reader.grantedTypes().isEmpty()) { syncing.set(false); return; }
+        imported = 0; status = recent ? "Refreshing shared readings…" : "Importing Samsung Health…"; notifyPage();
         worker.execute(() -> {
             try (HealthRecordStore store = openStore()) {
-                reader.sync(store, (type, count) -> { imported = count; status = "Importing " + type + "…"; notifyPage(); });
+                reader.sync(store, (type, count) -> { imported = count; if (!recent) { status = "Importing " + type + "…"; notifyPage(); } }, recent && store.metadata().has("lastSync"));
                 status = store.metadata().optLong("recordCount") == 0 ? "No Samsung Health records shared yet" : "Samsung Health imported";
                 publish(store, selected, true);
             } catch (Exception error) { status = message(error); }
-            finally { syncing.set(false); notifyPage(); }
+            finally { syncing.set(false); notifyPage(); handler.post(() -> { handler.removeCallbacks(refresh); if (visible && !closed) handler.postDelayed(refresh, 30000); }); }
         });
     }
 
@@ -96,9 +105,11 @@ final class SamsungHealth {
     private void notifyPage() { if (!closed) activity.runOnUiThread(() -> activity.healthChanged()); }
     void foreground(boolean value) {
         visible = value; if (reader != null) reader.visible = value;
+        live.foreground(value); handler.removeCallbacks(refresh);
         if (value && importAfterConsent) { importAfterConsent = false; sync(); }
+        else if (value) handler.post(refresh);
     }
-    void close() { closed = true; visible = false; if (reader != null) reader.visible = false; worker.shutdown(); }
+    void close() { closed = true; visible = false; live.close(); handler.removeCallbacksAndMessages(null); if (reader != null) reader.visible = false; worker.shutdown(); }
     private static String message(Exception error) {
         Throwable cause = error; while (cause.getCause() != null) cause = cause.getCause();
         if (cause instanceof SecurityException) return "Allow access in Health Connect, then import again";

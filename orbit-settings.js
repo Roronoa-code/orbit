@@ -18,7 +18,7 @@ const OrbitSettings=(()=>{
     error='';try{const raw=SettingsStore.read(key);if(raw===null)return {};const value=JSON.parse(raw);if(validate(value))throw Error('Invalid profile');return value}
     catch{error='Your saved profile could not be read. It has been preserved.';return {}}
   }
-  function view(){return `<section class="settings-section settings-health"><h2>Samsung Health</h2><p id="health-import-status" class="settings-note" role="status"></p><div class="actions"><button class="settings-action" id="health-connect">Connect</button><button class="settings-action" id="health-sync">Import now</button></div><details class="settings-about"><summary>Connection &amp; history</summary><div class="details-body"><p>In Samsung Health → Settings → Health Connect, allow Samsung Health to share your data. Then connect Orbit and allow the readings you want.</p><p id="health-import-coverage"></p><p>Older history appears only if Samsung has shared it. All records stay on this phone.</p><button class="settings-action" id="health-permissions">Health permissions</button></div></details></section><form id="profile-form" class="settings-profile" novalidate>
+  function view(){return `<section class="settings-section settings-health"><h2>Samsung Health</h2><p id="health-live-status" class="settings-note" role="status"></p><button class="settings-action" id="health-live">Connect live steps</button><p id="health-import-status" class="settings-note" role="status"></p><div class="actions"><button class="settings-action" id="health-connect">Connect</button><button class="settings-action" id="health-sync">Import now</button></div><details class="settings-about"><summary>Connection &amp; history</summary><div class="details-body"><p>In Samsung Health → Settings → Health Connect, allow Samsung Health to share your data. Then connect Orbit and allow the readings you want.</p><p id="health-import-coverage"></p><p>Live steps use Samsung’s combined phone and watch total. Watch steps appear after the watch syncs. This personal development build needs Samsung Health → Settings → About Samsung Health → tap the version ten times → Developer mode → Data Read, then Connect live steps.</p><p>Older history appears only if Samsung has shared it. All records stay on this phone.</p><button class="settings-action" id="health-permissions">Health permissions</button></div></details></section><form id="profile-form" class="settings-profile" novalidate>
     <h2>Profile</h2><p class="settings-note">Your defaults for new workouts.</p>
     <div class="settings-fields"><label>Name<input id="profile-name" autocomplete="name" maxlength="80" placeholder="Optional"/></label>
     <label>Date of birth<input id="profile-birth" inputmode="numeric" maxlength="10" placeholder="DD / MM / YYYY" autocomplete="bday"/></label>
@@ -32,13 +32,14 @@ const OrbitSettings=(()=>{
   function healthStatus(){
     if(!q('#health-import-status'))return;
     const info=HealthData.info,meta=HealthData.meta;
+    q('#health-live-status').textContent=info.live?.status||'Connect for live phone and watch steps';q('#health-live').disabled=!window.OrbitHealth?.connectLive;q('#health-live').textContent=info.live?.connected?'Live steps access':'Connect live steps';
     q('#health-import-status').textContent=info.status+(info.syncing&&info.scanned?' · '+info.scanned.toLocaleString()+' records':'');
     q('#health-connect').disabled=!info.available||info.syncing;q('#health-connect').textContent=info.permitted?'Access':'Connect';
     q('#health-sync').disabled=!info.permitted||info.syncing;q('#health-permissions').disabled=!info.available;
     q('#health-import-coverage').textContent=meta.lastSync?`${meta.recordCount.toLocaleString()} records saved · ${new Date(meta.lastSync).toLocaleString('en-GB')}. ${meta.historyAllowed?'Extended history access enabled.':'Recent shared history only. Allow history access to import older records.'}`:'No records imported yet.';
   }
   function mount(options){
-    healthStatus();q('#health-connect').addEventListener('click',()=>window.OrbitHealth?.connect());q('#health-sync').addEventListener('click',()=>window.OrbitHealth?.sync());q('#health-permissions').addEventListener('click',()=>window.OrbitHealth?.permissions());
+    healthStatus();q('#health-live').addEventListener('click',()=>window.OrbitHealth?.connectLive());q('#health-connect').addEventListener('click',()=>window.OrbitHealth?.connect());q('#health-sync').addEventListener('click',()=>window.OrbitHealth?.sync());q('#health-permissions').addEventListener('click',()=>window.OrbitHealth?.permissions());
     const value=profile(),form=q('#profile-form');
     for(const [id,field] of [['name','name'],['birth','birthDate'],['height','heightCm'],['weight','weightKg']])q('#profile-'+id).value=value[field]??'';
     if(value.birthDate)q('#profile-birth').value=value.birthDate.split('-').reverse().join('/');

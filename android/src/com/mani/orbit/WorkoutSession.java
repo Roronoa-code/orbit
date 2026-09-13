@@ -209,19 +209,28 @@ public final class WorkoutSession {
 
     /** Starts a session and, when requested, records genuine phone location metrics. */
     @JavascriptInterface public String start(String kind, double targetMs, boolean trackLocation, double weightKg) {
-        String result = startSession(kind, targetMs, trackLocation, weightKg);
-        if (result == null || activity == null) return result;
+        return startDelayed(kind, targetMs, trackLocation, weightKg, 0);
+    }
+
+    @JavascriptInterface public String startCountdown(String kind, double targetMs, boolean trackLocation, double weightKg) {
+        return startDelayed(kind, targetMs, trackLocation, weightKg, 3000);
+    }
+
+    private String startDelayed(String kind, double targetMs, boolean trackLocation, double weightKg, long delay) {
+        String result = startSession(kind, targetMs, trackLocation, weightKg, delay);
+        if (result == null) return null;
         try {
             JSONObject state = new JSONObject(result);
             long startedAt = state.getJSONObject("active").getLong("startedAt");
-            activity.runOnUiThread(() -> activity.onWorkoutStarted(startedAt, trackLocation));
+            if (delay > 0) new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> { if (activeStart() == startedAt) updateNotification(); }, delay);
+            if (activity != null) activity.runOnUiThread(() -> activity.onWorkoutStarted(startedAt, trackLocation));
         } catch (Exception error) {
             android.util.Log.e("OrbitWorkout", "Unable to schedule workout start", error);
         }
         return result;
     }
 
-    private String startSession(String kind, double targetMs, boolean trackLocation, double weightKg) {
+    private String startSession(String kind, double targetMs, boolean trackLocation, double weightKg, long delay) {
         synchronized (LOCK) {
             try {
                 if (!kind(kind) || !target(targetMs) || trackLocation && !trackKind(kind)
@@ -229,12 +238,13 @@ public final class WorkoutSession {
                 String raw = read();
                 JSONObject value = raw == null ? new JSONObject("{\"active\":null,\"history\":[]}") : decode(raw);
                 if (value.optJSONObject("active") != null) return null;
-                long now = System.currentTimeMillis();
+                long now = System.currentTimeMillis() + delay;
                 JSONObject session = new JSONObject().put("kind", kind).put("startedAt", now).put("elapsed", 0)
                     .put("resumedAt", now).put("targetMs", targetMs).put("trackLocation", trackLocation)
-                    .put("startedRealtime", SystemClock.elapsedRealtime()).put("bootCountTotal", bootCount());
+                    .put("startedRealtime", SystemClock.elapsedRealtime() + delay).put("bootCountTotal", bootCount());
                 if (weightKg > 0) session.put("weightKg", weightKg);
                 resume(session, now);
+                session.put("resumedRealtime", SystemClock.elapsedRealtime() + delay);
                 if (trackLocation) session.put("metrics", metrics(hasLocationPermission() ? "searching" : "permission"));
                 validateSession(session, true);
                 value.put("active", session);
@@ -286,6 +296,25 @@ public final class WorkoutSession {
         return Math.max(0, delta);
     }
 
+    long startsIn(JSONObject row) {
+        return Math.max(0, row.optInt("bootCountTotal", -2) == bootCount() && row.has("startedRealtime")
+            ? row.optLong("startedRealtime") - SystemClock.elapsedRealtime() : row.optLong("startedAt") - System.currentTimeMillis());
+    }
+
+    @JavascriptInterface public boolean cancelStart() {
+        long expected;
+        synchronized (LOCK) {
+            try {
+                JSONObject value = decode(read()), active = value.optJSONObject("active");
+                if (active == null || startsIn(active) <= 0) return false;
+                expected = active.getLong("startedAt");
+                value.put("active", JSONObject.NULL);
+                if (saveLocked(value) == null) return false;
+            } catch (Exception error) { android.util.Log.e("OrbitWorkout", "Unable to cancel countdown", error); return false; }
+        }
+        WorkoutTrackingService.stopForSession(context, expected); updateNotification(); return true;
+    }
+
     private JSONObject resume(JSONObject row, long now) throws Exception {
         return row.put("resumedAt", now).put("resumedRealtime", SystemClock.elapsedRealtime()).put("bootCount", bootCount());
     }
@@ -306,6 +335,7 @@ public final class WorkoutSession {
                 return new JSONObject().put("realDataMode", preferences.getBoolean("real-data-v1", false)).put("revision", revision).put("empty", sampledRaw == null)
                     .put("store", revision.equals(knownRevision) ? JSONObject.NULL : sampledRaw == null ? "{\"active\":null,\"history\":[]}" : sampledRaw)
                     .put("startedAt", sampledActive == null ? JSONObject.NULL : sampledActive.getLong("startedAt"))
+                    .put("startsInMs", sampledActive == null ? 0 : startsIn(sampledActive))
                     .put("elapsedMs", active).put("totalMs", sampledActive == null ? 0 : Math.max(active, totalElapsed(sampledActive, time))).toString();
             } catch (Exception error) {
                 return "{\"error\":\"Workout state unavailable\"}";
@@ -425,7 +455,7 @@ public final class WorkoutSession {
             }
             if (candidate == null) return value.toString().length() <= MAX_STORE_CHARS;
             JSONObject metrics = candidate.getJSONObject("metrics");
-            metrics.put("points", decimate(metrics.getJSONArray("points")));
+            metrics.put("points", WorkoutLocationMath.decimate(metrics.getJSONArray("points")));
         }
         return true;
     }
@@ -536,7 +566,7 @@ public final class WorkoutSession {
         }
     }
 
-    /** Persists one validated fix; the service updates its in-memory anchor only after SAVED. */
+    /** Persists one validated fix; a failed save stops the collector. */
     int recordLocation(long expectedStart, double latitude, double longitude, long elapsedMs,
                        Double altitudeM, Double speedMps, double accuracyM, double distanceDeltaM,
                        boolean breakBefore) {
@@ -552,11 +582,16 @@ public final class WorkoutSession {
                         || active.isNull("resumedAt")) return 3;
                 JSONObject metrics = active.getJSONObject("metrics");
                 JSONArray points = metrics.getJSONArray("points");
+                // A confirmed stop changes speed, not the route or elevation at the desk.
+                if (distanceDeltaM == 0 && !breakBefore && points.length() > 0) {
+                    JSONObject last = points.getJSONObject(points.length() - 1);
+                    latitude = last.getDouble("lat"); longitude = last.getDouble("lon"); altitudeM = null;
+                }
                 long pointElapsed = Math.max(elapsedMs, points.length() == 0 ? 0 : points.getJSONObject(points.length() - 1).getLong("elapsedMs"));
                 JSONObject point = new JSONObject().put("lat", latitude).put("lon", longitude).put("elapsedMs", pointElapsed)
                     .put("altitudeM", altitudeM == null ? JSONObject.NULL : altitudeM)
                     .put("speedMps", speedMps == null ? JSONObject.NULL : speedMps).put("breakBefore", breakBefore);
-                if (points.length() >= MAX_ROUTE_POINTS) points = decimate(points);
+                if (points.length() >= MAX_ROUTE_POINTS) points = WorkoutLocationMath.decimate(points);
                 points.put(point);
                 metrics.put("points", points).put("state", "tracking").put("distanceM", metrics.getDouble("distanceM") + distanceDeltaM)
                     .put("speedMps", speedMps == null ? JSONObject.NULL : speedMps)
@@ -568,7 +603,7 @@ public final class WorkoutSession {
                     metrics.put("altitudeMinM", min).put("altitudeMaxM", max);
                 }
                 if (saveLocked(value) == null) return 2;
-                updateNotification();
+                // The service refreshes notification metrics every five seconds; its clock is native.
                 return 1;
             } catch (Exception error) {
                 android.util.Log.e("OrbitWorkout", "Unable to save location fix", error);
@@ -577,22 +612,6 @@ public final class WorkoutSession {
         }
     }
 
-    private static JSONArray decimate(JSONArray source) throws Exception {
-        // ponytail: halve the route at the 4,096-point ceiling; switch to a streamed route store if detail needs to grow.
-        JSONArray reduced = new JSONArray();
-        boolean breakPending = false;
-        for (int i = 0; i < source.length(); i++) {
-            JSONObject point = source.getJSONObject(i);
-            boolean keep = i == 0 || i == source.length() - 1 || i % 2 == 0;
-            if (point.optBoolean("breakBefore", false)) breakPending = true;
-            if (keep) {
-                if (breakPending && i > 0) point = new JSONObject(point.toString()).put("breakBefore", true);
-                reduced.put(point);
-                breakPending = false;
-            }
-        }
-        return reduced;
-    }
 
     @JavascriptInterface public String enableTracking() {
         synchronized (LOCK) {

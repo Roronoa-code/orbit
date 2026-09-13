@@ -11,7 +11,6 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.SystemClock;
 
 /** Foreground GPS collector for an explicitly started outdoor workout. */
@@ -22,15 +21,13 @@ public final class WorkoutTrackingService extends Service {
     static final String ACTION_STOP = "com.mani.orbit.WORKOUT_TRACKING_STOP";
     static final String EXTRA_STARTED_AT = "startedAt";
     private static final long LOCATION_INTERVAL_MS = 1000;
-    private static final long MAX_FIX_AGE_NS = 10_000_000_000L;
     private static final long MAX_SEGMENT_GAP_NS = 15_000_000_000L;
-    private static final double MAX_ACCURACY_M = 100;
-    private static final double JITTER_DISTANCE_M = 2;
     private static volatile WorkoutTrackingService running;
 
     private WorkoutSession session;
     private LocationManager locationManager;
     private Handler handler;
+    private android.os.HandlerThread worker;
     private long startedAt = -1;
     private String kind;
     private LocationListener listener;
@@ -38,12 +35,7 @@ public final class WorkoutTrackingService extends Service {
     private boolean foreground;
     private boolean stopping;
     private boolean searching = true;
-    private boolean hasAnchor;
-    private long lastFixNanos = -1;
-    private boolean hasDistanceAnchor;
-    private double distanceAnchorLatitude;
-    private double distanceAnchorLongitude;
-    private long distanceAnchorNanos = -1;
+    private final WorkoutLocationMath filter = new WorkoutLocationMath();
     private final Runnable refresh = new Runnable() {
         @Override public void run() {
             if (stopping) return;
@@ -51,7 +43,7 @@ public final class WorkoutTrackingService extends Service {
                 shutdown();
                 return;
             }
-            if (listening && hasAnchor && SystemClock.elapsedRealtimeNanos() - lastFixNanos > MAX_SEGMENT_GAP_NS) markSearching();
+            if (listening && filter.lastGood() > 0 && SystemClock.elapsedRealtimeNanos() - filter.lastGood() > MAX_SEGMENT_GAP_NS) markSearching();
             session.updateNotification();
             handler.postDelayed(this, 5000);
         }
@@ -84,11 +76,17 @@ public final class WorkoutTrackingService extends Service {
         super.onCreate();
         session = new WorkoutSession(this);
         locationManager = getSystemService(LocationManager.class);
-        handler = new Handler(Looper.getMainLooper());
+        worker = new android.os.HandlerThread("Orbit GPS"); worker.start();
+        handler = new Handler(worker.getLooper());
         running = this;
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        handler.post(() -> handleStart(intent));
+        return START_STICKY;
+    }
+
+    private int handleStart(Intent intent) {
         String action = intent == null ? ACTION_START : intent.getAction();
         long expected = intent == null ? session.activeLocationStart() : intent.getLongExtra(EXTRA_STARTED_AT, -1);
         if (ACTION_STOP.equals(action)) {
@@ -174,7 +172,7 @@ public final class WorkoutTrackingService extends Service {
             @Override public void onProviderEnabled(String provider) { }
         };
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL_MS, 0, listener, Looper.getMainLooper());
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL_MS, 0, listener, handler.getLooper());
             listening = true;
             searching = true;
             session.startLocation(startedAt);
@@ -193,81 +191,21 @@ public final class WorkoutTrackingService extends Service {
             if (!stopping) shutdown();
             return;
         }
-        long nowNanos = SystemClock.elapsedRealtimeNanos();
-        long fixNanos = location.getElapsedRealtimeNanos();
-        if (fixNanos <= 0 || fixNanos > nowNanos || nowNanos - fixNanos > MAX_FIX_AGE_NS
-                || !location.hasAccuracy() || !Float.isFinite(location.getAccuracy()) || location.getAccuracy() < 0 || location.getAccuracy() > MAX_ACCURACY_M
-                || !Double.isFinite(location.getLatitude()) || !Double.isFinite(location.getLongitude())
-                || Math.abs(location.getLatitude()) > 90 || Math.abs(location.getLongitude()) > 180) {
-            markSearching();
-            return;
-        }
-        if (hasAnchor && fixNanos <= lastFixNanos) {
-            markSearching();
-            return;
-        }
-        double latitude = location.getLatitude(), longitude = location.getLongitude();
-        double maximumSpeed = maximumSpeed(kind);
-        Double speed = null;
-        if (location.hasSpeed()) {
-            float providerSpeed = location.getSpeed();
-            if (!Float.isFinite(providerSpeed) || providerSpeed < 0 || providerSpeed > maximumSpeed) {
-                markSearching();
-                return;
-            }
-            speed = (double) providerSpeed;
-        }
-        boolean breakBefore = !hasAnchor || fixNanos - lastFixNanos > MAX_SEGMENT_GAP_NS;
-        double distanceDelta = 0;
-        if (!breakBefore) {
-            if (!hasDistanceAnchor) {
-                markSearching();
-                return;
-            }
-            long deltaNanos = fixNanos - distanceAnchorNanos;
-            if (deltaNanos <= 0) {
-                markSearching();
-                return;
-            }
-            distanceDelta = WorkoutLocationMath.distanceMeters(distanceAnchorLatitude, distanceAnchorLongitude, latitude, longitude);
-            double derivedSpeed = distanceDelta / (deltaNanos / 1_000_000_000.0);
-            if (!Double.isFinite(derivedSpeed) || derivedSpeed > maximumSpeed) {
-                markSearching();
-                return;
-            }
-            if (speed == null) speed = derivedSpeed;
-        }
-        if (distanceDelta < JITTER_DISTANCE_M) distanceDelta = 0;
+        if (System.currentTimeMillis() < startedAt) return;
+        WorkoutLocationMath.Fix fix = filter.filter(kind, SystemClock.elapsedRealtimeNanos(), location.getElapsedRealtimeNanos(),
+            location.getLatitude(), location.getLongitude(), location.hasAccuracy() ? location.getAccuracy() : Double.NaN,
+            location.hasSpeed() ? (double) location.getSpeed() : null,
+            location.hasSpeedAccuracy() ? (double) location.getSpeedAccuracyMetersPerSecond() : null);
+        if (fix == null) return;
         long elapsedMs = session.activeElapsed(startedAt);
-        if (elapsedMs < 0) {
-            shutdown();
-            return;
-        }
-        Double altitude = location.hasAltitude() && Double.isFinite(location.getAltitude()) ? location.getAltitude() : null;
-        int result = session.recordLocation(startedAt, latitude, longitude, elapsedMs, altitude, speed,
-            location.getAccuracy(), breakBefore ? 0 : distanceDelta, breakBefore);
-        if (result == 1) {
-            hasAnchor = true;
-            lastFixNanos = fixNanos;
-            if (breakBefore || distanceDelta >= JITTER_DISTANCE_M) {
-                hasDistanceAnchor = true;
-                distanceAnchorLatitude = latitude;
-                distanceAnchorLongitude = longitude;
-                distanceAnchorNanos = fixNanos;
-            }
-            searching = false;
-        } else if (result == 3) {
-            shutdown();
-        } else if (result == 2) {
-            session.locationError(startedAt);
-            shutdown();
-        }
-    }
-
-    private static double maximumSpeed(String kind) {
-        if ("Walking".equals(kind)) return 15;
-        if ("Running".equals(kind)) return 20;
-        return 55;
+        if (elapsedMs < 0) { shutdown(); return; }
+        Double altitude = location.hasAltitude() && location.hasVerticalAccuracy() && location.getVerticalAccuracyMeters() > 0
+            && location.getVerticalAccuracyMeters() <= 8 && Double.isFinite(location.getAltitude()) ? location.getAltitude() : null;
+        int result = session.recordLocation(startedAt, location.getLatitude(), location.getLongitude(), elapsedMs,
+            altitude, fix.speed, location.getAccuracy(), fix.distance, fix.breakBefore);
+        if (result == 1) searching = false;
+        else if (result == 3) shutdown();
+        else if (result == 2) { session.locationError(startedAt); shutdown(); }
     }
 
     private void markSearching() {
@@ -285,12 +223,7 @@ public final class WorkoutTrackingService extends Service {
         session.updateNotification();
     }
 
-    private void breakAnchor() {
-        hasAnchor = false;
-        lastFixNanos = -1;
-        hasDistanceAnchor = false;
-        distanceAnchorNanos = -1;
-    }
+    private void breakAnchor() { filter.reset(); }
 
     private void stop(long expected) {
         if (startedAt < 0 || expected != startedAt) return;
@@ -323,10 +256,8 @@ public final class WorkoutTrackingService extends Service {
     @Override public IBinder onBind(Intent intent) { return null; }
 
     @Override public void onDestroy() {
-        stopping = true;
-        stopLocation();
-        handler.removeCallbacks(refresh);
         if (running == this) running = null;
+        handler.post(() -> { stopping = true; stopLocation(); handler.removeCallbacksAndMessages(null); worker.quitSafely(); });
         super.onDestroy();
     }
 }

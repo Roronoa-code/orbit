@@ -35,7 +35,7 @@ const OrbitInteraction=(()=>{
       if(d.owned){swallowUntil=performance.now()+400;try{host.releasePointerCapture(d.id)}catch{}}
       const dx=event.clientX-d.x,dy=event.clientY-d.y;
       const done=!cancel&&d.owned&&Math.abs(dx)>=48&&Math.abs(dx)>Math.abs(dy)*1.2;
-      if(done){d.commit(Math.sign(dx));haptic('select')}
+      if(done){d.node.style.removeProperty('transform');d.commit(Math.sign(dx));haptic('select');return}
       if(d.node.isConnected){const start=d.node.style.transform;d.node.style.removeProperty('transform');if(!document.hidden&&!SurfaceMotion.reduced)d.node.animate([{transform:start},{transform:'none'}],{duration:180,easing:'cubic-bezier(.2,.7,.2,1)'})}
     };
     host.addEventListener('pointerdown',event=>{

@@ -46,6 +46,8 @@ async function main(){
     const label=await p.locator('.history-week-nav p').textContent();await p.locator('.history-session').click();await p.waitForTimeout(500);assert.equal(await p.locator('#workout-record-body').count(),1);
     await p.locator('#health-back').click();await p.waitForTimeout(500);assert.equal(await p.locator('.history-week-nav p').textContent(),label);assert.equal(await p.locator('.history-session').count(),1);
     await p.locator('[data-history-week="1"]').click();await p.waitForTimeout(350);assert(await p.locator('[data-history-week="1"]').isDisabled());
+    // On Monday the current week has no other selectable day. Inspect a complete week.
+    await p.locator('[data-history-week="-1"]').click();await p.waitForTimeout(350);
     const empty=await p.locator('[data-week-day]:not([disabled])').all();for(const n of empty){await n.click();if(await p.locator('.history-empty').count())break}assert.equal(await p.locator('.history-empty').count(),1);
     assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('orbit-workouts-v2')).history.length),5);assert.deepEqual(errors,[]);
     results.push({width,status:'PASS',...result});await c.close();

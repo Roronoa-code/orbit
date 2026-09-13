@@ -50,11 +50,15 @@ final class HealthConnectReader {
     private static <T> T await(CompletableFuture<T> result) throws Exception { return result.get(45, TimeUnit.SECONDS); }
 
     void sync(HealthRecordStore store, BiConsumer<String, Integer> progress) throws Exception {
+        sync(store, progress, false);
+    }
+    void sync(HealthRecordStore store, BiConsumer<String, Integer> progress, boolean recent) throws Exception {
         checkVisible();
         List<String> types = grantedTypes();
         if (types.isEmpty()) throw new SecurityException("Allow health-data access to import");
         boolean history = allowed(HISTORY);
-        Instant end = Instant.now(), start = history ? Instant.EPOCH : LocalDate.now().minusDays(29).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant end = Instant.now(), start = recent ? LocalDate.now().minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+            : history ? Instant.EPOCH : LocalDate.now().minusDays(29).atStartOfDay(ZoneId.systemDefault()).toInstant();
         store.beginImport(); int count = 0;
         List<String> replace = new ArrayList<>(types);
         for (String type : types) {

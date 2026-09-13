@@ -26,13 +26,16 @@ window.LiquidGlass=(()=>{
     const radius=node.closest('#live-island')?31:node.closest('#utility-island')?24:Math.min(w/2,h/2,parseFloat(getComputedStyle(node).borderTopLeftRadius)||h/2),key=[w,h,radius].join(':');
     if(entry.key===key)return;entry.key=key;
     // The map is geometry, not a screenshot; 1/3 resolution needs nine times fewer generated pixels.
-    const canvas=document.createElement('canvas');canvas.width=Math.max(2,Math.ceil(w/3));canvas.height=Math.max(2,Math.ceil(h/3));
+    // Pad the map as well as the filter. Transparent map pixels decode as a full negative
+    // displacement, which cuts the lens off at the bitmap boundary on fractional edges.
+    const pad=24,mw=w+pad*2,mh=h+pad*2;
+    const canvas=document.createElement('canvas');canvas.width=Math.max(2,Math.ceil(mw/3));canvas.height=Math.max(2,Math.ceil(mh/3));
     const ctx=canvas.getContext('2d'),pixels=ctx.createImageData(canvas.width,canvas.height);
     for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
-      const [dx,dy]=displacement((x+.5)*w/canvas.width,(y+.5)*h/canvas.height,w,h,radius),i=(y*canvas.width+x)*4;
+      const [dx,dy]=displacement((x+.5)*mw/canvas.width-pad,(y+.5)*mh/canvas.height-pad,w,h,radius),i=(y*canvas.width+x)*4;
       pixels.data[i]=Math.round((.5+dx/48)*255);pixels.data[i+1]=Math.round((.5+dy/48)*255);pixels.data[i+2]=128;pixels.data[i+3]=255;
     }
-    ctx.putImageData(pixels,0,0);entry.image.setAttribute('href',canvas.toDataURL());entry.image.setAttribute('width',w);entry.image.setAttribute('height',h);
+    ctx.putImageData(pixels,0,0);entry.image.setAttribute('href',canvas.toDataURL());entry.image.setAttribute('width',mw);entry.image.setAttribute('height',mh);
     entry.filter.setAttribute('width',w+48);entry.filter.setAttribute('height',h+48);
     node.style.setProperty('--glass-lens',`url(#${entry.filter.id})`);node.classList.add('liquid-surface');
   }
@@ -42,7 +45,7 @@ window.LiquidGlass=(()=>{
     for(const [node,entry] of entries)if(!node.isConnected){observer.unobserve(node);entry.filter.remove();entries.delete(node)}
     for(const node of root.querySelectorAll(selector))if(!entries.has(node)){
       const filter=element('filter',{id:'orbit-glass-'+(++serial),filterUnits:'userSpaceOnUse',x:-24,y:-24,'color-interpolation-filters':'sRGB'});
-      const image=element('feImage',{x:0,y:0,preserveAspectRatio:'none',result:'lens'});
+      const image=element('feImage',{x:-24,y:-24,preserveAspectRatio:'none',result:'lens'});
       filter.append(image,element('feDisplacementMap',{in:'SourceGraphic',in2:'lens',scale:48,xChannelSelector:'R',yChannelSelector:'G'}));defs.append(filter);
       const entry={node,filter,image,key:''};entries.set(node,entry);observer.observe(node);update(entry);
     }

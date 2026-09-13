@@ -17,6 +17,7 @@ fs.mkdirSync(out,{recursive:true});
   homeMaterial.foreground.forEach(c=>assert.deepEqual(c,['none','none'],'No extra filter on the readings'));
   await p.screenshot({path:path.join(out,`home-${width}.png`)});await p.evaluate(()=>setDeckExpanded(true));await p.waitForTimeout(1000);
   await p.screenshot({path:path.join(out,`cards-${width}.png`)});
+  assert(await p.evaluate(()=>[...document.querySelectorAll('.stack-shell')].every(n=>{const rim=n.getBoundingClientRect(),clip=n.closest('.stack-motion').getBoundingClientRect();return rim.left>=clip.left-.01&&rim.right<=clip.right+.01&&rim.top>=clip.top-.01&&rim.bottom<=clip.bottom+.01})), 'The complete rim must fit inside its card clip');
   // Clone the real layers with identical geometry over one detailed backdrop. This catches a blur
   // nested inside the card's clip: matching CSS values alone did not mean it could sample behind it.
   await p.evaluate(()=>{
@@ -39,6 +40,7 @@ fs.mkdirSync(out,{recursive:true});
   await p.evaluate(()=>{Health.open('body');document.activeElement.blur()});await p.waitForTimeout(600);
   const material=await p.locator('.body-metric-picker').evaluate(n=>({filter:getComputedStyle(n).backdropFilter,tint:getComputedStyle(n).backgroundColor,indicator:getComputedStyle(n.querySelector('.selection-pill')).backgroundColor}));
   assert(material.filter.includes('blur(8px)')&&material.filter.includes('saturate(1.5)')&&material.filter.includes('url('));assert.equal(material.tint,'rgba(18, 18, 18, 0.4)');assert.equal(material.indicator,'rgba(0, 0, 0, 0.5)');
+  assert(await p.evaluate(()=>[...document.querySelectorAll('filter[id^="orbit-glass-"]')].every(n=>{const map=n.querySelector('feImage');return Number(map.getAttribute('x'))===-24&&Number(map.getAttribute('y'))===-24&&map.getAttribute('width')===n.getAttribute('width')&&map.getAttribute('height')===n.getAttribute('height')})), 'Every lens bitmap must cover the expanded filter bounds');
   const mapMutations=await p.evaluate(async()=>{let edits=0;const observer=new MutationObserver(records=>edits+=records.length);document.querySelectorAll('filter[id^="orbit-glass-"] feImage').forEach(n=>observer.observe(n,{attributes:true}));for(const metric of ['fatMass','muscle','lean','weight']){document.querySelector('[data-body-metric="'+metric+'"]').click();await new Promise(r=>setTimeout(r,450))}observer.disconnect();return edits});assert.equal(mapMutations,0,'Dragging/settling must reuse the lens geometry');
   await p.screenshot({path:path.join(out,`body-${width}.png`)});
   // Real backdrop sampling over colour and fine detail: changing the underlay and switching off the lens must both change pixels.

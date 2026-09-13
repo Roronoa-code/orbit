@@ -24,6 +24,27 @@ public final class NativeFinalCheck {
                 || ((Boolean) valid.invoke(null, first.substring(0, 31) + "g"))) throw new AssertionError("resume token validation failed");
         double oneDegree = WorkoutLocationMath.distanceMeters(0, 0, 0, 1);
         if (!(oneDegree > 111000 && oneDegree < 111300)) throw new AssertionError("distance validation failed: " + oneDegree);
+        WorkoutLocationMath gps = new WorkoutLocationMath();
+        double travelled = 0;
+        for (int i = 1; i <= 120; i++) {
+            long at = i * 1_000_000_000L;
+            WorkoutLocationMath.Fix fix = gps.filter("Walking", at, at, Math.sin(i) * .00008, Math.cos(i) * .00008, 12, .1, .2);
+            if (fix != null) travelled += fix.distance;
+        }
+        if (travelled != 0) throw new AssertionError("Desk jitter became a route: " + travelled);
+        gps.reset();
+        for (int i = 1; i <= 60; i++) {
+            long at = i * 1_000_000_000L;
+            WorkoutLocationMath.Fix fix = gps.filter("Walking", at, at, 0, i * 1.4 / oneDegree, 4, 1.4, .15);
+            if (fix != null) travelled += fix.distance;
+        }
+        if (travelled < 75 || travelled > 84) throw new AssertionError("Real walking rejected: " + travelled);
+        if (gps.filter("Walking", 61_000_000_000L, 61_000_000_000L, 1, 1, 4, 1.4, .15) != null
+                || gps.filter("Walking", 62_000_000_000L, 62_000_000_000L, 0, .001, 90, 1.4, .15) != null
+                || gps.filter("Walking", 63_000_000_000L, 1, 0, 0, 4, 1.4, .15) != null) throw new AssertionError("Bad or stale GPS accepted");
+        WorkoutLocationMath.Fix stop = gps.filter("Walking", 64_000_000_000L, 64_000_000_000L, 0, 84 / oneDegree, 4, 0.0, .15);
+        if (stop == null || stop.speed != 0 || stop.distance != 0) throw new AssertionError("Stopping must clear the last moving speed");
+        System.out.println("stationary_jitter_real_walking_outliers_stale_gps=PASS");
         int[] full = MusicSession.artworkSize(4000, 3000), small = MusicSession.artworkSize(320, 180), tall = MusicSession.artworkSize(1, 100000);
         if (full[0] != 2048 || full[1] != 1536 || small[0] != 320 || small[1] != 180 || tall[0] != 1 || tall[1] != 2048) throw new AssertionError("artwork size bounds failed");
         try { MusicSession.artworkSize(0, 200); throw new AssertionError("invalid artwork size accepted"); } catch (IllegalArgumentException expected) { }

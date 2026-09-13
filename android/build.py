@@ -1,4 +1,4 @@
-"""Build Orbit using the installed Android SDK and Java; no downloaded dependencies."""
+"""Build Orbit with the installed Android tools, local Samsung SDK and dependency cache."""
 from datetime import datetime
 from pathlib import Path
 import os
@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import zipfile
 import argparse
+import samsung_deps
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--audit', action='store_true', help='Build a separate debuggable Orbit Audit app with isolated data')
@@ -19,6 +20,7 @@ platform = sdk / 'platforms/android-37.0/android.jar'
 build = root / 'build' / (datetime.now().strftime('%Y%m%d-%H%M%S') + ('-audit' if audit else ''))
 for name in ['classes', 'assets', 'dex']:
     (build / name).mkdir(parents=True)
+jars = samsung_deps.prepare(build)
 env = dict(os.environ, JAVA_HOME=str(java))
 
 def run(*args):
@@ -60,10 +62,12 @@ if audit:
     manifest = build / 'AndroidManifest.xml'
     manifest.write_text(diagnostic_manifest, encoding='utf-8')
 run(bt / 'aapt2.exe', 'link', '-o', build / 'unsigned.apk', '-I', platform, '--manifest', manifest, '-A', build / 'assets', build / 'resources.zip')
-run(java / 'bin/javac.exe', '--release', '8', '-encoding', 'UTF-8', '-classpath', platform, '-d', build / 'classes', *sorted((root / 'src').rglob('*.java')))
-run(bt / 'd8.bat', '--release', '--min-api', '30', '--lib', platform, '--output', build / 'dex', *sorted((build / 'classes').rglob('*.class')))
+run(java / 'bin/javac.exe', '--release', '8', '-encoding', 'UTF-8', '-classpath', os.pathsep.join(map(str, [platform, *jars])), '-d', build / 'classes', *sorted((root / 'src').rglob('*.java')))
+run(bt / 'd8.bat', '--release', '--min-api', '30', '--lib', platform, '--output', build / 'dex', *sorted((build / 'classes').rglob('*.class')), *jars)
 with zipfile.ZipFile(build / 'unsigned.apk', 'a', zipfile.ZIP_DEFLATED) as apk:
-    apk.write(build / 'dex/classes.dex', 'classes.dex')
+    for dex in sorted((build / 'dex').glob('*.dex')):
+        apk.write(dex, dex.name)
+    samsung_deps.resources(apk, jars)
 run(bt / 'zipalign.exe', '-p', '4', build / 'unsigned.apk', build / 'aligned.apk')
 key = root / 'signing/orbit-local.p12'
 key.parent.mkdir(exist_ok=True)

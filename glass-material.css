@@ -57,14 +57,17 @@
 .blob-option>span,.blob-option>strong{display:inline-block;transform:none;transform-origin:50% 50%}
 
 /* BitChord's material on navigation and controls. The single backdrop pass stays below the unfiltered labels. */
-.glass-track,.masthead .icon-button,.health-page-head .icon-button,#settings-open{background:var(--frost-floating);border-color:transparent;box-shadow:0 4px 24px #0000001a,inset 0 .5px 0 #ffffff59,inset 0 -.5px 0 #ffffff26}
+.glass-track,.masthead .icon-button,.health-page-head .icon-button,#settings-open{background:var(--frost-floating);border-color:transparent;box-shadow:inset 0 0 0 1px #ffffff1f}
 .liquid-surface{backdrop-filter:blur(8px) saturate(1.5) var(--glass-lens,blur(0px))!important;-webkit-backdrop-filter:blur(8px) saturate(1.5) var(--glass-lens,blur(0px))!important}
 .utility-island .island-frost{background:var(--frost-floating)}
 .live-island .island-frost,.stack-motion{background:var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
-.live-island .island-surface,.utility-island .island-surface,.stack-card>.stack-shell{border-width:.5px;border-color:#ffffff26;border-top-color:#ffffff59;border-bottom-color:#ffffff40;background:none;box-shadow:0 4px 24px #0000001a}
+.live-island .island-surface,.utility-island .island-surface,.stack-card>.stack-shell{border-width:1px;border-color:#ffffff1f;background:none;box-shadow:none}
+/* Keep the whole curved rim inside the sampled shape. An oversized shell and directional
+   inset shadows lost their sides at the moving clip and made highlights end abruptly. */
+.stack-card>.stack-shell{inset:0}
 .glass-track{--blob-active:#fff;--blob-inactive:#ffffffa6}
 .glass-track .selection-pill{border:0}
-.glass-control{background:var(--frost-floating);box-shadow:inset 0 .5px 0 #ffffff59,0 4px 24px #0000001a;backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
+.glass-control{background:var(--frost-floating);box-shadow:inset 0 0 0 1px #ffffff14;backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
 
 /* Sample on the clipping layer itself, just like the navbar. A filter nested inside it
    cannot see the backdrop outside that clip. Readings remain unfiltered; the rim folds separately. */
@@ -74,7 +77,7 @@
 .history-days>button,.night-stage-totals>button,.oxygen-week>button{position:relative;z-index:1;background:none;border-color:transparent}
 .history-days>button[aria-pressed=true],.night-stage-totals>button[aria-pressed=true],.oxygen-week>button[aria-pressed=true]{background:none;border-color:transparent}
 .night-stage-totals{grid-template-columns:repeat(var(--stage-count,4),minmax(0,1fr));gap:0;padding:4px;border-radius:20px}
-.night-stage-totals button{padding:12px 3px;gap:6px;flex-direction:column;text-align:center;min-height:88px}
+.night-stage-totals button{padding:10px 3px;gap:6px;flex-direction:column;text-align:center;min-height:64px}
 .night-stage-totals i{width:18px;height:3px}.night-stage-totals strong{font-size:15px;white-space:nowrap;letter-spacing:-.4px}
 .health-page-head,.health-scroll{touch-action:pan-y}
 input[type=number],input[inputmode=numeric],input[inputmode=decimal]{-webkit-user-select:none;user-select:none}

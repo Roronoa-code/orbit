@@ -38,11 +38,11 @@ final class WorkoutNotification {
     Notification build(JSONObject active) throws Exception {
         long now = System.currentTimeMillis();
         long duration = session.notificationElapsed(active, now);
-        long started = active.getLong("startedAt");
+        long started = active.getLong("startedAt"), startsIn = session.startsIn(active);
         boolean paused = active.isNull("resumedAt");
         // Android 17 shows the running time inside the metric card; a header chronometer would repeat it.
-        boolean metricCard = Build.VERSION.SDK_INT >= 37;
-        boolean headerClock = !paused && !metricCard;
+        boolean metricCard = Build.VERSION.SDK_INT >= 37 && startsIn == 0;
+        boolean headerClock = !paused && !metricCard && startsIn == 0;
         String title = active.getString("kind");
         String description = headerClock ? "Recording" : (paused ? "Paused" : "Recording") + " · " + clock(duration);
         long targetMs = active.optLong("targetMs", 0);
@@ -54,6 +54,7 @@ final class WorkoutNotification {
             String state = metrics.optString("state", "searching");
             if (!"tracking".equals(state)) description += " · GPS " + state;
         }
+        if (startsIn > 0) description = "Starting in " + ((startsIn + 999) / 1000) + " seconds";
         String resumeToken = active.isNull("resumeToken") ? null : active.getString("resumeToken");
         Intent open = new Intent(context, MainActivity.class).setAction("com.mani.orbit.OPEN_WORKOUT")
             .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -9,7 +9,7 @@ const HealthData=(()=>{
   const average=values=>{const known=values.filter(finite);return known.length?sum(known)/known.length:null};
   const display=(value,digits=0)=>finite(value)?value.toLocaleString('en-GB',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—';
   const dayEmpty=key=>({date:key,steps:null,distance:null,floors:null,energy:null,totalEnergy:null,heart:Array(24).fill(null),heartCount:0,heartSum:0,heartLow:null,heartHigh:null,latest:null,latestTime:0,asleep:null,light:null,deep:null,rem:null,awake:null,meals:[],water:null,nights:[],night:null,body:{weight:null,fat:null,fatMass:null,muscle:null,lean:null},oxygen:{value:null,low:null,high:null}});
-  let days=new Map(),hours=[],loadedDate='',workouts=[],meta={},revision='',info={status:'Connect Samsung Health in Settings',available:false,permitted:false};
+  let days=new Map(),hours=[],loadedDate='',workouts=[],meta={},revision='',live=null,liveKey='',contentKey='',info={status:'Connect Samsung Health in Settings',available:false,permitted:false};
   function night(row){
     if(!Array.isArray(row.stages))throw Error('Missing sleep stages');
     const names={0:'unknown',1:'awake',2:'sleeping',3:'awake',4:'light',5:'deep',6:'rem',7:'awake'},segments=[];let cursor=row.start;
@@ -73,22 +73,30 @@ const HealthData=(()=>{
     days=next;hours=stepHours;loadedDate=data.date;workouts=imported.sort((a,b)=>b.startedAt-a.startedAt);meta=data.meta||{};
   }
   function refresh(){
-    let changed=false;
-    try{if(window.OrbitHealth){const snapshot=JSON.parse(window.OrbitHealth.snapshot(revision));if(snapshot.error)throw Error(snapshot.error);if(snapshot.data!==null&&snapshot.data!==undefined){accept(snapshot.data);changed=true}revision=snapshot.revision;info=snapshot;delete info.data}}
+    let changed=false,liveChanged=false;
+    try{if(window.OrbitHealth){
+      const snapshot=JSON.parse(window.OrbitHealth.snapshot(revision));if(snapshot.error)throw Error(snapshot.error);
+      const next=snapshot.live?.reading??null;
+      if(next&&(next.source!==source||!validDate(next.date)||next.date>today()||!Number.isSafeInteger(next.steps)||next.steps<0||!finite(next.at)||next.at<0||!Array.isArray(next.hours)||next.hours.some(h=>!finite(h.start)||!finite(h.end)||h.end<=h.start||!Number.isSafeInteger(h.value)||h.value<0)||next.hours.reduce((s,h)=>s+h.value,0)!==next.steps))throw Error('Invalid live steps');
+      if(snapshot.data!==null&&snapshot.data!==undefined){const key=JSON.stringify({...snapshot.data,meta:{...snapshot.data.meta,lastSync:0}});accept(snapshot.data);changed=key!==contentKey;contentKey=key}
+      const key=JSON.stringify(next&&[next.date,next.steps,next.hours.map(h=>[h.start,h.value])]);liveChanged=key!==liveKey;liveKey=key;live=next;
+      revision=snapshot.revision;info=snapshot;delete info.data;
+    }}
     catch{info={...info,status:'Health data could not be read. Saved records are unchanged.'}}
-    window.dispatchEvent(new CustomEvent('health-data-ready',{detail:{changed}}));return changed;
+    window.dispatchEvent(new CustomEvent('health-data-ready',{detail:{changed,liveChanged}}));return changed||liveChanged;
   }
   function stepHours(key){
-    if(key!==loadedDate||!hours.length)return Array.from({length:24},(_,h)=>({label:`${String(h).padStart(2,'0')}:00`,value:null}));
+    const direct=live?.date===key&&key===today(),readings=direct?live.hours:key===loadedDate?hours:[];
+    if(!readings.length)return Array.from({length:24},(_,h)=>({label:`${String(h).padStart(2,'0')}:00`,value:direct&&h<=new Date(live.at).getHours()?0:null}));
     const start=new Date(key+'T00:00:00').getTime(),end=new Date(key+'T00:00:00');end.setDate(end.getDate()+1);
-    return Array.from({length:Math.round((end-start)/3600000)},(_,i)=>{const at=start+i*3600000,h=hours.find(r=>r.start===at);return {label:new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),value:h?.value??null}});
+    return Array.from({length:Math.round((end-start)/3600000)},(_,i)=>{const at=start+i*3600000,h=readings.find(r=>r.start===at);return {label:new Date(at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),value:h?.value??(direct&&at<=live.at?0:null)}});
   }
   function load(key){window.OrbitHealth?.load(key)}
-  const daily=key=>days.get(key)||dayEmpty(key);
+  const daily=key=>{const row=days.get(key)||dayEmpty(key);return live?.date===key&&key===today()?{...row,steps:live.steps}:row};
   const body=key=>daily(key).body;
   const bodyDates=()=>[...days.keys()].filter(key=>Object.values(body(key)).some(finite)).sort();
   const latestBody=key=>{const at=bodyDates().filter(d=>d<=key&&body(d).weight!==null).at(-1);return {date:at,...body(at)}};
-  function sourceText(){return meta.lastSync?'Samsung Health':'Connect Samsung Health in Settings'}
+  function sourceText(){return meta.lastSync||live?'Samsung Health':'Connect Samsung Health in Settings'}
   window.addEventListener('orbit-health-change',refresh);
   return {accept,refresh,load,daily,body,bodyDates,latestBody,stepHours,sum,average,display,escape,today,date,sourceText,
     get workouts(){return workouts},get meta(){return meta},get info(){return info}};

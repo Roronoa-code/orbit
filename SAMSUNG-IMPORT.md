@@ -1,5 +1,18 @@
 # Samsung Health migration
 
+## Live combined steps — 14 September 2026
+
+Orbit can now read today’s combined phone and Galaxy Watch step total directly through Samsung Health Data SDK 1.1.0. It checks about every two seconds while Orbit is visible, permits one request at a time, rejects late/cancelled results and never adds a second phone counter. Watch steps arrive when Samsung Health has received the watch sync. This is not a guarantee of two-second physical sensor or watch latency. Other shared measurements refresh through Samsung-filtered Health Connect every 30 seconds while visible; older history is retained.
+
+For this personal developer build, open Samsung Health → Settings → About Samsung Health, tap the version ten times, open Developer mode (Samsung Health Data SDK) and enable Developer Mode for Data Read. Then open Orbit → Settings → Samsung Health → Connect live steps and allow step access. No write mode is needed. A generally distributed build requires Samsung registration for its package/signing certificate; personal developer mode is not a substitute for that approval. [Samsung developer setup](https://developer.samsung.com/health/data/guide/developer-mode.html), [combined steps aggregation](https://developer.samsung.com/health/data/guide/hello-sdk/aggregate-data.html).
+
+Only local checks were performed. Actual Samsung permission, combined phone/watch updates and user data coverage have not been inspected on the phone. Installation alone does not activate access. The existing Health Connect connection remains useful for shared history and other readings.
+
+Local checks: `verification/live-workout.cjs` exercises +10 replacement totals, malformed/stale readings, retained settings drafts and workout navigation. `verification/samsung-native.py --workout` checks actual SDK runtime loading, asynchronous polling/cancellation and foreground GPS service/clock lifecycle on an emulator. `HealthImportCheck` also replays the new recent refresh and verifies retained older history.
+
+## Earlier migration record
+
+
 Requested 13 September 2026. Source confirmed: Samsung Health. Keep one production Orbit app. All testing stays local; install only after verification.
 
 | Requirement | Implementation / proof | Status |

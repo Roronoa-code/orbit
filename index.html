@@ -109,7 +109,7 @@ body{background:#0a0a0c}
 </style>
 <style>
 /* Per-frame deck and live-bar changes stay on the compositor: moving card contents are not repainted. */
-.stack-content{position:relative;opacity:1}.stack-card .facts-footer{will-change:transform,opacity}
+.stack-content{position:relative;opacity:1;will-change:clip-path}.stack-card .facts-footer{will-change:transform,opacity}.stack-shell{will-change:transform}
 #stack-open{will-change:transform}
 /* The motion box owns the card's position, fold clip, fade and z-order; the card inside stays static. */
 .stack-motion{position:absolute;top:0;left:14px;right:14px;z-index:var(--card-z);transform-origin:50% 0;will-change:transform,clip-path;overflow:hidden}
@@ -182,7 +182,7 @@ body{background:#0a0a0c}
 document.addEventListener('contextmenu',event=>{if(event.target.closest('.screen')&&!event.target.closest('input,textarea,[contenteditable="true"]'))event.preventDefault()});
 'use strict';
 const $=s=>document.querySelector(s), fmt=n=>HealthData.display(n);
-const anchor=HealthData.today(), key='orbit-steps-goal-v1';
+let anchor=HealthData.today();const key='orbit-steps-goal-v1';
 const dayOffset=(date,delta)=>{const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+delta);return d.toISOString().slice(0,10)};
 const dateLabel=(date,options={weekday:'short',day:'numeric',month:'short'})=>new Date(date+'T12:00:00Z').toLocaleDateString('en-GB',{...options,timeZone:'UTC'});
 
@@ -266,12 +266,15 @@ function initOrb(){
   orb=SignalOrb.attach(button,{selected:metric,keys:metricOrder,onSelect:key=>changeMetric(metricOrder.indexOf(key)-metricOrder.indexOf(metric)),onOpen:cyclePeriod});orb.setPaused(paused);
 }
 
-function renderSteps(){
+function renderStepValues(){
   const rows=windowRows(days),total=sum(rows.map(r=>r.steps)),distance=sum(rows.map(r=>r.distance)),target=goal*days,remaining=total===null?null:target-total;
   $('#steps').textContent=fmt(total);$('#hero-label').textContent=days===1?'Steps':`${days}-day steps`;$('#goal-label').textContent=total===null?'No shared steps yet':`of ${fmt(target)} steps`;
   $('#distance').textContent=HealthData.display(distance===null?null:distance/1000,2);$('#energy').textContent=fmt(sum(rows.map(r=>r.energy)));$('#floors').textContent=fmt(sum(rows.map(r=>r.floors)));$('#completion').textContent=total===null?'—':fmt(total/target*100)+'%';
   $('#goal-caption').textContent='Goal completion';$('#remaining').textContent=remaining===null?'—':fmt(Math.abs(remaining))+' steps';$('#remaining-label').textContent=remaining===null?'No shared readings':remaining>=0?'To your goal':'Beyond your goal';
   $('#recorded').textContent=rows.filter(r=>r.steps!==null).length+' / '+days+' days';$('#recorded-label').textContent='With shared steps';$('#date-button').textContent=dateLabel(selected);$('#date-input').value=selected;
+}
+function renderSteps(){
+  renderStepValues();
   $('#back').disabled=days===1&&selected===anchor&&metric==='steps';$('#movement-heading').textContent=days===1?'Movement through the day':'Movement through the period';$('#week-heading').textContent=days===30?'Last 30 days':'Last 7 days';barIndex=0;scheduleCharts();
 }
 // The two charts live in folded cards that are invisible until the deck opens. Draw them in idle time,
@@ -573,13 +576,25 @@ function initDeck(){
 Health.init({settings:{getGoal:()=>goal,saveGoal,paused:()=>paused,rotate:value=>{paused=!value;orb.setPaused(paused)},reduce:value=>{SurfaceMotion.setReduced(value);paused=value;orb.setPaused(paused);animateDeck();animateIslands()}},dates:dateOptions,historyDates:dateOptions,getDate:()=>selected,getDaily:date=>({...HealthData.daily(date),goal}),notice:toast,beforeOpen:()=>{closeUtility(false);setIslandOpen(islands.live,false);orb?.setSuspended(true)},onClose:()=>{orb?.setSuspended(false);setDeckExpanded(deckExpanded);},onChange:()=>{updateLiveBar();if(measureIsland(islands.live))animateIslands()},onTick:updateLiveReadout});
 $('#live-session-controls').addEventListener('click',event=>{const button=event.target.closest('[data-session]');if(button)Health.action(button.dataset.session)});
 $('#live-open-workout').addEventListener('click',event=>Health.open('workouts',event.currentTarget));
-window.addEventListener('health-data-ready',event=>{
-  OrbitSettings.healthStatus();if(!event.detail.changed)return;
+let healthPaintPending=false,healthPointerCount=0,healthFullPaint=false;
+function paintHealthUpdate(){
+  if(!healthPaintPending||healthPointerCount||motionFrame||islandFrame||[...Health.tracks.values()].some(t=>t.busy)){if(healthPaintPending)setTimeout(paintHealthUpdate,160);return}
+  healthPaintPending=false;const oldBar=barIndex,oldLine=lineIndex;
+  if(!healthFullPaint&&HealthData.today()===anchor){if(metric==='steps'){renderStepValues();chartsDirty=true;if(deckExpanded&&!Health.page){renderCharts();inspectBar(Math.min(oldBar,movement().length-1));inspectLine(Math.min(oldLine,week().length-1))}}return}
+  healthFullPaint=false;
+  const current=HealthData.today();if(current!==anchor){if(selected===anchor)selected=current;anchor=current;HealthData.load(selected)}
   const first=HealthData.meta.firstRecord?HealthData.date(HealthData.meta.firstRecord):dayOffset(anchor,-29);
   const start=first<anchor?first:anchor,length=Math.round((Date.parse(anchor+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/86400000)+1;
   dateOptions.splice(0,dateOptions.length,...Array.from({length},(_,i)=>dayOffset(start,i)));
   $('#date-range').max=dateOptions.length-1;document.querySelectorAll('.date-limits span').forEach((n,i)=>n.textContent=dateLabel(i?anchor:start));
-  render();
+  renderMetric();renderComparison();if(chartsDirty)renderCharts();inspectBar(Math.min(oldBar,movement().length-1));inspectLine(Math.min(oldLine,week().length-1));
+}
+document.addEventListener('pointerdown',()=>healthPointerCount++,true);
+for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{healthPointerCount=Math.max(0,healthPointerCount-1)},true);
+window.addEventListener('blur',()=>healthPointerCount=0);
+window.addEventListener('health-data-ready',event=>{
+  OrbitSettings.healthStatus();if(!event.detail.changed&&!event.detail.liveChanged)return;healthFullPaint=healthFullPaint||event.detail.changed;
+  if(!healthPaintPending){healthPaintPending=true;setTimeout(paintHealthUpdate,0)}
 });
 HealthData.refresh();
 initOrb();

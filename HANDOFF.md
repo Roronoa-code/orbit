@@ -1,4 +1,25 @@
-# Orbit — handoff (updated 13 September 2026)
+# Orbit — handoff (updated 14 September 2026)
+
+## Live steps, workout stability, sleep and glass — 14 September 2026
+
+Baseline `2f15a54`. User rejected the previous sleep chart and reported clipping around glass throughout the app. Earlier pending requests also covered direct combined phone/watch steps, deck lag, redundant workout weight/music setup, background countdown and unstable GPS/navigation. All validation stayed local. Phone use was installation only.
+
+- Samsung Health Data SDK 1.1.0 reads the combined current-day phone/watch step total every two seconds while foreground, with one request, timeout, cancellation and stale-callback guards. It replaces the imported step total; no extra phone sensor count is added. This personal build requires Samsung developer read setup or registered package/signing access plus separate step consent. Watch delay depends on Samsung synchronization. Other Samsung-filtered Health Connect readings refresh every 30 seconds while foreground; the recent scan preserves older history.
+- New workouts use saved profile weight and no longer show a setup music card. Countdown saves its future start before animation and resumes from the native clock after suspension. Explicit cancellation removes only a pending start. Native GPS processing runs on its own thread; accuracy, timestamp, velocity and sustained-movement gates reject desk drift and spikes. A confirmed stop resets speed without moving the recorded position. Route previews no longer magnify the first few metres to full width, and unusably slow pace is omitted. Notification metrics refresh every five seconds instead of rebuilding for every fix.
+- GPS and clock updates retain live controls, chart navigation, selector controllers and focus. Successful page swipes no longer start a second competing rebound. Home updates wait until pointer/selector/deck motion has settled.
+- Sleep now has a compact duration summary, a quieter stage chart, a small interval readout and a single stage selector. Every actual interval stays visible; unknown timing remains unknown. Local dense and sparse data views were inspected. This redesign has not received user visual acceptance.
+- Shared glass lenses include padded sampling maps. The card rim is inside the moving clip, rather than extending one pixel beyond it. Complete rounded borders replace abrupt directional highlights and oversized edge shadows. The established navbar/card tint, diffusion and fixed control sizes remain shared.
+
+Local checks passed: model/data boundary, empty and populated Samsung views at 390/320; workout setup/history at 390/384/320; Home motion/reversals at 390/384/320; Body rapid swipes, held selectors and ring fill at 390/320; deeper gestures, haptics and live bar over open cards at 390/384/320; live step replacement, retained settings draft, suspended countdown and retained GPS/navigation nodes at 390/320. Glass checks verify shared rendered material, complete rim bounds, padded maps, actual backdrop sampling, geometry reuse and forced-colour fallback.
+
+Native local checks passed: desk jitter versus real walking, outliers/stale fixes, stopping speed/position, background countdown persistence and cancellation, actual foreground GPS service/thread startup, SDK runtime loading and delayed/cancelled callbacks. Actual Health Connect fixtures passed pagination, units, aggregation, full/recent replay, preserved older history, cancellation and rollback. The packaged production app launched and rendered on the emulator; initial WebView startup logged a disk-cache index error, with no app exception. Test fixtures are excluded from the APK.
+
+Matched desktop deck trace with CPU throttled 4x: drawing work over four sampled transitions fell from 75–95 ms to 24–34 ms; maximum sampled frame gaps changed from 20–27 ms to 19–21 ms. Fixed card-height drift was zero. These are local structural/timing observations, not phone FPS or outdoor GPS validation. Detailed traces and captures are ignored under `verification/samsung-import/`.
+
+Installed build `20260914-003734`, SHA256 `d5135f14561ca6fc5c653028cf28d5d009a8f093746caa2ac419255a99a4d24d`, 1562490 bytes. Identity confirmed SM-S938B / R5CY13S5F8D at `192.168.0.210:36395`. Used **`install --user 0 -r`**; installed APK hash matches, Owner user 0 is installed and users 95/150 remain uninstalled. Previous APK is backed up in ignored `verification/samsung-import/phone-before-live-20260914.apk` (SHA256 `aa59ea318108a5e05bb110d2effa1d2b24b13f0cb3829937fc53d893f232358a`). No phone app launch, navigation, screenshot, permission grant, workout, music operation or test was performed.
+
+**Remaining user setup:** direct Samsung live-step access is not activated or verified on the phone. Follow the current setup section in `SAMSUNG-IMPORT.md` / Orbit Settings, then grant Samsung step consent. Existing Health Connect sharing remains necessary for other readings. The user alone assesses phone appearance, motion and outdoor accuracy under the install-only boundary. Continue to maintain one Owner-profile Orbit package; never use the default all-users install. The older `C:\HA\HEALTH APP` project was not modified.
+
 
 ## Dual App clone removed — 13 September 2026
 

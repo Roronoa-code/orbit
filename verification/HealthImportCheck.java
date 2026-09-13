@@ -63,6 +63,7 @@ public final class HealthImportCheck extends Activity {
             check(weight&&steps&&distance&&energy,"daily totals at midnight, including extended history");
             check(reader.stepHours(LocalDate.now().minusDays(1)).length()>0,"real hourly data");
             reader.sync(store,(type,count)->{});check(store.metadata().getLong("recordCount")==expectedCount,"repeat import deduplicates");
+            reader.sync(store,(type,count)->{},true);check(store.metadata().getLong("recordCount")==expectedCount,"foreground refresh preserves older history");
             String before=store.metadata().toString();reader.visible=false;
             try{reader.sync(store,(type,count)->{});throw new AssertionError("hidden import allowed");}catch(CancellationException expected){}
             check(store.metadata().toString().equals(before),"cancellation preserves previous import");
