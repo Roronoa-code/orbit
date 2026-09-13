@@ -31,9 +31,9 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
   await p.locator('[data-night-stage=awake]').tap();await p.waitForTimeout(350);await drag('[data-night-stage=awake]',last.x-first.x,0,450);assert.equal(await p.locator('[data-night-stage=deep]').getAttribute('aria-pressed'),'true');
   await p.screenshot({path:path.join(out,`sleep-${width}.png`)});
   await p.evaluate(()=>Health.close());await p.waitForTimeout(500);await p.screenshot({path:path.join(out,`home-${width}.png`)});
-  const filters=await p.evaluate(()=>[getComputedStyle(document.querySelector('.stack-glass')).backdropFilter,getComputedStyle(document.querySelector('#settings-open')).backdropFilter,getComputedStyle(document.querySelector('#live-island .island-frost')).backdropFilter]);
+  const filters=await p.evaluate(()=>[getComputedStyle(document.querySelector('.stack-motion')).backdropFilter,getComputedStyle(document.querySelector('#settings-open')).backdropFilter,getComputedStyle(document.querySelector('#live-island .island-frost')).backdropFilter]);
   assert(filters.every(f=>f.includes('blur(8px)')));assert(!filters[2].includes('url('),'Large moving launcher must avoid the displacement pass');
-  await p.emulateMedia({forcedColors:'active'});assert.equal(await p.locator('.stack-glass').first().evaluate(n=>getComputedStyle(n).backdropFilter),'none');
+  await p.emulateMedia({forcedColors:'active'});assert.equal(await p.locator('.stack-motion').first().evaluate(n=>getComputedStyle(n).backdropFilter),'none');
   assert.deepEqual(errors,[]);console.log(width,'PASS: bar over cards, haptics, page swipes, held selectors, compact input and material');await context.close();
  }
  // A monotonic native clock sample is reused by all UI readings. State changes remain authoritative.

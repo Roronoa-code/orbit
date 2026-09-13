@@ -1,5 +1,19 @@
 # Player and Settings corrections — 12 September 2026
 
+## Dashboard glass correction — 13 September 2026
+
+Baseline `7adc56f`. The user rejected the previous card glass because it did not match the bottom navbar. The extra card blur was nested inside the moving clip, which prevented it from sampling the external backdrop; the rim also had its own gradient and shadow.
+
+The four outer card layers now share the bottom navbar's actual background, 8px blur and 1.5 saturation declarations. Their rims share its border and shadow declarations. Removed the redundant inner glass element and the old 12px foreground backdrop pass. The fold clips to rounded corners, and the rim compensates for vertical scaling to keep those corners round. Card and control sizes remain fixed. Existing selector refraction is unchanged.
+
+Verification: the updated `liquid-glass.cjs` rejects the baseline, then passes at 390/320px. All four card fills and rims match the actual navbar's computed material; cloned real layers over an identical striped backdrop differ by less than 0.1 per colour channel on average. Disabling diffusion changes more than four million summed channel values, proving that the card samples outside its clip. Foreground-filter, high-contrast, existing refraction and geometry-cache checks pass. Home motion and interaction checks pass at 390/384/320px; model checks, signed APK and packaged-source parity pass. Local screenshots cover folded and open cards.
+
+Matched desktop deck probe: layout events remain 8 over four transitions, fixed card heights are unchanged, and both samples have a maximum RAF gap of 16.8ms. Paint events increase from 793 to 1212 with the live sample and rounded rim; this is not evidence of a phone performance improvement. The running-workout launcher probe remains at 3 native snapshots and 3 layouts. Physical appearance and smoothness have not been tested.
+
+Installed production build `20260913-013841`, SHA256 `da75aa93434cc471161118b9734465fa347188c1bc903135a346eaa803e1cd80` (280145 bytes), with `install -r`; installed hash verified. Previous production APK is backed up in `glass-correction/phone-before.apk`. No app launch or phone test. **Latest user instruction: keep all tests local and install only when done.** This supersedes earlier broad phone-testing permission. Push the completed source and APK to `main` under the standing release instruction.
+
+This section supersedes the earlier dashboard-glass description below. Local comparison, motion and release evidence is in `glass-correction/`; glass pixel evidence is in `glass-port/`.
+
 ## Haptics, deeper gestures, live-bar access and running-workout cost — 13 September 2026
 
 Baseline `8fcbac5`. All six requests are implemented in the standalone Orbit app. The phone restriction remains **install only, no launching or testing**.

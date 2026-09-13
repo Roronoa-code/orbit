@@ -81,7 +81,6 @@
 /* The orb owns time selection; each circle opens a full reading page. */
 .orb-period{font-size:10px;letter-spacing:1.1px;color:#c8b7f6;margin-top:12px}
 .stack-card>.stack-shell{border-color:#ffffff10;border-top-color:#ffffff29;background:var(--frost-grain),linear-gradient(130deg,#ffffff14,#ffffff04 56%,#ffffff0b),#111115a6;box-shadow:inset 0 1px 2px #ffffff1c,inset 0 -1px 2px #0004,0 10px 22px -14px #000a}
-.stack-card.facts{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .deck-scroll{background:radial-gradient(ellipse 65% 43% at 4% 32%,#d9d9e414,transparent 80%),radial-gradient(ellipse 45% 25% at 100% 82%,#d9d9e410,transparent 90%)}
 .live-island.has-activity .live-icon{color:#ccb8ff}.live-island.has-activity .live-title{font-variant-numeric:tabular-nums}
 .live-session-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 0 0}.live-session-controls[hidden]{display:none}.live-session-controls button{min-width:0;white-space:nowrap;font-size:13px;min-height:48px;padding:0 12px;border:1px solid #ffffff14;background:#ffffff0d;border-radius:18px;color:#ece9f1}.live-session-controls #live-open-workout{grid-column:1/-1;background:none;border:0;color:#d2c1ff}.live-island .live-chevron svg{transform:rotate(calc(-90deg + max(var(--deck-progress,0),var(--island-open,0))*180deg))}
@@ -399,7 +398,7 @@ const deckMotion={value:0,velocity:0},orbPose={value:0,velocity:0};
 function ensureShell(card){
   if(!card.prepend)return null;
   const first=card.firstElementChild;if(first?.classList?.contains('stack-shell'))return first;
-  const shell=document.createElement('div');shell.className='stack-shell';shell.setAttribute('aria-hidden','true');card.prepend(shell);const glass=document.createElement('div');glass.className='stack-glass';glass.setAttribute('aria-hidden','true');shell.after(glass);return shell;
+  const shell=document.createElement('div');shell.className='stack-shell';shell.setAttribute('aria-hidden','true');card.prepend(shell);return shell;
 }
 let scrollReturn=null;
 let motionFrame=0,motionTime=0,cardHeights=[],cardContentTop=[],deckClosedSpace=180,heroClosed=300,heroOpen=220;
@@ -486,8 +485,8 @@ function layoutDeck(){
     for(const icon of card.querySelectorAll?.('.metric svg')||[])icon.style.opacity=String(details*.45);
     const shown=146+(height-146)*q;
     box.style.opacity=String(i?.3+.7*q:1);
-    const shell=ensureShell(card);if(shell)shell.style.transform=`scaleY(${shown/height})`;else card.style.setProperty('--shell-scale',String(shown/height));
-    box.style.clipPath='inset(0 0 '+(height-shown)+'px 0)';
+    const shell=ensureShell(card);if(shell){shell.style.transform=`scaleY(${shown/height})`;shell.style.borderRadius=`20px / ${20*height/shown}px`}else card.style.setProperty('--shell-scale',String(shown/height));
+    box.style.clipPath='inset(0 0 '+(height-shown)+'px 0 round 20px)';
     previousBottom=Math.max(previousBottom,y+shown);
     next+=height+12;
   });

@@ -589,5 +589,61 @@
     },
     "phoneQualification": "Not run: explicit install-only instruction",
     "profileFields": "Birthday formatting, height/weight/goal context suppression and normal name selection verified on desktop"
+  },
+  "glassCorrection": {
+    "baseline": "7adc56f",
+    "materialWidths": [
+      390,
+      320
+    ],
+    "gestureWidths": [
+      390,
+      384,
+      320
+    ],
+    "baselineRegressionRejected": true,
+    "materialAndExternalBackdrop": "PASS",
+    "foregroundUnfiltered": true,
+    "model": "PASS",
+    "signedBuildAndSourceParity": "PASS",
+    "desktopDeck": [
+      {
+        "baseline": true,
+        "layout": 8,
+        "paint": 793,
+        "styleMs": 34.236,
+        "maxRafGap": 16.800000000000182,
+        "heights": [
+          211,
+          209,
+          167,
+          180
+        ]
+      },
+      {
+        "baseline": false,
+        "layout": 8,
+        "paint": 1212,
+        "styleMs": 40.229,
+        "maxRafGap": 16.800000000000182,
+        "heights": [
+          211,
+          209,
+          167,
+          180
+        ]
+      }
+    ],
+    "phoneTested": false,
+    "release": {
+      "build": "C:\\HA\\design-concepts\\signal-orbit-steps\\android\\build\\20260913-013841",
+      "bytes": 280145,
+      "sha256": "da75aa93434cc471161118b9734465fa347188c1bc903135a346eaa803e1cd80",
+      "previousHash": "f8511588d87f98f82188a9324fab191f9ed0d3c90afd105b33692cdbe85c8555",
+      "device": "192.168.0.210:46215",
+      "phoneTested": false,
+      "installed": true,
+      "backup": "verification/player-settings-20260912/glass-correction/phone-before.apk"
+    }
   }
 }
