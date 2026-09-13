@@ -22,3 +22,6 @@ verification/perf-tools/measure12-audit-*.json
 verification/player-settings-20260912/*
 !verification/player-settings-20260912/RESULTS.md
 !verification/player-settings-20260912/checks.json
+
+# Private import checkpoints and local emulator/browser output.
+verification/samsung-import/

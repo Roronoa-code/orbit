@@ -1,5 +1,19 @@
 # Orbit — handoff (updated 13 September 2026)
 
+## Samsung Health import and demo retirement — 13 September 2026
+
+Baseline `cc57dfd`. The user confirmed Samsung Health is the source of truth and all existing Orbit measurements and workouts are demo data. Only production `com.mani.orbit` remains on the phone; earlier Audit/old Health clones were removed. The current boundary is **all tests local, phone installation only**.
+
+Added a foreground, read-only Android Health Connect importer with exact Samsung origin filtering, complete pagination, transactional SQLite storage and original record IDs, metadata, units and timestamps. Home activity/heart/food, Body/oxygen, sleep and weekly workout history use shared records; unavailable readings remain missing. Imports are manual after initial consent and run off the UI thread. Settings includes Samsung Health Connect, access and refresh controls. No external dependency, Samsung write permission or synthetic production fallback was added.
+
+Old Orbit test workouts are privately archived and retired once on the next app launch. Profile preferences and new app-owned workouts are preserved. Samsung originals are never edited. Imported workouts remain read-only and their metrics are labelled totals within the recorded interval. Sleep gaps stay unknown; unsupported muscle readings and unshared routes are not invented.
+
+Local verification passed: Samsung model/rendered empty and populated checks at 390/320px; existing model, Home motion, Body/history, interaction and workout-rework flows; native arithmetic/media checks; signing and packaged-source parity. Native Health Connect fixtures cover multiple pages, units, replay, cancellation, failed staging and demo retirement. A separate reader package caught extended-history daily queries dropping midnight records; corrected query bounds pass for recent and extended access. The exact final production APK imported 508 controlled records, including older history, and stored correct daily totals (5,010 steps, 5.71 km, 270 kcal). These are local test records, not the user's health data.
+
+Installed build `20260913-204125`, SHA256 `aa59ea318108a5e05bb110d2effa1d2b24b13f0cb3829937fc53d893f232358a` (300625 bytes), using `install -r`; the installed hash matches. The previous production APK is backed up in ignored `verification/samsung-import/phone-before.apk` (SHA256 `da75aa93434cc471161118b9734465fa347188c1bc903135a346eaa803e1cd80`). No app launch, phone navigation, permission change, workout, playback, screenshot or phone test was performed.
+
+**Actual migration is pending:** the user must enable Samsung Health sharing and approve Orbit's Health Connect reading and past-data permissions. Initial consent starts the import while Orbit remains open. Only shared records can transfer; unavailable older history may require a Samsung export. See `SAMSUNG-IMPORT.md` for scope, checks and setup. Private checkpoints, local fixture captures and release evidence stay ignored in `verification/samsung-import/`. The older native project `C:\HA\HEALTH APP` is unchanged.
+
 ## Dashboard glass correction — 13 September 2026
 
 Baseline `7adc56f`. The user rejected the previous card glass because it did not match the bottom navbar. The extra card blur was nested inside the moving clip, which prevented it from sampling the external backdrop; the rim also had its own gradient and shadow.

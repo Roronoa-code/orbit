@@ -30,6 +30,7 @@ public final class MainActivity extends Activity {
     private WebView web;
     private WorkoutSession workouts;
     private MusicSession music;
+    private SamsungHealth health;
     private boolean pageReady;
     private String insetCss = "";
     private boolean activityVisible;
@@ -61,10 +62,13 @@ public final class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         // Only the bundled offline page can load; no remote page or frame receives this bridge.
+        DemoRetirement.apply(this);
         workouts = new WorkoutSession(this);
         web.addJavascriptInterface(workouts, "OrbitWorkouts");
         web.addJavascriptInterface(new OrbitFeedback(this, web), "OrbitFeedback");
         web.addJavascriptInterface(new AppPreferences(this), "OrbitPreferences");
+        health = new SamsungHealth(this);
+        web.addJavascriptInterface(health, "OrbitHealth");
         music = new MusicSession(this, () -> {
             if (pageReady && activityVisible) web.evaluateJavascript("window.dispatchEvent(new Event('orbit-music-change'));", null);
         });
@@ -147,6 +151,7 @@ public final class MainActivity extends Activity {
 
     @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(code, permissions, results);
+        if (code == SamsungHealth.PERMISSION_REQUEST) { health.permissionResult(); return; }
         if (code == LOCATION_PERMISSION_REQUEST) {
             long expectedStart = pendingLocationStart;
             pendingLocationStart = -1;
@@ -198,7 +203,8 @@ public final class MainActivity extends Activity {
         }
     }
     @Override public void onWindowFocusChanged(boolean focused) { super.onWindowFocusChanged(focused); if (focused) enterImmersive(); }
-    @Override protected void onPause() { music.suspend(); web.onPause(); super.onPause(); }
-    @Override protected void onResume() { super.onResume(); if (music != null) music.resume(); if (web != null) { web.onResume(); if (pageReady) web.evaluateJavascript("Health.refresh();MusicPlayer.refresh();",null); } if (workouts != null) workouts.updateNotification(); enterImmersive(); }
-    @Override protected void onDestroy() { music.close(); web.destroy(); super.onDestroy(); }
+    void healthChanged() { if (pageReady && activityVisible) web.evaluateJavascript("window.dispatchEvent(new Event('orbit-health-change'));", null); }
+    @Override protected void onPause() { health.foreground(false); music.suspend(); web.onPause(); super.onPause(); }
+    @Override protected void onResume() { super.onResume(); if (health != null) health.foreground(true); if (music != null) music.resume(); if (web != null) { web.onResume(); if (pageReady) web.evaluateJavascript("HealthData.refresh();Health.refresh();MusicPlayer.refresh();",null); } if (workouts != null) workouts.updateNotification(); enterImmersive(); }
+    @Override protected void onDestroy() { health.close(); music.close(); web.destroy(); super.onDestroy(); }
 }

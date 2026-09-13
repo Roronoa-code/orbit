@@ -135,24 +135,24 @@ body{background:#0a0a0c}
 <div class="status" aria-hidden="true"><span>10:24</span><i class="camera"></i><div class="status-right"><svg viewBox="0 0 18 16"><path d="M1 14V11h2v3m2 0V8h2v6m2 0V5h2v9m2 0V1h2v13" stroke="currentColor" stroke-width="1.5"/></svg><svg viewBox="0 0 20 16"><path d="M1 5q9-8 18 0M4 8q6-5 12 0M7 11q3-3 6 0" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="14" r="1" fill="currentColor"/></svg><svg viewBox="0 0 10 18"><rect x="1" y="3" width="8" height="14" rx="1.5" fill="currentColor"/><path d="M3 1h4" stroke="currentColor" stroke-width="2"/></svg><span>100%</span></div></div>
 <header class="masthead"><button class="icon-button back" id="back" aria-label="Return to today's steps" title="Return to today's steps" disabled><svg style="transform:rotate(180deg)"><use href="#chevron"/></svg></button><h1>Steps</h1><button class="date" id="date-button" aria-label="Choose date" aria-expanded="false" aria-controls="utility-body">Mon, 8 Sept</button></header>
 <div class="utility-island" id="utility-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="icon-button settings-open" id="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 3-.7 2.5-2.4 1L4 5.8 1.5 10l1.8 1.8v2.4L1.5 16 4 20.2l2.4-.7 2.4 1 .7 2.5h5l.7-2.5 2.4-1 2.4.7 2.5-4.2-1.8-1.8v-2.4l1.8-1.8L20 5.8l-2.4.7-2.4-1-.7-2.5Z" transform="translate(1 0) scale(.92)"/><circle cx="12" cy="12" r="3.2"/></svg></button><div class="utility-body" id="utility-body" inert>
-<section class="utility-page" hidden id="date-dialog" aria-label="Choose date"><form id="date-form"><h2>Choose a day</h2><p>Explore 30 days of saved demonstration data.</p><input id="date-input" type="hidden"><div class="date-choice"><button type="button" id="date-prev" aria-label="Previous day">‹</button><output id="date-choice" for="date-range" aria-live="polite"></output><button type="button" id="date-next" aria-label="Next day">›</button></div><input id="date-range" type="range" min="0" max="29" step="1" value="29" aria-label="Choose demonstration day"><div class="date-limits"><span>10 Aug</span><span>8 Sept</span></div><div class="actions"><button type="button" class="cancel">Cancel</button><button class="primary" type="submit">View day</button></div></form></section>
+<section class="utility-page" hidden id="date-dialog" aria-label="Choose date"><form id="date-form"><h2>Choose a day</h2><p>Explore your shared health history.</p><input id="date-input" type="hidden"><div class="date-choice"><button type="button" id="date-prev" aria-label="Previous day">‹</button><output id="date-choice" for="date-range" aria-live="polite"></output><button type="button" id="date-next" aria-label="Next day">›</button></div><input id="date-range" type="range" min="0" max="29" step="1" value="29" aria-label="Choose health history day"><div class="date-limits"><span>Earlier</span><span>Today</span></div><div class="actions"><button type="button" class="cancel">Cancel</button><button class="primary" type="submit">View day</button></div></form></section>
 
 </div></div>
 
-<section class="hero" aria-label="Step count"><div class="readout"><div class="hero-copy"><p class="label" id="hero-label">Steps</p><p class="number" id="steps">8,420</p><p class="goal-label" id="goal-label">of 10,000 steps</p><p class="orb-period" id="orb-period">Today</p></div></div><button class="orb-button" id="orb-button" aria-label="Steps. Swipe left or right, or tap, to change metric"><span id="globe" aria-hidden="true"></span></button><span class="sr-only" aria-live="polite" aria-atomic="true" id="metric-announcement"></span></section>
+<section class="hero" aria-label="Step count"><div class="readout"><div class="hero-copy"><p class="label" id="hero-label">Steps</p><p class="number" id="steps">—</p><p class="goal-label" id="goal-label">of 10,000 steps</p><p class="orb-period" id="orb-period">Today</p></div></div><button class="orb-button" id="orb-button" aria-label="Steps. Swipe left or right, or tap, to change metric"><span id="globe" aria-hidden="true"></span></button><span class="sr-only" aria-live="polite" aria-atomic="true" id="metric-announcement"></span></section>
 <div class="panel-deck" id="panel-deck"><span class="deck-frost" aria-hidden="true"></span><div class="deck-scroll" id="deck-scroll"><div id="period-content" role="region" tabindex="-1" aria-label="Steps details">
 <section class="facts horizon" aria-label="Activity summary"><div class="metrics">
-<div class="metric"><svg aria-hidden="true"><use href="#route"/></svg><p class="metric-value"><b id="distance" style="font-weight:inherit">6.32</b> <span>km</span></p><small>Distance</small></div>
-<div class="metric"><svg aria-hidden="true"><use href="#flame"/></svg><p class="metric-value"><b id="energy" style="font-weight:inherit">337</b> <span>kcal</span></p><small>Estimated energy</small></div>
-<div class="metric"><svg aria-hidden="true"><use href="#stairs"/></svg><p class="metric-value" id="floors">2</p><small>Floors climbed</small></div>
-<div class="metric"><svg aria-hidden="true"><use href="#target"/></svg><p class="metric-value" id="completion">84%</p><small id="goal-caption">Goal completion</small></div>
-</div><div class="facts-footer"><div><strong id="remaining">1,580 steps</strong><small id="remaining-label">To your goal</small></div><div><strong id="recorded">18:42</strong><small id="recorded-label">Recorded through</small></div></div></section>
-<section class="horizon hourly"><div class="panel-head"><h2 id="movement-heading">Movement through the day</h2></div><p class="subtitle" id="movement-subtitle">Most active: 18:00 – 19:00 · 3,180 steps</p><figure aria-labelledby="movement-heading"><div class="plot" id="hour-plot"><div class="axis-y" aria-hidden="true"><span id="bar-max">4K</span><span id="bar-half">2K</span><span>0</span></div><svg id="bars" viewBox="0 0 350 80" preserveAspectRatio="none" aria-hidden="true"></svg><output class="selection-tip" id="bar-tip">3,180</output><input class="chart-input" id="bar-range" type="range" min="0" max="23" value="18" aria-label="Inspect hourly steps"></div><div class="ticks" id="bar-ticks" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></figure></section>
+<div class="metric"><svg aria-hidden="true"><use href="#route"/></svg><p class="metric-value"><b id="distance" style="font-weight:inherit">—</b> <span>km</span></p><small>Distance</small></div>
+<div class="metric"><svg aria-hidden="true"><use href="#flame"/></svg><p class="metric-value"><b id="energy" style="font-weight:inherit">—</b> <span>kcal</span></p><small>Active energy</small></div>
+<div class="metric"><svg aria-hidden="true"><use href="#stairs"/></svg><p class="metric-value" id="floors">—</p><small>Floors climbed</small></div>
+<div class="metric"><svg aria-hidden="true"><use href="#target"/></svg><p class="metric-value" id="completion">—</p><small id="goal-caption">Goal completion</small></div>
+</div><div class="facts-footer"><div><strong id="remaining">—</strong><small id="remaining-label">To your goal</small></div><div><strong id="recorded">—</strong><small id="recorded-label">Recorded through</small></div></div></section>
+<section class="horizon hourly"><div class="panel-head"><h2 id="movement-heading">Movement through the day</h2></div><p class="subtitle" id="movement-subtitle">—</p><figure aria-labelledby="movement-heading"><div class="plot" id="hour-plot"><div class="axis-y" aria-hidden="true"><span id="bar-max">4K</span><span id="bar-half">2K</span><span>0</span></div><svg id="bars" viewBox="0 0 350 80" preserveAspectRatio="none" aria-hidden="true"></svg><output class="selection-tip" id="bar-tip">—</output><input class="chart-input" id="bar-range" type="range" min="0" max="23" value="18" aria-label="Inspect hourly steps"></div><div class="ticks" id="bar-ticks" aria-hidden="true"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div></figure></section>
 <section class="horizon weekly"><div class="panel-head"><h2 id="week-heading">Last 7 days</h2></div><figure aria-labelledby="week-heading"><div class="plot"><div class="axis-y" aria-hidden="true"><span id="line-max">12K</span><span id="line-half">6K</span><span>0</span></div><svg id="line" viewBox="0 0 350 62" preserveAspectRatio="none" aria-hidden="true"></svg><input class="chart-input" id="line-range" type="range" min="0" max="6" value="6" aria-label="Inspect daily steps"></div><div class="ticks week" id="line-ticks" aria-hidden="true"></div><p class="subtitle sr-only" id="line-readout" aria-live="polite"></p></figure></section>
-<section class="horizon comparison"><h2>Daily average comparison</h2><div class="comparison-grid"><div><strong id="current-average">6,794 <span>steps</span></strong><small id="current-period">Current daily average</small></div><div><strong id="previous-average">7,520 <span>steps</span></strong><small id="previous-period">Previous daily average</small></div><div class="difference"><strong><i id="direction">▼</i><b id="difference" style="font-weight:inherit">726</b></strong><small id="difference-label">steps lower</small></div></div></section>
+<section class="horizon comparison"><h2>Daily average comparison</h2><div class="comparison-grid"><div><strong id="current-average">—</strong><small id="current-period">Current daily average</small></div><div><strong id="previous-average">—</strong><small id="previous-period">Previous daily average</small></div><div class="difference"><strong><i id="direction">–</i> <b id="difference">—</b></strong><small id="difference-label">Comparison unavailable</small></div></div></section>
 </div></div>
 <button class="stack-open" id="stack-open" aria-label="Expand four panels" aria-controls="period-content"></button>
-<div class="live-island" id="live-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="live-bar" id="live-bar" aria-expanded="false" aria-controls="live-choices"><span class="live-icon" aria-hidden="true"><svg><use id="live-symbol" href="#stairs"/></svg></span><span class="live-copy"><strong class="live-title" id="live-title">1,580 steps to go</strong><span class="live-meta" id="live-meta">Today · 84% of your goal</span></span><output class="live-timer" id="live-timer" hidden></output><span class="live-chevron" aria-hidden="true"><svg><use href="#chevron"/></svg></span></button>
+<div class="live-island" id="live-island"><div class="island-frost" aria-hidden="true"></div><div class="island-surface" aria-hidden="true"></div><button class="live-bar" id="live-bar" aria-expanded="false" aria-controls="live-choices"><span class="live-icon" aria-hidden="true"><svg><use id="live-symbol" href="#stairs"/></svg></span><span class="live-copy"><strong class="live-title" id="live-title">Explore</strong><span class="live-meta" id="live-meta">Health and workouts</span></span><output class="live-timer" id="live-timer" hidden></output><span class="live-chevron" aria-hidden="true"><svg><use href="#chevron"/></svg></span></button>
 <div class="live-island-body" id="live-choices" inert><div class="live-island-content"><div class="activity-choices" role="group" aria-label="More health sections">
 <button class="activity-choice" data-activity="body" ><span><svg aria-hidden="true"><use href="#body-icon"/></svg></span>Body</button>
 <button class="activity-choice" data-activity="workouts" ><span><svg aria-hidden="true"><use href="#workout-icon"/></svg></span>Workouts</button>
@@ -162,7 +162,7 @@ body{background:#0a0a0c}
 </div>
 <section id="health-page" class="health-page" hidden aria-label="Health detail"><header class="health-page-head"><span class="health-head-frost" aria-hidden="true"></span><button class="icon-button" id="health-back" aria-label="Back to dashboard"><svg style="transform:rotate(180deg)"><use href="#chevron"/></svg></button><h1 id="health-title"></h1></header><div class="health-scroll" id="health-scroll"><p class="health-source" id="health-source"></p><div id="health-content" class="health-content"></div></div></section>
 </div></main>
-<footer class="copy-label">ORBIT <span>·</span> Standalone design copy <span>·</span> <a href="#about" id="about-link">Demo data</a></footer>
+<footer class="copy-label">ORBIT <span>·</span> Personal health <span>·</span> <a href="#about" id="about-link">About</a></footer>
 <p class="toast" role="status" id="toast"></p>
 <script src="settings-store.js"></script>
 <script src="surface-motion.js"></script>
@@ -176,92 +176,74 @@ body{background:#0a0a0c}
 <script src="liquid-glass.js"></script>
 <script src="workout-details.js"></script>
 <script src="orbit-settings.js"></script>
+<script src="health-data.js"></script>
 <script src="health-pages.js"></script>
 <script id="app">
 document.addEventListener('contextmenu',event=>{if(event.target.closest('.screen')&&!event.target.closest('input,textarea,[contenteditable="true"]'))event.preventDefault()});
 'use strict';
-const $=s=>document.querySelector(s), fmt=n=>Math.round(n).toLocaleString('en-GB');
-const anchor='2025-09-08', key='orbit-steps-goal-v1';
+const $=s=>document.querySelector(s), fmt=n=>HealthData.display(n);
+const anchor=HealthData.today(), key='orbit-steps-goal-v1';
 const dayOffset=(date,delta)=>{const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+delta);return d.toISOString().slice(0,10)};
 const dateLabel=(date,options={weekday:'short',day:'numeric',month:'short'})=>new Date(date+'T12:00:00Z').toLocaleDateString('en-GB',{...options,timeZone:'UTC'});
-const lastWeek=[3200,6400,4700,5500,11100,8238,8420], previousWeek=[7800,8200,6400,8600,7040,7800,6800];
-const records=Array.from({length:90},(_,i)=>{const ago=89-i;return {date:dayOffset(anchor,-ago),steps:ago<7?lastWeek[6-ago]:ago<14?previousWeek[13-ago]:4400+((ago*1783+ago*ago*29)%6200),floors:ago===0?2:(ago*3+2)%9}});
-const hours=[62,28,19,10,10,12,32,72,127,117,67,99,211,371,513,360,650,1300,3180,null,null,null,null,null];
-// The selected day ends at 18:42. Later hours stay unrecorded, rather than inventing future steps.
-const earlySum=hours.slice(0,18).reduce((a,b)=>a+b,0);hours[17]+=8420-3180-earlySum;
+
 let days=1,selected=anchor,goal=10000,barIndex=18,lineIndex=6,paused=false,storageError=false,toastTimer,barTipTimer;
 try{const saved=SettingsStore.read(key);if(saved!==null){const n=Number(saved);if(!Number.isInteger(n)||n<100||n>100000||n%100)throw Error('Invalid stored goal');goal=n}}catch{storageError=true}
 function toast(message){$('#toast').textContent=message;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').textContent='',3500)}
-function windowRows(count,end=selected){return records.filter(r=>r.date<=end&&r.date>=dayOffset(end,1-count))}
-function movement(){if(metric!=='steps')return extraMovement();if(days>1)return windowRows(days).map(r=>({label:dateLabel(r.date),value:r.steps}));const r=windowRows(1)[0],weights=hours.map(v=>v??90),weightTotal=weights.reduce((a,b)=>a+b,0);let cumulative=0,allocated=0;return hours.map((v,i)=>{cumulative+=weights[i];const next=Math.round(cumulative*r.steps/weightTotal),value=selected===anchor?v:next-allocated;allocated=next;return {label:`${String(i).padStart(2,'0')}:00 – ${String(i+1).padStart(2,'0')}:00`,value}})}
+function windowRows(count,end=selected){return Array.from({length:count},(_,i)=>HealthData.daily(dayOffset(end,i+1-count)))}
+function movement(){if(metric!=='steps')return extraMovement();return days>1?windowRows(days).map(r=>({label:dateLabel(r.date),value:r.steps})):HealthData.stepHours(selected)}
 function week(){return windowRows(days===30?30:7).map(r=>({label:dateLabel(r.date),date:r.date,value:dailyMetric(r)}))}
 function curve(points){if(!points.length)return '';const slopes=points.slice(1).map((p,i)=>(p.y-points[i].y)/(p.x-points[i].x));const tangents=points.map((_,i)=>!i?slopes[0]:i===points.length-1?slopes.at(-1):slopes[i-1]*slopes[i]<=0?0:2*slopes[i-1]*slopes[i]/(slopes[i-1]+slopes[i]));slopes.forEach((s,i)=>{if(!s){tangents[i]=tangents[i+1]=0;return}const length=Math.hypot(tangents[i]/s,tangents[i+1]/s);if(length>3){tangents[i]*=3/length;tangents[i+1]*=3/length}});return `M${points[0].x} ${points[0].y}`+slopes.map((_,i)=>{const a=points[i],b=points[i+1],t=(b.x-a.x)/3;return `C${a.x+t} ${a.y+tangents[i]*t} ${b.x-t} ${b.y-tangents[i+1]*t} ${b.x} ${b.y}`}).join('')}
-function renderBars(){const rows=movement(),max=chartCeiling(rows);barIndex=Math.min(barIndex,rows.length-1);const slot=350/rows.length, width=Math.min(6,slot*.45);$('#bars').innerHTML=`<defs><linearGradient id="bar-fill" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#d8ccff"/><stop offset=".35" stop-color="#ad94f6"/><stop offset="1" stop-color="#756393" stop-opacity=".15"/></linearGradient></defs><path class="grid" d="M0 1H350M0 40H350"/><path class="axis" d="M0 79H350M0 0V80"/>`+rows.map((r,i)=>{const x=slot*i+slot/2,h=(r.value??0)/max*77;return `<rect x="${x-width/2}" y="${79-h}" width="${width}" height="${Math.max(.7,h)}" rx=".7" fill="url(#bar-fill)" stroke="#c3b5ff" stroke-opacity="${r.value===null?.08:.65}" stroke-width=".5"/>`}).join('');$('#bar-max').textContent=axisText(max);$('#bar-half').textContent=axisText(max/2);$('#bar-range').max=rows.length-1;$('#bar-range').setAttribute('aria-label',days===1?`Inspect ${metricNames[metric]} readings`:`Inspect daily ${metricNames[metric]}`);$('#bar-ticks').innerHTML=(days===1&&['steps','heart'].includes(metric)?['00:00','06:00','12:00','18:00','24:00']:days===1?rows.map(r=>r.label):[rows[0].label,rows[Math.floor(rows.length/2)].label,rows.at(-1).label]).map(t=>`<span>${t}</span>`).join('');inspectBar(barIndex)}
+function renderBars(){const rows=movement(),max=chartCeiling(rows);barIndex=Math.min(barIndex,rows.length-1);const slot=350/rows.length, width=Math.min(6,slot*.45);$('#bars').innerHTML=`<defs><linearGradient id="bar-fill" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#d8ccff"/><stop offset=".35" stop-color="#ad94f6"/><stop offset="1" stop-color="#756393" stop-opacity=".15"/></linearGradient></defs><path class="grid" d="M0 1H350M0 40H350"/><path class="axis" d="M0 79H350M0 0V80"/>`+rows.map((r,i)=>{const x=slot*i+slot/2,h=(r.value??0)/max*77;return `<rect x="${x-width/2}" y="${79-h}" width="${width}" height="${Math.max(.7,h)}" rx=".7" fill="url(#bar-fill)" stroke="#c3b5ff" opacity="${r.value===null?0:1}" stroke-opacity=".65" stroke-width=".5"/>`}).join('');$('#bar-max').textContent=axisText(max);$('#bar-half').textContent=axisText(max/2);$('#bar-range').max=rows.length-1;$('#bar-range').setAttribute('aria-label',days===1?`Inspect ${metricNames[metric]} readings`:`Inspect daily ${metricNames[metric]}`);$('#bar-ticks').innerHTML=(days===1&&['steps','heart'].includes(metric)?['00:00','06:00','12:00','18:00','24:00']:days===1?rows.map(r=>r.label):[rows[0].label,rows[Math.floor(rows.length/2)].label,rows.at(-1).label]).map(t=>`<span>${t}</span>`).join('');inspectBar(barIndex)}
 function inspectBar(index,show=false){barIndex=index;const rows=movement(),r=rows[index],x=350/rows.length*(index+.5);$('#bar-tip').textContent=r.value===null?'Not recorded':metricText(r.value);$('#bar-tip').style.left=`${Math.max(13,Math.min(91,6+x/350*94))}%`;$('#bar-range').value=index;$('#bar-range').setAttribute('aria-valuetext',`${r.label}: ${r.value===null?'Not recorded':metricText(r.value)+' '+metricUnit()}`);$('#movement-subtitle').textContent=`${r.label} · ${r.value===null?'Not recorded yet':metricText(r.value)+' '+metricUnit()}`;clearTimeout(barTipTimer);$('#bar-tip').classList.toggle('is-visible',show);if(show)barTipTimer=setTimeout(()=>$('#bar-tip').classList.remove('is-visible'),1600)}
-function renderLine(){const rows=week(),max=chartCeiling(rows,true);lineIndex=rows.length-1;const points=rows.map((r,i)=>({x:4+i*342/(rows.length-1),y:60-r.value/max*59}));const d=curve(points);$('#line').innerHTML=`<defs><linearGradient id="area-fill" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#aa94ee" stop-opacity=".28"/><stop offset="1" stop-color="#a590ed" stop-opacity=".025"/></linearGradient></defs><path class="grid" d="M0 1H350M0 30H350"/><path class="axis" d="M0 60H350M0 0V60"/><path d="${d}L346 60L4 60Z" fill="url(#area-fill)"/><path d="${d}" stroke="#b69cff" stroke-width="1.5" fill="none"/>`+(rows.length===7?points.map(p=>`<path d="M${p.x} ${p.y}V60" class="grid"/><circle cx="${p.x}" cy="${p.y}" r="3" fill="#ad96f3" stroke="#141417"/>`).join(''):'')+`<circle id="line-halo" r="5.6" stroke="#bfaaff" stroke-opacity=".65" fill="#ad96f31a"/><circle id="line-marker" r="3.5" fill="#f4f4f6" stroke="#9f8ce3" stroke-width="1.2"/>`;$('#line-max').textContent=axisText(max);$('#line-half').textContent=axisText(max/2);$('#line-range').max=rows.length-1;const ticks=rows.length===7?rows:[rows[0],rows[14],rows.at(-1)];$('#line-ticks').innerHTML=ticks.map(r=>`<span>${dateLabel(r.date,{weekday:'short'})}<small>${dateLabel(r.date,{day:'numeric',month:'short'})}</small></span>`).join('');inspectLine(lineIndex)}
-function inspectLine(index){lineIndex=index;const rows=week(),r=rows[index],max=chartCeiling(rows,true),x=4+index*342/(rows.length-1),y=60-r.value/max*59;for(const id of ['#line-marker','#line-halo']){$(id).setAttribute('cx',x);$(id).setAttribute('cy',y)}$('#line-range').value=index;$('#line-range').setAttribute('aria-valuetext',`${r.label}: ${metricText(r.value)} ${metricUnit()}`);$('#line-readout').textContent=`${r.label} · ${metricText(r.value)} ${metricUnit()}`}
+function renderLine(){const rows=week(),max=chartCeiling(rows,true);lineIndex=rows.length-1;const points=rows.map((r,i)=>({x:4+i*342/(rows.length-1),y:60-r.value/max*59}));const groups=[];points.forEach((p,i)=>{if(rows[i].value===null)return;if(!i||rows[i-1].value===null)groups.push([]);groups.at(-1).push(p)});const d=groups.map(curve).join(' ');$('#line').innerHTML=`<defs><linearGradient id="area-fill" x1="0%" y1="0%" x2="0%" y2="100%"><stop stop-color="#aa94ee" stop-opacity=".28"/><stop offset="1" stop-color="#a590ed" stop-opacity=".025"/></linearGradient></defs><path class="grid" d="M0 1H350M0 30H350"/><path class="axis" d="M0 60H350M0 0V60"/><path d="${groups.map(g=>curve(g)+`L${g.at(-1).x} 60L${g[0].x} 60Z`).join(' ')}" fill="url(#area-fill)"/><path d="${d}" stroke="#b69cff" stroke-width="1.5" fill="none"/>`+(rows.length===7?points.filter((p,i)=>rows[i].value!==null).map(p=>`<path d="M${p.x} ${p.y}V60" class="grid"/><circle cx="${p.x}" cy="${p.y}" r="3" fill="#ad96f3" stroke="#141417"/>`).join(''):'')+`<circle id="line-halo" r="5.6" stroke="#bfaaff" stroke-opacity=".65" fill="#ad96f31a"/><circle id="line-marker" r="3.5" fill="#f4f4f6" stroke="#9f8ce3" stroke-width="1.2"/>`;$('#line-max').textContent=axisText(max);$('#line-half').textContent=axisText(max/2);$('#line-range').max=rows.length-1;const ticks=rows.length===7?rows:[rows[0],rows[14],rows.at(-1)];$('#line-ticks').innerHTML=ticks.map(r=>`<span>${dateLabel(r.date,{weekday:'short'})}<small>${dateLabel(r.date,{day:'numeric',month:'short'})}</small></span>`).join('');inspectLine(lineIndex)}
+function inspectLine(index){lineIndex=index;const rows=week(),r=rows[index],max=chartCeiling(rows,true),x=4+index*342/(rows.length-1),y=60-r.value/max*59;for(const id of ['#line-marker','#line-halo']){$(id).style.display=r.value===null?'none':'';$(id).setAttribute('cx',x);$(id).setAttribute('cy',y)}$('#line-range').value=index;$('#line-range').setAttribute('aria-valuetext',`${r.label}: ${metricText(r.value)} ${metricUnit()}`);$('#line-readout').textContent=`${r.label} · ${metricText(r.value)} ${metricUnit()}`}
 const metricOrder=['steps','heart','sleep','intake'];
 const metricNames={steps:'Steps',heart:'Heart rate',sleep:'Sleep',intake:'Intake'};
 let metric='steps';
 const stepsFacts=$('.facts').innerHTML;
-const average=values=>values.reduce((a,b)=>a+b,0)/values.length;
-const duration=minutes=>{const n=Math.round(minutes);return `${Math.floor(n/60)}h${n%60?' '+String(n%60).padStart(2,'0')+'m':''}`};
-const extras=new Map(records.map((r,i)=>{
-  const ago=records.length-1-i,asleep=ago===0?600:405+(ago*19%115),deep=Math.round(asleep*.2),rem=Math.round(asleep*.25);
-  const heart=Array.from({length:24},(_,h)=>h>18&&ago===0?null:Math.round((h<7?55:69)+ago%5+5*Math.sin(h*.7)+(h===18?26:0)));
-  const meals=['Breakfast','Lunch','Dinner','Snack'].map((name,j)=>{const protein=[25,35,42,14][j]+ago%4,carbs=[60,75,65,28][j]+ago%7,fat=[15,20,19,13][j]+ago%3;return {name,protein,carbs,fat,calories:protein*4+carbs*4+fat*9}});
-  const sleep={asleep,deep,rem,light:asleep-deep-rem,awake:ago===0?60:22+ago%5*3};
-  return [r.date,{heart,latest:ago===0?64:heart.at(-1),...sleep,night:SleepTimeline.demoNight(r.date,sleep),meals,water:ago===0?1800:1500+ago%6*150}];
-}));
+const average=HealthData.average, sum=HealthData.sum;
+const duration=minutes=>{if(!Number.isFinite(minutes))return '—';const n=Math.round(minutes);return `${Math.floor(n/60)}h${n%60?' '+String(n%60).padStart(2,'0')+'m':''}`};
+
 function metricText(value){return metric==='sleep'?duration(value):fmt(value)}
 function metricUnit(){return {steps:'steps',heart:'bpm',sleep:'',intake:'kcal'}[metric]}
 function axisText(value){if(metric==='sleep')return +(value/60).toFixed(1)+'h';return value>=1000?+(value/1000).toFixed(1)+'K':String(Math.round(value))}
 function chartCeiling(rows,line=false){const largest=Math.max(...rows.map(r=>r.value??0));if(metric==='heart')return Math.max(120,Math.ceil(largest/20)*20);if(metric==='sleep')return Math.max(240,Math.ceil(largest/120)*120);if(metric==='intake')return Math.max(500,Math.ceil(largest/500)*500);return Math.max(line?12000:4000,Math.ceil(largest/2000)*2000)}
-function dailyMetric(r){const x=extras.get(r.date);return metric==='steps'?r.steps:metric==='heart'?average(x.heart.filter(n=>n!==null)):metric==='sleep'?x.asleep:x.meals.reduce((s,m)=>s+m.calories,0)}
-function intakeCalories(rows){const total=rows.reduce((sum,r)=>sum+dailyMetric(r),0);return days===30?total/rows.length:total}
-function extraMovement(){if(days>1)return windowRows(days).map(r=>({label:dateLabel(r.date),value:dailyMetric(r)}));const x=extras.get(selected);if(metric==='heart')return x.heart.map((value,i)=>({label:`${String(i).padStart(2,'0')}:00 – ${String(i+1).padStart(2,'0')}:00`,value}));if(metric==='sleep')return ['light','deep','rem','awake'].map(k=>({label:k==='rem'?'REM':k[0].toUpperCase()+k.slice(1),value:x[k]}));return x.meals.map(m=>({label:m.name,value:m.calories}))}
+function dailyMetric(r){return metric==='steps'?r.steps:metric==='heart'?(r.heartCount?r.heartSum/r.heartCount:null):metric==='sleep'?r.asleep:sum(r.meals.map(m=>m.calories))}
+function extraMovement(){if(days>1)return windowRows(days).map(r=>({label:dateLabel(r.date),value:dailyMetric(r)}));const x=HealthData.daily(selected);if(metric==='heart')return x.heart.map((value,i)=>({label:`${String(i).padStart(2,'0')}:00`,value}));if(metric==='sleep')return ['light','deep','rem','awake'].map(k=>({label:k==='rem'?'REM':k[0].toUpperCase()+k.slice(1),value:x[k]}));return x.meals.length?x.meals.map(m=>({label:HealthData.escape(m.name),value:m.calories})):[{label:'No food entries',value:null}]}
 function renderMetric(){
   $('.facts').innerHTML=stepsFacts;
-  $('.facts').setAttribute('role',metric==='sleep'?'button':'group');$('.facts').tabIndex=metric==='sleep'?0:-1;$('.facts').setAttribute('aria-label',metric==='sleep'?'Explore sleep stages and exact times through the night':metricNames[metric]+' summary');
-  renderSteps();
-  $('h1').textContent=metricNames[metric];
-  $('.hero').setAttribute('aria-label',metricNames[metric]);
+  $('.facts').setAttribute('role',metric==='sleep'?'button':'group');$('.facts').tabIndex=metric==='sleep'?0:-1;$('.facts').setAttribute('aria-label',metric==='sleep'?'Explore recorded sleep stages':metricNames[metric]+' summary');
+  renderSteps();$('h1').textContent=metricNames[metric];$('.hero').setAttribute('aria-label',metricNames[metric]);
   $('#orb-button').setAttribute('aria-label',metricNames[metric]+', '+periodLabel()+'. Tap to change period. Swipe or use arrow keys to change metric.');
-  $('#line-range').setAttribute('aria-label','Inspect daily '+metricNames[metric]);
-  if(metric==='steps')return;
-  const rows=windowRows(days),list=rows.map(r=>extras.get(r.date)),x=extras.get(selected);
-  const total=rows.reduce((s,r)=>s+dailyMetric(r),0),primary=metric==='heart'?(days===1?x.latest:total/rows.length):metric==='sleep'?total/rows.length:intakeCalories(rows);
+  $('#line-range').setAttribute('aria-label','Inspect daily '+metricNames[metric]);if(metric==='steps')return;
+  const rows=windowRows(days),x=HealthData.daily(selected),values=rows.map(dailyMetric),known=values.filter(Number.isFinite),meals=rows.flatMap(r=>r.meals);
+  const primary=metric==='heart'?(days===1?x.latest:sum(rows.map(r=>r.heartSum))/(sum(rows.map(r=>r.heartCount))||NaN)):metric==='sleep'?average(values):days===30?average(values):sum(values);
   $('#steps').textContent=metricText(primary);
-  $('#hero-label').textContent=metric==='sleep'?(days===1?'Time asleep':'Average sleep'):metric==='heart'?(days===1?'Heart rate':'Average heart rate'):(days===30?'Average daily intake':days===1?'Sample-day intake':days+'-day intake');
-  $('#goal-label').textContent=metric==='heart'?'bpm · '+(days===1?'latest reading':'period average'):metric==='sleep'?(days===1?'asleep · '+duration(x.awake)+' awake':'per night'):days===30?'kcal / day · last 30 days':'kcal logged';
-  const avg=k=>average(list.map(v=>v[k]));
-  let cards,footer;
+  $('#hero-label').textContent=metric==='sleep'?(days===1?'Recorded sleep':'Average sleep'):metric==='heart'?(days===1?'Heart rate':'Average heart rate'):days===30?'Average intake':'Intake';
+  $('#goal-label').textContent=metric==='heart'?'bpm · '+(days===1?'latest reading':'recorded average'):metric==='sleep'?(rows.some(r=>r.sleepIncomplete)?'Known sleep · gaps unrecorded':'Recorded time asleep'):'kcal logged';
+  const avg=k=>average(rows.map(r=>r[k]));let cards,footer;
   if(metric==='heart'){
-    const samples=list.flatMap(v=>v.heart.filter(n=>n!==null));
-    cards=[['Average',fmt(average(samples)),'bpm','target'],['Lowest',fmt(Math.min(...samples)),'bpm','target'],['Highest',fmt(Math.max(...samples)),'bpm','flame'],['Readings',fmt(samples.length),'hourly','target']];
-    footer=[['Hourly averages','Demonstration readings'],[days===1?(selected===anchor?'18:42':'23:59'):rows.length+' days',days===1?'Latest recorded':'In this period']];
+    const lows=rows.map(r=>r.heartLow).filter(Number.isFinite),highs=rows.map(r=>r.heartHigh).filter(Number.isFinite),count=sum(rows.map(r=>r.heartCount));
+    cards=[['Average',fmt(count?sum(rows.map(r=>r.heartSum))/count:null),'bpm','target'],['Lowest',fmt(lows.length?Math.min(...lows):null),'bpm','target'],['Highest',fmt(highs.length?Math.max(...highs):null),'bpm','flame'],['Readings',fmt(count),'samples','target']];
+    footer=[['Samsung Health','Recorded readings'],[x.latestTime?new Date(x.latestTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—','Latest recorded']];
     $('#movement-heading').textContent=days===1?'Heart rate through the day':'Daily average heart rate';
-  } else if(metric==='sleep'){
+  }else if(metric==='sleep'){
     cards=[['Light',duration(avg('light')),'','target'],['Deep',duration(avg('deep')),'','target'],['REM',duration(avg('rem')),'','target'],['Awake',duration(avg('awake')),'','target']];
-    footer=[[duration(avg('asleep')+avg('awake')),days===1?'Recorded sleep window':'Average sleep window'],[rows.length+' '+(rows.length===1?'night':'nights'),'Explore night →']];
-    $('#movement-heading').textContent=days===1?'Your sleep stages':'Time asleep each night';
-  } else {
-    const meals=list.flatMap(v=>v.meals),divisor=days===30?rows.length:1,sum=k=>meals.reduce((a,m)=>a+m[k],0)/divisor,suffix=days===30?' / day':'';
-    cards=[['Protein'+suffix,fmt(sum('protein')),'g','target'],['Carbs'+suffix,fmt(sum('carbs')),'g','flame'],['Fat'+suffix,fmt(sum('fat')),'g','target'],['Water'+suffix,(list.reduce((a,v)=>a+v.water,0)/1000/divisor).toFixed(1),'L','target']];
-    footer=[[fmt(meals.length)+' meals','Logged in this period'],[fmt(total/rows.length)+' kcal','Daily average']];
-    $('#movement-heading').textContent=days===1?'Intake through the day':'Calories logged each day';
+    footer=[[fmt(rows.reduce((n,r)=>n+r.nights.length,0))+' sessions','Recorded sleep'],[known.length+' days','Explore sleep →']];$('#movement-heading').textContent=days===1?'Recorded sleep stages':'Time asleep each day';
+  }else{
+    const divisor=days===30?(known.length||1):1,total=k=>{const n=sum(meals.map(m=>m[k]));return n===null?null:n/divisor},water=sum(rows.map(r=>r.water));
+    cards=[['Protein',fmt(total('protein')),'g','target'],['Carbs',fmt(total('carbs')),'g','flame'],['Fat',fmt(total('fat')),'g','target'],['Water',HealthData.display(water===null?null:water/1000/divisor,1),'L','target']];
+    footer=[[fmt(meals.length)+' entries','Logged in this period'],[fmt(average(values))+' kcal','Average recorded day']];$('#movement-heading').textContent=days===1?'Intake through the day':'Calories logged each day';
   }
   $('.facts').innerHTML='<div class="metrics">'+cards.map(([label,value,unit,icon])=>`<div class="metric" ${metric==='sleep'?`data-sleep-stage="${label.toLowerCase()}"`:''}><svg aria-hidden="true"><use href="#${icon}"/></svg><p class="metric-summary-value">${value} <span>${unit}</span></p><small class="metric-summary-label">${label}</small></div>`).join('')+'</div><div class="facts-footer">'+footer.map(([value,label])=>`<div><strong>${value}</strong><small>${label}</small></div>`).join('')+'</div>';
-  $('#movement-subtitle').textContent=days===1?(metric==='heart'?'Hourly averages · bpm':metric==='sleep'?'Stage totals · time asleep excludes awake':'Four demonstration food entries'):'Select a reading to explore this period';
-  $('#week-heading').textContent=(metric==='sleep'?'Last ':'Last ')+(days===30?'30':'7')+(metric==='sleep'?' nights':' days');
-
+  $('#movement-subtitle').textContent=known.length?'Samsung Health · recorded data':'No shared readings for this period';$('#week-heading').textContent='Last '+(days===30?'30':'7')+' days';
 }
 function changeMetric(delta){OrbitInteraction.haptic('select');metric=metricOrder[(metricOrder.indexOf(metric)+delta+metricOrder.length)%metricOrder.length];render();SurfaceMotion.shift($('.hero-copy'),{x:Math.sign(delta)*16,y:0},240)}
-function periodLabel(){return days===1?'Sample day':days+'-day sample'}
+function periodLabel(){return days===1?'Daily view':days+'-day view'}
 function cyclePeriod(){OrbitInteraction.haptic('select');days=[1,7,30][([1,7,30].indexOf(days)+1)%3];render();orb?.turnPeriod();SurfaceMotion.shift($('.hero-copy'),{x:0,y:8},240)}
 // Round each displayed daily average once; the displayed delta uses those same integers.
 function periodComparison(current,previous){
-  const mean=rows=>rows.length?Math.round(average(rows)):null,a=mean(current),b=mean(previous);
+  const mean=rows=>{const value=average(rows);return value===null?null:Math.round(value)},a=mean(current),b=mean(previous);
   return {current:a,previous:b,delta:a===null||b===null?null:a-b};
 }
 function renderComparison(){
@@ -270,7 +252,7 @@ function renderComparison(){
   const bounds=rows=>rows.length?dateLabel(rows[0].date,{day:'numeric',month:'short'})+'–'+dateLabel(rows.at(-1).date,{day:'numeric',month:'short',year:'numeric'}):'No samples';
   for(const [id,value,rows] of [['current',result.current,current],['previous',result.previous,previous]]){
     $('#'+id+'-average').innerHTML=value===null?'—':metricText(value)+` <span>${unit}</span>`;
-    $('#'+id+'-period').textContent=bounds(rows)+' · daily average';
+    $('#'+id+'-period').textContent=bounds(rows)+' · '+rows.map(dailyMetric).filter(Number.isFinite).length+' recorded days';
   }
   const delta=result.delta;$('#difference').textContent=delta===null?'—':metricText(Math.abs(delta));
   $('#direction').textContent=delta===null||delta===0?'–':delta<0?'▼':'▲';
@@ -284,7 +266,14 @@ function initOrb(){
   orb=SignalOrb.attach(button,{selected:metric,keys:metricOrder,onSelect:key=>changeMetric(metricOrder.indexOf(key)-metricOrder.indexOf(metric)),onOpen:cyclePeriod});orb.setPaused(paused);
 }
 
-function renderSteps(){const rows=windowRows(days),total=rows.reduce((s,r)=>s+r.steps,0),sumFloors=rows.reduce((s,r)=>s+r.floors,0),target=goal*rows.length,remaining=target-total;$('#steps').textContent=fmt(total);$('#hero-label').textContent=days===1?'Steps':`${days}-day steps`;$('#goal-label').textContent=`of ${fmt(target)} steps`;$('#distance').textContent=(total*.00075).toFixed(2);$('#energy').textContent=fmt(total*.04);$('#floors').textContent=sumFloors;$('#completion').textContent=fmt(total/target*100)+'%';$('#goal-caption').textContent='Goal completion';$('#remaining').textContent=fmt(Math.abs(remaining))+' steps';$('#remaining-label').textContent=remaining>=0?'To your goal':'Beyond your goal';$('#recorded').textContent=days===1?(selected===anchor?'18:42':'23:59'):`${rows.length} days`;$('#recorded-label').textContent=days===1?'Recorded through':'In this period';$('#date-button').textContent=dateLabel(selected);$('#date-input').value=selected;$('#back').disabled=days===1&&selected===anchor&&metric==='steps';$('#movement-heading').textContent=days===1?'Movement through the day':'Movement through the period';$('#week-heading').textContent=days===30?'Last 30 days':'Last 7 days';barIndex=days===1?18:rows.length-1;scheduleCharts()}
+function renderSteps(){
+  const rows=windowRows(days),total=sum(rows.map(r=>r.steps)),distance=sum(rows.map(r=>r.distance)),target=goal*days,remaining=total===null?null:target-total;
+  $('#steps').textContent=fmt(total);$('#hero-label').textContent=days===1?'Steps':`${days}-day steps`;$('#goal-label').textContent=total===null?'No shared steps yet':`of ${fmt(target)} steps`;
+  $('#distance').textContent=HealthData.display(distance===null?null:distance/1000,2);$('#energy').textContent=fmt(sum(rows.map(r=>r.energy)));$('#floors').textContent=fmt(sum(rows.map(r=>r.floors)));$('#completion').textContent=total===null?'—':fmt(total/target*100)+'%';
+  $('#goal-caption').textContent='Goal completion';$('#remaining').textContent=remaining===null?'—':fmt(Math.abs(remaining))+' steps';$('#remaining-label').textContent=remaining===null?'No shared readings':remaining>=0?'To your goal':'Beyond your goal';
+  $('#recorded').textContent=rows.filter(r=>r.steps!==null).length+' / '+days+' days';$('#recorded-label').textContent='With shared steps';$('#date-button').textContent=dateLabel(selected);$('#date-input').value=selected;
+  $('#back').disabled=days===1&&selected===anchor&&metric==='steps';$('#movement-heading').textContent=days===1?'Movement through the day':'Movement through the period';$('#week-heading').textContent=days===30?'Last 30 days':'Last 7 days';barIndex=0;scheduleCharts();
+}
 // The two charts live in folded cards that are invisible until the deck opens. Draw them in idle time,
 // or the moment the deck starts to open, so a period or metric change never waits on hidden work.
 let chartsDirty=false,chartsIdle=0;
@@ -303,7 +292,7 @@ function scheduleCharts(){
   if(!deckReady||deckExpanded||deckProgress>0){renderCharts();return}
   if(chartsIdle)cancelIdle(chartsIdle);chartsIdle=idle(()=>{chartsIdle=0;flushCharts()});
 }
-const dateOptions=records.slice(-30).map(r=>r.date);
+const dateOptions=Array.from({length:30},(_,i)=>dayOffset(anchor,i-29));
 let islandFrame=0;
 const islands={utility:{el:$('#utility-island'),body:$('#utility-body'),trigger:$('#date-button'),closed:48},live:{el:$('#live-island'),body:$('#live-choices'),trigger:$('#live-bar'),closed:62}};
 for(const item of Object.values(islands))Object.assign(item,{open:false,value:0,velocity:0,height:{value:item.closed,velocity:0},fullHeight:item.closed,width:300,page:'#date-dialog',content:{value:1,velocity:0}});
@@ -369,13 +358,13 @@ function initIslands(){
 }
 function setDateChoice(value){
   const i=dateOptions.indexOf(value);if(i<0)return;
-  $('#date-input').value=value;$('#date-range').value=i;$('#date-prev').disabled=i===0;$('#date-next').disabled=i===29;
+  $('#date-input').value=value;$('#date-range').value=i;$('#date-prev').disabled=i===0;$('#date-next').disabled=i===dateOptions.length-1;
   const label=dateLabel(value,{weekday:'long',day:'numeric',month:'short'});$('#date-choice').textContent=label;$('#date-range').setAttribute('aria-valuetext',label);
 }
 $('#date-range').addEventListener('input',event=>setDateChoice(dateOptions[Number(event.target.value)]));
 $('#date-prev').addEventListener('click',()=>setDateChoice(dateOptions[Number($('#date-range').value)-1]));
 $('#date-next').addEventListener('click',()=>setDateChoice(dateOptions[Number($('#date-range').value)+1]));
-$('#back').addEventListener('click',()=>{selected=anchor;days=1;metric='steps';render()});$('#settings-open').addEventListener('click',e=>Health.open('settings',e.currentTarget));$('#date-button').addEventListener('click',e=>show('#date-dialog',e.currentTarget));$('#date-form').addEventListener('submit',e=>{e.preventDefault();const value=$('#date-input').value;if(!dateOptions.includes(value))return;selected=value;days=1;render();closeUtility()});
+$('#back').addEventListener('click',()=>{selected=anchor;days=1;metric='steps';HealthData.load(selected);render()});$('#settings-open').addEventListener('click',e=>Health.open('settings',e.currentTarget));$('#date-button').addEventListener('click',e=>show('#date-dialog',e.currentTarget));$('#date-form').addEventListener('submit',e=>{e.preventDefault();const value=$('#date-input').value;if(!dateOptions.includes(value))return;selected=value;days=1;HealthData.load(selected);render();closeUtility()});
 function saveGoal(n){
   if(!Number.isInteger(n)||n<100||n>100000||n%100)return 'Choose 100–100,000 steps, in increments of 100.';
   try{SettingsStore.write(key,String(n))}
@@ -457,7 +446,7 @@ function updateLiveBar(){
   $('.screen').classList.toggle('launcher-open',islands.live.open);
   for(const [name,value] of [['aria-expanded',String(islands.live.open)],['aria-label',(islands.live.open?'Close':'Open')+' '+(live?'live workout controls and destinations':'Explore destinations')]])if(liveBar.getAttribute(name)!==value)liveBar.setAttribute(name,value);
 }
-function render(){renderMetric();renderComparison();$('#date-button').textContent='Demo · '+dateLabel(selected,{day:'numeric',month:'short',year:'numeric'});$('#orb-period').textContent=periodLabel();$('#period-content').setAttribute('aria-label',metricNames[metric]+' · '+periodLabel()+' details');Health.render();orb?.select(metric);if(deckReady)measureDeck();updateLiveBar();$('#metric-announcement').textContent=metricNames[metric]+', '+periodLabel()+', '+$('#steps').textContent+', '+$('#goal-label').textContent}
+function render(){renderMetric();renderComparison();$('#date-button').textContent=dateLabel(selected,{day:'numeric',month:'short',year:'numeric'});$('#orb-period').textContent=periodLabel();$('#period-content').setAttribute('aria-label',metricNames[metric]+' · '+periodLabel()+' details');Health.render();orb?.select(metric);if(deckReady)measureDeck();updateLiveBar();$('#metric-announcement').textContent=metricNames[metric]+', '+periodLabel()+', '+$('#steps').textContent+', '+$('#goal-label').textContent}
 function layoutDeck(){
   if(!deckReady)return;
   const p=clamp(deckProgress),pose=clamp(orbPose.value),travel=heroClosed-heroOpen;
@@ -581,9 +570,18 @@ function initDeck(){
   deck.addEventListener('lostpointercapture',event=>{if(deckGesture?.input==='pointer'&&deckGesture.id===event.pointerId)endDeckGesture(deckGesture.x,deckGesture.y,true)});
 }
 
-Health.init({settings:{getGoal:()=>goal,saveGoal,paused:()=>paused,rotate:value=>{paused=!value;orb.setPaused(paused)},reduce:value=>{SurfaceMotion.setReduced(value);paused=value;orb.setPaused(paused);animateDeck();animateIslands()}},dates:dateOptions,historyDates:records.map(r=>r.date),getDate:()=>selected,getDaily:date=>({...windowRows(1,date)[0],...extras.get(date),goal}),notice:toast,beforeOpen:()=>{closeUtility(false);setIslandOpen(islands.live,false);orb?.setSuspended(true)},onClose:()=>{orb?.setSuspended(false);setDeckExpanded(deckExpanded);},onChange:()=>{updateLiveBar();if(measureIsland(islands.live))animateIslands()},onTick:updateLiveReadout});
+Health.init({settings:{getGoal:()=>goal,saveGoal,paused:()=>paused,rotate:value=>{paused=!value;orb.setPaused(paused)},reduce:value=>{SurfaceMotion.setReduced(value);paused=value;orb.setPaused(paused);animateDeck();animateIslands()}},dates:dateOptions,historyDates:dateOptions,getDate:()=>selected,getDaily:date=>({...HealthData.daily(date),goal}),notice:toast,beforeOpen:()=>{closeUtility(false);setIslandOpen(islands.live,false);orb?.setSuspended(true)},onClose:()=>{orb?.setSuspended(false);setDeckExpanded(deckExpanded);},onChange:()=>{updateLiveBar();if(measureIsland(islands.live))animateIslands()},onTick:updateLiveReadout});
 $('#live-session-controls').addEventListener('click',event=>{const button=event.target.closest('[data-session]');if(button)Health.action(button.dataset.session)});
 $('#live-open-workout').addEventListener('click',event=>Health.open('workouts',event.currentTarget));
+window.addEventListener('health-data-ready',event=>{
+  OrbitSettings.healthStatus();if(!event.detail.changed)return;
+  const first=HealthData.meta.firstRecord?HealthData.date(HealthData.meta.firstRecord):dayOffset(anchor,-29);
+  const start=first<anchor?first:anchor,length=Math.round((Date.parse(anchor+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/86400000)+1;
+  dateOptions.splice(0,dateOptions.length,...Array.from({length},(_,i)=>dayOffset(start,i)));
+  $('#date-range').max=dateOptions.length-1;document.querySelectorAll('.date-limits span').forEach((n,i)=>n.textContent=dateLabel(i?anchor:start));
+  render();
+});
+HealthData.refresh();
 initOrb();
 initDeck();
 initIslands();

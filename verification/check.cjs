@@ -24,7 +24,12 @@ node('#orb-button').querySelector=()=>canvas;
 const observers=[];
 let testTime=0;
 const sandbox = {setInterval:()=>1,clearInterval:noop,document,getComputedStyle:()=>({marginTop:'2',marginBottom:'10',bottom:'82px'}),window:events({innerHeight:900}),AbortController,performance:{timeOrigin:100000,now:()=>testTime},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},matchMedia:()=>reduced,ResizeObserver:class{observe(){}},IntersectionObserver:class{constructor(fn){observers.push(fn)}observe(){}},requestAnimationFrame:fn=>{frames.set(++nextFrame,fn);return nextFrame},cancelAnimationFrame:id=>frames.delete(id),setTimeout,clearTimeout};
+sandbox.CustomEvent=class{constructor(type,init){this.type=type;Object.assign(this,init)}};
+sandbox.window.dispatchEvent=event=>sandbox.window.fire(event.type,event);
+const healthFixture=require('./samsung-import.cjs').fixture();
+sandbox.window.OrbitHealth={snapshot:known=>JSON.stringify({revision:'1',status:'Local fixture',available:true,permitted:true,data:known==='1'?null:healthFixture}),load(){}};
 vm.createContext(sandbox);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'..','health-data.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','settings-store.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','surface-motion.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','orbit-interaction.js'),'utf8'),sandbox);
@@ -36,48 +41,14 @@ vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-focus.js'),'ut
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','workout-details.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','orbit-settings.js'),'utf8'),sandbox);
 vm.runInContext(fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8'),sandbox);
-vm.runInContext(script+`;globalThis.model={set:(d,n,k='steps')=>{selected=d;days=n;metric=k},periodComparison,windowRows,movement,week,dayOffset,anchor,render,renderCharts,extras,deckSwipeTarget,liveSummary,setDeckExpanded,SignalOrb,springStep,reveal,deckMotion,orbPose,getProgress:()=>deckProgress,getExpanded:()=>deckExpanded,islands,setLiveOpen,closeInline,show,Health,cyclePeriod,getPeriod:()=>days,setDateChoice,dateOptions,pause:p=>orb.setPaused(p),hide:h=>{document.hidden=h;document.fire('visibilitychange')}}`,sandbox);
+vm.runInContext(script+`;globalThis.model={set:(d,n,k='steps')=>{selected=d;days=n;metric=k},periodComparison,windowRows,movement,week,dayOffset,anchor,render,renderCharts,HealthData,deckSwipeTarget,liveSummary,setDeckExpanded,SignalOrb,springStep,reveal,deckMotion,orbPose,getProgress:()=>deckProgress,getExpanded:()=>deckExpanded,islands,setLiveOpen,closeInline,show,Health,cyclePeriod,getPeriod:()=>days,setDateChoice,dateOptions,pause:p=>orb.setPaused(p),hide:h=>{document.hidden=h;document.fire('visibilitychange')}}`,sandbox);
 const m=sandbox.model;
 for(const [a,b,delta] of [[[2077.6],[2085.5],-8],[[1.5],[1.49],1],[[1.49],[1.5],-1],[[0],[0],0],[[3.4],[3.49],0],[[],[4],null],[[4],[],null]])assert.equal(m.periodComparison(a,b).delta,delta);
 assert.equal(nodes.get('#steps').textContent, '8,420');
-assert.equal(nodes.get('#current-average').innerHTML, '6,794 <span>steps</span>');
-assert.equal(nodes.get('#previous-average').innerHTML, '7,520 <span>steps</span>');
-for(let ago=0;ago<30;ago++) {
-  const date=m.dayOffset(m.anchor,-ago);
-  m.set(date,1);
-  const hourly=Array.from(m.movement());
-  assert.equal(hourly.reduce((s,r)=>s+(r.value??0),0),m.windowRows(1)[0].steps);
-  assert(hourly.every(r=>r.value===null||Number.isInteger(r.value)&&r.value>=0));
-  assert.equal(hourly.filter(r=>r.value===null).length,ago===0?5:0);
-  for(const days of [1,7,30]) {
-    m.set(date,days);m.render();m.renderCharts();
-    const period=days===30?30:7;
-    assert.equal(m.windowRows(days).length,days);
-    assert.equal(m.windowRows(period,m.dayOffset(date,-period)).length,period);
-    assert.equal(m.week().length,period);
-    assert(!nodes.get('#line').innerHTML.includes('NaN'));
-  }
-}
-for (const metric of ['heart','sleep','intake']) for(let ago=0;ago<30;ago++) {
-  const date=m.dayOffset(m.anchor,-ago);
-  const x=m.extras.get(date);
-  assert.equal(x.light+x.deep+x.rem,x.asleep);
-  assert(x.meals.every(v=>v.calories===v.protein*4+v.carbs*4+v.fat*9));
-  for(const days of [1,7,30]) {
-    m.set(date,days,metric);m.render();m.renderCharts();
-    assert(!nodes.get('#steps').textContent.includes('NaN'));
-    assert(!nodes.get('#line').innerHTML.includes('NaN'));
-    assert(!nodes.get('#bars').innerHTML.includes('NaN'));
-    assert.equal(m.week().length,days===30?30:7);
-    if(metric==='intake') {
-      const total=Array.from(m.windowRows(days)).reduce((sum,r)=>sum+m.extras.get(r.date).meals.reduce((s,meal)=>s+meal.calories,0),0);
-      const expected=Math.round(total/(days===30?30:1)).toLocaleString('en-GB');
-      assert.equal(nodes.get('#steps').textContent,expected);
-      assert.equal(m.liveSummary().title,'Explore');
-      assert(nodes.get('.facts').innerHTML.includes(Math.round(total/days).toLocaleString('en-GB')+' kcal'));
-      if(days===30){assert.equal(nodes.get('#hero-label').textContent,'Average daily intake');assert.equal(nodes.get('#goal-label').textContent,'kcal / day · last 30 days');assert.equal(nodes.get('#metric-announcement').textContent,'Intake, 30-day sample, '+expected+', kcal / day · last 30 days');}
-    }
-  }
+for(const metric of ['steps','heart','sleep','intake'])for(let ago=0;ago<30;ago++)for(const days of [1,7,30]){
+ const date=m.dayOffset(m.anchor,-ago);m.set(date,days,metric);m.render();m.renderCharts();
+ assert.equal(m.week().length,days===30?30:7);assert(!nodes.get('#line').innerHTML.includes('NaN'));assert(!nodes.get('#bars').innerHTML.includes('NaN'));
+ assert(!nodes.get('#steps').textContent.includes('NaN'));assert.equal(m.windowRows(days).length,days);
 }
 m.pause(false);assert.equal(frames.size,1);
 m.pause(false);assert.equal(frames.size,1);
@@ -101,10 +72,10 @@ m.set(m.anchor,1,'steps');m.render();
 const button=nodes.get('#orb-button');
 const pointer=(x,y,t)=>({isPrimary:true,button:0,pointerId:1,clientX:x,clientY:y,timeStamp:t,preventDefault:noop});
 button.fire('pointerdown',pointer(200,150,0));button.fire('pointermove',pointer(120,150,40));button.fire('pointerup',pointer(120,150,60));
-assert.equal(nodes.get('#steps').textContent,'64');
-button.fire('click',{detail:1,preventDefault:noop,stopPropagation:noop});assert.equal(nodes.get('#steps').textContent,'64');
-button.fire('keydown',{key:'ArrowRight',preventDefault:noop});assert.equal(nodes.get('#steps').textContent,'10h');
-button.fire('keydown',{key:'ArrowRight',preventDefault:noop});assert.equal(nodes.get('#steps').textContent,'1,979');
+assert.equal(nodes.get('#steps').textContent,'80');
+button.fire('click',{detail:1,preventDefault:noop,stopPropagation:noop});assert.equal(nodes.get('#steps').textContent,'80');
+button.fire('keydown',{key:'ArrowRight',preventDefault:noop});assert.equal(nodes.get('#steps').textContent,'7h');
+button.fire('keydown',{key:'ArrowRight',preventDefault:noop});assert.equal(nodes.get('#steps').textContent,'550');
 button.fire('keydown',{key:'ArrowRight',preventDefault:noop});assert.equal(nodes.get('#steps').textContent,'8,420');
 button.fire('pointerdown',pointer(200,150,100));button.fire('pointermove',pointer(200,230,150));button.fire('pointerup',pointer(200,230,170));
 button.fire('click',{detail:1,preventDefault:noop,stopPropagation:noop});assert.equal(nodes.get('#steps').textContent,'8,420');
@@ -165,13 +136,13 @@ assert.equal(m.reveal(.3,.35,.94),0);assert.equal(m.reveal(1,.35,.94),1);
 // Slower spring response, while preserving continuous retargeting and complete endpoints.
 const paced={value:0,velocity:0};m.springStep(paced,1,.1);assert(paced.value>.45&&paced.value<.6);
 m.setLiveOpen(true);assert(m.islands.live.open);assert.equal(m.islands.live.body.inert,false);
-for(const date of m.dateOptions){m.set(date,1);const b=m.Health.sample('body',date),o=m.Health.sample('oxygen',date);assert(Object.values(b).every(Number.isFinite));assert(Math.abs(b.fatMass+b.lean-b.weight)<1e-9);assert(o.low<=o.value&&o.value<=o.high)}
+for(const date of m.HealthData.bodyDates()){m.set(date,1);const b=m.Health.sample('body',date),o=m.Health.sample('oxygen',date);assert.equal(b.muscle,null);assert(Math.abs(b.fatMass-b.weight*b.fat/100)<1e-9);assert.equal(b.lean,62);assert(o.low<=o.value&&o.value<=o.high)}
 for(const page of ['body','workouts','overview']){assert(m.Health.open(page));assert.equal(m.Health.page,page);assert.equal(nodes.get('#health-page').hidden,false);assert(m.closeInline());assert.equal(m.Health.page,null);assert.equal(nodes.get('#health-page').hidden,true)}
 assert.equal(m.Health.open('unknown'),false);
 m.setLiveOpen(false);assert.equal(m.islands.live.body.inert,true);
 assert(!html.includes('stack-close'));assert(!html.includes('dot-value'));assert(!fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8').includes('dot-value'));
 assert(!html.includes('<dialog')&&!html.includes('showModal')&&!html.includes('pillMorphFrames'));
-for(const date of m.dateOptions){m.setDateChoice(date);assert.equal(nodes.get('#date-input').value,date);assert(nodes.get('#date-range').value>=0&&nodes.get('#date-range').value<30)}
+for(const date of m.dateOptions){m.setDateChoice(date);assert.equal(nodes.get('#date-input').value,date);assert(nodes.get('#date-range').value>=0&&nodes.get('#date-range').value<m.dateOptions.length)}
 const valid=nodes.get('#date-input').value;m.setDateChoice('2025-08-32');assert.equal(nodes.get('#date-input').value,valid);
 assert(!html.includes('type="date"'));assert(html.includes('utility-island'));
 assert(html.includes('data:font/ttf;base64,'));
@@ -224,8 +195,8 @@ reduced.matches=true;let preferredClosed=false;surfaces.reveal(panel);surfaces.d
 // Countdown dots keep their animation and stop on disposal.
 // Sleep chronology must preserve all displayed totals and cross midnight without gaps.
 const sleep=vm.runInContext('SleepTimeline',sandbox);
-for(const date of m.dateOptions){const daily=m.extras.get(date),night=daily.night;assert(sleep.valid(night));const sum=sleep.totals(night);for(const stage of ['awake','light','deep','rem'])assert.equal(sum[stage],daily[stage]);assert.equal((night.end-night.start)/60000,daily.asleep+daily.awake)}
-const night=m.extras.get(m.anchor).night;assert.equal(night.segments.length,21);assert.equal(sleep.stageMinute(night,'light'),10);assert.equal(sleep.locate(night,659),20);assert.equal(sleep.totals(night).light,330);assert.equal(new Date(night.start).getDate()+1,new Date(night.end).getDate());
+for(const date of m.dateOptions){const daily=m.HealthData.daily(date),night=daily.night;if(!night)continue;assert(sleep.valid(night));const sum=sleep.totals(night);for(const stage of ['awake','light','deep','rem'])assert.equal(sum[stage],daily[stage]);assert.equal((night.end-night.start)/60000,daily.asleep+daily.awake)}
+const night=m.HealthData.daily(m.anchor).night;assert.equal(night.segments.length,4);assert.equal(sleep.stageMinute(night,'light'),60);assert.equal(sleep.locate(night,479),3);assert.equal(sleep.totals(night).light,120);assert.equal(new Date(night.start).getDate()+1,new Date(night.end).getDate());
 assert(!sleep.valid({...night,segments:night.segments.slice(1)}));assert(sleep.view(null).includes('unavailable'));assert(!html.includes('id="bar-marker"'));
 const dots=vm.runInContext('HeroDots',sandbox),dotsDrawn=[];
 for(const value of ['75.8','8,420','00:01','24:59:59','3','2','1']){const glyph=dots.layout(value);assert(glyph.points.length>0);assert(glyph.points.every(p=>p.x>0&&p.x<glyph.width&&p.y>0&&p.y<7));assert(dots.markup(value).includes('<title>'+value+'</title>'))}
@@ -244,4 +215,4 @@ assert(music.valid(media));assert(music.valid({status:'permission'}));assert(!mu
 const pattern=dots.pattern(0);assert.equal((pattern.match(/<circle/g)||[]).length,72);assert.notEqual(pattern,dots.pattern(1));assert.notEqual(pattern,dots.pattern(2));
 for(const phrase of ['make it yours','In your rhythm','Find your','Your pace.','keep going'])assert(!fs.readFileSync(path.join(__dirname,'..','health-pages.js'),'utf8').includes(phrase));
 assert(!html.includes('Body<br>composition'));assert(!html.includes('box-shadow:inset 0 1px 1px #ffffff5c'));
-console.log('PASS: 4 metrics × 30 dates × 3 periods; 30-day calorie averages in orb and summary; coherent totals; 646 Signal particles; swipe and keyboard metric cycle; animation stops; stack expand/collapse; removed decorative text; touch-up regression, orb period taps, full health pages, live timer pause/resume/save and storage failure, inline surfaces, slower continuous orb/card motion, reversal momentum, exact spring timing, staged reveal and always-enabled motion.');
+console.log('PASS: health-backed metric rendering, charts, input, workout persistence, clock, particles, gestures and surface lifecycle.');

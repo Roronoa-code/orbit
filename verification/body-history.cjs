@@ -25,7 +25,7 @@ async function main(){
   const browser=await chromium.launch(),results=[];
   try{for(const width of [390,320]){
     const c=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,timezoneId:'Europe/London'}),p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
-    await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');
+    await p.addInitScript(data=>{window.OrbitHealth={snapshot:known=>JSON.stringify({revision:'1',available:true,permitted:true,status:'Local fixture',data:known==='1'?null:data}),load(){}}},require('./samsung-import.cjs').fixture());await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');
     await p.addStyleTag({content:':root{--orbit-inset-top:34px}.status,.home-indicator{display:none}.screen{height:100dvh!important;min-height:0!important}'});
     const result=await gestures(p,c);await p.screenshot({path:path.join(out,width+'-body.png')});
     await p.evaluate(()=>Health.close());await p.waitForTimeout(600);await p.evaluate(()=>setDeckExpanded(true));await p.waitForTimeout(700);
@@ -38,16 +38,16 @@ async function main(){
     // Several weeks and a midnight crossing: calendar membership follows the local start date.
     await p.evaluate(()=>{
       const t=new Date();t.setHours(10,0,0,0);window.testHistory=[0,0,2,7,14].map((ago,i)=>{const d=new Date(t);d.setDate(d.getDate()-ago);d.setMinutes(i*10);return {kind:i%2?'Walking':'Strength',startedAt:d.getTime(),endedAt:d.getTime()+1800000,elapsed:1800000,weightKg:75,targetMs:0}});
-      localStorage.setItem('orbit-workouts-v1',JSON.stringify({active:null,history:testHistory}));
+      localStorage.setItem('orbit-workouts-v2',JSON.stringify({active:null,history:testHistory}));
     });await p.reload();await p.evaluate(()=>Health.open('workouts'));await p.waitForTimeout(300);await p.locator('.workout-tabs [data-workout-tab=history]').click();await p.waitForTimeout(350);
     assert.equal(await p.locator('details.workout-history').count(),0);assert.equal(await p.locator('[data-week-day]').count(),7);assert.equal(await p.locator('.history-session').count(),2);
-    assert.match(await p.locator('.history-week-metrics').textContent(),/Active time/);await p.locator('#workout-calendar').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(out,width+'-history.png')});
+    assert.match(await p.locator('.history-week-metrics').textContent(),/Recorded time/);await p.locator('#workout-calendar').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(out,width+'-history.png')});
     await p.locator('[data-history-week="-1"]').click();await p.waitForTimeout(350);assert.equal(await p.locator('.history-session').count(),1);
     const label=await p.locator('.history-week-nav p').textContent();await p.locator('.history-session').click();await p.waitForTimeout(500);assert.equal(await p.locator('#workout-record-body').count(),1);
     await p.locator('#health-back').click();await p.waitForTimeout(500);assert.equal(await p.locator('.history-week-nav p').textContent(),label);assert.equal(await p.locator('.history-session').count(),1);
     await p.locator('[data-history-week="1"]').click();await p.waitForTimeout(350);assert(await p.locator('[data-history-week="1"]').isDisabled());
     const empty=await p.locator('[data-week-day]:not([disabled])').all();for(const n of empty){await n.click();if(await p.locator('.history-empty').count())break}assert.equal(await p.locator('.history-empty').count(),1);
-    assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('orbit-workouts-v1')).history.length),5);assert.deepEqual(errors,[]);
+    assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('orbit-workouts-v2')).history.length),5);assert.deepEqual(errors,[]);
     results.push({width,status:'PASS',...result});await c.close();
   }}finally{await browser.close()}
   fs.writeFileSync(path.join(out,'results.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results));

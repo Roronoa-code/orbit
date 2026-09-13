@@ -6,7 +6,7 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
  try{for(const width of [390,384,320]){
   const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true}),p=await context.newPage(),errors=[];
   p.on('pageerror',e=>errors.push(e.message));await p.addInitScript(()=>{window.haptics=[];window.OrbitFeedback={pulse:kind=>haptics.push(kind)}});
-  await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');await p.waitForTimeout(700);
+  await p.addInitScript(data=>{window.OrbitHealth={snapshot:known=>JSON.stringify({revision:'1',available:true,permitted:true,status:'Local fixture',data:known==='1'?null:data}),load(){}}},require('./samsung-import.cjs').fixture());await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');await p.waitForTimeout(700);
   const cdp=await context.newCDPSession(p);
   async function drag(selector,dx,dy=0,hold=0){const r=await p.locator(selector).boundingBox(),x=r.x+r.width/2,y=r.y+r.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});if(hold)await p.waitForTimeout(hold);for(let i=1;i<=12;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*i/12,y:y+dy*i/12}]});await p.waitForTimeout(16)}await p.waitForTimeout(130);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await p.waitForTimeout(500)}
   for(const active of [false,true]){
@@ -40,7 +40,7 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
  const p=await browser.newPage({viewport:{width:384,height:844}});
  await p.addInitScript(()=>{
   window.samples=0;window.revision='1';window.bad=false;window.nativeState={active:{kind:'Running',startedAt:1000,elapsed:30000,resumedAt:1000,targetMs:60000},history:[]};
-  window.OrbitWorkouts={snapshot(known){samples++;return bad===true?'{}':JSON.stringify({revision,store:known===revision?null:JSON.stringify(nativeState),startedAt:bad==='mismatch'?999:nativeState.active?.startedAt??null,elapsedMs:30000,totalMs:60000})}};
+  window.OrbitWorkouts={snapshot(known){samples++;return bad===true?'{}':JSON.stringify({realDataMode:true,revision,store:known===revision?null:JSON.stringify(nativeState),startedAt:bad==='mismatch'?999:nativeState.active?.startedAt??null,elapsedMs:30000,totalMs:60000})}};
  });
  await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');await p.waitForTimeout(100);
  const clock=await p.evaluate(async()=>{const before=samples;for(let i=0;i<100;i++)Health.live();const calls=samples-before;const a=Health.elapsed(Health.state.active);await new Promise(r=>setTimeout(r,160));const b=Health.elapsed(Health.state.active);nativeState.active.resumedAt=null;revision='2';Health.refresh();const paused=Health.elapsed(Health.state.active);await new Promise(r=>setTimeout(r,160));const held=Health.elapsed(Health.state.active);bad=true;Health.refresh();const rejected=!Health.action('start','Walking');return {calls,advance:b-a,paused,held,rejected}});
@@ -49,11 +49,11 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
  await p.close();
  for(const reject of [false,true]){
   const migration=await browser.newPage();await migration.addInitScript(reject=>{
-   const legacy=JSON.stringify({active:null,history:[{kind:'Walking',startedAt:1000,endedAt:3000,elapsed:2000}]});localStorage.setItem('orbit-workouts-v1',legacy);let raw=null;
-   window.writes=0;window.OrbitWorkouts={write(value){writes++;if(reject)return false;raw=value;return true},snapshot(){return JSON.stringify({empty:raw===null,revision:raw?'2':'1',store:raw||'{"active":null,"history":[]}',startedAt:null,elapsedMs:0,totalMs:0})}};
+   const legacy=JSON.stringify({active:null,history:[{kind:'Walking',startedAt:1000,endedAt:3000,elapsed:2000}]});localStorage.setItem('orbit-workouts-v2',legacy);let raw=null;
+   window.writes=0;window.OrbitWorkouts={write(value){writes++;if(reject)return false;raw=value;return true},snapshot(){return JSON.stringify({realDataMode:true,empty:raw===null,revision:raw?'2':'1',store:raw||'{"active":null,"history":[]}',startedAt:null,elapsedMs:0,totalMs:0})}};
   },reject);await migration.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');
   assert.equal(await migration.evaluate(()=>writes),1);assert.equal(await migration.evaluate(()=>Health.state.history.length),reject?0:1);
-  if(reject)assert(await migration.evaluate(()=>!Health.action('start','Walking')&&JSON.parse(localStorage.getItem('orbit-workouts-v1')).history.length===1));await migration.close();
+  if(reject)assert(await migration.evaluate(()=>!Health.action('start','Walking')&&JSON.parse(localStorage.getItem('orbit-workouts-v2')).history.length===1));await migration.close();
  }
  fs.writeFileSync(path.join(out,'checks.json'),JSON.stringify({widths:[390,384,320],status:'PASS',clock,migrationAndFailurePreservation:true,phoneTested:false},null,2));console.log('Native sample and migration boundary PASS',clock);
  }finally{await browser.close()}

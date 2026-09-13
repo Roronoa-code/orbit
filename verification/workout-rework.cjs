@@ -7,7 +7,7 @@ const out=path.join(__dirname,'player-settings-20260912','workout-rework');fs.mk
   await page.addInitScript(()=>{
    const kinds=['Running','Strength','Walking','Cycling'],today=new Date();today.setHours(9,0,0,0);
    const history=[0,1,2,4,8,10,17].map((ago,i)=>{const d=new Date(today);d.setDate(d.getDate()-ago);const startedAt=d.getTime(),elapsed=[2542000,2100000,1320000,3030000,14e3,1800000,2400000][i];return {kind:kinds[i%4],startedAt,endedAt:startedAt+elapsed+90000,elapsed,totalMs:elapsed+90000,weightKg:75,targetMs:0,trackLocation:false}});
-   localStorage.setItem('orbit-workouts-v1',JSON.stringify({active:null,history}));localStorage.setItem('orbit-profile-v1',JSON.stringify({name:'',birthDate:'',heightCm:180,weightKg:75}));
+   localStorage.setItem('orbit-workouts-v2',JSON.stringify({active:null,history}));localStorage.setItem('orbit-profile-v1',JSON.stringify({name:'',birthDate:'',heightCm:180,weightKg:75}));
   });
   await page.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');
   await page.addStyleTag({content:'.status,.home-indicator{display:none}.screen{height:100dvh!important;min-height:0!important}:root{--orbit-inset-top:34px;--orbit-inset-bottom:8px}'});

@@ -303,7 +303,7 @@ public final class WorkoutSession {
                 }
                 long time = System.currentTimeMillis(), active = sampledActive == null ? 0 : elapsed(sampledActive, time);
                 String revision = Long.toString(sampleRevision);
-                return new JSONObject().put("revision", revision).put("empty", sampledRaw == null)
+                return new JSONObject().put("realDataMode", preferences.getBoolean("real-data-v1", false)).put("revision", revision).put("empty", sampledRaw == null)
                     .put("store", revision.equals(knownRevision) ? JSONObject.NULL : sampledRaw == null ? "{\"active\":null,\"history\":[]}" : sampledRaw)
                     .put("startedAt", sampledActive == null ? JSONObject.NULL : sampledActive.getLong("startedAt"))
                     .put("elapsedMs", active).put("totalMs", sampledActive == null ? 0 : Math.max(active, totalElapsed(sampledActive, time))).toString();

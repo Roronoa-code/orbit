@@ -1,4 +1,4 @@
-/* Personal defaults are separate from demonstration measurements and workout history. */
+/* Personal defaults stay separate from imported measurements and workout history. */
 'use strict';
 const OrbitSettings=(()=>{
   const key='orbit-profile-v1',q=s=>document.querySelector(s);
@@ -18,7 +18,7 @@ const OrbitSettings=(()=>{
     error='';try{const raw=SettingsStore.read(key);if(raw===null)return {};const value=JSON.parse(raw);if(validate(value))throw Error('Invalid profile');return value}
     catch{error='Your saved profile could not be read. It has been preserved.';return {}}
   }
-  function view(){return `<form id="profile-form" class="settings-profile" novalidate>
+  function view(){return `<section class="settings-section settings-health"><h2>Samsung Health</h2><p id="health-import-status" class="settings-note" role="status"></p><div class="actions"><button class="settings-action" id="health-connect">Connect</button><button class="settings-action" id="health-sync">Import now</button></div><details class="settings-about"><summary>Connection &amp; history</summary><div class="details-body"><p>In Samsung Health → Settings → Health Connect, allow Samsung Health to share your data. Then connect Orbit and allow the readings you want.</p><p id="health-import-coverage"></p><p>Older history appears only if Samsung has shared it. All records stay on this phone.</p><button class="settings-action" id="health-permissions">Health permissions</button></div></details></section><form id="profile-form" class="settings-profile" novalidate>
     <h2>Profile</h2><p class="settings-note">Your defaults for new workouts.</p>
     <div class="settings-fields"><label>Name<input id="profile-name" autocomplete="name" maxlength="80" placeholder="Optional"/></label>
     <label>Date of birth<input id="profile-birth" inputmode="numeric" maxlength="10" placeholder="DD / MM / YYYY" autocomplete="bday"/></label>
@@ -28,8 +28,17 @@ const OrbitSettings=(()=>{
     <section class="settings-section"><h2>Daily goal</h2><form id="settings-goal-form" novalidate><div class="settings-goal-row"><label class="settings-goal">Steps<input id="settings-goal" type="number" min="100" max="100000" step="100" inputmode="numeric" required/></label><button type="submit" class="settings-action">Save</button></div><p id="settings-goal-error" class="health-error" role="alert"></p></form></section>
     <section class="settings-section"><h2>Motion</h2><label class="tracking-option"><span>Reduce motion</span><input id="settings-reduce" type="checkbox" role="switch"/></label><label class="tracking-option"><span>Globe rotation</span><input id="settings-rotation" type="checkbox" role="switch"/></label><p class="health-error" id="settings-motion-error" role="alert"></p></section>
     <section class="settings-section"><h2>Music</h2><button class="music-access" data-music-connect ${window.OrbitMusic?'':'disabled'}>${MusicPlayer.accessLabel()}</button></section>
-    <details class="settings-section settings-about"><summary>About Orbit</summary><div class="details-body"><p>Saved on this device. Home and Body charts show demo measurements. Your profile supplies workout defaults; past sessions keep their original values.</p></div></details>`}
+    <details class="settings-section settings-about"><summary>About Orbit</summary><div class="details-body"><p>Samsung Health supplies your shared readings. Orbit keeps a private local copy and does not change Samsung Health. Your profile supplies workout defaults; past sessions keep their original values.</p></div></details>`}
+  function healthStatus(){
+    if(!q('#health-import-status'))return;
+    const info=HealthData.info,meta=HealthData.meta;
+    q('#health-import-status').textContent=info.status+(info.syncing&&info.scanned?' · '+info.scanned.toLocaleString()+' records':'');
+    q('#health-connect').disabled=!info.available||info.syncing;q('#health-connect').textContent=info.permitted?'Access':'Connect';
+    q('#health-sync').disabled=!info.permitted||info.syncing;q('#health-permissions').disabled=!info.available;
+    q('#health-import-coverage').textContent=meta.lastSync?`${meta.recordCount.toLocaleString()} records saved · ${new Date(meta.lastSync).toLocaleString('en-GB')}. ${meta.historyAllowed?'Extended history access enabled.':'Recent shared history only. Allow history access to import older records.'}`:'No records imported yet.';
+  }
   function mount(options){
+    healthStatus();q('#health-connect').addEventListener('click',()=>window.OrbitHealth?.connect());q('#health-sync').addEventListener('click',()=>window.OrbitHealth?.sync());q('#health-permissions').addEventListener('click',()=>window.OrbitHealth?.permissions());
     const value=profile(),form=q('#profile-form');
     for(const [id,field] of [['name','name'],['birth','birthDate'],['height','heightCm'],['weight','weightKg']])q('#profile-'+id).value=value[field]??'';
     if(value.birthDate)q('#profile-birth').value=value.birthDate.split('-').reverse().join('/');
@@ -64,5 +73,5 @@ const OrbitSettings=(()=>{
     });
     q('#settings-rotation').addEventListener('change',event=>options.rotate(event.target.checked));
   }
-  return {view,mount,profile,validate,get error(){return error}};
+  return {view,mount,profile,validate,healthStatus,get error(){return error}};
 })();

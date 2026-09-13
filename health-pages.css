@@ -50,7 +50,7 @@
 .oxygen-tile[open] .oxygen-chevron{transform:rotate(180deg)}
 .oxygen-detail-head{display:flex;justify-content:space-between;gap:8px;padding:18px 0 11px;border-top:1px solid #ffffff0d;margin-top:14px;font-size:9px;color:#b7afc3}
 .oxygen-detail-head output{color:#d9c8f5}
-.oxygen-week{display:grid;grid-template-columns:repeat(7,minmax(44px,1fr));gap:3px;overflow:auto;scrollbar-width:none;padding:3px 0}
+.oxygen-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;padding:3px 0}
 .oxygen-week button{border:1px solid transparent;border-radius:13px;background:#ffffff03;padding:10px 2px;min-height:66px;text-align:center}
 .oxygen-week button>small{font-size:8px;color:#b7afc3}
 .oxygen-week strong{display:block;font-size:15px;font-weight:500;margin-top:6px}
@@ -549,6 +549,8 @@
 .settings-action{min-height:44px;border:0;background:#302b3b;border-radius:22px;padding:10px 18px;color:#e7dafb;font:inherit;font-size:13px}
 .settings-goal-row{display:flex;align-items:center;gap:12px}.settings-goal{flex:1;min-width:0}.settings-goal input{width:90px;text-align:right}
 .settings-action:active{background:#393143}
+.settings-health .actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.settings-health .settings-action:disabled{opacity:.4}
 .settings-section .tracking-option{margin-top:0;padding:8px 0;border-top:0;min-height:48px;font-size:13px}
 .settings-section .music-access{margin-top:0}
 .settings-about summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;font-size:13px;cursor:pointer}.settings-about summary:after{content:'+';color:#bfa7f2}.settings-about[open] summary:after{content:'−'}
