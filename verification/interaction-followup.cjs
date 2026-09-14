@@ -27,8 +27,8 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
   assert(await p.locator('#target-minutes').evaluate(n=>{const e=new MouseEvent('contextmenu',{bubbles:true,cancelable:true});return !n.dispatchEvent(e)}));
   await p.locator('#target-minutes').blur();await drag('.setup-activity',100);assert(await p.locator('.workout-tabs').isVisible(),'Swipe back exits setup');
   await p.evaluate(()=>Health.open('sleep'));await p.waitForTimeout(500);
-  const first=await p.locator('[data-night-stage=awake]').boundingBox(),last=await p.locator('[data-night-stage=deep]').boundingBox();
-  await p.locator('[data-night-stage=awake]').tap();await p.waitForTimeout(350);await drag('[data-night-stage=awake]',last.x-first.x,0,450);assert.equal(await p.locator('[data-night-stage=deep]').getAttribute('aria-pressed'),'true');
+  await p.locator('[data-night-stage=deep]').tap();assert.equal(await p.locator('[data-night-stage=deep]').getAttribute('aria-pressed'),'true');
+  const before=await p.locator('#night-scrub').inputValue();await drag('#night-scrub',60,0,450);assert.notEqual(await p.locator('#night-scrub').inputValue(),before);assert(await p.locator('#night-selection').evaluate(n=>n.classList.contains('is-inspecting')));
   await p.screenshot({path:path.join(out,`sleep-${width}.png`)});
   await p.evaluate(()=>Health.close());await p.waitForTimeout(500);await p.screenshot({path:path.join(out,`home-${width}.png`)});
   const filters=await p.evaluate(()=>[getComputedStyle(document.querySelector('.stack-motion')).backdropFilter,getComputedStyle(document.querySelector('#settings-open')).backdropFilter,getComputedStyle(document.querySelector('#live-island .island-frost')).backdropFilter]);

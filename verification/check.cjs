@@ -197,7 +197,7 @@ reduced.matches=true;let preferredClosed=false;surfaces.reveal(panel);surfaces.d
 const sleep=vm.runInContext('SleepTimeline',sandbox);
 for(const date of m.dateOptions){const daily=m.HealthData.daily(date),night=daily.night;if(!night)continue;assert(sleep.valid(night));const sum=sleep.totals(night);for(const stage of ['awake','light','deep','rem'])assert.equal(sum[stage],daily[stage]);assert.equal((night.end-night.start)/60000,daily.asleep+daily.awake)}
 const night=m.HealthData.daily(m.anchor).night;assert.equal(night.segments.length,4);assert.equal(sleep.stageMinute(night,'light'),60);assert.equal(sleep.locate(night,479),3);assert.equal(sleep.totals(night).light,120);assert.equal(new Date(night.start).getDate()+1,new Date(night.end).getDate());
-assert(!sleep.valid({...night,segments:night.segments.slice(1)}));assert(sleep.view(null).includes('unavailable'));assert(!html.includes('id="bar-marker"'));
+assert(!sleep.valid({...night,segments:night.segments.slice(1)}));assert(sleep.view(null).includes('No sleep recorded'));assert(!html.includes('id="bar-marker"'));
 const dots=vm.runInContext('HeroDots',sandbox),dotsDrawn=[];
 for(const value of ['75.8','8,420','00:01','24:59:59','3','2','1']){const glyph=dots.layout(value);assert(glyph.points.length>0);assert(glyph.points.every(p=>p.x>0&&p.x<glyph.width&&p.y>0&&p.y<7));assert(dots.markup(value).includes('<title>'+value+'</title>'))}
 assert(!dots.markup('<script>').includes('<script>'));

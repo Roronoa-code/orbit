@@ -6,7 +6,7 @@ const Health = (() => {
   let page=null,store={active:null,history:[]},storageFault=false,options,timer=0,returnFocus;
   let bodyMetric='weight',bodyRange=30,bodyDate=null,setup=null,countdown=null,countTimer=0,countDots=null;
   let timerMode='elapsed',timerFocused=false,dotPattern=0,historyDate=null,workoutTab='train';
-  let sleepDate=null,sleepMinute=0,sleepSession=0,workoutRecord=null,workoutChart='route',workoutReturn=null;
+  let sleepDate=null,sleepMinute=0,workoutRecord=null,workoutChart='route',workoutReturn=null;
   const now=()=>performance.timeOrigin+performance.now();
   const stamp=(date,full=false)=>new Date(date).toLocaleDateString('en-GB',full?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});
   let nativeClock=null,nativeRevision='',lastRaw;
@@ -68,9 +68,9 @@ const Health = (() => {
     <details class="health-tile oxygen-tile"><summary><span class="oxygen-symbol" aria-hidden="true">O₂</span><span class="oxygen-label"><h2>Blood oxygen</h2><small>${stamp(date+'T12:00:00',true)}</small></span><p class="tile-value">${HealthData.display(oxygen.value)}<small>%</small></p><span class="oxygen-chevron">⌄</span></summary><div class="details-body"><div class="oxygen-detail-head"><span>Recent readings</span><output id="oxygen-date">${oxygen.value===null?'No shared reading today':HealthData.display(oxygen.value)+'%'}</output></div><div class="oxygen-week glass-track blob-track" role="group" aria-label="Blood oxygen readings by day"><span class="selection-pill glass-indicator" aria-hidden="true"></span>${recent.map(day=>`<button class="blob-option" data-oxygen-day="${day}" aria-pressed="${day===date}" aria-label="${stamp(day+'T12:00:00',true)}, ${sample('oxygen',day).value}%"><small>${new Date(day+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'})}</small><strong>${sample('oxygen',day).value}<small>%</small></strong></button>`).join('')}</div></div></details><p class="health-note">${HealthData.meta.lastSync?'Samsung Health · only shared measurements appear here.':'Connect Samsung Health in Settings to bring your records into Orbit.'}</p>`;
   }
   function bodyRows(){const end=options.getDate(),start=dayOffset(end,1-bodyRange);return HealthData.bodyDates().filter(date=>date>=start&&date<=end&&Number.isFinite(sample('body',date)[bodyMetric]))}
-  function setSleepMinute(value){sleepMinute=SleepTimeline.inspect((options.getDaily(sleepDate).nights[sleepSession]||null),value);tracks.get('sleep-stage')?.sync(q('[data-night-stage][aria-pressed=true]')?.dataset.nightStage)}
+  function setSleepMinute(value){sleepMinute=SleepTimeline.inspect(options.getDaily(sleepDate).sleepTimeline,value)}
   function setOxygenDay(date){if(!options.dates.includes(date))return;q('#oxygen-date').textContent=stamp(date+'T12:00:00')+' · '+sample('oxygen',date).value+'%';document.querySelectorAll('[data-oxygen-day]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.oxygenDay===date)));tracks.get('oxygen-day')?.sync(date)}
-  function sleepView(){const index=options.dates.indexOf(sleepDate);return `<div class="sleep-date-nav"><button data-night-date="-1" aria-label="Previous night" ${index<=0?'disabled':''}>‹</button><span>${stamp(sleepDate+'T12:00:00',true)}</span><button data-night-date="1" aria-label="Next night" ${index>=options.dates.length-1?'disabled':''}>›</button></div>`+(options.getDaily(sleepDate).nights.length>1?`<div class="sleep-date-nav"><button data-sleep-session="-1" aria-label="Previous sleep session" ${sleepSession===0?'disabled':''}>‹</button><span>Session ${sleepSession+1} of ${options.getDaily(sleepDate).nights.length}</span><button data-sleep-session="1" aria-label="Next sleep session" ${sleepSession===options.getDaily(sleepDate).nights.length-1?'disabled':''}>›</button></div>`:'')+SleepTimeline.view((options.getDaily(sleepDate).nights[sleepSession]||null),sleepMinute)}
+  function sleepView(){const index=options.dates.indexOf(sleepDate),navigation=`<div class="sleep-date-nav"><span>${stamp(sleepDate+'T12:00:00',true)}</span><div><button data-night-date="-1" aria-label="Previous day" ${index<=0?'disabled':''}>‹</button><button data-night-date="1" aria-label="Next day" ${index>=options.dates.length-1?'disabled':''}>›</button></div></div>`;return SleepTimeline.view(options.getDaily(sleepDate).sleepTimeline,sleepMinute,navigation)}
   // Each of the ring's 100 dots is 1% of body weight: purple is the selected measurement's share, with Weight filling the whole ring.
   const bodyOrder=Object.keys(bodyFields),bodyTone={purple:[182,156,255],rest:[52,50,60]};
   const bodyShare=(field,d)=>!Number.isFinite(d[field])||!(d.weight>0)?0:Math.max(0,Math.min(1,field==='weight'?1:field==='fatMass'?d.fat/100:d[field]/d.weight));
@@ -129,7 +129,6 @@ const Health = (() => {
     bindTrack('timer-mode',q('.timer-mode-picker'),{optionSelector:'[data-timer-mode]',idOf:el=>el.dataset.timerMode,
       committed:()=>timerMode,commit:id=>{trackCommit=performance.now();setTimerMode(id)}});
     bindTrack('history-day',q('.history-days'),{optionSelector:'[data-week-day]:not(:disabled)',idOf:el=>el.dataset.weekDay,committed:()=>q('[data-week-day][aria-pressed=true]')?.dataset.weekDay,commit:id=>{trackCommit=performance.now();inspectWeek(Number(id))}});
-    bindTrack('sleep-stage',q('.night-stage-totals'),{optionSelector:'[data-night-stage]',idOf:el=>el.dataset.nightStage,committed:()=>q('[data-night-stage][aria-pressed=true]')?.dataset.nightStage,commit:id=>{trackCommit=performance.now();setSleepMinute(SleepTimeline.stageMinute((options.getDaily(sleepDate).nights[sleepSession]||null),id))}});
     bindTrack('oxygen-day',q('.oxygen-week'),{optionSelector:'[data-oxygen-day]',idOf:el=>el.dataset.oxygenDay,committed:()=>q('[data-oxygen-day][aria-pressed=true]')?.dataset.oxygenDay,commit:id=>{trackCommit=performance.now();setOxygenDay(id)}});
     bindTrack('workout-chart',q('.workout-chart-tabs'),{optionSelector:'[data-workout-chart]',idOf:el=>el.dataset.workoutChart,
       committed:()=>workoutChart,commit:id=>{trackCommit=performance.now();setWorkoutChart(id)}});
@@ -402,9 +401,9 @@ const Health = (() => {
     const enter=()=>{
       if(!page)returnFocus=source||document.activeElement;page=which;setup=null;workoutRecord=null;if(which==='workouts'){historyDate=null;workoutTab='train'}cancelCountdown();options.beforeOpen();q('#health-page').hidden=false;q('.screen').classList.add('is-detail');
       if(which==='workouts'&&startsIn()>0){setup={kind:store.active.kind};countdown=Math.ceil(startsIn()/1000);countTimer=setInterval(countTick,100)}
-      if(which==='sleep'){sleepDate=options.getDate();sleepSession=0;const night=(options.getDaily(sleepDate).nights[sleepSession]||null);sleepMinute=SleepTimeline.valid(night)?SleepTimeline.stageMinute(night,stage):0}
+      if(which==='sleep'){sleepDate=options.getDate();const night=options.getDaily(sleepDate).sleepTimeline;sleepMinute=SleepTimeline.valid(night)?SleepTimeline.stageMinute(night,stage):0}
       for(const selector of ['.masthead','.hero','#deck-scroll','#stack-open','#utility-island','#live-island'])q(selector).inert=true;
-      render();q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true});q('#health-page').setAttribute('aria-label',titles[which]);return true;
+      render();if(which==='sleep'&&stage&&SleepTimeline.valid(options.getDaily(sleepDate).sleepTimeline))setSleepMinute(sleepMinute);q('#health-scroll').scrollTop=0;q('#health-back').focus({preventScroll:true});q('#health-page').setAttribute('aria-label',titles[which]);return true;
     };
     if(page)return SurfaceMotion.change(enter);
     enter();SurfaceMotion.reveal(q('#health-page'));return true;
@@ -451,10 +450,8 @@ const Health = (() => {
       else if(b.dataset.bodyMetric||b.hasAttribute('data-next-body')){if(b.dataset.bodyMetric)goBody(b.dataset.bodyMetric);else goBody(bodyNeighbour(bodyMetric,1),1)}
       else if(b.dataset.bodyRange)setBodyRange(Number(b.dataset.bodyRange));
       else if(b.dataset.bodyStep)inspectBody(bodyRows().indexOf(bodyDate)+Number(b.dataset.bodyStep));
-      else if(b.dataset.nightDate){const date=options.dates[options.dates.indexOf(sleepDate)+Number(b.dataset.nightDate)];if(date){sleepDate=date;sleepMinute=0;sleepSession=0;render();q('[data-night-date="'+b.dataset.nightDate+'"]').focus({preventScroll:true})}}
-      else if(b.dataset.sleepSession){const next=sleepSession+Number(b.dataset.sleepSession);if(options.getDaily(sleepDate).nights[next]){sleepSession=next;sleepMinute=0;render()}}
-      else if(b.dataset.nightPart){const night=(options.getDaily(sleepDate).nights[sleepSession]||null);setSleepMinute(SleepTimeline.part(night,sleepMinute,Number(b.dataset.nightPart)))}
-      else if(b.dataset.nightStage){const night=(options.getDaily(sleepDate).nights[sleepSession]||null);setSleepMinute(SleepTimeline.stageMinute(night,b.dataset.nightStage))}
+      else if(b.dataset.nightDate){const date=options.dates[options.dates.indexOf(sleepDate)+Number(b.dataset.nightDate)];if(date){sleepDate=date;sleepMinute=0;render();q('[data-night-date="'+b.dataset.nightDate+'"]').focus({preventScroll:true})}}
+      else if(b.dataset.nightStage){const night=options.getDaily(sleepDate).sleepTimeline;setSleepMinute(SleepTimeline.stageMinute(night,b.dataset.nightStage))}
       else if(b.dataset.timerMode)setTimerMode(b.dataset.timerMode);
       else if(b.hasAttribute('data-timer-focus'))setFocus(!timerFocused);
       else if(b.hasAttribute('data-music-expand'))setFocus(true);

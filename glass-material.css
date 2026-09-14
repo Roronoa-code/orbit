@@ -72,15 +72,13 @@
 /* Sample on the clipping layer itself, just like the navbar. A filter nested inside it
    cannot see the backdrop outside that clip. Readings remain unfiltered; the rim folds separately. */
 .stack-motion{border-radius:20px}
-.history-days,.night-stage-totals,.oxygen-week{position:relative}
-.history-days>.selection-pill,.night-stage-totals>.selection-pill,.oxygen-week>.selection-pill{position:absolute;left:0;top:0;pointer-events:none;z-index:0;transform:translate(var(--selection-x,0px),var(--selection-y,0px));width:var(--selection-width,0px);height:var(--selection-height,0px);border-radius:16px}
-.history-days>button,.night-stage-totals>button,.oxygen-week>button{position:relative;z-index:1;background:none;border-color:transparent}
-.history-days>button[aria-pressed=true],.night-stage-totals>button[aria-pressed=true],.oxygen-week>button[aria-pressed=true]{background:none;border-color:transparent}
-.night-stage-totals{grid-template-columns:repeat(var(--stage-count,4),minmax(0,1fr));gap:0;padding:4px;border-radius:20px}
-.night-stage-totals button{padding:10px 3px;gap:6px;flex-direction:column;text-align:center;min-height:64px}
-.night-stage-totals i{width:18px;height:3px}.night-stage-totals strong{font-size:15px;white-space:nowrap;letter-spacing:-.4px}
+.history-days,.oxygen-week{position:relative}
+.history-days>.selection-pill,.oxygen-week>.selection-pill{position:absolute;left:0;top:0;pointer-events:none;z-index:0;transform:translate(var(--selection-x,0px),var(--selection-y,0px));width:var(--selection-width,0px);height:var(--selection-height,0px);border-radius:16px}
+.history-days>button,.oxygen-week>button{position:relative;z-index:1;background:none;border-color:transparent}
+.history-days>button[aria-pressed=true],.oxygen-week>button[aria-pressed=true]{background:none;border-color:transparent}
 .health-page-head,.health-scroll{touch-action:pan-y}
-input[type=number],input[inputmode=numeric],input[inputmode=decimal]{-webkit-user-select:none;user-select:none}
+*{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+::selection{background:transparent;color:inherit}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 
 /* Honest fallbacks: the material degrades to a visible opaque surface, never to an empty indicator. */

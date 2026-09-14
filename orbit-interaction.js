@@ -6,18 +6,19 @@ const OrbitInteraction=(()=>{
     if(document.hidden||performance.now()-last<55)return;
     last=performance.now();window.OrbitFeedback?.pulse(kind);
   }
-  const compact=node=>node?.matches?.('input[type=number],input[inputmode=numeric],input[inputmode=decimal]');
-  // Let a short numeric value receive the keyboard programmatically. Preventing the text-touch default avoids
+  const editable=node=>node?.matches?.('textarea,input:not([type]),input[type=text],input[type=number],input[type=email],input[type=tel],input[type=password],input[type=search],input[type=url]');
+  // Focus editable values programmatically. Preventing the text-touch default avoids
   // the insertion handle; a normal caret, hardware keyboard, IME, validation and paste remain available.
   document.addEventListener('pointerdown',event=>{
-    if(event.pointerType!=='touch'||!compact(event.target)||event.target.disabled)return;
+    if(event.pointerType!=='touch'||!editable(event.target)||event.target.disabled)return;
     event.preventDefault();event.target.focus({preventScroll:true});
   },true);
   document.addEventListener('touchstart',event=>{
-    if(event.touches.length!==1||!compact(event.target)||event.target.disabled)return;
+    if(event.touches.length!==1||!editable(event.target)||event.target.disabled)return;
     event.preventDefault();event.target.focus({preventScroll:true});
   },{capture:true,passive:false});
-  document.addEventListener('contextmenu',event=>{if(compact(event.target))event.preventDefault()},true);
+  document.addEventListener('contextmenu',event=>event.preventDefault(),true);
+  document.addEventListener('dragstart',event=>event.preventDefault(),true);
   document.addEventListener('click',event=>{
     if(!event.isTrusted)return;
     const target=event.target.closest('button,summary,a,input[type=checkbox]');

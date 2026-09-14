@@ -1,5 +1,18 @@
 # Orbit — handoff (updated 14 September 2026)
 
+## Sleep consolidation and browser hold removal — 14 September 2026
+
+Baseline `51f0885`. The user rejected the prior Sleep redesign, requested Apple's approach, one navigation system, and removal of browser long-press highlights throughout Orbit. Reference inspected: [Apple's official Sleep history screenshot and guide](https://support.apple.com/en-ie/108906), published 17 April 2026. This revision takes its chart hierarchy, stage lanes, quieter transitions and compact duration summary; Samsung's Light classification and original recorded times remain intact.
+
+- One date control replaces separate day/session navigators. All sessions ending that day share a continuous clock-time chart. The existing interval union also produces this timeline: overlaps cannot double-count sleep, conflicting stages stay unknown, and gaps between sessions are blank/unrecorded. Home and detail totals use the same union.
+- The chart sits directly on the page. Simple stage-duration rows replace the large glass stage switcher; redundant interval arrows are removed. Tap a stage or hold/slide across the chart for the exact interval. Rounded hour ticks, readable lane labels and faint connectors keep dense records legible. A stage opened from Home is selected in detail.
+- Shared CSS suppresses browser selection/tap highlighting and callouts; shared touch handling focuses text fields without insertion handles. The Android WebView consumes its browser long-press menu. Custom held selectors, chart scrubbing, keyboard editing and semantic keyboard focus remain available.
+
+Local checks passed: `verification/check.cjs`, `samsung-import.cjs`, `sleep-apple.cjs`, `interaction-followup.cjs`, `live-workout.cjs` and `liquid-glass.cjs`. Dense multi-session and empty layouts were rendered at 390/320; broader gestures were checked at 390/384/320. New sleep checks cover a session gap, overlapping conflicting records, daily totals, day navigation, chart hold/drag and text entry. A packaged local Android Audit build on emulator-5556 was exercised using Android touch/key events: no text selection or context menu after long holds, name editing still worked, and a 700 ms hold followed by dragging the Body selector still committed correctly. Local screenshots and native results are ignored under `verification/samsung-import/`. These do not establish physical-phone visual acceptance.
+
+Installed production build `20260914-010327`, SHA256 `f94e1417a408902713142bfed78754dfb43743a537bcfa2ff9e379bdf7985e4d`. Verified bundled source matches the current files and excludes local test records. Phone SM-S938B / R5CY13S5F8D at `192.168.0.210:36395` received **`install --user 0 -r`** only. Installed hash matches; Owner 0 installed=true, users 95/150 installed=false. Previous APK backed up in ignored `verification/samsung-import/phone-before-apple-sleep-20260914.apk`, SHA256 `d5135f14561ca6fc5c653028cf28d5d009a8f093746caa2ac419255a99a4d24d`. No phone app launch, navigation, capture, workout, permission change or test was performed. Local Audit package and owned emulator/preview server were cleaned up afterward.
+
+
 ## Live steps, workout stability, sleep and glass — 14 September 2026
 
 Baseline `2f15a54`. User rejected the previous sleep chart and reported clipping around glass throughout the app. Earlier pending requests also covered direct combined phone/watch steps, deck lag, redundant workout weight/music setup, background countdown and unstable GPS/navigation. All validation stayed local. Phone use was installation only.

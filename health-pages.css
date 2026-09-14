@@ -184,22 +184,20 @@
 /* The sleep timeline uses clock time horizontally and stage depth vertically. */
 .facts[role=button]{cursor:pointer;touch-action:pan-y}
 .facts[role=button]:focus-visible{outline:2px solid #cdb6ff;outline-offset:-3px}
-.sleep-date-nav{display:flex;align-items:center;justify-content:space-between;padding:0 6px;margin:2px 0 2px}
-.sleep-date-nav button,.night-selected>button{border:0;border-radius:50%;background:#ffffff07;width:44px;height:44px;font-size:22px;flex-shrink:0}
-.sleep-date-nav button:disabled,.night-selected>button:disabled{opacity:.2}
-.sleep-date-nav>span{font-size:12px;color:#d8cdea}
-.sleep-summary{padding:18px 6px 25px}.sleep-summary>span{font-size:12px;color:#aaa6b1}.sleep-summary p{display:flex;align-items:baseline;gap:5px;font-size:19px;color:#aaa6b1;margin:6px 0 4px}.sleep-summary strong{font-size:44px;font-weight:500;letter-spacing:-2px;color:#f5f1fa}.sleep-summary strong+strong{margin-left:8px}.sleep-summary small{font-size:13px;color:#aaa6b1}
-.sleep-night{padding:18px 14px 10px;border-radius:20px;background:#161618}.sleep-night h2{font-size:14px;font-weight:500}.sleep-night .health-section-head{margin-bottom:18px}
-.night-chart{position:relative;margin:0}.night-chart>svg{display:block;width:100%;height:176px;overflow:visible}
-#night-scrub{position:absolute;left:11.76%;top:0;width:85.3%;height:87%;margin:0;opacity:0;cursor:crosshair;touch-action:pan-y}
-.night-chart:focus-within{outline:1px solid #b69cff;outline-offset:5px;border-radius:4px}
-.night-selected{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 12px;padding-top:10px;border-top:1px solid #ffffff0d}
-#night-selection{flex:1;text-align:center;min-width:0}.night-selection-label{display:flex;align-items:center;justify-content:center;gap:6px}.night-selection-label i{width:5px;height:5px;border-radius:50%;flex-shrink:0}.night-selection-label h2{font-size:11px}.night-selection-label strong{font-size:11px;font-weight:400;color:#aaa6b1;margin-left:3px}
-.night-selection-time{font-size:13px;margin:4px 0 0;color:#aaa6b1;font-variant-numeric:tabular-nums}
-.night-stage-totals{display:grid;margin-top:0}.night-stage-totals button{display:flex;align-items:center;gap:6px;border:0;border-radius:16px;background:none;text-align:center}.night-stage-totals i{display:block;border-radius:3px}.night-stage-totals span{font-size:10px;color:#aaa6b1}.night-stage-totals strong{display:block;color:#f0eaf7;font-weight:450;margin-top:4px}
-.sleep-source{font-size:11px;color:#817e87;padding:16px 6px}
+.sleep-summary{padding:14px 6px 12px}.sleep-summary>span{font-size:10px;font-weight:600;letter-spacing:.7px;color:#a5a2ac}
+.sleep-summary p{display:flex;align-items:baseline;gap:4px;font-size:16px;color:#a5a2ac;margin:0;line-height:1.25}.sleep-summary strong{font-size:36px;font-weight:500;letter-spacing:-1.6px;color:#f5f1fa}.sleep-summary strong:not(:first-child){margin-left:5px}
+.sleep-date-nav{display:flex;align-items:center;justify-content:space-between;min-height:44px}.sleep-date-nav>span{font-size:12px;color:#b4b1bc}.sleep-date-nav>div{display:flex;gap:2px}.sleep-date-nav button{border:0;border-radius:50%;background:none;width:44px;height:44px;font-size:25px;color:#c8b4fc}.sleep-date-nav button:disabled{opacity:.2}
+.sleep-night{padding:0 6px 20px}.night-inspection{min-height:48px;display:flex;flex-direction:column;justify-content:center;padding:0 0 8px}.night-inspection>span{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:550}.night-inspection small{font-size:10px;letter-spacing:0;color:#95929e}.night-inspection i{width:6px;height:6px;border-radius:50%}.night-inspection strong{font-size:11px;font-weight:450;color:#aaa6b1;margin-left:auto}
+.night-chart{position:relative;margin:0}.night-chart>svg{display:block;width:100%;height:auto;overflow:visible}
+#night-scrub{appearance:none;-webkit-appearance:none;position:absolute;top:0;margin:0;opacity:0;cursor:crosshair;touch-action:pan-y}
+#night-scrub::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:1px;height:1px}
+.night-chart:has(:focus-visible){outline:1px solid #b69cff;outline-offset:5px;border-radius:4px}
+.sleep-breakdown{border-radius:18px;background:#19191c;padding:0 14px;margin:0 4px;overflow:hidden}
+.sleep-breakdown button{display:flex;align-items:center;gap:10px;width:100%;min-height:49px;padding:10px 0;border:0;border-bottom:1px solid #ffffff0c;border-radius:0;background:none;text-align:left;transition:color 150ms,opacity 150ms}
+.sleep-breakdown button:last-child{border-bottom:0}.sleep-breakdown i{width:7px;height:7px;border-radius:50%;background:var(--stage-color)}.sleep-breakdown span{font-size:12px}.sleep-breakdown strong{margin-left:auto;font-size:13px;font-weight:500;color:#c4c0cb;white-space:nowrap}.sleep-breakdown [aria-pressed=true]{color:var(--stage-color)}.sleep-breakdown button:active{opacity:.6}.sleep-breakdown button:disabled{opacity:.5}
+.sleep-breakdown button:focus-visible{outline-offset:-3px}.sleep-source{font-size:10px;color:#817e87;padding:14px 9px;line-height:1.6}.sleep-empty{font-size:13px;color:#aaa6b1;padding:40px 6px}
 @media(max-width:360px){.oxygen-tile{padding:14px}.oxygen-tile summary{gap:8px}.oxygen-symbol{width:31px;height:31px;font-size:14px}.oxygen-label h2{font-size:12px}.oxygen-tile .tile-value{font-size:26px}}
-@media(forced-colors:active){.night-chart>svg{forced-color-adjust:none}.night-stage-totals button[aria-pressed=true],.oxygen-week button[aria-pressed=true]{outline:2px solid Highlight}}
+@media(forced-colors:active){.night-chart>svg{forced-color-adjust:none}.sleep-breakdown button[aria-pressed=true],.oxygen-week button[aria-pressed=true]{outline:2px solid Highlight}}
 
 .toast{z-index:40}
 

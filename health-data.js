@@ -56,8 +56,14 @@ const HealthData=(()=>{
       const b=d.body;if(b.weight>0&&b.fat!==null&&b.fat<=100&&Math.abs(b.weightAt-b.fatAt)<=60000)b.fatMass=b.weight*b.fat/100;
       d.nights.sort((a,b)=>a.start-b.start);d.night=d.nights.reduce((best,n)=>!best||n.end-n.start>best.end-best.start?n:best,null);
       // Union reported intervals; overlapping, conflicting stages stay unknown instead of double counting.
-      const segments=d.nights.flatMap(n=>n.segments),edges=[...new Set(segments.flatMap(s=>[s.start,s.end]))].sort((a,b)=>a-b),totals={};
-      for(let i=1;i<edges.length;i++){const active=segments.filter(s=>s.start<=edges[i-1]&&s.end>=edges[i]);if(!active.length)continue;const stage=active.every(s=>s.stage===active[0].stage)?active[0].stage:'unknown';totals[stage]=(totals[stage]??0)+(edges[i]-edges[i-1])/60000}
+      const segments=d.nights.flatMap(n=>n.segments),edges=[...new Set(segments.flatMap(s=>[s.start,s.end]))].sort((a,b)=>a-b),totals={},timeline=[];
+      for(let i=1;i<edges.length;i++){
+        const start=edges[i-1],end=edges[i],active=segments.filter(s=>s.start<=start&&s.end>=end);
+        const stage=!active.length?'unrecorded':active.every(s=>s.stage===active[0].stage)?active[0].stage:'unknown';
+        if(active.length)totals[stage]=(totals[stage]??0)+(end-start)/60000;
+        if(timeline.at(-1)?.stage===stage)timeline.at(-1).end=end;else timeline.push({start,end,stage});
+      }
+      d.sleepTimeline=timeline.length?{start:edges[0],end:edges.at(-1),segments:timeline}:null;
       const known=['light','deep','rem','sleeping'].some(k=>Object.hasOwn(totals,k));d.asleep=known?['light','deep','rem','sleeping'].reduce((v,k)=>v+(totals[k]??0),0):null;
       for(const k of ['light','deep','rem','awake'])d[k]=totals[k]??(known&&!totals.sleeping&&!totals.unknown?0:null);
       d.sleepIncomplete=Boolean(totals.unknown);d.meals.sort((a,b)=>a.at-b.at);
