@@ -198,6 +198,18 @@ const sleep=vm.runInContext('SleepTimeline',sandbox);
 for(const date of m.dateOptions){const daily=m.HealthData.daily(date),night=daily.night;if(!night)continue;assert(sleep.valid(night));const sum=sleep.totals(night);for(const stage of ['awake','light','deep','rem'])assert.equal(sum[stage],daily[stage]);assert.equal((night.end-night.start)/60000,daily.asleep+daily.awake)}
 const night=m.HealthData.daily(m.anchor).night;assert.equal(night.segments.length,4);assert.equal(sleep.stageMinute(night,'light'),60);assert.equal(sleep.locate(night,479),3);assert.equal(sleep.totals(night).light,120);assert.equal(new Date(night.start).getDate()+1,new Date(night.end).getDate());
 assert(!sleep.valid({...night,segments:night.segments.slice(1)}));assert(sleep.view(null).includes('No sleep recorded'));assert(!html.includes('id="bar-marker"'));
+// Five-minute rendering changes presentation only, including at gaps and partial window edges.
+const base=Date.parse('2026-09-13T23:35:00Z');
+const recorded=parts=>{let at=base;return {start:base,end:base+parts.reduce((sum,[,minutes])=>sum+minutes,0)*60000,segments:parts.map(([stage,minutes])=>{const start=at;at+=minutes*60000;return {stage,start,end:at}})}};
+const fragmented=recorded(Array.from({length:20},()=>[['light',4],['awake',1]]).flat()),original=JSON.stringify(fragmented);
+const grouped=sleep.blocks(fragmented);assert.equal(grouped.length,1);assert.equal(grouped[0].stage,'light');assert.equal(grouped[0].end,fragmented.end);assert.equal(sleep.totals(fragmented).awake,20);assert.equal(JSON.stringify(fragmented),original);
+const sustained=recorded([['light',5],['awake',10],['deep',5]]);assert.equal(sleep.blocks(sustained).map(s=>s.stage).join(','),'light,awake,deep');
+const gaps=recorded([['light',4],['unrecorded',1],['light',3],['unknown',1],['deep',6]]),gapBlocks=sleep.blocks(gaps);
+for(const missing of gaps.segments.filter(s=>['unrecorded','unknown'].includes(s.stage))){const shown=gapBlocks.find(s=>s.stage===missing.stage);assert.equal(shown.start,missing.start);assert.equal(shown.end,missing.end)}
+assert.equal(sleep.blocks(recorded([['light',5],['deep',2.5],['light',2.5]]))[0].end,base+600000,'Equal-duration ties retain the preceding stage');
+const weighted=recorded([['awake',1],['light',3],['awake',1]]);assert.equal(sleep.blocks(weighted)[0].stage,'light','Duration, not interval count, determines the block');
+const partial=recorded([['light',3],['deep',5],['rem',3]]);partial.start+=120000;partial.segments[0].start=partial.start;assert(sleep.valid(partial));const clipped=sleep.blocks(partial);assert.equal(clipped[0].start,partial.start);assert.equal(clipped.at(-1).end,partial.end);
+assert.equal(sleep.blocks(null).length,0);
 const dots=vm.runInContext('HeroDots',sandbox),dotsDrawn=[];
 for(const value of ['75.8','8,420','00:01','24:59:59','3','2','1']){const glyph=dots.layout(value);assert(glyph.points.length>0);assert(glyph.points.every(p=>p.x>0&&p.x<glyph.width&&p.y>0&&p.y<7));assert(dots.markup(value).includes('<title>'+value+'</title>'))}
 assert(!dots.markup('<script>').includes('<script>'));

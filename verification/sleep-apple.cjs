@@ -4,7 +4,7 @@ const {fixture}=require('./samsung-import.cjs');
 function dense(){
  const data=fixture(),day=data.date,base=data.rows.find(r=>r.type==='sleep');data.rows=data.rows.filter(r=>r!==base);
  const start=new Date(day+'T07:35:00').getTime(),end=new Date(day+'T14:09:00').getTime(),stages=[];
- let cursor=start,i=0;const pattern=[[4,24],[5,19],[4,31],[1,1],[4,8],[6,12],[1,1],[4,3],[6,4],[1,1],[4,13],[1,1],[4,2]];
+ let cursor=start,i=0;const pattern=[...Array.from({length:4},()=>[[4,4],[1,1]]).flat(),[5,18],[1,1],...Array.from({length:4},()=>[[4,4],[1,1]]).flat(),[6,12],[1,5],...Array.from({length:3},()=>[[4,3],[1,1]]).flat()];
  while(cursor<end){const [type,minutes]=pattern[i++%pattern.length],next=Math.min(end,cursor+minutes*60000);stages.push([cursor,next,type]);cursor=next}
  data.rows.push({...base,start,end,stages});
  const nap=new Date(day+'T14:10:00').getTime();data.rows.push({...base,id:'second-sleep',start:nap,end:nap+88*60000,stages:[[nap,nap+88*60000,4]]});return data;
@@ -16,9 +16,9 @@ async function run(){const browser=await chromium.launch({headless:true});try{
   await p.goto('http://127.0.0.1:8784/signal-orbit-steps/index.html');await p.locator('#orb-button').tap();await p.evaluate(()=>Health.open('sleep'));await p.waitForTimeout(350);
   assert.equal(await p.locator('.sleep-date-nav').count(),1);assert.equal(await p.locator('[data-sleep-session]').count(),0);
   assert.equal(await p.locator('[data-night-part]').count(),0);assert.equal(await p.locator('.sleep-breakdown button').count(),4);
-  const model=await p.evaluate(()=>{const d=HealthData.daily(sleepFixture.date),t=SleepTimeline.totals(d.sleepTimeline);return {sessions:d.nights.length,valid:SleepTimeline.valid(d.sleepTimeline),asleep:d.asleep,total:t.light+t.rem+t.deep,gap:t.unrecorded,bars:d.sleepTimeline.segments.filter(s=>s.stage!=='unrecorded').length}});
-  assert.equal(model.sessions,2);assert(model.valid);assert.equal(model.asleep,model.total);assert.equal(model.gap,1);assert.equal(await p.locator('[data-night-segment]').count(),model.bars);
-  await p.screenshot({path:path.join(__dirname,'samsung-import',`sleep-apple-${width}.png`)});
+  const model=await p.evaluate(()=>{const d=HealthData.daily(sleepFixture.date),t=SleepTimeline.totals(d.sleepTimeline);return {sessions:d.nights.length,valid:SleepTimeline.valid(d.sleepTimeline),asleep:d.asleep,total:t.light+t.rem+t.deep,gap:t.unrecorded,raw:d.sleepTimeline.segments.length,bars:SleepTimeline.blocks(d.sleepTimeline).filter(s=>s.stage!=='unrecorded').length}});
+  assert.equal(model.sessions,2);assert(model.valid);assert.equal(model.asleep,model.total);assert.equal(model.gap,1);assert.equal(await p.locator('[data-night-segment]').count(),model.bars);assert(model.bars<model.raw,'Five-minute bands must reduce the dense fixture');assert.equal(await p.locator('.night-chart path[stroke-opacity]').count(),0,'No stage connectors');
+  await p.screenshot({path:path.join(__dirname,'samsung-import',`sleep-five-minute-${width}.png`)});
   const cdp=await p.context().newCDPSession(p);
   async function holdDrag(selector,dx=0){const r=await p.locator(selector).boundingBox(),x=r.x+r.width/2,y=r.y+r.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await p.waitForTimeout(650);for(let i=1;i<=10;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*i/10,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
   await holdDrag('.sleep-summary p');assert.equal(await p.evaluate(()=>String(getSelection())), '');
@@ -32,7 +32,7 @@ async function run(){const browser=await chromium.launch({headless:true});try{
   await p.locator('#profile-name').press('End');await p.locator('#profile-name').press('Backspace');assert.equal(await p.locator('#profile-name').inputValue(),'Local nam');
   assert(await p.locator('body').evaluate(n=>getComputedStyle(n).userSelect==='none'));
   await p.evaluate(()=>{HealthData.accept({schema:1,date:sleepFixture.date,rows:[],workouts:[],meta:{}});Health.open('sleep')});assert(await p.locator('.sleep-empty').isVisible());assert.equal(await p.locator('.sleep-date-nav').count(),1);
-  assert.deepEqual(errors,[]);console.log(width,'PASS: dense daily union, session gap, conflict, one navigation, hold/scrub, editable text and empty day');await p.close();
+  assert.deepEqual(errors,[]);console.log(width,`${model.raw} raw intervals → ${model.bars} bands`, 'PASS: dense daily union, session gap, conflict, one navigation, hold/scrub, editable text and empty day');await p.close();
  }
 }finally{await browser.close()}}
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});

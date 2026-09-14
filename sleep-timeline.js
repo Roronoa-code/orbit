@@ -8,7 +8,26 @@ const SleepTimeline=(()=>{
   function valid(night){return night&&Number.isFinite(night.start)&&Number.isFinite(night.end)&&night.end>night.start&&Array.isArray(night.segments)&&night.segments.length>0&&night.segments.every((s,i)=>Object.hasOwn(stages,s.stage)&&Number.isFinite(s.start)&&Number.isFinite(s.end)&&s.end>s.start&&s.start===(i?night.segments[i-1].end:night.start)&&s.end<=night.end)&&night.segments.at(-1).end===night.end}
   function locate(night,minute){const at=night.start+Math.max(0,Math.min((night.end-night.start)/60000-.001,minute))*60000;return Math.max(0,night.segments.findIndex(s=>at>=s.start&&at<s.end))}
   function totals(night){return Object.fromEntries(Object.keys(stages).map(stage=>[stage,night.segments.filter(s=>s.stage===stage).reduce((sum,s)=>sum+(s.end-s.start)/60000,0)]))}
-  function selection(night,index){const s=night.segments[index];return `<span><i style="background:${stages[s.stage][1]}"></i>${stages[s.stage][0]}<strong>${duration((s.end-s.start)/60000)}</strong></span><small>${time(s.start)} – ${time(s.end)}</small>`}
+  function blocks(night){
+    if(!valid(night))return [];
+    const size=5*60000,edges=[night.start,night.end],result=[];
+    for(let at=Math.floor(night.start/size)*size+size;at<night.end;at+=size)edges.push(at);
+    // Missing intervals are hard boundaries: smoothing must never paint sleep across a recording gap.
+    for(const s of night.segments)if(s.stage==='unknown'||s.stage==='unrecorded')edges.push(s.start,s.end);
+    const points=[...new Set(edges)].sort((a,b)=>a-b);let cursor=0;
+    for(let i=1;i<points.length;i++){
+      const start=points[i-1],end=points[i],weights={};
+      while(night.segments[cursor].end<=start)cursor++;
+      for(let j=cursor;j<night.segments.length&&night.segments[j].start<end;j++){
+        const s=night.segments[j];weights[s.stage]=(weights[s.stage]||0)+Math.min(end,s.end)-Math.max(start,s.start);
+      }
+      let [stage,weight]=Object.entries(weights).sort((a,b)=>b[1]-a[1])[0];const previous=result.at(-1);
+      if(previous&&weights[previous.stage]===weight)stage=previous.stage;
+      if(previous?.stage===stage)previous.end=end;else result.push({start,end,stage});
+    }
+    return result;
+  }
+  function selection(night,index){const s=night.segments[index];return `<span><i style="background:${stages[s.stage][1]}"></i>${stages[s.stage][0]}<strong>${duration((s.end-s.start)/60000)}</strong></span><small>Recorded · ${time(s.start)} – ${time(s.end)}</small>`}
   function view(night,minute=0,navigation=''){
     const available=valid(night),all=available?totals(night):{},asleep=Math.round((all.light||0)+(all.deep||0)+(all.rem||0)+(all.sleeping||0));
     const summary=`<header class="sleep-summary"><span>TIME ASLEEP</span><p>${available&&['awake','light','deep','rem','sleeping'].some(k=>all[k]>0)?`<strong>${Math.floor(asleep/60)}</strong>h <strong>${asleep%60}</strong>min`:'<strong>—</strong>'}</p>${navigation}</header>`;
@@ -21,22 +40,22 @@ const SleepTimeline=(()=>{
     const x=t=>8+(t-start.getTime())/(end-start)*324,y=stage=>lanes.indexOf(stage)*43+27;
     const tickHours=Math.max(1,Math.ceil((end-start)/hour/4)),axis=[];
     for(let at=+start;at<=+end;at+=tickHours*hour)axis.push(at);
-    const bars=night.segments.map((s,i)=>{
+    const bars=blocks(night).map((s,i)=>{
       if(s.stage==='unrecorded')return '';
-      const left=x(s.start),width=x(s.end)-left,top=y(s.stage),previous=night.segments[i-1];
-      const connected=previous&&!['unrecorded','unknown'].includes(previous.stage)&&s.stage!=='unknown'&&previous.stage!==s.stage;
-      return `${connected?`<path d="M${left} ${y(previous.stage)}V${top}" stroke="${stages[s.stage][1]}" stroke-opacity=".16" stroke-width="1.5"/>`:''}<rect data-night-segment="${i}" x="${left}" y="${top-7}" width="${Math.max(.35,width)}" height="14" rx="${Math.min(3,width/2)}" fill="${stages[s.stage][1]}" opacity="1"/>`;
+      const left=x(s.start),width=x(s.end)-left,top=y(s.stage);
+      return `<rect data-night-segment="${i}" data-stage="${s.stage}" x="${left}" y="${top-8}" width="${width}" height="16" rx="${Math.min(3,width/2)}" fill="${stages[s.stage][1]}" opacity="1"/>`;
     }).join('');
     return summary+`<section class="sleep-night" aria-label="Sleep stages">
-      <div id="night-selection" class="night-inspection" data-index="${index}" aria-live="polite"><span>Sleep stages</span><small>${time(night.start)} – ${time(night.end)}</small></div>
-      <figure class="night-chart" aria-label="Sleep stages. Hold and slide to inspect the recorded intervals."><svg viewBox="0 0 340 ${height+23}" aria-hidden="true">
+      <div class="night-view-label"><h2>Sleep stages</h2><span>5-min blocks</span></div>
+      <div id="night-selection" class="night-inspection" data-index="${index}" aria-live="polite"><span>${time(night.start)} – ${time(night.end)}</span><small>Hold the chart for recorded timings</small></div>
+      <figure class="night-chart" aria-label="Sleep stages grouped into five-minute blocks by the longest recorded stage. Hold and slide for original recorded timings."><svg viewBox="0 0 340 ${height+23}" aria-hidden="true">
       ${axis.map(t=>`<path d="M${x(t)} 0V${height}" stroke="#ffffff10" stroke-dasharray="2 3"/><text x="${x(t)}" y="${height+17}" text-anchor="${t===axis[0]?'start':'middle'}" fill="#939199" font-size="11">${time(t)}</text>`).join('')}
       ${lanes.map((stage,i)=>`<text x="8" y="${i*43+12}" fill="#b6b3bc" font-size="12">${stages[stage][0]}</text><path d="M8 ${(i+1)*43}H332" stroke="#ffffff12"/>`).join('')}${bars}
       <path id="night-cursor" d="M${x(selected.start)} 0V${height}" stroke="#f0edf7" stroke-width=".8" opacity="0"/></svg>
       <input id="night-scrub" type="range" min="0" max="${Math.max(0,span-.001)}" step="any" value="${minute}" style="left:${x(night.start)/3.4}%;width:${(x(night.end)-x(night.start))/3.4}%;height:${height/(height+23)*100}%" aria-label="Inspect time during the night" aria-valuetext="${stages[selected.stage][0]}, ${time(selected.start)} to ${time(selected.end)}" data-axis-start="${+start}" data-axis-end="${+end}" data-height="${height}"/>
       </figure></section>
       <section class="sleep-breakdown" aria-label="Time in each stage">${Object.entries(stages).filter(([stage])=>stage!=='unrecorded'&&lanes.includes(stage)).map(([stage,[label,color]])=>`<button data-night-stage="${stage}" aria-pressed="false" ${!all[stage]?'disabled':''} style="--stage-color:${color}"><i></i><span>${label}</span><strong>${duration(all[stage]||0)}</strong></button>`).join('')}</section>
-      <p class="sleep-source">Samsung Health${all.unrecorded?' · Gaps are not recorded':''}${all.unknown?' · Some stage timings are unavailable':''}</p>`;
+      <p class="sleep-source">Samsung Health · Totals use original readings${all.unrecorded?'<br>Gaps are not recorded':''}${all.unknown?'<br>Some stage timings are unavailable':''}</p>`;
   }
   function inspect(night,minute){
     if(!valid(night)||!Number.isFinite(minute))return 0;
@@ -49,5 +68,5 @@ const SleepTimeline=(()=>{
     document.querySelectorAll('[data-night-stage]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.nightStage===s.stage)));return minute;
   }
   function stageMinute(night,stage){if(!valid(night))return 0;const s=night.segments.find(s=>s.stage===stage);return s?(s.start-night.start)/60000:0}
-  return {valid,view,inspect,stageMinute,locate,totals};
+  return {valid,view,inspect,stageMinute,locate,totals,blocks};
 })();

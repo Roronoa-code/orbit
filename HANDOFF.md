@@ -1,5 +1,16 @@
 # Orbit — handoff (updated 14 September 2026)
 
+## Five-minute Sleep overview — 14 September 2026
+
+Baseline `3a4dcb9`. The user rejected the preceding Sleep revision and explicitly requested five-minute blocks and research into other health apps. Reviewed [Oura's Sleep Graphs guide](https://support.ouraring.com/hc/en-us/articles/4403155260307-Sleep-Graphs), which documents five-minute display intervals, its published nighttime-movement screenshot, and [Fitbit/Google Health's Sleep Stages guide](https://support.google.com/googlehealth/answer/14236712?hl=en), which describes hold-and-drag access to recorded timings. These informed the overview/detail separation; Orbit does not claim to reproduce either app's private aggregation algorithm.
+
+The chart now chooses the stage with the greatest recorded duration in each clock-aligned five-minute block, retaining the preceding stage for exact-duration ties, and joins adjacent matching blocks into continuous bands. Every vertical stage connector is removed. Unknown/unrecorded spans are hard boundaries and retain their exact extent; outer and gap-adjacent blocks can therefore be partial. This is display-only: source records and all duration totals remain unchanged. The chart says “5-min blocks”; holding the chart or tapping a stage exposes original intervals labelled “Recorded”. One date navigator remains.
+
+Local checks passed: `verification/check.cjs`, `verification/sleep-apple.cjs`, `verification/interaction-followup.cjs`. Coverage includes duration-weighted grouping, sustained awakenings, equal-duration ties, source immutability, short/unaligned boundary windows, midnight, exact unknown/unrecorded gaps, dense/multiple-session and empty layouts, chart hold/scrub, day navigation, text editing, shared selectors and live-bar gestures. The dense browser fixture reduced 117 raw intervals to 24 visible bands at both 390 and 320 px; screenshots were inspected. Other gesture checks passed at 390/384/320. Output stays ignored in `verification/samsung-import/`. The native host is unchanged from the preceding verified build; no physical phone tests were performed.
+
+Production build `20260914-011828`, SHA256 `ccb61d1212127549aa23fbd0b4f08dbaf0bdb8fb86b79d2e062a1b65307d6fcf`, contains matching current source and no test records. Installed using **`install --user 0 -r`** on verified SM-S938B / R5CY13S5F8D at `192.168.0.210:36395`. Installed hash matches; user 0 installed=true, users 95/150 installed=false. Prior APK backed up in ignored `verification/samsung-import/phone-before-five-minute-sleep-20260914.apk`, SHA256 `f94e1417a408902713142bfed78754dfb43743a537bcfa2ff9e379bdf7985e4d`. No phone launch, navigation, capture, permission change or test. Phone appearance remains for the user to assess.
+
+
 ## Sleep consolidation and browser hold removal — 14 September 2026
 
 Baseline `51f0885`. The user rejected the prior Sleep redesign, requested Apple's approach, one navigation system, and removal of browser long-press highlights throughout Orbit. Reference inspected: [Apple's official Sleep history screenshot and guide](https://support.apple.com/en-ie/108906), published 17 April 2026. This revision takes its chart hierarchy, stage lanes, quieter transitions and compact duration summary; Samsung's Light classification and original recorded times remain intact.
