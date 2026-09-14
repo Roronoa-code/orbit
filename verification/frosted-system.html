@@ -122,19 +122,19 @@ document.querySelector('#run').onclick=async()=>{
     check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric!==before,'Releasing must commit exactly once');
     checks.push('A gesture held halfway shows one indicator between two options, both reacting, with nothing committed until release');
 
-    // The stationary hold on a distant option never moves the leading edge past a tenth of one slot.
+    // A distant press brings the same material beneath the finger, without committing.
     labels[0].click();await wait(900);
-    const track=health.tracks.get('body-metric'),slot=track.options[0].width,resting=track.pose;
+    const track=health.tracks.get('body-metric');
     const y=box(host).top+box(host).height/2,farX=box(labels[3]).left+box(labels[3]).width/2;
     ptr(labels[3],'pointerdown',farX,y);
-    let worst=0;
-    for(let i=0;i<40;i++){await frame();const at=track.pose;worst=Math.max(worst,Math.abs(at.cx-resting.cx)+Math.max(0,at.width-resting.width)/2)}
-    check(worst<=slot*0.10+0.51,'A distant stationary hold must stay within a tenth of one local slot: '+worst.toFixed(2)+' of '+(slot*0.10).toFixed(2));
+    for(let i=0;i<40;i++)await frame();
+    const error=Math.abs(track.pose.cx-track.options[3].centre);
+    check(error<2,'A distant stationary hold must reach the pressed item: '+error.toFixed(2));
     check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===labels[0].dataset.bodyMetric,'A stationary hold must not select the pressed option');
     ptr(host,'pointercancel',farX,y);await wait(700);
     check(q('[data-body-metric][aria-pressed="true"]').dataset.bodyMetric===labels[0].dataset.bodyMetric,'A cancelled hold must commit nothing');
-    measurements.distantHold={budget:+(slot*0.10).toFixed(2),worstLeadingExcursion:+worst.toFixed(2)};
-    checks.push('A distant stationary hold is capped at a tenth of one slot through the whole press spring, and cancels without committing');
+    measurements.distantHold={centreError:+error.toFixed(2)};
+    checks.push('A distant hold reaches the pressed item and cancels without committing');
 
     // A press during the settle captures the moving indicator instead of jumping back to a resting slot.
     ptr(labels[3],'pointerdown',farX,y);ptr(host,'pointerup',farX,y);await wait(120);

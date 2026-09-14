@@ -49,6 +49,7 @@ window.LiquidGlass=(()=>{
       filter.append(image,element('feDisplacementMap',{in:'SourceGraphic',in2:'lens',scale:48,xChannelSelector:'R',yChannelSelector:'G'}));defs.append(filter);
       const entry={node,filter,image,key:''};entries.set(node,entry);observer.observe(node);update(entry);
     }
+    window.GlassResponse?.enhance(root);
   }
   preference.addEventListener('change',()=>{if(!preference.matches)for(const entry of entries.values())update(entry)});
   return {enhance,displacement};

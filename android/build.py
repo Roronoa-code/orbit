@@ -41,7 +41,7 @@ def inline(reference, path, attributes=''):
 # Every local stylesheet and script the page loads must be inlined here; nothing may remain a network reference.
 inline('<link rel="stylesheet" href="glass-material.css">', 'glass-material.css')
 inline('<link rel="stylesheet" href="health-pages.css">', 'health-pages.css')
-for name in ['health-data.js', 'settings-store.js', 'surface-motion.js', 'orbit-interaction.js', 'hero-dots.js', 'sleep-timeline.js', 'blob-track.js', 'liquid-glass.js', 'workout-focus.js', 'workout-details.js', 'orbit-settings.js', 'signal-orb.js']:
+for name in ['health-data.js', 'settings-store.js', 'surface-motion.js', 'orbit-interaction.js', 'hero-dots.js', 'sleep-timeline.js', 'blob-track.js', 'liquid-glass.js', 'glass-response.js', 'workout-focus.js', 'workout-details.js', 'orbit-settings.js', 'signal-orb.js']:
     inline(f'<script src="{name}"></script>', name)
 inline('<script src="health-pages.js"></script>', 'health-pages.js', ' id="health-pages"')
 import re as _re

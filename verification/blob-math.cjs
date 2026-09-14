@@ -82,36 +82,6 @@ for (let offset = 0; offset <= RIGHT - SLOT; offset += 3) {
   ok(B.influences(0, 0, zones).every(v => v.raw === 0), 'A zero-width blob yields no influence');
 }
 
-// The stationary hold: pressing any option, however far, never moves the leading edge past a tenth of one slot.
-for (const direction of [-3, -2, -1, 1, 2, 3]) {
-  const base = { cx: CENTRES[direction > 0 ? 0 : 3], width: SLOT, height: 34 };
-  for (const progress of [0, 0.25, 0.5, 0.75, 1, 1.4, 3]) {
-    const held = B.holdPose(base, SLOT, direction, progress);
-    const excursion = B.leadingExcursion(held, base);
-    ok(excursion <= SLOT * 0.10 + 1e-9, `Hold excursion must stay within one tenth of a slot: ${excursion}`);
-    ok(held.width >= base.width, 'A hold may only grow the indicator');
-    ok(Math.abs(held.height - base.height) < 1e-9, 'A hold does not change height');
-  }
-  const full = B.holdPose(base, SLOT, direction, 1);
-  near(Math.abs(full.cx - base.cx), 0.85 * 0.10 * SLOT, 1e-9, 'Hold shift is 85% of the budget');
-  near(full.width - base.width, 0.15 * 0.10 * SLOT, 1e-9, 'Hold growth is 15% of the budget');
-  near(B.leadingExcursion(full, base), 0.0925 * SLOT, 1e-9, 'Full hold leading excursion');
-}
-
-// Symmetry: equal and opposite presses give equal displacement and growth.
-{
-  const base = { cx: CENTRES[1], width: SLOT, height: 34 };
-  const leftward = B.holdPose(base, SLOT, -1, 1), rightward = B.holdPose(base, SLOT, 1, 1);
-  near(base.cx - leftward.cx, rightward.cx - base.cx, 1e-9, 'Opposite holds must be symmetric');
-  near(leftward.width, rightward.width, 1e-9, 'Opposite holds must grow equally');
-  const none = B.holdPose(base, SLOT, 0, 1);
-  near(none.cx, base.cx, 1e-9, 'Pressing the active option does not lean');
-  near(none.width, base.width, 1e-9, 'Pressing the active option does not grow');
-  throws(() => B.holdPose({ cx: 0, width: 0, height: 10 }, SLOT, 1, 1), 'Zero geometry must be rejected');
-  throws(() => B.holdPose(base, 0, 1, 1), 'A zero slot must be rejected');
-  throws(() => B.holdPose({ cx: NaN, width: 10, height: 10 }, SLOT, 1, 1), 'Non-finite geometry must be rejected');
-}
-
 // A stretched candidate at a wall stays inside the track with positive width and a bounded bulge.
 for (const pull of [1, 8, 30, 120, 900]) {
   for (const side of [-1, 1]) {
@@ -184,4 +154,4 @@ near(B.smoothstep01(0.5), 0.5, 1e-12, 'Smoothstep is symmetric at one half');
 near(B.clamp(5, 0, 1), 1, 1e-12, 'Clamp bounds above');
 near(B.clamp(-5, 0, 1), 0, 1e-12, 'Clamp bounds below');
 
-console.log(`PASS: ${count} assertions. Catchments, coverage partitions, eased response, the one-tenth single-slot hold cap through overshoot, wall compression, bounded release projection and frame-partition-independent springs, executed against the shipped blob-track.js.`);
+console.log(`PASS: ${count} assertions. Catchments, coverage partitions, eased response, wall compression, bounded release projection and frame-partition-independent springs, executed against the shipped blob-track.js.`);

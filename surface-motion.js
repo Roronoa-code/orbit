@@ -4,7 +4,7 @@ const SurfaceMotion=(()=>{
   const running=new Map();
   let reduced=false;try{reduced=SettingsStore.read('orbit-reduce-motion-v1')==='true'}catch{}
   const immediate=()=>document.hidden||reduced;
-  function setReduced(value){const next=Boolean(value);SettingsStore.write('orbit-reduce-motion-v1',String(next));reduced=next;settle()}
+  function setReduced(value){const next=Boolean(value);SettingsStore.write('orbit-reduce-motion-v1',String(next));reduced=next;settle();window.GlassResponse?.clear()}
   function stop(node){const old=running.get(node);if(old){old.animation.onfinish=null;old.animation.cancel();running.delete(node)}return old}
   function play(node,frames,duration,finish,open){
     stop(node);if(!node?.getBoundingClientRect||immediate()){finish?.();return}

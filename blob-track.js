@@ -1,6 +1,6 @@
 /* One physical selector: a measured track, a single moving indicator and the influence its rendered overlap gives
    every option. Geometry belongs to this module; the committed value belongs to the page. A press answers at once,
-   a held neighbour leans within a hard cap of one tenth of a local slot, a drag follows the pointer without
+   a held neighbour draws the same material beneath the finger, a drag follows the pointer without
    tweening, walls compress the candidate shape, a release projects a bounded distance and commits once, and a
    cancelled gesture commits nothing. Lengths are CSS pixels in track-local coordinates; time is seconds. */
 'use strict';
@@ -13,17 +13,6 @@ const BlobTrack=(()=>{
     if(dimension<=0||coefficient<=0)return 0;
     const x=Math.max(0,overshoot);return x*dimension*coefficient/(dimension+coefficient*x);
   }
-  // The stationary lean toward a pressed option. The budget is one tenth of one local slot, never of the bar or of
-  // the distance to that option; 85% of it moves the centre and 15% grows the width, so the rendered leading edge
-  // stays inside the budget.
-  function holdPose(base,slotWidth,direction,progress=1){
-    for(const key of ['cx','width','height'])finite(key,base[key]);
-    finite('slotWidth',slotWidth);finite('direction',direction);finite('progress',progress);
-    if(base.width<=0||base.height<=0||slotWidth<=0)throw new RangeError('Positive geometry is required');
-    const d=Math.sign(direction),budget=d===0?0:slotWidth*.10*clamp(progress,0,1);
-    return {cx:base.cx+d*budget*.85,width:base.width+budget*.15,height:base.height};
-  }
-  const leadingExcursion=(pose,base)=>Math.abs(pose.cx-base.cx)+Math.max(0,pose.width-base.width)/2;
   // Contiguous catchments: inner boundaries are midpoints between measured centres, outer boundaries the track
   // edges, so the indicator can never fall into a gap between options.
   function catchments(centres,left,right){
@@ -78,10 +67,10 @@ const BlobTrack=(()=>{
     return {x:target+c1*e1+c2*e2,velocity:c1*r1*e1+c2*r2*e2};
   }
   const TUNING={
-    pressShrink:8,pressStiffness:260,pressDamping:.78,
+    pressStiffness:260,pressDamping:.78,
     settleStiffness:320,settleDamping:.72,shapeStiffness:500,shapeDamping:1,
     slop:6,maxStretch:.16,squash:.5,stretchSlotsPerSecond:8,stretchTau:.035,
-    velocityWindow:.1,stillness:.06,projectionHorizon:.12,holdCap:.10,
+    velocityWindow:.1,stillness:.06,projectionHorizon:.12,
   };
 
   function create(config){
@@ -90,8 +79,11 @@ const BlobTrack=(()=>{
     const noop=()=>{};
     const haptics=config.haptics||{tick:noop,select:noop};
     let opts=[],zones=[],bounds={left:0,right:0},rest={width:0,height:0},maxHeight=0,targets={cx:0,width:0,height:0};
-    let pose={cx:0,width:0,height:0},vel={cx:0,width:0,height:0},stretch=0,stretchVelocity=0;
-    let mode='rest',session=null,frame=0,generation=0,ownIndex=0,lastInfluences=[],destroyed=false,driven=null;
+    let pose={cx:0,width:0,height:0},vel={cx:0,width:0,height:0},stretch=0;
+    let mode='rest',session=null,frame=0,generation=0,lastInfluences=[],destroyed=false,centres=[],hostLeft=0,ignoreClickUntil=0;
+    const material=window.GlassResponse?.create(host,true),gentle=()=>window.GlassResponse?.reduced()||false;
+    let materialAt=performance.now();
+    function stepMaterial(now=performance.now()){const moving=material?.step(Math.min(.05,Math.max(0,(now-materialAt)/1000)))||false;materialAt=now;return moving}
     const optionEls=()=>[...host.querySelectorAll(config.optionSelector)].filter(el=>el.getClientRects().length);
     const idOf=el=>config.idOf?config.idOf(el):el.dataset.blobId;
     const committedIndex=()=>{const id=config.committed();const i=opts.findIndex(o=>o.id===id);return i<0?0:i};
@@ -108,23 +100,21 @@ const BlobTrack=(()=>{
       // Equal centres (a collapsed layout) cannot produce catchments.
       for(let i=1;i<opts.length;i++)if(opts[i].centre<=opts[i-1].centre)return false;
       bounds=inner;
-      zones=catchments(opts.map(o=>o.centre),inner.left,inner.right);
+      hostLeft=base.left;centres=opts.map(o=>o.centre);
+      zones=catchments(centres,inner.left,inner.right);
       const active=opts[committedIndex()];
       rest={width:active.width,height:active.height};
+      host.style.setProperty('--selection-base-width',rest.width+'px');
+      host.style.setProperty('--selection-base-height',rest.height+'px');
       maxHeight=Math.max(rest.height,base.height-(parseFloat(style.paddingTop)||0)-(parseFloat(style.paddingBottom)||0));
       return true;
     }
     const slotSpan=i=>{const z=zones[clamp(i,0,zones.length-1)];return Math.max(1,z.right-z.left)};
-    // The cap uses the active slot and, for a farther press, the nearest neighbour in that direction.
-    function referenceSlot(from,to){
-      if(from===to)return opts[from].width;
-      const step=Math.sign(to-from);
-      return Math.max(1,Math.min(opts[from].width,opts[clamp(from+step,0,opts.length-1)].width));
-    }
     function restingPose(index=committedIndex()){const o=opts[clamp(index,0,opts.length-1)];return {cx:o.centre,width:o.width,height:o.height}}
 
     function render(){
-      const shaped=wallPose(pose.cx,pose.width,pose.height,bounds.left,bounds.right,maxHeight);
+      const lift=material?.engagement||0;
+      const shaped=wallPose(pose.cx,pose.width*(1+lift*.07),pose.height*(1+lift*.20),bounds.left,bounds.right,maxHeight+rest.height*.22);
       const active=opts[committedIndex()];
       const left=shaped.cx-shaped.width/2,top=active?active.top+(active.height-shaped.height)/2:0;
       if(config.render)config.render({cx:shaped.cx,left,top,width:shaped.width,height:shaped.height},{opts,bounds,mode});
@@ -133,6 +123,8 @@ const BlobTrack=(()=>{
         host.style.setProperty('--selection-y',top.toFixed(2)+'px');
         host.style.setProperty('--selection-width',shaped.width.toFixed(2)+'px');
         host.style.setProperty('--selection-height',shaped.height.toFixed(2)+'px');
+        host.style.setProperty('--selection-scale-x',(shaped.width/rest.width).toFixed(5));
+        host.style.setProperty('--selection-scale-y',(shaped.height/rest.height).toFixed(5));
       }
       lastInfluences=influences(left,shaped.width,zones);
       if(config.influence)opts.forEach((o,i)=>config.influence(o.el,lastInfluences[i].raw,lastInfluences[i].eased,i));
@@ -148,41 +140,34 @@ const BlobTrack=(()=>{
         const dragging=session?.owned;
         const position=dragging?tuning.settleStiffness:mode==='press'?tuning.pressStiffness:tuning.settleStiffness;
         const damping=dragging?tuning.settleDamping:mode==='press'?tuning.pressDamping:tuning.settleDamping;
-        let moving=false;
+        let moving=false;const materialMoving=stepMaterial(now),reduced=gentle();
         if(dragging){
           // Translation is raw: the finger owns the centre. Only the deformation relaxes over time.
-          const target=Math.min(1,session.speedSlots/tuning.stretchSlotsPerSecond)*tuning.maxStretch;
+          const target=reduced?0:Math.min(1,session.speedSlots/tuning.stretchSlotsPerSecond)*tuning.maxStretch;
           stretch+=(target-stretch)*(1-Math.exp(-dt/tuning.stretchTau));
           session.speedSlots*=Math.exp(-dt/tuning.stretchTau);
-          pose.cx=session.rawCx;vel.cx=0;
+          // A fast grab of another item retains the displayed pose, then closes only
+          // that initial gap. Subsequent finger movement remains one-to-one.
+          const catchup=reduced?{x:0,velocity:0}:spring(session.catchup,session.catchupV,0,dt,650,1);
+          session.catchup=catchup.x;session.catchupV=catchup.velocity;
+          pose.cx=session.rawCx+session.catchup;vel.cx=session.catchupV;
           pose.width=session.baseWidth*(1+stretch);
           pose.height=rest.height*(1-tuning.squash*stretch);
-          moving=stretch>.001;
-        }else{
+          moving=stretch>.001||Math.abs(session.catchup)>.05||Math.abs(session.catchupV)>.5;
+        }else if(reduced){Object.assign(pose,targets);vel={cx:0,width:0,height:0};stretch=0}
+        else{
           const p=spring(pose.cx,vel.cx,targets.cx,dt,position,damping);pose.cx=p.x;vel.cx=p.velocity;
           const w=spring(pose.width,vel.width,targets.width,dt,mode==='press'?position:tuning.shapeStiffness,mode==='press'?damping:tuning.shapeDamping);pose.width=w.x;vel.width=w.velocity;
           const h=spring(pose.height,vel.height,targets.height,dt,tuning.shapeStiffness,tuning.shapeDamping);pose.height=h.x;vel.height=h.velocity;
           stretch=0;
-          // The hold cap binds every rendered frame, including the press spring's overshoot.
-          if(mode==='press'&&session)capHold();
           moving=Math.abs(pose.cx-targets.cx)>.05||Math.abs(vel.cx)>.5||Math.abs(pose.width-targets.width)>.05||Math.abs(vel.width)>.5||Math.abs(pose.height-targets.height)>.05;
           if(!moving){pose.cx=targets.cx;pose.width=targets.width;pose.height=targets.height;vel={cx:0,width:0,height:0}}
         }
         render();
-        if(moving||dragging)frame=requestAnimationFrame(tick);
+        if(moving||materialMoving)frame=requestAnimationFrame(tick);
         else if(mode==='settle'){mode='rest';host.classList.remove('is-dragging')}
       };
       frame=requestAnimationFrame(tick);
-    }
-    // Both contributions scale back together, so the rendered leading edge lands exactly on the budget.
-    function capHold(){
-      const base=session.base,budget=session.reference*tuning.holdCap;
-      if(budget<=0)return;
-      const excursion=leadingExcursion(pose,base);
-      if(excursion<=budget)return;
-      const factor=budget/excursion;
-      pose.cx=base.cx+(pose.cx-base.cx)*factor;
-      pose.width=base.width+(pose.width-base.width)*factor;
     }
 
     function settleTo(index,velocity=0){
@@ -205,67 +190,66 @@ const BlobTrack=(()=>{
     }
 
     function down(event){
-      if(destroyed||!event.isPrimary||session||!measure())return;
+      if(session&&session.id!==event.pointerId){cancel('multiple pointers');return}
+      if(destroyed||!event.isPrimary||event.button!==0||session||!measure())return;
       const el=event.target.closest?.(config.optionSelector);
       const index=el?opts.findIndex(o=>o.el===el):-1;
-      if(index<0)return;
+      if(index<0||opts[index].el.disabled)return;
+      ignoreClickUntil=0;
       stop();
       const base=restingPose();
+      // A launcher has no selected destination while idle. Its temporary lens originates
+      // at the touched item; an interrupted material keeps the pose already on screen.
+      if(config.transient&&mode==='rest'&&!(material?.engagement>.01))pose=restingPose(index);
       // Only an uninitialised indicator adopts a resting slot; otherwise the press keeps whatever is on screen,
       // including a pose the page is driving through a cyclic move.
       if(!(pose.width>0)){pose={cx:base.cx,width:base.width,height:base.height};vel={cx:0,width:0,height:0}}
       const from=committedIndex();
-      // The press leans from the pose actually on screen, so interrupting a settle never snaps the indicator back
-      // to a resting slot, and the hold cap measures the lean rather than that distance.
       const held={cx:pose.cx,width:pose.width||base.width,height:pose.height||base.height};
       session={id:event.pointerId,downX:event.clientX,downY:event.clientY,index,from,owned:false,done:false,
-        base:held,reference:referenceSlot(from,index),
+        grabDx:event.clientX-hostLeft-(index===from?held.cx:opts[index].centre),
         samples:[],speedSlots:0,baseWidth:rest.width,lastMove:performance.now()/1000,generation:++generation,candidate:from};
       sample(session,event);
+      material?.begin(event.clientX,event.clientY);
+      materialAt=performance.now();
       mode='press';
-      if(index===from){
-        const shrink=Math.min(tuning.pressShrink,rest.width*.25);
-        targets={cx:held.cx,width:Math.max(8,held.width-shrink),height:held.height};
-      }else{
-        const lean=holdPose(held,session.reference,index-from,1);
-        targets={cx:lean.cx,width:lean.width,height:lean.height};
-      }
+      targets=index===from?{cx:held.cx,width:base.width,height:base.height}:restingPose(index);
       run();
     }
     function move(event){
       if(!session||event.pointerId!==session.id)return;
+      material?.aim(event.clientX,event.clientY);
       const dx=event.clientX-session.downX,dy=event.clientY-session.downY;
       if(!session.owned){
         if(Math.abs(dy)>tuning.slop&&Math.abs(dy)>=Math.abs(dx)){cancel('vertical');return} // the scroller keeps it
         if(Math.abs(dx)<tuning.slop)return;
         session.owned=true;haptics.tick();session.baseWidth=rest.width;
+        if(material)material.state.dragging=true;
         try{host.setPointerCapture(session.id)}catch{}
         host.classList.add('is-dragging');
-        // Rebase from the pose actually on screen, so a press on a distant option never teleports the indicator.
-        // Keep the movement beyond touch slop, even when the first event spans a narrow date slot.
-        const beyondSlop=dx-Math.sign(dx)*tuning.slop;
-        session.grabDx=event.clientX-beyondSlop-(host.getBoundingClientRect().left+pose.cx);
+        session.catchup=pose.cx-(event.clientX-session.grabDx-hostLeft);
+        session.catchupV=vel.cx;
         session.samples=[];sample(session,event);
       }
       if(event.cancelable)event.preventDefault();
       const previous=session.samples[session.samples.length-1];
       sample(session,event);
-      const base=host.getBoundingClientRect();
-      session.rawCx=event.clientX-session.grabDx-base.left;
+      session.rawCx=event.clientX-session.grabDx-hostLeft;
       const dt=previous?Math.max(1e-3,event.timeStamp/1000-previous.t):0;
       if(dt>0&&previous){
         const speed=Math.abs(event.clientX-previous.x)/dt/slotSpan(session.candidate);
         session.speedSlots=Math.max(session.speedSlots,speed);
       }
       session.lastMove=performance.now()/1000;
-      const candidate=nearestCentre(opts.map(o=>o.centre),session.rawCx,session.candidate);
+      const candidate=nearestCentre(centres,session.rawCx,session.candidate);
       if(candidate!==session.candidate&&Math.abs(opts[candidate].centre-session.rawCx)<slotSpan(candidate)*.42){session.candidate=candidate;haptics.tick()}
       run();
     }
     function up(event){
       if(!session||event.pointerId!==session.id||session.done)return;
       const active=session;active.done=true;
-      host.classList.remove('is-dragging');
+      ignoreClickUntil=performance.now()+450;
+      material?.end();
       try{host.releasePointerCapture(active.id)}catch{}
       session=null;
       // A release away from the track commits nothing. An owned drag is judged vertically only, so pulling past a
@@ -276,8 +260,8 @@ const BlobTrack=(()=>{
       if(!vertical||(!active.owned&&!horizontal)){config.onCancel?.('outside');settleTo(committedIndex());return}
       if(active.owned){
         sample(active,event);
-        const projected=projectCentre(pose.cx,velocityNow(active),slotSpan(active.candidate),tuning.projectionHorizon);
-        const index=nearestCentre(opts.map(o=>o.centre),projected.centre,active.from);
+        const projected=projectCentre(active.rawCx,velocityNow(active),slotSpan(active.candidate),tuning.projectionHorizon);
+        const index=nearestCentre(centres,projected.centre,active.from);
         commit(index,'drag');
         settleTo(index,clamp(projected.velocity,-8*slotSpan(index),8*slotSpan(index)));
       }else{commit(active.index,'tap');settleTo(active.index)}
@@ -290,7 +274,8 @@ const BlobTrack=(()=>{
     function cancel(reason){
       if(!session)return;
       const active=session;session=null;active.done=true;
-      host.classList.remove('is-dragging');
+      ignoreClickUntil=performance.now()+450;
+      material?.end(true);
       try{host.releasePointerCapture(active.id)}catch{}
       config.onCancel?.(reason);
       settleTo(committedIndex());
@@ -312,21 +297,43 @@ const BlobTrack=(()=>{
     }
     function setPose(next){ // a page-owned move, for example Body's cyclic metric gesture
       if(session)return;
-      stop();mode='rest';pose={cx:next.cx,width:next.width??rest.width,height:next.height??rest.height};vel={cx:0,width:0,height:0};targets={...pose};render();
+      stop();mode='rest';pose={cx:next.cx,width:next.width??rest.width,height:next.height??rest.height};vel={cx:0,width:0,height:0};targets={...pose};const moving=stepMaterial();render();if(moving)run();
     }
     function remeasure(){if(measure()&&!session){const target=restingPose();pose={...target};targets={...target};render()}}
+    function suspend(){
+      if(session)cancel('interrupted');stop();material?.reset();
+      if(opts.length){pose=restingPose();targets={...pose};vel={cx:0,width:0,height:0};mode='rest';render()}
+      host.classList.remove('is-dragging');
+    }
+    function keyDown(event){
+      if(session||event.repeat||!['Enter',' '].includes(event.key)||!event.target.closest(config.optionSelector)||!measure())return;
+      const o=opts.find(o=>o.el===event.target.closest(config.optionSelector));if(!o||o.el.disabled)return;
+      material?.begin(hostLeft+o.centre,host.getBoundingClientRect().top+o.top+o.height/2);run();
+    }
+    function keyUp(event){if(!session&&['Enter',' '].includes(event.key)){material?.end();run()}}
+    function focusOut(){if(!session){material?.end();run()}}
+    function blockClick(event){if(event.detail&&performance.now()<ignoreClickUntil){event.preventDefault();event.stopImmediatePropagation()}}
+    const visibility=()=>{if(document.hidden)suspend()};
     function destroy(){
-      destroyed=true;stop();session=null;
+      destroyed=true;stop();session=null;material?.destroy();
       host.removeEventListener('pointerdown',down);host.removeEventListener('pointermove',move);
       for(const type of ['pointerup','pointercancel','lostpointercapture'])host.removeEventListener(type,type==='pointerup'?up:lost);
+      document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',lost);
+      host.removeEventListener('keydown',keyDown);host.removeEventListener('keyup',keyUp);host.removeEventListener('focusout',focusOut);
+      host.removeEventListener('click',blockClick,true);
+      window.removeEventListener('blur',suspend);window.removeEventListener('resize',suspend);document.removeEventListener('visibilitychange',visibility);
     }
     host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);
     host.addEventListener('pointerup',up);host.addEventListener('pointercancel',lost);host.addEventListener('lostpointercapture',lost);
+    document.addEventListener('pointerup',up);document.addEventListener('pointercancel',lost);
+    host.addEventListener('keydown',keyDown);host.addEventListener('keyup',keyUp);host.addEventListener('focusout',focusOut);
+    host.addEventListener('click',blockClick,true);
+    window.addEventListener('blur',suspend);window.addEventListener('resize',suspend);document.addEventListener('visibilitychange',visibility);
     if(measure()){const target=restingPose();pose={...target};targets={...target};render()}
     return {host,sync,remeasure,setPose,cancel:()=>cancel('external'),destroy,
       get busy(){return Boolean(session)},get dragging(){return Boolean(session?.owned)},
       get pose(){return {...pose}},get influences(){return lastInfluences.map(v=>({...v}))},
       get options(){return opts.map(o=>({id:o.id,centre:o.centre,width:o.width}))},get bounds(){return {...bounds}}};
   }
-  return {create,clamp,smoothstep01,rubberband,holdPose,leadingExcursion,catchments,influences,wallPose,projectCentre,nearestCentre,spring,TUNING};
+  return {create,clamp,smoothstep01,rubberband,catchments,influences,wallPose,projectCentre,nearestCentre,spring,TUNING};
 })();

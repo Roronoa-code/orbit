@@ -11,7 +11,6 @@
   --frost-overlay:rgba(19,19,24,.82);
   --frost-track:rgba(18,18,18,.40);
   --frost-indicator:rgba(0,0,0,.50);
-  --frost-indicator-held:rgba(0,0,0,.58);
   /* BitChord's floating chrome: 8 dp diffusion, 1.5 saturation, 40% #121212 tint. */
   --frost-blur-floating:blur(8px) saturate(1.5);
   --frost-blur-panel:blur(20px) saturate(.95);
@@ -39,7 +38,6 @@
 .glass-track{position:relative;isolation:isolate;background:var(--frost-track);-webkit-backdrop-filter:var(--frost-blur-track);backdrop-filter:var(--frost-blur-track);box-shadow:var(--frost-recess),var(--frost-rim-low)}
 /* Role: indicator — the same family, a little more luminous, with its own edge and lift. */
 .glass-indicator{background:var(--frost-indicator);box-shadow:var(--frost-indicator-rim),var(--frost-indicator-lift)}
-.is-dragging>.glass-indicator{background:var(--frost-indicator-held)}
 /* Role: action — consistent edges; the established filled primary and neutral secondary keep their meaning. */
 .glass-action{border:1px solid #ffffff14;box-shadow:var(--frost-rim)}
 
@@ -102,4 +100,53 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .liquid-surface,.glass-control{background:Canvas;border:1px solid CanvasText;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
   .liquid-surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .live-island .island-frost,.stack-motion{backdrop-filter:none;-webkit-backdrop-filter:none;background:Canvas}
+}
+
+/* The moving material has fixed layout dimensions. Only its decorative geometry flexes;
+   the options, labels, input hit targets and shared backdrop never resize on contact. */
+.blob-track.glass-responsive{overflow:visible!important}
+.blob-track.glass-responsive>.selection-pill{
+  width:var(--selection-base-width,0px)!important;height:var(--selection-base-height,44px)!important;
+  transform:translate3d(var(--selection-x,0px),var(--selection-y,0px),0) scale(var(--selection-scale-x,1),var(--selection-scale-y,1))!important;
+  transform-origin:0 0;will-change:transform;transition:none!important;
+}
+.glass-response-surface,.glass-contact-mark,.glass-shared-light{position:absolute;pointer-events:none!important;user-select:none;opacity:0}
+.glass-response-surface{
+  inset:0;border-radius:inherit;overflow:hidden;
+  background:linear-gradient(155deg,#f4efff24,#ede9ff08 42%,#b9a6db12);
+  box-shadow:inset 0 0 0 1px #ffffff38,inset 0 1px 1px #ffffff30,0 5px 13px -5px #0007;
+  transform-origin:50% 50%;
+}
+.selection-pill>.glass-response-surface{inset:0;background:linear-gradient(150deg,#eee9ff38,#e1d6ff14 45%,#dfccff20)}
+.glass-shell-response{background:linear-gradient(155deg,#f4efff0c,transparent 65%);box-shadow:none}
+.transient-track{position:relative;--blob-active:#fff;--blob-inactive:#e0dde6}
+.transient-track>.selection-pill{background:none;box-shadow:none;border-radius:16px}
+.glass-response-light{position:absolute;inset:-35%;pointer-events:none;background:radial-gradient(ellipse at center,#fff3,transparent 58%);transform-origin:50% 50%}
+.glass-shared-light{inset:0;z-index:0;border-radius:inherit;background:radial-gradient(ellipse at center,#eee5ff30,transparent 62%)}
+.glass-contact-mark{left:0;top:0;width:28px;height:28px;border-radius:50%;background:#d5c2f512;box-shadow:inset 0 0 0 1px #e4d4ff30;overflow:hidden}
+.glass-responsive[data-glass-state=idle]>.glass-response-surface,.glass-responsive[data-glass-state=idle]>.glass-contact-mark{will-change:auto}
+.glass-responsive:not([data-glass-state=idle])>.glass-response-surface{will-change:transform,opacity}
+
+/* Native range tracking and value semantics remain intact. The thumb is the material. */
+.music-timeline input.glass-responsive::-webkit-slider-thumb{
+  transform:scale(calc(1 + var(--glass-flex,0)*.9 + var(--glass-stretch,0)*.32),calc(1 + var(--glass-flex,0)*.9 - var(--glass-stretch,0)*.15));
+  background:color-mix(in srgb,#fff calc(100% - var(--glass-engagement,0)*30%),#d5c2f5);
+  box-shadow:0 2px 5px #0003;transition:none;
+}
+#date-range.glass-responsive::-webkit-slider-thumb{transform:scale(calc(1 + var(--glass-flex,0)*.18 + var(--glass-stretch,0)*.12));transition:none}
+.tracking-option input.glass-responsive{touch-action:pan-y}
+.tracking-option input.glass-responsive:before,.tracking-option input.glass-responsive:checked:before{
+  transform:translateX(var(--switch-x,0px)) scale(calc(1 + var(--glass-flex,0)*.26 + var(--glass-stretch,0)*.14),calc(1 + var(--glass-flex,0)*.14 - var(--glass-stretch,0)*.05));
+  background:color-mix(in srgb,#fff calc(100% - var(--glass-engagement,0)*22%),#d5c2f5);transition:none;
+}
+/* Previous independent press keyframes no longer compete with the material. */
+.body-date-stepper button.glass-responsive:active{transform:none}
+.music-controls button.glass-responsive:active svg{transform:none;opacity:1}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  .glass-response-surface{background:#d5c2f526;box-shadow:inset 0 0 0 1px #fff7}
+  .glass-response-light,.glass-shared-light{display:none}
+}
+@media(forced-colors:active){
+  .glass-response-surface,.glass-contact-mark,.glass-shared-light{display:none}
+  .glass-responsive[data-glass-state=engaged],.glass-responsive[data-glass-state=touch]{outline:2px solid Highlight;outline-offset:-2px}
 }
