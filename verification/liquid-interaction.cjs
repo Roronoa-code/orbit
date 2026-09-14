@@ -103,6 +103,7 @@ try{for(const width of [390,320]){
 
  // Native switches can be held and dragged, without a subsequent click undoing the choice.
  await p.evaluate(()=>Health.open('settings'));await p.waitForTimeout(350);
+ await p.locator('.settings-health>summary').tap();await p.waitForTimeout(350);
  await disclosure('.settings-health .settings-about summary','connection-row-held');
  await disclosure('.settings-section.settings-about summary','about-row-held');
  const toggle='#settings-rotation';await p.locator(toggle).scrollIntoViewIfNeeded();

@@ -49,7 +49,7 @@ left_over = _re.findall(r'<script src="([^"]+)"></script>|<link rel="stylesheet"
 left_over = [name for pair in left_over for name in pair if name and '//' not in name]
 if left_over:
     raise SystemExit(f'Unbundled local assets remain in the packaged page: {left_over}')
-native_style = '<style>.status,.home-indicator{display:none}.utility-island{top:calc(var(--safe-top) + 62px)}.screen{height:100dvh!important;min-height:0!important}.phone{max-width:none;margin:0;padding:0;border:0;box-shadow:none}.screen{border-radius:0;padding-top:var(--safe-top)}.copy-label{margin-bottom:16px}.masthead{padding-top:12px}body{background:#0a0a0c}</style>'
+native_style = '<style>.status,.home-indicator{display:none}.screen{height:100dvh!important;min-height:0!important}.phone{max-width:none;margin:0;padding:0;border:0;box-shadow:none}.screen{border-radius:0;padding-top:var(--safe-top)}.copy-label{margin-bottom:16px}body{background:#0a0a0c}</style>'
 html = html.replace('</head>', native_style + '</head>')
 (build / 'assets/index.html').write_text(html, encoding='utf-8')
 shutil.copy2(root.parent / 'Manrope-OFL.txt', build / 'assets/Manrope-OFL.txt')

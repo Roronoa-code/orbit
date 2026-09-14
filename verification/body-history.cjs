@@ -18,8 +18,8 @@ async function gestures(p,c){
   for(let i=0;i<3;i++)await swipe('[data-body-dial]',-145);assert.equal(await selected(),'weight','Fast reverse swipes must work');await p.waitForTimeout(700);
   const ranges=await p.locator('[data-body-range]').all(),a=await ranges[1].boundingBox(),z=await ranges[3].boundingBox();await swipe('[data-body-range="30"]',z.x-a.x,500);await p.waitForTimeout(700);assert.equal(await ranges[3].getAttribute('aria-pressed'),'true','Shared history selector drag');
   await p.locator('#health-scroll').evaluate(n=>n.scrollTop=0);
-  const title=await p.locator('#health-title').boundingBox(),source=await p.locator('#health-source').boundingBox();assert(source.y>=title.y+title.height+4,'Body date overlaps title');
-  return {rapid,ring:[fills[0],fills.at(-1)],title,source};
+  const title=await p.locator('#health-title').boundingBox(),hero=await p.locator('.body-hero').boundingBox();assert(hero.y>=title.y+title.height+4,'Body reading overlaps title');assert.equal(await p.locator('#health-source').count(),0,'Source prose belongs with measurement notes');assert.match(await p.locator('.reading-notes').textContent(),/Samsung Health/);
+  return {rapid,ring:[fills[0],fills.at(-1)],title,hero};
 }
 async function main(){
   const browser=await chromium.launch(),results=[];

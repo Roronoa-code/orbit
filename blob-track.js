@@ -195,6 +195,9 @@ const BlobTrack=(()=>{
       const el=event.target.closest?.(config.optionSelector);
       const index=el?opts.findIndex(o=>o.el===el):-1;
       if(index<0||opts[index].el.disabled)return;
+      // Touch can synthesize a mousedown after navigation reveals a different control.
+      // Suppress compatibility mouse events before they can focus or edit that content.
+      if(event.pointerType!=='mouse'&&event.cancelable)event.preventDefault();
       ignoreClickUntil=0;
       stop();
       const base=restingPose();
@@ -313,6 +316,10 @@ const BlobTrack=(()=>{
     function keyUp(event){if(!session&&['Enter',' '].includes(event.key)){material?.end();run()}}
     function focusOut(){if(!session){material?.end();run()}}
     function blockClick(event){if(event.detail&&performance.now()<ignoreClickUntil){event.preventDefault();event.stopImmediatePropagation()}}
+    // A navigation commit can move the track before the browser emits its click.
+    // Consume that release even if it is retargeted to newly revealed content.
+    // A new physical press clears the guard, so the next deliberate tap still works.
+    const nextPress=()=>{ignoreClickUntil=0};
     const visibility=()=>{if(document.hidden)suspend()};
     function destroy(){
       destroyed=true;stop();session=null;material?.destroy();
@@ -320,14 +327,14 @@ const BlobTrack=(()=>{
       for(const type of ['pointerup','pointercancel','lostpointercapture'])host.removeEventListener(type,type==='pointerup'?up:lost);
       document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',lost);
       host.removeEventListener('keydown',keyDown);host.removeEventListener('keyup',keyUp);host.removeEventListener('focusout',focusOut);
-      host.removeEventListener('click',blockClick,true);
+      document.removeEventListener('click',blockClick,true);document.removeEventListener('pointerdown',nextPress,true);
       window.removeEventListener('blur',suspend);window.removeEventListener('resize',suspend);document.removeEventListener('visibilitychange',visibility);
     }
     host.addEventListener('pointerdown',down);host.addEventListener('pointermove',move);
     host.addEventListener('pointerup',up);host.addEventListener('pointercancel',lost);host.addEventListener('lostpointercapture',lost);
     document.addEventListener('pointerup',up);document.addEventListener('pointercancel',lost);
     host.addEventListener('keydown',keyDown);host.addEventListener('keyup',keyUp);host.addEventListener('focusout',focusOut);
-    host.addEventListener('click',blockClick,true);
+    document.addEventListener('click',blockClick,true);document.addEventListener('pointerdown',nextPress,true);
     window.addEventListener('blur',suspend);window.addEventListener('resize',suspend);document.addEventListener('visibilitychange',visibility);
     if(measure()){const target=restingPose();pose={...target};targets={...target};render()}
     return {host,sync,remeasure,setPose,cancel:()=>cancel('external'),destroy,

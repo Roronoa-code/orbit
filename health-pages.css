@@ -18,29 +18,23 @@
 .health-page-head .icon-button{width:48px;height:48px;background:var(--frost-control)}
 .health-page h1{font-size:22px;letter-spacing:-.5px;line-height:1.2}
 .health-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior-y:contain;padding:0 14px 28px;scrollbar-width:none}
-.health-source{margin:0 6px 16px;font-size:10px;color:#adadb5}
+
 .health-tile{border:0;border-radius:25px;background:#202023;padding:21px;margin:0 0 9px;min-width:0}
 .health-tile h2{font-size:15px;letter-spacing:-.2px;font-weight:500}
 .health-section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .health-section-head>span{font-size:10px;color:#babac3}
-.health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.health-grid .health-tile{margin:0;padding:18px;overflow:hidden}
-.health-tile-button{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;width:100%;text-align:left;color:inherit;cursor:pointer}
-.health-tile-button:active{background:#2b2934}
+
 .health-tile small{color:#b9b9c2;font-size:10px;letter-spacing:0}
 .matrix-reading{width:100%;height:auto;fill:currentColor;overflow:visible;display:block}
 .tile-value{font-size:31px;font-weight:500;line-height:1.3;margin:12px 0 0;letter-spacing:-1px;font-variant-numeric:tabular-nums}
 .tile-value>small{font-size:11px;margin-left:5px;letter-spacing:0}
-.mini-plot{width:100%;height:68px;margin:12px 0 2px}
-.tile-art{height:94px;width:100%;display:flex;justify-content:space-between;align-items:center;color:#c9b5ff}
-.tile-art>.workout-glyph{width:65px;height:65px}
-.round-arrow{background:#34323b;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-size:17px}
+
 .oxygen-tile summary{cursor:pointer;list-style:none}
 .oxygen-tile summary::-webkit-details-marker{display:none}
- .health-destinations{margin:7px 0 12px}
+
 .oxygen-tile{padding:17px 18px}
 .oxygen-tile summary{display:flex;align-items:center;gap:12px;min-height:50px}
-.oxygen-symbol{display:grid;place-items:center;width:39px;height:39px;border:1px solid #b69cff42;border-radius:50%;color:#c7b0ee;font-size:16px;flex-shrink:0}
+
 .oxygen-label{flex:1;min-width:0}
 .oxygen-label h2{font-size:13px}
 .oxygen-label>small{display:block;margin-top:4px;font-size:9px}
@@ -155,7 +149,6 @@
 .session-actions button:first-child{background:var(--action-primary);color:var(--action-ink);border-color:transparent}
 .notification-enable{background:none;border:0;min-height:44px;font-size:11px;color:#cbbaff;margin-top:8px}
 .workout-countdown{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:450px}
-.workout-countdown .countdown-heading{font-size:20px;color:#ded9e9;letter-spacing:-.6px}
 .countdown-play{position:relative;width:min(100%,330px);aspect-ratio:1;margin:12px 0 0}
 #countdown-dots{display:block;width:100%;height:100%;touch-action:none}
 .workout-countdown .countdown-invitation{font-size:11px;color:#b9b2c8}
@@ -163,8 +156,8 @@
 .countdown-stages i{display:block;width:7px;height:7px;background:#39343f;border-radius:50%;transition:background 120ms}
 .countdown-stages i.lit{background:#bda3ff}
 .workout-countdown button{border:0;border-radius:25px;min-height:48px;padding:12px 40px;background:#29292e}
-@media(max-width:360px){.health-scroll{padding-inline:11px}.health-grid .health-tile{padding:15px}.health-tile h2{font-size:13px}.setup-segments label{font-size:13px}.activity-choice{font-size:12px}}
-@media(forced-colors:active){.health-tile,.workout-kinds,.setup-panel{border:1px solid CanvasText;background:Canvas}.mini-plot{forced-color-adjust:none}.tracking-option input{appearance:auto;-webkit-appearance:auto}.tracking-option input:before{display:none}}
+@media(max-width:360px){.health-scroll{padding-inline:11px}.health-tile h2{font-size:13px}.setup-segments label{font-size:13px}.activity-choice{font-size:12px}}
+@media(forced-colors:active){.health-tile,.workout-kinds,.setup-panel{border:1px solid CanvasText;background:Canvas}.tracking-option input{appearance:auto;-webkit-appearance:auto}.tracking-option input:before{display:none}}
 
 .details-body[hidden],.target-minutes[hidden]{display:none}
 .health-page{contain:layout paint}
@@ -197,7 +190,7 @@
 .sleep-breakdown button{display:flex;align-items:center;gap:12px;width:100%;min-height:49px;padding:10px 10px;border:0;border-radius:12px;background:none;text-align:left;transition:color 160ms,background-color 160ms}
 .sleep-breakdown i{width:16px;height:4px;border-radius:2px;flex:none;background:var(--stage-color)}.sleep-breakdown span{font-size:12px}.sleep-breakdown strong{margin-left:auto;font-size:13px;font-weight:500;color:#c4c0cb;white-space:nowrap}.sleep-breakdown [aria-pressed=true]{color:#f0ebfa;background:color-mix(in srgb,var(--stage-color) 12%,transparent)}.sleep-breakdown button:active{background:color-mix(in srgb,var(--stage-color) 22%,transparent)}.sleep-breakdown button:disabled{opacity:.5}
 .sleep-breakdown button:focus-visible{outline-offset:-3px}.sleep-source{font-size:10px;color:#817e87;padding:14px 9px;line-height:1.6}.sleep-empty{font-size:13px;color:#aaa6b1;padding:40px 6px}
-@media(max-width:360px){.oxygen-tile{padding:14px}.oxygen-tile summary{gap:8px}.oxygen-symbol{width:31px;height:31px;font-size:14px}.oxygen-label h2{font-size:12px}.oxygen-tile .tile-value{font-size:26px}}
+@media(max-width:360px){.oxygen-tile{padding:14px}.oxygen-tile summary{gap:8px}.oxygen-label h2{font-size:12px}.oxygen-tile .tile-value{font-size:26px}}
 @media(forced-colors:active){.night-chart>svg{forced-color-adjust:none}.sleep-breakdown button[aria-pressed=true],.oxygen-week button[aria-pressed=true]{outline:2px solid Highlight}}
 
 .toast{z-index:40}
@@ -263,7 +256,6 @@
 .music-lit .target-remaining{color:#dbd4d8;text-shadow:0 1px 7px #000000a6}
 .music-lit .music-heading h2,.music-lit .music-heading p,.music-lit .music-timeline>div{text-shadow:0 1px 8px #000000a6}
 .music-lit .music-controls button svg{filter:drop-shadow(0 1px 6px #000000a6)}
-
 
 @media(forced-colors:active){.health-page.music-focus{background:Canvas}.health-page.music-focus:before,.health-page.music-focus:after{display:none}.music-lit .target-remaining,.timer-focused #timer-label,.timer-focused .timer-tap-hint{color:CanvasText}.timer-focused #focus-time-dots{display:none}.timer-focused .session-time .session-matrix{display:block}.timer-focused .session-time .matrix-reading{height:64px}.music-lit .session-actions button{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}}
 
@@ -365,7 +357,6 @@
 .health-page h1{transition:text-shadow 240ms ease}
 /* Workout actions retain the same semantic colours over every artwork. */
 
-
 @media(forced-colors:active){.workout-live:not(.timer-focused) .music-bottom{border:1px solid CanvasText}.music-thumb{forced-color-adjust:none}}
 
 /* The open launcher is one drag surface: a vertical move over its shortcuts belongs to the shell. */
@@ -378,20 +369,11 @@
 /* One frosted material for Orbit's raised surfaces and controls: a charcoal tint over visible diffusion, a rim that
    catches light along the top edge, and a soft drop that lifts it off the page. Used for containers and controls only. */
 .health-page,.live-island{--glass-tint:linear-gradient(180deg,#2a2a31b3,#1b1b21c2 55%,var(--frost-panel));--glass-blur:var(--frost-blur-panel);--glass-rim:linear-gradient(170deg,#ffffff3d,#ffffff12 26%,#ffffff06 55%,#ffffff12);--glass-lift:var(--frost-rim),var(--frost-lift)}
-.health-glass{position:relative;isolation:isolate;background:var(--frost-grain),var(--glass-tint);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-lift)}
-.health-glass:before{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;padding:1px;background:var(--glass-rim);pointer-events:none;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
 
 /* Body is one scene: a quiet light behind the ring, a header that frosts only once content passes beneath it. */
-.health-head-frost{display:none}
 .deck-frost{position:absolute;inset:-24px 0 auto;height:84px;z-index:7;pointer-events:none;opacity:0;background:linear-gradient(transparent,#0a0a0c 28.6%,#0a0a0c8c 52%,transparent);backdrop-filter:blur(16px) saturate(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.1);mask-image:linear-gradient(transparent,#000 28.6%,#000 48%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 28.6%,#000 48%,transparent)}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.deck-frost{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .health-page[data-page=body]{background:radial-gradient(120% 55% at 50% -10%,#18171f,transparent 62%),#0a0a0c}
-.health-page[data-page=body] .health-page-head{position:absolute;inset:0 0 auto;z-index:5}
-.health-page[data-page=body] .health-head-frost{display:block;position:absolute;inset:0 0 -26px;z-index:-1;pointer-events:none;opacity:0;background:linear-gradient(#0a0a0cd9,#0a0a0c8c 62%,#0a0a0c00);-webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);-webkit-mask-image:linear-gradient(#000 58%,transparent);mask-image:linear-gradient(#000 58%,transparent);will-change:opacity}
-
-.health-page[data-page=body] .health-scroll{padding-top:calc(80px + var(--safe-top,0px))}
-.health-page[data-page=body] .health-source{margin:0 0 8px 58px;color:#9d99a8}
-
 .body-hero{position:relative;isolation:isolate;padding:0 0 2px}
 .body-hero:before{content:"";position:absolute;z-index:-1;left:-14px;right:-14px;top:-40px;height:480px;pointer-events:none;background:radial-gradient(closest-side at 50% 40%,#b69cff1c,#b69cff0a 55%,transparent),radial-gradient(60% 36% at 50% 97%,#e4e2f00c,transparent 70%)}
 .body-composition{position:relative;width:min(100%,300px);aspect-ratio:1;margin:2px auto 0;touch-action:pan-y;-webkit-user-select:none;user-select:none}
@@ -457,8 +439,8 @@
 .body-coverage{margin:12px 2px 0;font-size:9px;line-height:1.5;color:#8f8a9b}
 .health-page[data-page=body] .health-note{margin:12px 6px 4px;font-size:9.5px;line-height:1.6;color:#9a96a4}
 @media(max-width:360px){.body-composition{width:min(100%,280px)}.body-value .matrix-reading{height:44px}.body-metric-picker button{font-size:11px}.body-timeline{padding-inline:13px}.body-hero:before{left:-11px;right:-11px}.body-readout-value{font-size:24px}.body-readout-meta{flex-direction:column;align-items:flex-start;gap:2px}.body-stats dd{font-size:14px}}
-@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-glass,.health-page[data-page=body] .health-page-head .icon-button{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}.health-page[data-page=body] .health-head-frost{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0a0a0c}}
-@media(forced-colors:active){.health-glass{background:Canvas;border:1px solid CanvasText}.health-glass:before,.health-page[data-page=body] .health-head-frost{display:none}.body-share i{forced-color-adjust:none}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-page[data-page=body] .health-page-head .icon-button{-webkit-backdrop-filter:none;backdrop-filter:none;background:#222228}.health-page[data-page=body] .health-head-frost{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0a0a0c}}
+@media(forced-colors:active){.health-page[data-page=body] .health-head-frost{display:none}.body-share i{forced-color-adjust:none}}
 
 /* Video audit: stable foregrounds, a single viewport fade, and one action dock. */
 .status{display:none}
@@ -560,6 +542,7 @@
 .history-day{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:24px 4px 12px;font-size:13px;font-weight:500;color:#d6d0df}.history-day small{font-size:10px;font-weight:400;color:#a7a1b0;white-space:nowrap}
 .history-session{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) 12px;align-items:center;gap:12px;margin-bottom:10px;padding:16px;border:0;border-radius:20px;background:#19181e;text-align:left;transition:background-color 160ms}
 .history-session-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#bfa7f212;color:#cbb3f3}.history-session-icon .workout-glyph{width:24px;height:24px}
+svg.workout-glyph{background:none}
 .history-session-title{min-width:0}.history-session-title strong{display:block;font-size:15px;font-weight:550;overflow-wrap:anywhere}.history-session-title small{display:block;margin-top:4px;font-size:10px;color:#a7a1b0;line-height:1.4}
 .history-session-metrics{grid-column:1/-1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;border-top:1px solid #ffffff0a;padding-top:12px;margin-top:1px}.history-session-metrics b{display:block;font-size:16px;font-weight:500;letter-spacing:-.3px;color:#e6ddeb;overflow-wrap:anywhere}.history-session-metrics small{display:block;margin-top:4px;font-size:10px;color:#a7a1b0}.history-arrow{font-size:22px;color:#bfa7f2}.history-session:active{background:#25222d}
 .history-empty{padding:32px 16px;border-radius:20px;background:#19181e;text-align:center;font-size:14px;color:#d5ccdf}.history-empty span{display:block;margin-top:8px;font-size:11px;line-height:1.5;color:#aaa2b6}
@@ -586,3 +569,61 @@
 @media(max-height:750px){.setup-activity{height:75px;margin-bottom:12px}.workout-unconnected .workout-stat{padding-block:12px}}
 @media(prefers-reduced-motion:reduce){.workout-kinds button,.history-session,.sleep-breakdown button{transition:none}}
 @media(forced-colors:active){.workout-kinds button{background:ButtonFace;border:1px solid ButtonText}.workout-tabs button[aria-pressed=true],.history-days button[aria-pressed=true]{outline:2px solid Highlight;outline-offset:-2px}.history-days button.has-records:before{border-color:Highlight}.workout-history,.history-overview,.history-session,.history-empty,.setup-panel,.workout-detail-group,.workout-energy{background:Canvas;border-color:CanvasText}}
+
+/* Shared anatomy: a clear title, grouped reading content, one floating navigation plane. */
+:root{--text-primary:#f2eff6;--text-secondary:#b9b3c3;--text-caption:#a7a1b0;--reading-surface:#19181e;--section-space:24px}
+.home-heading{flex:1;min-width:0;padding-right:58px}
+.masthead{min-height:74px;align-items:center}
+.masthead h1,.health-page h1{font-size:24px;font-weight:550;line-height:1.2;letter-spacing:-.6px}
+.masthead .back:disabled{display:none}
+.home-heading .date{display:block;margin:0;padding:4px 0;min-height:30px;text-align:left;font-size:12px;line-height:1.5;letter-spacing:0;color:var(--text-secondary)}
+.utility-island{top:calc(var(--safe-top,0px) + 12px);right:14px}
+.health-page-head{position:absolute;inset:0 0 auto;z-index:5;isolation:isolate;min-height:74px}
+.health-page .health-scroll{padding-top:calc(82px + var(--safe-top,0px));padding-bottom:calc(100px + var(--safe-bottom,0px));scroll-padding-bottom:100px}
+.health-page .health-head-frost{display:block;position:absolute;inset:0 0 -26px;z-index:-1;pointer-events:none;opacity:0;background:linear-gradient(#0a0a0c calc(100% - 30px),transparent);backdrop-filter:blur(16px) saturate(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.1);mask-image:linear-gradient(#000 calc(100% - 26px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 26px),transparent);will-change:opacity}
+.screen.is-detail .panel-deck{z-index:24}
+.screen.is-detail .deck-scroll,.screen.is-detail #stack-open{visibility:hidden}
+.screen.is-task .live-island{visibility:hidden;pointer-events:none}
+.screen.is-task .health-scroll{padding-bottom:calc(24px + var(--safe-bottom,0px))}
+/* Full-screen workout/music already owns a continuous header and action dock. */
+.screen.is-task .health-page-head{position:relative;inset:auto}
+.screen.is-task .health-scroll{padding-top:0}
+.screen.is-task .health-head-frost{display:none}
+.activity-choice[aria-current=page]{font-weight:650;text-decoration:underline;text-decoration-color:#cbb9eb80;text-underline-offset:7px;text-decoration-thickness:2px}
+.health-section-head h2,.workout-start-title,.health-tile h2{font-size:16px;font-weight:550;letter-spacing:-.2px}
+.health-note,.reading-notes p,.sleep-source{font-size:12px;line-height:1.65;color:var(--text-secondary)}
+.health-overview-intro{margin:4px 4px 18px;font-size:13px;color:var(--text-secondary)}
+.health-library{padding:0 4px;margin-bottom:12px}
+.health-reading{width:100%;display:flex;align-items:center;gap:12px;min-height:84px;padding:16px 0;background:none;border:0;border-bottom:1px solid #ffffff0d;text-align:left}
+.health-reading>span:first-child{flex:1;min-width:0}.health-reading strong{display:block;font-size:16px;font-weight:500}
+.health-reading small{display:block;margin-top:4px;color:var(--text-caption);font-size:12px;line-height:1.4;letter-spacing:0}
+.health-reading-value{flex:none;text-align:right;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.health-reading-value small{font-size:11px;letter-spacing:0}.reading-chevron{font-size:22px;color:var(--text-caption)}
+.health-reading:active{background:#ffffff06}
+.oxygen-tile{background:var(--reading-surface);border-radius:20px;padding:14px 16px;margin-top:8px}
+.oxygen-label h2{font-size:16px}.oxygen-label>small{font-size:12px}.oxygen-tile .tile-value{font-size:22px}
+.source-link{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 4px;min-height:48px;border:0;background:none;text-align:left;color:var(--text-secondary);font-size:12px}
+.source-link>span{font-size:20px;color:#cbb9eb}
+.body-timeline{padding:24px 4px 8px;margin-top:20px;background:none;border:0;box-shadow:none}
+.body-timeline .health-section-head{align-items:flex-start;flex-direction:column;gap:12px}
+.body-timeline .segmented{width:100%;display:flex}.body-timeline .segmented button{flex:1;font-size:12px}
+.body-readout{margin-top:20px}.body-stats dt{font-size:12px}.body-stats dd{font-size:18px}.body-coverage{line-height:1.6}
+.reading-notes{margin:20px 4px 0;border-top:1px solid #ffffff12}
+.reading-notes summary,.settings-section>summary{display:flex;align-items:center;justify-content:space-between;min-height:52px;font-size:14px;list-style:none;cursor:pointer}
+.reading-notes summary:after,.settings-section>summary:after{content:'+';color:#bfa7f2}.reading-notes[open] summary:after,.settings-section[open]>summary:after{content:'−'}
+.reading-notes p{padding:8px 0}.reading-notes summary::-webkit-details-marker,.settings-section>summary::-webkit-details-marker{display:none}
+.settings-profile,.settings-section{padding:20px 4px;margin:0;border-radius:0;background:none;box-shadow:none;border-bottom:1px solid #ffffff10}
+.settings-profile{padding-top:8px}.settings-profile h2,.settings-section h2{font-size:16px;margin-bottom:10px}
+.settings-fields>label,.settings-goal,.settings-measurements label{font-size:13px}.settings-fields input,.settings-goal input{font-size:16px}
+.settings-profile .workout-primary{width:auto;min-width:140px;padding-inline:22px}
+.settings-section>summary{font-weight:550}.settings-section>summary small{display:block;font-weight:400;color:var(--text-caption);font-size:12px;line-height:1.5;margin-top:4px}
+.settings-about p{margin:10px 0}.settings-section:last-child{border-bottom:0}
+.history-week-nav p,.history-day small,.history-session-title small,.history-session-metrics small{font-size:12px;line-height:1.5}
+.history-week-nav h2,.history-session-title strong{font-size:16px}.history-week-metrics small{font-size:12px}.history-session-metrics{gap:12px}
+.workout-start-title{margin-top:22px;color:var(--text-primary)}
+.workout-kinds button{min-height:124px;gap:20px;background:var(--reading-surface);border:0}
+.workout-kinds .workout-glyph{width:34px;height:34px}.workout-kind-arrow{color:var(--text-caption)}
+.workout-detail-group,.workout-energy{padding-block:var(--section-space)}
+@media(max-width:360px){.health-reading{gap:8px}.health-reading strong{font-size:14px}.health-reading-value{font-size:20px}.health-reading small{font-size:11px}.history-session-metrics b{font-size:14px}.history-session-metrics small{font-size:11px}}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-page .health-head-frost{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0a0a0c}.health-reading small,.health-note,.source-link,.sleep-source,.reading-notes p{color:#d3ceda}}
+@media(forced-colors:active){.health-page .health-head-frost{display:none}.health-reading,.source-link,.body-timeline,.reading-notes,.settings-profile,.settings-section{background:Canvas;color:CanvasText;border-color:CanvasText}.activity-choice[aria-current=page]{text-decoration-color:Highlight}}

@@ -14,11 +14,11 @@ Direction confirmed by the user, 10 September 2026: replace their everyday Samsu
 | Trends | Longer history and comparisons across related metrics | Compare periods with coverage; open original observations |
 | Devices & Settings | Watch, sources, permissions, goals, units, appearance, backup/export and storage | Review connection and freshness; choose sources; manage preferences and history |
 
-Implemented Settings now has its own page, opened by the Home gear: name, birth date, height, weight, daily goal, motion, music access and About. Saved profile weight prefills workout setup; each session retains its own weight. Profile data is distinct from demonstration Body measurements. Watch, units, backup/export and connected sources in the table remain future work.
+Implemented Settings opens from the Home gear and reading-source links. Profile and daily goal lead; motion, music, Samsung connection controls and About follow. Saved profile weight supplies new workouts automatically; each session retains its own weight. Body measurements come from Samsung Health and are distinct from editable profile defaults. Samsung import/live access is implemented; acquisition and device validation remain separate from this layout work. Units and backup/export remain roadmap items.
 
-The three flat launcher shortcuts open Body, Workouts and Health overview. The raised circles and wrapped labels were rejected; the launcher now shares the stack's charcoal material. Oxygen is a compact expandable tile in the overview, not a separate page. The overview no longer repeats Heart, Sleep, Intake or Steps; those stay on Home. Tap the Sleep summary on Home for a timed night view.
+The three flat Explore shortcuts open Body, Workouts and Health. The same frosted charcoal launcher remains available on reading pages, with a current-destination indication. Focused workout setup/countdown/recording uses contextual controls instead. Health is a compact directory of Steps, Heart, Sleep, Nutrition and Body readings; each row opens its existing summary or detail. Oxygen expands in place. Nested reading/source pages return to their originating page and scroll position. See `APPLE_RULES.md` for the current screen audit and reusable design decisions.
 
-The user rejected log-first pages. Lead with a visual summary and a few useful values. Body has a chart and date scrubber; completed workouts use a recent summary with history behind an explicit expansion. Future real records must retain source, time, quality and correction paths. Sparse measurements remain sparse.
+The user rejected log-first pages. Lead with a visual summary and a few useful values. Body has a chart and date scrubber; Workouts separates Train from weekly/day-based History and opens full session records on selection. Source, time, measurement quality and missing data remain explicit. Sparse measurements remain sparse.
 
 ## Live activity behaviour
 
