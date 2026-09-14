@@ -22,8 +22,12 @@ async function run(){const browser=await chromium.launch({headless:true});try{
   const cdp=await p.context().newCDPSession(p);
   async function holdDrag(selector,dx=0){const r=await p.locator(selector).boundingBox(),x=r.x+r.width/2,y=r.y+r.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});await p.waitForTimeout(650);for(let i=1;i<=10;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+dx*i/10,y}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]})}
   await holdDrag('.sleep-summary p');assert.equal(await p.evaluate(()=>String(getSelection())), '');
-  await holdDrag('#night-scrub',60);assert.equal(await p.locator('#night-cursor').getAttribute('opacity'),'1');assert.match(await p.locator('#night-scrub').getAttribute('aria-valuetext'),/\d\d:\d\d/);
+  await holdDrag('#night-scrub',60);assert.equal(await p.locator('#night-cursor').count(),0);assert.equal(await p.locator('.night-inspection.is-inspecting').count(),1);assert.match(await p.locator('#night-scrub').getAttribute('aria-valuetext'),/\d\d:\d\d/);
   await p.locator('[data-night-stage=deep]').tap();assert.equal(await p.locator('[data-night-stage=deep]').getAttribute('aria-pressed'),'true');
+  await p.waitForTimeout(180);
+  assert.notEqual(await p.locator('[data-night-stage=deep]').evaluate(n=>getComputedStyle(n).backgroundColor),await p.locator('[data-night-stage=rem]').evaluate(n=>getComputedStyle(n).backgroundColor),'Selected category has a visible tint');
+  assert(await p.locator('.sleep-breakdown i,.night-inspection i').evaluateAll(ns=>ns.every(n=>n.getBoundingClientRect().width>=n.getBoundingClientRect().height*3)),'Stage colours use bars, not dots');
+  await p.screenshot({path:path.join(__dirname,'samsung-import',`sleep-category-${width}.png`)});
   const firstDate=await p.locator('.sleep-date-nav>span').innerText();await p.locator('[data-night-date="-1"]').tap();await p.locator('[data-night-date="1"]').tap();assert.equal(await p.locator('.sleep-date-nav>span').innerText(),firstDate);
   await p.evaluate(()=>{const data=structuredClone(sleepFixture),r=data.rows.find(r=>r.id==='s-'+data.date);data.rows.push({...r,id:'overlap',stages:[[r.start,r.end,6]]});HealthData.accept(data);const d=HealthData.daily(data.date),t=SleepTimeline.totals(d.sleepTimeline);if(!SleepTimeline.valid(d.sleepTimeline)||t.unknown<=0||t.light+t.deep+t.rem!==d.asleep)throw Error('Overlap union lost data integrity')});
   await p.evaluate(()=>Health.open('settings'));await p.waitForTimeout(350);

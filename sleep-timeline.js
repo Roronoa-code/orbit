@@ -51,8 +51,8 @@ const SleepTimeline=(()=>{
       <figure class="night-chart" aria-label="Sleep stages grouped into five-minute blocks by the longest recorded stage. Hold and slide for original recorded timings."><svg viewBox="0 0 340 ${height+23}" aria-hidden="true">
       ${axis.map(t=>`<path d="M${x(t)} 0V${height}" stroke="#ffffff10" stroke-dasharray="2 3"/><text x="${x(t)}" y="${height+17}" text-anchor="${t===axis[0]?'start':'middle'}" fill="#939199" font-size="11">${time(t)}</text>`).join('')}
       ${lanes.map((stage,i)=>`<text x="8" y="${i*43+12}" fill="#b6b3bc" font-size="12">${stages[stage][0]}</text><path d="M8 ${(i+1)*43}H332" stroke="#ffffff12"/>`).join('')}${bars}
-      <path id="night-cursor" d="M${x(selected.start)} 0V${height}" stroke="#f0edf7" stroke-width=".8" opacity="0"/></svg>
-      <input id="night-scrub" type="range" min="0" max="${Math.max(0,span-.001)}" step="any" value="${minute}" style="left:${x(night.start)/3.4}%;width:${(x(night.end)-x(night.start))/3.4}%;height:${height/(height+23)*100}%" aria-label="Inspect time during the night" aria-valuetext="${stages[selected.stage][0]}, ${time(selected.start)} to ${time(selected.end)}" data-axis-start="${+start}" data-axis-end="${+end}" data-height="${height}"/>
+      </svg>
+      <input id="night-scrub" type="range" min="0" max="${Math.max(0,span-.001)}" step="any" value="${minute}" style="left:${x(night.start)/3.4}%;width:${(x(night.end)-x(night.start))/3.4}%;height:${height/(height+23)*100}%" aria-label="Inspect time during the night" aria-valuetext="${stages[selected.stage][0]}, ${time(selected.start)} to ${time(selected.end)}"/>
       </figure></section>
       <section class="sleep-breakdown" aria-label="Time in each stage">${Object.entries(stages).filter(([stage])=>stage!=='unrecorded'&&lanes.includes(stage)).map(([stage,[label,color]])=>`<button data-night-stage="${stage}" aria-pressed="false" ${!all[stage]?'disabled':''} style="--stage-color:${color}"><i></i><span>${label}</span><strong>${duration(all[stage]||0)}</strong></button>`).join('')}</section>
       <p class="sleep-source">Samsung Health · Totals use original readings${all.unrecorded?'<br>Gaps are not recorded':''}${all.unknown?'<br>Some stage timings are unavailable':''}</p>`;
@@ -63,8 +63,6 @@ const SleepTimeline=(()=>{
     input.value=minute;input.setAttribute('aria-valuetext',`${time(night.start+minute*60000)}: ${stages[s.stage][0]}, ${time(s.start)} to ${time(s.end)}, ${duration((s.end-s.start)/60000)}`);
     const label=q('#night-selection');
     if(label.dataset.index!==String(index)||!label.classList.contains('is-inspecting')){label.innerHTML=selection(night,index);label.dataset.index=String(index);label.classList.add('is-inspecting')}
-    const x=8+(night.start+minute*60000-Number(input.dataset.axisStart))/(Number(input.dataset.axisEnd)-Number(input.dataset.axisStart))*324;
-    q('#night-cursor').setAttribute('d',`M${x} 0V${input.dataset.height}`);q('#night-cursor').setAttribute('opacity','1');
     document.querySelectorAll('[data-night-stage]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.nightStage===s.stage)));return minute;
   }
   function stageMinute(night,stage){if(!valid(night))return 0;const s=night.segments.find(s=>s.stage===stage);return s?(s.start-night.start)/60000:0}
