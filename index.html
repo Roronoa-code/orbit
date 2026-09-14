@@ -356,7 +356,12 @@ function initIslands(){
   document.querySelectorAll('.utility-body .cancel').forEach(button=>button.addEventListener('click',closeUtility));
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&closeInline())event.preventDefault()});
   document.addEventListener('click',event=>{if(islands.utility.open&&!event.target.closest('#utility-island,#date-button,#about-link'))closeUtility(false)});
-  document.addEventListener('click',event=>{if(islands.live.open&&!event.target.closest('#live-island,#utility-island')){setLiveOpen(false);event.preventDefault();event.stopImmediatePropagation()}},true);
+  document.addEventListener('click',event=>{
+    // Mouse capture sends the completed drag's click to the deck. Consume it before
+    // outside-click dismissal can close the launcher we just opened.
+    if(event.detail&&ignoreDeckClick&&event.target.closest('#panel-deck')){ignoreDeckClick=false;event.preventDefault();event.stopImmediatePropagation();return}
+    if(islands.live.open&&!event.target.closest('#live-island,#utility-island')){setLiveOpen(false);event.preventDefault();event.stopImmediatePropagation()}
+  },true);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)animateIslands()});
   window.addEventListener('resize',()=>{for(const item of Object.values(islands))measureIsland(item);animateIslands()});
 }

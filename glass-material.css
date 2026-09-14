@@ -119,6 +119,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 }
 .selection-pill>.glass-response-surface{inset:0;background:linear-gradient(150deg,#eee9ff38,#e1d6ff14 45%,#dfccff20)}
 .glass-shell-response{background:linear-gradient(155deg,#f4efff0c,transparent 65%);box-shadow:none}
+/* Disclosure rows sit inside reading cards; feedback stays flat within that plane. */
+summary.glass-responsive>.glass-response-surface{border-radius:12px;background:#ffffff08;box-shadow:none;transform:none!important}
+summary.glass-responsive>.glass-response-surface>.glass-response-light{display:none}
 .transient-track{position:relative;--blob-active:#fff;--blob-inactive:#e0dde6}
 .transient-track>.selection-pill{background:none;box-shadow:none;border-radius:16px}
 .glass-response-light{position:absolute;inset:-35%;pointer-events:none;background:radial-gradient(ellipse at center,#fff3,transparent 58%);transform-origin:50% 50%}

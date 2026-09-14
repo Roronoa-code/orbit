@@ -1,5 +1,15 @@
 # Orbit — handoff (updated 14 September 2026)
 
+## Disclosure feedback and Explore drag release — 14 September 2026
+
+Baseline `fe70de2`. The user rejected the square held overlay inside About Orbit, then reported Explore closing after dragging upward while the four cards were open. They explicitly approved the current glass colour; preserve it.
+
+Disclosure rows now use soft rounded feedback within their reading card, without the square rim, glossy spotlight or scaling. The shared `summary` rule covers About, connection/history, blood oxygen and workout energy explanations. Native disclosure opening, closing and keyboard activation remain intact. Explore's failure was reproduced with actual Chromium mouse input: pointer capture routes the release click to `#panel-deck`, so the document's outside-click handler immediately closed the just-opened launcher. The handler now consumes that completed drag's click before dismissal. The next genuine outside click still closes Explore. No glass colour or shader changes were made.
+
+`verification/liquid-interaction.cjs` passed at 390/320, including new checks for all four disclosure types: held geometry, no rim/spotlight, release clearing and keyboard toggling. Held screenshots were inspected at both widths. `verification/interaction-followup.cjs` passed at 390/384/320 with new held mouse drags over expanded cards at scroll positions 0/160, both idle and during a workout, plus existing real-touch/deeper-navigation checks. Source and CSS match the packaged APK, with no local verification records included.
+
+Build `20260914-024037`, SHA256 `e8465d68b014de4af8890a22854e65f0b05a3fd962d95af3bcf8e32d7efda24a`, installed using **`install --user 0 -r`** on verified SM-S938B / R5CY13S5F8D at `192.168.0.210:36395`. Installed hash matches; package flags remain user 0 true, users 95/150 false. Previous APK backup: ignored `verification/samsung-import/phone-before-disclosure-explore-20260914-024037.apk`, SHA256 `b4be1f6c2f6bdc091527e2c6cbb2b44c3686388e009d89494f8673f853a62998`. Phone use was installation and package verification only; no launch, navigation, capture or tests. The existing preview server remains running for the user's review; reload the page for these changes.
+
 ## Continuous Liquid Glass interaction — 14 September 2026
 
 Baseline `6c40cee`. Researched the five requested official Apple Developer transcripts before changing code. [LIQUID-INTERACTION.md](LIQUID-INTERACTION.md) records sources, the eight-state interaction model, implementation choices and evidence. Apple does not publish the exact physics or private renderer; Orbit retains its cached frosted WebView optics and reproduces the documented interaction principles using its existing spring engine.

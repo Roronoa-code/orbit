@@ -38,6 +38,8 @@ The same response applies to nested pickers, date controls, switches, media seek
 
 ## Acceptance ledger
 
+Preview follow-up: the user approved the glass colour. Disclosure rows now keep a soft rounded press fill on their existing reading plane, without a square rim or spotlight. Explore consumes the captured mouse drag's terminal click before outside-click dismissal, so releasing above expanded cards leaves it open. These paths are covered in the two existing interaction checks; see the current release entry in `HANDOFF.md`.
+
 | Requirement | Boundary | Evidence / status |
 |---|---|---|
 | Immediate held lift and continuous drag/release/regrab | Shared material + BlobTrack | `verification/liquid-interaction.cjs`: actual Chromium touch, 390/320; selected and distant unselected grabs, immediate/held drags, reversal and interruption |
@@ -46,8 +48,8 @@ The same response applies to nested pickers, date controls, switches, media seek
 | No layout reads/map generation on selector move | Cached geometry + transforms | Instrumented 390/320 drags: 0 geometry reads, 0 layouts, 0 lens-map mutations. Short local samples around 16.6–16.8 ms/frame; not a phone performance claim |
 | Cancellation, disabled/keyboard, accessibility | Shared response lifecycle | Touch cancel, blur, keyboard, reduced motion, forced colours and switch native values pass; no idle response frame work |
 | Main deck/live/player and deeper navigation regression | Existing local checks | `check`, `body-history`, `interaction-followup`, `home-motion`, `workout-endpoints`, `sleep-apple`, `liquid-glass` passed. 18 player handoffs have no geometry delta; card heights remain fixed through open/close |
-| Packaged source, one Owner app, installation only | Android build + explicit user-0 installation | Signed build `20260914-023520`; bundled JS/CSS matches source and excludes local fixtures. Installed with `--user 0 -r`; installed hash matches. Package dump confirms Owner 0 true, users 95/150 false. No phone testing |
+| Packaged source, one Owner app, installation only | Android build + explicit user-0 installation | Signed build `20260914-024037`; bundled JS/CSS matches source and excludes local fixtures. Installed with `--user 0 -r`; installed hash matches. Package dump confirms Owner 0 true, users 95/150 false. No phone testing |
 
 Run the touch check with the existing local preview at port 8784 and Playwright available through the project's verification environment: `node verification/liquid-interaction.cjs`. Ignored captures and measurements live in `verification/samsung-import/liquid-interaction/`. `verification/blob-math.cjs` passes 239 assertions against the shipped spring/geometry functions. No new runtime dependency was added.
 
-APK SHA256: `b4be1f6c2f6bdc091527e2c6cbb2b44c3686388e009d89494f8673f853a62998`. The pre-install APK was saved separately in `verification/samsung-import/phone-before-liquid-interaction-20260914-023128.apk` (SHA256 `1ea4ef911a4e81ad65e8389b8a000098ad24be0d230115dfd3965551807e9627`). Physical-phone appearance and motion remain for the user to assess.
+APK SHA256: `e8465d68b014de4af8890a22854e65f0b05a3fd962d95af3bcf8e32d7efda24a`. The pre-install APK was saved separately in `verification/samsung-import/phone-before-disclosure-explore-20260914-024037.apk` (SHA256 `b4be1f6c2f6bdc091527e2c6cbb2b44c3686388e009d89494f8673f853a62998`). Physical-phone appearance and motion remain for the user to assess.

@@ -26,6 +26,18 @@ try{for(const width of [390,320]){
   return {point,before,hold};
  }
  async function release(){await touch('touchEnd');await p.waitForTimeout(750)}
+ async function disclosure(selector,name){
+  const wasOpen=await p.locator(selector).evaluate(n=>n.parentElement.open);
+  const hit=await held(selector,selector,name),style=await p.locator(selector+'>.glass-response-surface').evaluate(n=>{
+   const s=getComputedStyle(n);return{shadow:s.boxShadow,radius:s.borderRadius,transform:s.transform,light:getComputedStyle(n.firstElementChild).display};
+  });
+  assert.deepEqual(style,{shadow:'none',radius:'12px',transform:'none',light:'none'},'Disclosure feedback stays flat and softly rounded');
+  assert.equal(hit.before.width,hit.hold.width);assert.equal(hit.before.height,hit.hold.height);
+  await release();assert.equal(await p.locator(selector).evaluate(n=>n.parentElement.open),!wasOpen);
+  assert((await snap(selector)).opacity<.001,'Disclosure feedback clears after release');
+  await p.locator(selector).focus();await p.keyboard.press('Space');await p.waitForTimeout(750);
+  assert.equal(await p.locator(selector).evaluate(n=>n.parentElement.open),wasOpen,'Keyboard disclosure still toggles');
+ }
  async function dragTo(from,to){for(let i=1;i<=14;i++){await touch('touchMove',from.x+(to.x-from.x)*i/14,from.y+(to.y-from.y)*i/14);await p.waitForTimeout(16)}}
 
  const globe=await centre('#orb-button');await touch('touchStart',globe.x,globe.y);await p.waitForTimeout(450);
@@ -86,10 +98,13 @@ try{for(const width of [390,320]){
  await dragTo(nav.point,destination);await p.waitForTimeout(120);
  assert(await p.locator('[data-activity=body]').evaluate(n=>getComputedStyle(n).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(n,':before').content==='none'),'The original pressed option leaves no second background');
  await shot('navigation-drag');await release();assert.equal(await p.evaluate(()=>Health.page),'overview');
+ await disclosure('.oxygen-tile summary','oxygen-row-held');
  await p.locator('.oxygen-tile summary').tap();await p.waitForTimeout(450);await held('[data-oxygen-day][aria-pressed=true]','.oxygen-week');await release();
 
  // Native switches can be held and dragged, without a subsequent click undoing the choice.
  await p.evaluate(()=>Health.open('settings'));await p.waitForTimeout(350);
+ await disclosure('.settings-health .settings-about summary','connection-row-held');
+ await disclosure('.settings-section.settings-about summary','about-row-held');
  const toggle='#settings-rotation';await p.locator(toggle).scrollIntoViewIfNeeded();
  const checked=await p.locator(toggle).isChecked(),switchHold=await held(toggle,toggle,'switch-held');
  await dragTo(switchHold.point,{x:switchHold.point.x+(checked?-20:20),y:switchHold.point.y});await p.waitForTimeout(90);await release();assert.equal(await p.locator(toggle).isChecked(),!checked);
@@ -118,9 +133,10 @@ try{for(const width of [390,320]){
  await held('.music-timeline input','.music-timeline input');await release();
  const musicPoint=await centre('.music-heading h2');await touch('touchStart',musicPoint.x,musicPoint.y);await dragTo(musicPoint,{x:musicPoint.x,y:musicPoint.y+220});await release();
  assert.equal(await p.locator('.workout-live').evaluate(n=>n.classList.contains('timer-focused')),false,'Music swipe returns to the same compact controls');
- await p.evaluate(()=>{Health.state.active.trackLocation=true;Health.state.active.metrics={state:'tracking',distanceM:0,maxSpeedMps:0,speedMps:0,points:[{lat:51,lon:0,elapsedMs:0,speedMps:0,breakBefore:true}]};Health.render()});
+ await p.evaluate(()=>{Health.state.active.weightKg=75;Health.state.active.trackLocation=true;Health.state.active.metrics={state:'tracking',distanceM:0,maxSpeedMps:0,speedMps:0,points:[{lat:51,lon:0,elapsedMs:0,speedMps:0,breakBefore:true}]};Health.render()});
  await p.locator('[data-workout-detail=active]').tap();await p.waitForTimeout(350);
  await held('[data-workout-chart=speed]','.workout-chart-tabs');await release();
+ await disclosure('.energy-method summary','energy-row-held');
  await p.emulateMedia({forcedColors:'active'});await p.keyboard.press('Tab');await p.locator('#health-back').focus();assert.notEqual(await p.locator('#health-back').evaluate(n=>getComputedStyle(n).outlineStyle),'none');await p.emulateMedia({forcedColors:'none'});
  await p.evaluate(()=>{Health.open('body');Health.open('settings');Health.open('sleep')});await p.waitForTimeout(900);
  assert.equal(await p.evaluate(()=>GlassResponse.active),0,'No idle response frame work');assert.deepEqual(errors,[]);

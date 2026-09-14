@@ -16,7 +16,17 @@ const out=path.join(__dirname,'player-settings-20260912','interaction-followup')
    assert.deepEqual(await p.evaluate(()=>[deckExpanded,islands.live.open]),[true,true]);
    const body=await p.locator('#live-choices').boundingBox();await drag('#live-choices',0,Math.min(180,body.height+15));assert.deepEqual(await p.evaluate(()=>[deckExpanded,islands.live.open]),[true,false]);
    await drag('#live-bar',0,-190);assert.deepEqual(await p.evaluate(()=>[deckExpanded,islands.live.open]),[true,true]);
-   await p.locator('#live-bar').tap();if(active)await p.evaluate(()=>Health.action('finish'));
+   await p.locator('#live-bar').tap();await p.waitForTimeout(650);
+   // Mouse capture targets the deck on release; its synthetic click must not dismiss Explore.
+   for(const scrollTop of [0,160]){
+    await p.evaluate(top=>deckScroller.scrollTop=top,scrollTop);
+    const bar=await p.locator('#live-bar').boundingBox(),x=bar.x+bar.width/2,y=bar.y+bar.height/2;
+    await p.mouse.move(x,y);await p.mouse.down();await p.waitForTimeout(350);await p.mouse.move(x,y-190,{steps:12});await p.waitForTimeout(130);await p.mouse.up();await p.waitForTimeout(650);
+    assert.deepEqual(await p.evaluate(()=>[deckExpanded,islands.live.open]),[true,true],'Explore stays open after held mouse release above expanded cards');
+    await p.locator('.hero').click({position:{x:20,y:20}});await p.waitForTimeout(650);
+    assert.deepEqual(await p.evaluate(()=>[deckExpanded,islands.live.open]),[true,false],'A subsequent genuine outside click still dismisses Explore');
+   }
+   if(active)await p.evaluate(()=>Health.action('finish'));
   }
   assert(await p.evaluate(()=>haptics.length>=6),'Navigation and bar feedback must reach the native bridge');
   await p.evaluate(()=>{setDeckExpanded(false);Health.open('workouts')});await p.waitForTimeout(500);
