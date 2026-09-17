@@ -10,9 +10,11 @@ const OrbitInteraction=(()=>{
   // Focus editable values programmatically. Preventing the text-touch default avoids
   // the insertion handle; a normal caret, hardware keyboard, IME, validation and paste remain available.
   document.addEventListener('pointerdown',event=>{
+    document.querySelector('.screen').classList.add('pointer-input');
     if(event.pointerType!=='touch'||!editable(event.target)||event.target.disabled)return;
     event.preventDefault();event.target.focus({preventScroll:true});
   },true);
+  document.addEventListener('keydown',()=>document.querySelector('.screen').classList.remove('pointer-input'),true);
   document.addEventListener('touchstart',event=>{
     if(event.touches.length!==1||!editable(event.target)||event.target.disabled)return;
     event.preventDefault();event.target.focus({preventScroll:true});

@@ -52,9 +52,16 @@ public final class MusicSession {
     private String title = "", artist = "", source = "", art = "", trackKey = "";
     private long duration;
     private MediaController.Callback callback;
+    private final boolean nativeImages;
+    private Bitmap nativeArt;
 
     public MusicSession(Activity host, Runnable onChange) {
+        this(host, onChange, false);
+    }
+
+    public MusicSession(Activity host, Runnable onChange, boolean nativeImages) {
         activity = host;
+        this.nativeImages = nativeImages;
         changed = onChange;
         dispatch = () -> { synchronized (MusicSession.this) { if (!foreground) return; } changed.run(); };
         manager = host.getSystemService(MediaSessionManager.class);
@@ -82,7 +89,7 @@ public final class MusicSession {
         if (artworkTask != null) artworkTask.cancel(true);
         artworkTask = null;
         if (controller != null) controller.unregisterCallback(callback);
-        controller = null; token = null; art = ""; metadataDirty = true;
+        controller = null; token = null; art = ""; nativeArt = null; metadataDirty = true;
         title = ""; artist = ""; source = ""; duration = 0; artVersion++;
     }
 
@@ -121,7 +128,7 @@ public final class MusicSession {
 
     private void metadata() {
         if (!metadataDirty) return;
-        metadataDirty = false; art = ""; artVersion++;
+        metadataDirty = false; art = ""; nativeArt = null; artVersion++;
         if (artworkTask != null) artworkTask.cancel(true);
         artworkTask = null;
         MediaMetadata data = controller.getMetadata();
@@ -139,10 +146,10 @@ public final class MusicSession {
         // Never decode/compress inside the synchronous JavaScript read: it stalls page animation.
         artworkTask = artworkWorker.submit(() -> {
             MediaMetadata current = first;
-            String encoded = "";
+            Artwork cover = null;
             while (true) {
-                if (current != null) encoded = artwork(current);
-                if (!encoded.isEmpty() || Thread.currentThread().isInterrupted()) break;
+                if (current != null) cover = artwork(current);
+                if (cover != null || Thread.currentThread().isInterrupted()) break;
                 if (SystemClock.uptimeMillis() - changedAt >= ARTWORK_GRACE_MS) break;
                 try { Thread.sleep(ARTWORK_RETRY_MS); } catch (InterruptedException interrupted) { return; }
                 MediaController live;
@@ -155,16 +162,36 @@ public final class MusicSession {
             }
             synchronized (MusicSession.this) {
                 if (!foreground || artVersion != version) return;
-                art = encoded; artworkTask = null;
+                art = cover == null ? "" : cover.encoded;
+                nativeArt = cover == null ? null : cover.bitmap;
+                artworkTask = null;
             }
             signalChange();
         });
     }
 
-    private static final class Artwork {
+    private final class Artwork {
         final String encoded;
+        final Bitmap bitmap;
         final int width, height;
-        Artwork(Bitmap bitmap) { encoded = encodeArtwork(bitmap); width = bitmap.getWidth(); height = bitmap.getHeight(); }
+        Artwork(Bitmap source) {
+            bitmap = nativeImages ? copyNativeArtwork(source) : null;
+            encoded = nativeImages ? "" : encodeArtwork(source);
+            width = source.getWidth(); height = source.getHeight();
+        }
+    }
+
+    // The renderer may retain an outgoing cover. Own an immutable copy and let GC release it;
+    // recycling a session-owned bitmap or an image still referenced by a GPU layer is unsafe.
+    static Bitmap copyNativeArtwork(Bitmap original) {
+        int[] size = artworkSize(original.getWidth(), original.getHeight());
+        Bitmap scaled = Bitmap.createScaledBitmap(original, size[0], size[1], true);
+        try { return scaled.copy(Bitmap.Config.ARGB_8888, false); }
+        finally { if (scaled != original) scaled.recycle(); }
+    }
+
+    public synchronized Bitmap nativeArtwork(String key) {
+        return nativeImages && Long.toString(artVersion).equals(key) ? nativeArt : null;
     }
 
     private static String artCacheKey(String mediaId, Uri uri) {
@@ -186,7 +213,7 @@ public final class MusicSession {
         if (queue != null && state != null && state.getActiveQueueItemId() != MediaSession.QueueItem.UNKNOWN_ID) {
             for (int i = 0; i < queue.size(); i++) {
                 if (queue.get(i).getQueueId() != state.getActiveQueueItemId()) continue;
-                for (int j = i + 1; j < Math.min(queue.size(), i + 4); j++) {
+                for (int j = i + 1; j < Math.min(queue.size(), i + (nativeImages ? 3 : 4)); j++) {
                     android.media.MediaDescription item = queue.get(j).getDescription();
                     String key = artCacheKey(item.getMediaId(), item.getIconUri());
                     if (!key.isEmpty()) upcoming.put(key, item.getIconUri());
@@ -199,7 +226,7 @@ public final class MusicSession {
         queueKey = signature;
         if (prefetchTask != null) prefetchTask.cancel(true);
         final long version = ++queueVersion;
-        // At most three upcoming covers plus the cover currently being decoded; never persist music history.
+        // Decoded native covers cost more than JPEG strings: retain at most two, never persist music history.
         if (upcoming.isEmpty()) { prefetched.clear(); prefetchTask = null; return; }
         prefetchTask = prefetchWorker.submit(() -> {
             for (Map.Entry<String, Uri> item : upcoming.entrySet()) {
@@ -210,7 +237,7 @@ public final class MusicSession {
                     Artwork cover = new Artwork(bitmap);
                     synchronized (MusicSession.this) {
                         if (!foreground || version != queueVersion) return;
-                        if (!cover.encoded.isEmpty()) { prefetched.put(item.getKey(), cover); while (prefetched.size() > 4) prefetched.remove(prefetched.keySet().iterator().next()); }
+                        if (cover.bitmap != null || !cover.encoded.isEmpty()) { prefetched.put(item.getKey(), cover); while (prefetched.size() > (nativeImages ? 2 : 4)) prefetched.remove(prefetched.keySet().iterator().next()); }
                     }
                 } catch (java.io.IOException | RuntimeException unavailable) { /* Upcoming covers are optional; current artwork has its own worker. */ }
                 finally { if (bitmap != null) bitmap.recycle(); }
@@ -224,7 +251,7 @@ public final class MusicSession {
         return new int[]{Math.max(1, (int)Math.round(width * scale)), Math.max(1, (int)Math.round(height * scale))};
     }
 
-    private String artwork(MediaMetadata data) {
+    private Artwork artwork(MediaMetadata data) {
         Bitmap best = null;
         Artwork cached = null;
         boolean owned = false;
@@ -235,7 +262,7 @@ public final class MusicSession {
             }
             // Android may downsample embedded bitmaps; an accessible content URI can retain the original.
             for (String key : new String[]{MediaMetadata.METADATA_KEY_ALBUM_ART_URI, MediaMetadata.METADATA_KEY_ART_URI, MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI}) {
-                if (Thread.currentThread().isInterrupted()) return "";
+                if (Thread.currentThread().isInterrupted()) return null;
                 if (best != null && Math.max(best.getWidth(), best.getHeight()) >= 2048) break;
                 String value = data.getString(key);
                 if (value == null) continue;
@@ -255,10 +282,10 @@ public final class MusicSession {
                     } else candidate.recycle();
                 } catch (java.io.IOException | RuntimeException unavailable) { /* Retain the best shared bitmap. */ }
             }
-            if (Thread.currentThread().isInterrupted()) return "";
-            if (cached != null && (best == null || (long)cached.width * cached.height >= (long)best.getWidth() * best.getHeight())) return cached.encoded;
-            return best == null ? "" : encodeArtwork(best);
-        } catch (RuntimeException unavailable) { return ""; }
+            if (Thread.currentThread().isInterrupted()) return null;
+            if (cached != null && (best == null || (long)cached.width * cached.height >= (long)best.getWidth() * best.getHeight())) return cached;
+            return best == null ? null : new Artwork(best);
+        } catch (RuntimeException unavailable) { return null; }
         finally { if (owned && best != null) best.recycle(); }
     }
 
@@ -305,7 +332,7 @@ public final class MusicSession {
                 .put("canSeek", duration > 0 && (actions & PlaybackState.ACTION_SEEK_TO) != 0)
                 .put("artKey", Long.toString(artVersion));
             result.put("artLoading", artworkTask != null);
-            if (artworkTask == null && !Long.toString(artVersion).equals(knownArt)) result.put("art", art);
+            if (!nativeImages && artworkTask == null && !Long.toString(artVersion).equals(knownArt)) result.put("art", art);
             return result.toString();
         } catch (Exception unavailable) { clear(); return "{\"status\":\"error\"}"; }
     }

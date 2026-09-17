@@ -17,8 +17,10 @@ const SurfaceMotion=(()=>{
   function pop(node,open){play(node,[{opacity:open?0:1,transform:open?'translateY(5px)':'translateY(0)'},{opacity:open?1:0,transform:open?'translateY(0)':'translateY(3px)'}],open?170:110)}
   function change(update){const result=update();if(result!==false)reveal(document.querySelector('#health-content'));return result}
   function expand(node,open,done){
-    if(!node)return;const before=node.getBoundingClientRect?.().height||0;stop(node);node.hidden=false;node.style.height='';const full=node.scrollHeight;node.style.overflow='hidden';
-    play(node,[{height:before+'px',opacity:open?0:1},{height:(open?full:0)+'px',opacity:open?1:0}],190,()=>{node.hidden=!open;node.style.height='';node.style.overflow='';done?.()},open);
+    if(!node)return;const before=node.getBoundingClientRect?.().height||0,style=getComputedStyle(node),from={height:before+'px',paddingTop:before?style.paddingTop:'0px',paddingBottom:before?style.paddingBottom:'0px'};
+    stop(node);node.hidden=false;node.style.height='';node.style.overflow='hidden';const full=node.scrollHeight,rest=getComputedStyle(node);
+    // Keep the presented height on reversal. Padding travels with it, so the final pixels never snap.
+    play(node,[from,{height:(open?full:0)+'px',paddingTop:open?rest.paddingTop:'0px',paddingBottom:open?rest.paddingBottom:'0px'}],240,()=>{node.hidden=!open;node.style.height='';node.style.overflow='';done?.()},open);
   }
   function toggleDetails(details){const body=details.querySelector('.details-body'),open=!(running.get(body)?.open??details.open);if(!details.open){body.hidden=true;details.open=true}details.querySelector('summary').setAttribute('aria-expanded',String(open));expand(body,open,()=>{details.open=open})}
   function settle(){for(const [node,entry] of [...running]){stop(node);entry.finish?.()}}

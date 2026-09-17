@@ -60,6 +60,7 @@
 .utility-island .island-frost{background:var(--frost-floating)}
 .live-island .island-frost,.stack-motion{background:var(--frost-floating);backdrop-filter:var(--frost-blur-floating);-webkit-backdrop-filter:var(--frost-blur-floating)}
 .live-island .island-surface,.utility-island .island-surface,.stack-card>.stack-shell{border-width:1px;border-color:#ffffff1f;background:none;box-shadow:none}
+.live-island>.island-surface{border:0}
 /* Keep the whole curved rim inside the sampled shape. An oversized shell and directional
    inset shadows lost their sides at the moving clip and made highlights end abruptly. */
 .stack-card>.stack-shell{inset:0}
@@ -70,13 +71,15 @@
 /* Sample on the clipping layer itself, just like the navbar. A filter nested inside it
    cannot see the backdrop outside that clip. Readings remain unfiltered; the rim folds separately. */
 .stack-motion{border-radius:20px}
-.history-days,.oxygen-week{position:relative}
-.history-days>.selection-pill,.oxygen-week>.selection-pill{position:absolute;left:0;top:0;pointer-events:none;z-index:0;transform:translate(var(--selection-x,0px),var(--selection-y,0px));width:var(--selection-width,0px);height:var(--selection-height,0px);border-radius:16px}
-.history-days>button,.oxygen-week>button{position:relative;z-index:1;background:none;border-color:transparent}
-.history-days>button[aria-pressed=true],.oxygen-week>button[aria-pressed=true]{background:none;border-color:transparent}
+.history-days{position:relative}
+.history-days>.selection-pill{position:absolute;left:0;top:0;pointer-events:none;z-index:0;transform:translate(var(--selection-x,0px),var(--selection-y,0px));width:var(--selection-width,0px);height:var(--selection-height,0px);border-radius:50%}
+.history-days>button{position:relative;z-index:1;background:none;border-color:transparent}
+.history-days>button[aria-pressed=true]{background:none;border-color:transparent}
 .health-page-head,.health-scroll{touch-action:pan-y}
 *{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 ::selection{background:transparent;color:inherit}
+/* Programmatic navigation focus must not leave a keyboard ring after a touch. */
+.screen.pointer-input :focus-visible,.screen.pointer-input :is(.night-chart,.body-chart,.plot,.oxygen-chart):focus-within{outline:none}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 
 /* Honest fallbacks: the material degrades to a visible opaque surface, never to an empty indicator. */
@@ -100,6 +103,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .liquid-surface,.glass-control{background:Canvas;border:1px solid CanvasText;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
   .liquid-surface{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .live-island .island-frost,.stack-motion{backdrop-filter:none;-webkit-backdrop-filter:none;background:Canvas}
+  .live-island>.island-rim rect{stroke:CanvasText}
 }
 
 /* The moving material has fixed layout dimensions. Only its decorative geometry flexes;

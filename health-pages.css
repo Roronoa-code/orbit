@@ -32,24 +32,9 @@
 .oxygen-tile summary{cursor:pointer;list-style:none}
 .oxygen-tile summary::-webkit-details-marker{display:none}
 
-.oxygen-tile{padding:17px 18px}
-.oxygen-tile summary{display:flex;align-items:center;gap:12px;min-height:50px}
-
-.oxygen-label{flex:1;min-width:0}
-.oxygen-label h2{font-size:13px}
-.oxygen-label>small{display:block;margin-top:4px;font-size:9px}
-.oxygen-tile .tile-value{margin:0;font-size:29px;white-space:nowrap}
-.oxygen-tile .tile-value>small{font-size:11px;margin-left:4px}
-.oxygen-chevron{font-size:13px;color:#b2a8c2;transition:transform 220ms}
-.oxygen-tile[open] .oxygen-chevron{transform:rotate(180deg)}
-.oxygen-detail-head{display:flex;justify-content:space-between;gap:8px;padding:18px 0 11px;border-top:1px solid #ffffff0d;margin-top:14px;font-size:9px;color:#b7afc3}
-.oxygen-detail-head output{color:#d9c8f5}
-.oxygen-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;padding:3px 0}
-.oxygen-week button{border:1px solid transparent;border-radius:13px;background:#ffffff03;padding:10px 2px;min-height:66px;text-align:center}
-.oxygen-week button>small{font-size:8px;color:#b7afc3}
-.oxygen-week strong{display:block;font-size:15px;font-weight:500;margin-top:6px}
-.oxygen-week strong>small{font-size:8px;margin-left:1px}
-.oxygen-week button[aria-pressed=true]{border-color:#b69cff55;background:#b69cff13}
+.oxygen-tile .details-body{padding:0 18px 16px}
+.oxygen-detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding-top:14px;border-top:1px solid #ffffff0c}.oxygen-detail-head span{font-size:11px;color:#aaa4b4}.oxygen-detail-head output{display:block;font-size:13px;margin-top:4px;color:#e1d9eb}.oxygen-detail-head p{margin:0}.oxygen-detail-head strong{font-size:26px;font-weight:500}.oxygen-detail-head small{font-size:12px;margin-left:4px;color:#aaa4b4}
+.oxygen-chart{position:relative;margin:0}.oxygen-chart svg{display:block;width:100%;height:auto;overflow:visible}.oxygen-chart text{fill:#aaa4b4;font-size:10px}.oxygen-chart input{position:absolute;top:0;left:9.4%;width:82.4%;height:100%;opacity:0;margin:0;touch-action:pan-y}.oxygen-chart:has(input:focus-visible){outline:1px solid #bfa7f2;outline-offset:3px;border-radius:8px}
 .selection-pill{position:absolute;top:0;left:0;z-index:0;pointer-events:none;border-radius:25px;width:var(--selection-width,0px);height:var(--selection-height,44px);transform:translate(var(--selection-x,0px),var(--selection-y,0px))}
 .is-ready>.selection-pill{transition:transform 360ms cubic-bezier(.2,.8,.2,1),width 360ms cubic-bezier(.2,.8,.2,1),height 220ms ease}
 .health-note{font-size:10px;line-height:1.7;color:#b7b7c1;margin:15px 5px}
@@ -65,7 +50,7 @@
 .workout-kinds button{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:28px;min-width:0;min-height:148px;padding:20px 18px;border:1px solid #ffffff09;border-radius:21px;background:linear-gradient(145deg,#24212d,#17171d);text-align:left;color:inherit;transition:background-color 160ms ease,transform 180ms ease}
 .workout-kinds .workout-glyph{width:41px;height:41px;color:#c3b0eb}
 .workout-kinds strong{font-size:19px;font-weight:500;letter-spacing:-.4px;color:#f4f1f8}
-.workout-kind-arrow{position:absolute;right:17px;top:19px;color:#8f889c;font-size:17px}
+
 .workout-kinds button:active{transform:translateY(2px);background:#302939}
 .workout-kinds button:disabled{opacity:.4}
 .workout-week-link{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;border:0;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12;background:none;padding:19px 2px;margin:0 0 24px}
@@ -177,12 +162,13 @@
 /* The sleep timeline uses clock time horizontally and stage depth vertically. */
 .facts[role=button]{cursor:pointer;touch-action:pan-y}
 .facts[role=button]:focus-visible{outline:2px solid #cdb6ff;outline-offset:-3px}
-.sleep-summary{padding:14px 6px 12px}.sleep-summary>span{font-size:10px;font-weight:600;letter-spacing:.7px;color:#a5a2ac}
-.sleep-summary p{display:flex;align-items:baseline;gap:4px;font-size:16px;color:#a5a2ac;margin:0;line-height:1.25}.sleep-summary strong{font-size:36px;font-weight:500;letter-spacing:-1.6px;color:#f5f1fa}.sleep-summary strong:not(:first-child){margin-left:5px}
-.sleep-date-nav{display:flex;align-items:center;justify-content:space-between;min-height:44px}.sleep-date-nav>span{font-size:12px;color:#b4b1bc}.sleep-date-nav>div{display:flex;gap:2px}.sleep-date-nav button{border:0;border-radius:50%;background:none;width:44px;height:44px;font-size:25px;color:#c8b4fc}.sleep-date-nav button:disabled{opacity:.2}
-.sleep-night{padding:0 6px 20px}.night-inspection{min-height:48px;display:flex;flex-direction:column;justify-content:center;padding:0 0 8px}.night-inspection>span{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:550}.night-inspection small{font-size:10px;letter-spacing:0;color:#95929e}.night-inspection i{width:14px;height:4px;border-radius:2px;flex:none}.night-inspection strong{font-size:11px;font-weight:450;color:#aaa6b1;margin-left:auto}
+.sleep-summary{padding:4px 16px 20px;margin:4px 0 18px;border-radius:22px;background:#19181e}
+.sleep-summary-reading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:15px}.sleep-summary-reading>div>span{display:block;font-size:12px;color:#b9b3c3;margin-bottom:6px}
+.sleep-summary p{display:flex;align-items:baseline;gap:4px;font-size:14px;color:#b9b3c3;margin:0;line-height:1.25}.sleep-summary strong{font-size:34px;font-weight:500;letter-spacing:-1.4px;color:#f5f1fa}.sleep-summary strong:not(:first-child){margin-left:4px}
+.sleep-window{text-align:right}.sleep-window time{display:block;font-size:13px;color:#e2dce9;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sleep-date-nav{display:flex;align-items:center;justify-content:space-between;min-height:52px;border-bottom:1px solid #ffffff0c}.sleep-date-nav>span{font-size:13px;color:#eee8f5}.sleep-date-nav>div{display:flex;gap:0}.sleep-date-nav button{border:0;border-radius:50%;background:none;width:44px;height:44px;font-size:25px;color:#c8b4fc}.sleep-date-nav button:active{color:#fff;background:#ffffff08}.sleep-date-nav button:disabled{opacity:.2}
+.sleep-night{padding:0 6px 20px}.night-inspection{height:48px;display:flex;flex-direction:column;justify-content:center;padding:0 0 8px}.night-inspection>span{display:flex;gap:6px;align-items:center;font-size:14px;font-weight:550}.night-inspection small{font-size:11px;letter-spacing:0;color:#a7a1b0}.night-inspection i{width:14px;height:4px;border-radius:2px;flex:none}.night-inspection strong{font-size:11px;font-weight:450;color:#aaa6b1;margin-left:auto}
 .night-chart{position:relative;margin:0}.night-chart>svg{display:block;width:100%;height:auto;overflow:visible}
-.night-view-label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:5px}.night-view-label h2{font-size:13px;font-weight:550}.night-view-label>span{font-size:10px;color:#aaa6b1}
 #night-scrub{appearance:none;-webkit-appearance:none;position:absolute;top:0;margin:0;opacity:0;cursor:crosshair;touch-action:pan-y}
 #night-scrub::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:1px;height:1px}
 .night-chart:has(:focus-visible){outline:1px solid #b69cff;outline-offset:5px;border-radius:4px}
@@ -190,8 +176,8 @@
 .sleep-breakdown button{display:flex;align-items:center;gap:12px;width:100%;min-height:49px;padding:10px 10px;border:0;border-radius:12px;background:none;text-align:left;transition:color 160ms,background-color 160ms}
 .sleep-breakdown i{width:16px;height:4px;border-radius:2px;flex:none;background:var(--stage-color)}.sleep-breakdown span{font-size:12px}.sleep-breakdown strong{margin-left:auto;font-size:13px;font-weight:500;color:#c4c0cb;white-space:nowrap}.sleep-breakdown [aria-pressed=true]{color:#f0ebfa;background:color-mix(in srgb,var(--stage-color) 12%,transparent)}.sleep-breakdown button:active{background:color-mix(in srgb,var(--stage-color) 22%,transparent)}.sleep-breakdown button:disabled{opacity:.5}
 .sleep-breakdown button:focus-visible{outline-offset:-3px}.sleep-source{font-size:10px;color:#817e87;padding:14px 9px;line-height:1.6}.sleep-empty{font-size:13px;color:#aaa6b1;padding:40px 6px}
-@media(max-width:360px){.oxygen-tile{padding:14px}.oxygen-tile summary{gap:8px}.oxygen-label h2{font-size:12px}.oxygen-tile .tile-value{font-size:26px}}
-@media(forced-colors:active){.night-chart>svg{forced-color-adjust:none}.sleep-breakdown button[aria-pressed=true],.oxygen-week button[aria-pressed=true]{outline:2px solid Highlight}}
+@media(max-width:360px){.sleep-summary{padding-inline:12px}.sleep-summary strong{font-size:30px}.sleep-window time{font-size:12px}}
+@media(forced-colors:active){.night-chart>svg{forced-color-adjust:none}.sleep-breakdown button[aria-pressed=true]{outline:2px solid Highlight}}
 
 .toast{z-index:40}
 
@@ -375,7 +361,7 @@
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.deck-frost{backdrop-filter:none;-webkit-backdrop-filter:none}}
 .health-page[data-page=body]{background:radial-gradient(120% 55% at 50% -10%,#18171f,transparent 62%),#0a0a0c}
 .body-hero{position:relative;isolation:isolate;padding:0 0 2px}
-.body-hero:before{content:"";position:absolute;z-index:-1;left:-14px;right:-14px;top:-40px;height:480px;pointer-events:none;background:radial-gradient(closest-side at 50% 40%,#b69cff1c,#b69cff0a 55%,transparent),radial-gradient(60% 36% at 50% 97%,#e4e2f00c,transparent 70%)}
+.body-hero:before{content:"";position:absolute;z-index:-1;left:-14px;right:-14px;top:-40px;height:480px;pointer-events:none;background:radial-gradient(closest-side at 50% 40%,#b69cff1c,#b69cff0a 55%,transparent)}
 .body-composition{position:relative;width:min(100%,300px);aspect-ratio:1;margin:2px auto 0;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 #body-ring{position:absolute;inset:0;display:block;pointer-events:none}
 #body-ring>svg{width:100%;height:100%;overflow:visible}
@@ -418,16 +404,8 @@
 .body-readout-meta>*{white-space:nowrap}
 #body-date{color:#e3dcf4}
 #body-change{color:#c7b3ff}
-.body-date-stepper{display:flex;gap:6px;flex:none}
-.body-date-stepper button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:#ffffff0a;box-shadow:inset 0 1px 0 #ffffff14;color:#e2dbee;transition:opacity 200ms ease,transform 160ms ease,background-color 160ms ease}
-.body-date-stepper svg{width:15px;height:15px}
-.body-date-stepper button:first-child svg{transform:rotate(180deg)}
-.body-date-stepper button:active{transform:scale(.92);background:#ffffff14}
-.body-date-stepper button:disabled{opacity:.28}
 .body-chart{position:relative;margin:12px 0 0}
 .body-chart>svg{display:block;width:100%;height:128px;overflow:visible}
-#body-halo{transition:r 180ms ease,fill 180ms ease}
-.body-chart:has(input:active) #body-halo{r:13px;fill:#b69cff30}
 .body-chart input{position:absolute;inset:0 0 22px;width:100%;height:calc(100% - 22px);margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
 .body-chart:focus-within{outline:1px solid #b69cff;outline-offset:5px;border-radius:6px}
 .body-chart figcaption{display:flex;justify-content:space-between;gap:4px;margin-top:6px;font-size:9.5px;color:#a9a5b3;font-variant-numeric:tabular-nums}
@@ -467,7 +445,6 @@
 .grid{stroke:#ffffff12}
 .health-scroll{padding-bottom:calc(24px + var(--safe-bottom,0px));scroll-padding-bottom:90px}
 .health-page-head .icon-button{flex-shrink:0}
-.health-overview-intro{font-size:16px;color:#e4dfed;margin:8px 4px 18px}
 #workout-record-body{display:flex;flex-direction:column;min-height:100%}
 #workout-record-body>.session-actions{position:sticky;bottom:0;margin-top:auto;padding:14px 0 6px;background:linear-gradient(transparent,#0a0a0c 22%);z-index:4}
 .session-time{position:relative;isolation:isolate}
@@ -533,18 +510,18 @@
 .history-week-metrics p{display:flex;flex-direction:column;gap:5px;min-width:0}.history-week-metrics p+p{padding-left:20px;border-left:1px solid #ffffff12}.history-week-metrics strong{font-size:28px;font-weight:500;letter-spacing:-.7px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.history-week-metrics small{font-size:11px;color:#a7a1b0}
 /* Weekday labels stay outside the moving date circle. The button itself owns its measured geometry. */
 .history-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;border-radius:18px;padding:25px 3px 4px;margin-inline:-7px}
-.history-days.glass-track{background:none;box-shadow:none;--blob-active:#261938;--blob-inactive:#d6d0df}
+.history-days{background:none;box-shadow:none;--blob-active:#261938;--blob-inactive:#d6d0df}
 .history-days button{display:grid;place-items:center;justify-self:center;width:min(44px,100%);aspect-ratio:1;padding:0;border:0;border-radius:50%;background:none}
 .history-days.blob-track>.selection-pill,.history-days.is-dragging>.selection-pill{border-radius:999px;background:#d5c2f5;box-shadow:none}
 .history-days small{position:absolute;top:-21px;left:0;width:100%;font-size:10px;color:#a7a1b0}.history-days strong{font-size:16px;font-weight:500}
 .history-days button.has-records:before{content:"";position:absolute;inset:2px;border:1px solid #bfa7f24d;border-radius:50%;pointer-events:none}
 .history-days button[aria-pressed=true]:before{opacity:0}.history-days button[aria-pressed=true] small{color:#e2d4f5}.history-days button:disabled{opacity:.28}
 .history-day{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:24px 4px 12px;font-size:13px;font-weight:500;color:#d6d0df}.history-day small{font-size:10px;font-weight:400;color:#a7a1b0;white-space:nowrap}
-.history-session{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) 12px;align-items:center;gap:12px;margin-bottom:10px;padding:16px;border:0;border-radius:20px;background:#19181e;text-align:left;transition:background-color 160ms}
+.history-session{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr);align-items:center;gap:12px;margin-bottom:10px;padding:16px;border:0;border-radius:20px;background:#19181e;text-align:left;transition:background-color 160ms}
 .history-session-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#bfa7f212;color:#cbb3f3}.history-session-icon .workout-glyph{width:24px;height:24px}
 svg.workout-glyph{background:none}
 .history-session-title{min-width:0}.history-session-title strong{display:block;font-size:15px;font-weight:550;overflow-wrap:anywhere}.history-session-title small{display:block;margin-top:4px;font-size:10px;color:#a7a1b0;line-height:1.4}
-.history-session-metrics{grid-column:1/-1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;border-top:1px solid #ffffff0a;padding-top:12px;margin-top:1px}.history-session-metrics b{display:block;font-size:16px;font-weight:500;letter-spacing:-.3px;color:#e6ddeb;overflow-wrap:anywhere}.history-session-metrics small{display:block;margin-top:4px;font-size:10px;color:#a7a1b0}.history-arrow{font-size:22px;color:#bfa7f2}.history-session:active{background:#25222d}
+.history-session-metrics{grid-column:1/-1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;border-top:1px solid #ffffff0a;padding-top:12px;margin-top:1px}.history-session-metrics b{display:block;font-size:16px;font-weight:500;letter-spacing:-.3px;color:#e6ddeb;overflow-wrap:anywhere}.history-session-metrics small{display:block;margin-top:4px;font-size:10px;color:#a7a1b0}.history-session:active{background:#25222d}
 .history-empty{padding:32px 16px;border-radius:20px;background:#19181e;text-align:center;font-size:14px;color:#d5ccdf}.history-empty span{display:block;margin-top:8px;font-size:11px;line-height:1.5;color:#aaa2b6}
 /* The live timer keeps its tested music geometry. Supporting data has no extra card around it. */
 .workout-live-top{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px}
@@ -564,7 +541,6 @@ svg.workout-glyph{background:none}
 .workout-source-note{font-size:11px;line-height:1.6;margin-inline:4px}
 .energy-method summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-size:12px;color:#bfaad9;cursor:pointer;list-style:none}.energy-method summary:after{content:'+';font-size:18px}.energy-method[open] summary:after{content:'−'}.energy-method p{font-size:11px;line-height:1.7;color:#afa3bd;margin:0 0 10px}
 .health-page[data-page=workouts]:not(.music-focus){background:#0c0b10}
-.health-page[data-page=workouts] .health-scroll{padding-bottom:calc(22px + var(--safe-bottom,0px))}
 @media(max-width:360px){.workout-kinds button{padding:17px 14px;min-height:132px;gap:22px}.workout-kinds strong{font-size:17px}.history-week-metrics strong{font-size:25px}.history-session{padding:14px}.history-session-metrics b{font-size:14px}.workout-unconnected .workout-stat dd:not(.workout-stat-copy){font-size:24px}}
 @media(max-height:750px){.setup-activity{height:75px;margin-bottom:12px}.workout-unconnected .workout-stat{padding-block:12px}}
 @media(prefers-reduced-motion:reduce){.workout-kinds button,.history-session,.sleep-breakdown button{transition:none}}
@@ -579,7 +555,7 @@ svg.workout-glyph{background:none}
 .home-heading .date{display:block;margin:0;padding:4px 0;min-height:30px;text-align:left;font-size:12px;line-height:1.5;letter-spacing:0;color:var(--text-secondary)}
 .utility-island{top:calc(var(--safe-top,0px) + 12px);right:14px}
 .health-page-head{position:absolute;inset:0 0 auto;z-index:5;isolation:isolate;min-height:74px}
-.health-page .health-scroll{padding-top:calc(82px + var(--safe-top,0px));padding-bottom:calc(100px + var(--safe-bottom,0px));scroll-padding-bottom:100px}
+.health-page .health-scroll{padding-top:calc(82px + var(--safe-top,0px));padding-bottom:calc(100px + var(--safe-bottom,0px));scroll-padding-bottom:100px;scroll-padding-top:calc(82px + var(--safe-top,0px))}
 .health-page .health-head-frost{display:block;position:absolute;inset:0 0 -26px;z-index:-1;pointer-events:none;opacity:0;background:linear-gradient(#0a0a0c calc(100% - 30px),transparent);backdrop-filter:blur(16px) saturate(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.1);mask-image:linear-gradient(#000 calc(100% - 26px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 26px),transparent);will-change:opacity}
 .screen.is-detail .panel-deck{z-index:24}
 .screen.is-detail .deck-scroll,.screen.is-detail #stack-open{visibility:hidden}
@@ -589,25 +565,25 @@ svg.workout-glyph{background:none}
 .screen.is-task .health-page-head{position:relative;inset:auto}
 .screen.is-task .health-scroll{padding-top:0}
 .screen.is-task .health-head-frost{display:none}
-.activity-choice[aria-current=page]{font-weight:650;text-decoration:underline;text-decoration-color:#cbb9eb80;text-underline-offset:7px;text-decoration-thickness:2px}
+.activity-choice[aria-current=page]{font-weight:650;text-decoration:none}
 .health-section-head h2,.workout-start-title,.health-tile h2{font-size:16px;font-weight:550;letter-spacing:-.2px}
 .health-note,.reading-notes p,.sleep-source{font-size:12px;line-height:1.65;color:var(--text-secondary)}
-.health-overview-intro{margin:4px 4px 18px;font-size:13px;color:var(--text-secondary)}
-.health-library{padding:0 4px;margin-bottom:12px}
-.health-reading{width:100%;display:flex;align-items:center;gap:12px;min-height:84px;padding:16px 0;background:none;border:0;border-bottom:1px solid #ffffff0d;text-align:left}
-.health-reading>span:first-child{flex:1;min-width:0}.health-reading strong{display:block;font-size:16px;font-weight:500}
-.health-reading small{display:block;margin-top:4px;color:var(--text-caption);font-size:12px;line-height:1.4;letter-spacing:0}
-.health-reading-value{flex:none;text-align:right;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
-.health-reading-value small{font-size:11px;letter-spacing:0}.reading-chevron{font-size:22px;color:var(--text-caption)}
-.health-reading:active{background:#ffffff06}
-.oxygen-tile{background:var(--reading-surface);border-radius:20px;padding:14px 16px;margin-top:8px}
-.oxygen-label h2{font-size:16px}.oxygen-label>small{font-size:12px}.oxygen-tile .tile-value{font-size:22px}
 .source-link{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 4px;min-height:48px;border:0;background:none;text-align:left;color:var(--text-secondary);font-size:12px}
 .source-link>span{font-size:20px;color:#cbb9eb}
-.body-timeline{padding:24px 4px 8px;margin-top:20px;background:none;border:0;box-shadow:none}
-.body-timeline .health-section-head{align-items:flex-start;flex-direction:column;gap:12px}
-.body-timeline .segmented{width:100%;display:flex}.body-timeline .segmented button{flex:1;font-size:12px}
-.body-readout{margin-top:20px}.body-stats dt{font-size:12px}.body-stats dd{font-size:18px}.body-coverage{line-height:1.6}
+.body-timeline{display:flex;flex-direction:column;padding:18px 6px 8px;margin-top:8px;background:none;border:0;box-shadow:none}
+.body-timeline .health-section-head{align-items:center;gap:8px}
+.body-timeline .health-section-head h2{font-size:16px;white-space:nowrap}
+#body-record-count{font-size:11px;color:#a9a1b4}
+.body-timeline .segmented{order:4;position:relative;display:flex;flex:none;margin-top:20px;background:#ffffff06;border:0;box-shadow:none;backdrop-filter:none;border-radius:16px}
+.body-timeline .segmented button{flex:1;min-height:40px;padding-inline:7px;font-size:12px}
+.body-timeline .selection-pill{background:#c1a8ed20;border-radius:13px;border:0;box-shadow:none;backdrop-filter:none}
+.body-readout{align-items:center;margin:16px 2px 0}.body-readout-value{font-size:38px}.body-readout-value small{font-size:14px}
+.body-readout-meta{flex-direction:column;align-items:flex-start;gap:5px;font-size:12px}
+#body-change{flex:none;max-width:48%;margin:0;color:#c6afeb;font-size:12px;line-height:1.7;white-space:pre-line;text-align:right}
+.body-chart{margin-top:12px}.body-chart>svg{height:100px}.body-timeline.has-variation .body-chart>svg{height:132px}
+.body-timeline.is-sparse .body-chart{display:none}
+.body-stats{display:none;order:3;margin-top:22px}.body-timeline.has-variation .body-stats{display:grid}
+.body-stats dt{font-size:11px}.body-stats dd{font-size:19px}.body-coverage{order:5;font-size:10px;line-height:1.6;margin-top:12px;text-align:center}
 .reading-notes{margin:20px 4px 0;border-top:1px solid #ffffff12}
 .reading-notes summary,.settings-section>summary{display:flex;align-items:center;justify-content:space-between;min-height:52px;font-size:14px;list-style:none;cursor:pointer}
 .reading-notes summary:after,.settings-section>summary:after{content:'+';color:#bfa7f2}.reading-notes[open] summary:after,.settings-section[open]>summary:after{content:'−'}
@@ -622,8 +598,18 @@ svg.workout-glyph{background:none}
 .history-week-nav h2,.history-session-title strong{font-size:16px}.history-week-metrics small{font-size:12px}.history-session-metrics{gap:12px}
 .workout-start-title{margin-top:22px;color:var(--text-primary)}
 .workout-kinds button{min-height:124px;gap:20px;background:var(--reading-surface);border:0}
-.workout-kinds .workout-glyph{width:34px;height:34px}.workout-kind-arrow{color:var(--text-caption)}
+.workout-kinds .workout-glyph{width:34px;height:34px}
 .workout-detail-group,.workout-energy{padding-block:var(--section-space)}
-@media(max-width:360px){.health-reading{gap:8px}.health-reading strong{font-size:14px}.health-reading-value{font-size:20px}.health-reading small{font-size:11px}.history-session-metrics b{font-size:14px}.history-session-metrics small{font-size:11px}}
+@media(max-width:360px){.history-session-metrics b{font-size:14px}.history-session-metrics small{font-size:11px}}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.health-page .health-head-frost{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0a0a0c}.health-reading small,.health-note,.source-link,.sleep-source,.reading-notes p{color:#d3ceda}}
-@media(forced-colors:active){.health-page .health-head-frost{display:none}.health-reading,.source-link,.body-timeline,.reading-notes,.settings-profile,.settings-section{background:Canvas;color:CanvasText;border-color:CanvasText}.activity-choice[aria-current=page]{text-decoration-color:Highlight}}
+@media(forced-colors:active){.health-page .health-head-frost{display:none}.health-library,.sleep-summary,.health-reading,.source-link,.body-timeline,.reading-notes,.settings-profile,.settings-section{background:Canvas;color:CanvasText;border-color:CanvasText}.activity-choice[aria-current=page]{color:Highlight}}
+
+/* Content presses keep the same surface; arrows are quiet directional controls. */
+.history-session,.workout-kinds button,.workout-week-link{transition:transform 320ms cubic-bezier(.2,.8,.2,1),background-color 160ms}
+.history-session:active,.workout-kinds button:active,.workout-week-link:active{transform:scale(.975);transition-duration:100ms;background:var(--reading-surface)}
+.date-arrow{display:block;width:18px;height:18px;margin:auto;transition:translate 180ms cubic-bezier(.2,.8,.2,1)}
+.date-arrow-back{transform:rotate(180deg)}
+:is(.history-week-nav,.sleep-date-nav) button{background:#ffffff06;width:44px;height:44px;margin-left:1px;font-size:0}
+:is(.history-week-nav,.sleep-date-nav) button:active .date-arrow{translate:2px 0}
+:is(.history-week-nav,.sleep-date-nav) button:active .date-arrow-back{translate:-2px 0}
+.workout-week-link>.week-link-label{font-size:12px;color:#cfb7ed}

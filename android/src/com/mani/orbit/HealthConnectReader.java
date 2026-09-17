@@ -90,7 +90,7 @@ final class HealthConnectReader {
             // These are labelled interval totals; Health Connect does not link separate sensors by workout ID.
             try (android.database.Cursor rows = store.pendingWorkouts()) {
                 while (rows.moveToNext()) {
-                    checkVisible(); JSONObject row = new JSONObject(rows.getString(0));
+                    checkVisible(); JSONObject row = store.hydratePending(new JSONObject(rows.getString(0)));
                     row.put("summary", workoutTotals(row, types)); store.stage(new JSONArray().put(row));
                 }
             }

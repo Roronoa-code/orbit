@@ -30,7 +30,7 @@ const SleepTimeline=(()=>{
   function selection(night,index){const s=night.segments[index];return `<span><i style="background:${stages[s.stage][1]}"></i>${stages[s.stage][0]}<strong>${duration((s.end-s.start)/60000)}</strong></span><small>Recorded · ${time(s.start)} – ${time(s.end)}</small>`}
   function view(night,minute=0,navigation=''){
     const available=valid(night),all=available?totals(night):{},asleep=Math.round((all.light||0)+(all.deep||0)+(all.rem||0)+(all.sleeping||0));
-    const summary=`<header class="sleep-summary"><span>TIME ASLEEP</span><p>${available&&['awake','light','deep','rem','sleeping'].some(k=>all[k]>0)?`<strong>${Math.floor(asleep/60)}</strong>h <strong>${asleep%60}</strong>min`:'<strong>—</strong>'}</p>${navigation}</header>`;
+    const summary=`<header class="sleep-summary">${navigation}<div class="sleep-summary-reading"><div><span>Time asleep</span><p>${available&&['awake','light','deep','rem','sleeping'].some(k=>all[k]>0)?`<strong>${Math.floor(asleep/60)}</strong>h <strong>${asleep%60}</strong>min`:'<strong>—</strong>'}</p></div>${available?`<div class="sleep-window"><span>Sleep window</span><time>${time(night.start)} – ${time(night.end)}</time></div>`:''}</div></header>`;
     if(!available)return summary+'<p class="sleep-empty">No sleep recorded for this day.</p>';
     const index=locate(night,minute),selected=night.segments[index],span=(night.end-night.start)/60000;
     const lanes=['awake','rem','light','deep',...['sleeping','unknown'].filter(k=>all[k]>0)],height=lanes.length*43;
@@ -46,8 +46,7 @@ const SleepTimeline=(()=>{
       return `<rect data-night-segment="${i}" data-stage="${s.stage}" x="${left}" y="${top-8}" width="${width}" height="16" rx="${Math.min(3,width/2)}" fill="${stages[s.stage][1]}" opacity="1"/>`;
     }).join('');
     return summary+`<section class="sleep-night" aria-label="Sleep stages">
-      <div class="night-view-label"><h2>Sleep stages</h2><span>5-min blocks</span></div>
-      <div id="night-selection" class="night-inspection" data-index="${index}" aria-live="polite"><span>${time(night.start)} – ${time(night.end)}</span><small>Hold the chart for recorded timings</small></div>
+      <div id="night-selection" class="night-inspection" data-index="${index}" aria-live="polite"><span>Sleep stages<strong>5-min blocks</strong></span></div>
       <figure class="night-chart" aria-label="Sleep stages grouped into five-minute blocks by the longest recorded stage. Hold and slide for original recorded timings."><svg viewBox="0 0 340 ${height+23}" aria-hidden="true">
       ${axis.map(t=>`<path d="M${x(t)} 0V${height}" stroke="#ffffff10" stroke-dasharray="2 3"/><text x="${x(t)}" y="${height+17}" text-anchor="${t===axis[0]?'start':'middle'}" fill="#939199" font-size="11">${time(t)}</text>`).join('')}
       ${lanes.map((stage,i)=>`<text x="8" y="${i*43+12}" fill="#b6b3bc" font-size="12">${stages[stage][0]}</text><path d="M8 ${(i+1)*43}H332" stroke="#ffffff12"/>`).join('')}${bars}

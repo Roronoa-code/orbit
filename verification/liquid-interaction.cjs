@@ -26,13 +26,22 @@ try{for(const width of [390,320]){
   return {point,before,hold};
  }
  async function release(){await touch('touchEnd');await p.waitForTimeout(750)}
- async function disclosure(selector,name){
+ async function quietHold(selector,host=selector,name){
+  await p.locator(selector).scrollIntoViewIfNeeded();const point=await centre(selector);
+  await touch('touchStart',point.x,point.y);await p.waitForTimeout(400);
+  assert.equal(await p.locator(host+' .glass-response-surface').count(),0,'Reading content never creates a held glass layer: '+selector);
+  assert.notEqual(await p.locator(host).getAttribute('data-glass-state'),'engaged');
+  if(name)await shot(name);
+ }
+ async function disclosure(selector,name,quiet=false){
   const wasOpen=await p.locator(selector).evaluate(n=>n.parentElement.open);
+  if(quiet)await quietHold(selector,selector,name);else{
   const hit=await held(selector,selector,name),style=await p.locator(selector+'>.glass-response-surface').evaluate(n=>{
    const s=getComputedStyle(n);return{shadow:s.boxShadow,radius:s.borderRadius,transform:s.transform,light:getComputedStyle(n.firstElementChild).display};
   });
   assert.deepEqual(style,{shadow:'none',radius:'12px',transform:'none',light:'none'},'Disclosure feedback stays flat and softly rounded');
   assert.equal(hit.before.width,hit.hold.width);assert.equal(hit.before.height,hit.hold.height);
+  }
   await release();assert.equal(await p.locator(selector).evaluate(n=>n.parentElement.open),!wasOpen);
   assert((await snap(selector)).opacity<.001,'Disclosure feedback clears after release');
   await p.locator(selector).focus();await p.keyboard.press('Space');await p.waitForTimeout(750);
@@ -86,7 +95,7 @@ try{for(const width of [390,320]){
  await p.locator(start).focus();await p.keyboard.down(' ');await p.waitForTimeout(250);assert((await snap(track)).opacity>.9);await p.keyboard.up(' ');await p.waitForTimeout(700);
  await held(start,track);await p.evaluate(()=>window.dispatchEvent(new Event('blur')));await touch('touchCancel');assert.equal((await snap(track)).opacity,0);
  await p.emulateMedia({reducedMotion:'reduce'});const gentle=await held(start,track);assert(Math.abs(gentle.hold.height-gentle.before.height)<1,'Reduced motion keeps feedback without elasticity');await release();await p.emulateMedia({reducedMotion:'no-preference'});
- await held('[data-body-range="30"]','.segmented','range-held');await release();
+ await quietHold('[data-body-range="30"]','.segmented','range-held');await release();
 
  // The main launcher is also a held, draggable navigation control.
  await p.evaluate(()=>Health.close());await p.waitForTimeout(400);const live=await held('#live-bar','#live-bar','live-held');
@@ -98,8 +107,8 @@ try{for(const width of [390,320]){
  await dragTo(nav.point,destination);await p.waitForTimeout(120);
  assert(await p.locator('[data-activity=body]').evaluate(n=>getComputedStyle(n).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(n,':before').content==='none'),'The original pressed option leaves no second background');
  await shot('navigation-drag');await release();assert.equal(await p.evaluate(()=>Health.page),'overview');
- await disclosure('.oxygen-tile summary','oxygen-row-held');
- await p.locator('.oxygen-tile summary').tap();await p.waitForTimeout(450);await held('[data-oxygen-day][aria-pressed=true]','.oxygen-week');await release();
+ await disclosure('.oxygen-tile summary','oxygen-row-held',true);
+ await p.locator('.oxygen-tile summary').tap();await p.waitForTimeout(450);assert.equal(await p.locator('[data-oxygen-point]').count(),7);await quietHold('#oxygen-scrub','.oxygen-chart');await release();
 
  // Native switches can be held and dragged, without a subsequent click undoing the choice.
  await p.evaluate(()=>Health.open('settings'));await p.waitForTimeout(350);
@@ -113,10 +122,10 @@ try{for(const width of [390,320]){
  const stableSwitch=await p.locator(toggle).evaluate(n=>({x:n.style.getPropertyValue('--switch-x'),checked:n.checked}));assert.equal(parseFloat(stableSwitch.x),stableSwitch.checked?18:0);
  await held('#profile-form button[type=submit]','#profile-form button[type=submit]');await release();
 
- await p.evaluate(()=>Health.open('sleep'));await p.waitForTimeout(350);await held('[data-night-stage=deep]','[data-night-stage=deep]','sleep-held');await release();
- await held('#night-scrub','#night-scrub');await release();assert.equal(await p.locator('#night-cursor').count(),0);
+ await p.evaluate(()=>Health.open('sleep'));await p.waitForTimeout(350);await quietHold('[data-night-stage=deep]','[data-night-stage=deep]','sleep-held');await release();
+ await quietHold('#night-scrub','.night-chart');await release();assert.equal(await p.locator('#night-cursor').count(),0);
  await p.evaluate(()=>Health.open('workouts'));await p.waitForTimeout(350);await held('.workout-tabs [data-workout-tab=history]','.workout-tabs','workout-tabs-held');await release();
- await held('[data-week-day][aria-pressed=true]','.history-days','date-held');await release();
+ await quietHold('[data-week-day][aria-pressed=true]','.history-days','date-held');await release();
  await p.locator('[data-workout-tab=train]').tap();await p.locator('[data-setup=Running]').tap();await p.waitForTimeout(300);
  await held('.setup-segments label:first-of-type','.setup-segments');await release();
  await require('./video-audit-scenes.cjs').seedMedia(p);
@@ -137,7 +146,7 @@ try{for(const width of [390,320]){
  await p.evaluate(()=>{Health.state.active.weightKg=75;Health.state.active.trackLocation=true;Health.state.active.metrics={state:'tracking',distanceM:0,maxSpeedMps:0,speedMps:0,points:[{lat:51,lon:0,elapsedMs:0,speedMps:0,breakBefore:true}]};Health.render()});
  await p.locator('[data-workout-detail=active]').tap();await p.waitForTimeout(350);
  await held('[data-workout-chart=speed]','.workout-chart-tabs');await release();
- await disclosure('.energy-method summary','energy-row-held');
+ await disclosure('.energy-method summary','energy-row-held',true);
  await p.emulateMedia({forcedColors:'active'});await p.keyboard.press('Tab');await p.locator('#health-back').focus();assert.notEqual(await p.locator('#health-back').evaluate(n=>getComputedStyle(n).outlineStyle),'none');await p.emulateMedia({forcedColors:'none'});
  await p.evaluate(()=>{Health.open('body');Health.open('settings');Health.open('sleep')});await p.waitForTimeout(900);
  assert.equal(await p.evaluate(()=>GlassResponse.active),0,'No idle response frame work');assert.deepEqual(errors,[]);

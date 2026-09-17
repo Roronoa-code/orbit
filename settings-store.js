@@ -1,7 +1,7 @@
 /* One storage boundary for profile, goal and motion; browser preview stays localStorage-only. */
 'use strict';
 const SettingsStore=(()=>{
-  const allowed=new Set(['orbit-profile-v1','orbit-steps-goal-v1','orbit-reduce-motion-v1']);
+  const allowed=new Set(['orbit-profile-v1','orbit-steps-goal-v1','orbit-reduce-motion-v1','orbit-health-layout-v1','orbit-health-order-v1']);
   function write(key,value){
     if(!allowed.has(key)||typeof value!=='string'||value.length>4096)throw Error('Invalid setting');
     const native=window.OrbitPreferences;

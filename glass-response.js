@@ -7,10 +7,13 @@ window.GlassResponse=(()=>{
   const motion=matchMedia('(prefers-reduced-motion:reduce)');
   const reduced=()=>motion.matches||SurfaceMotion.reduced;
   const clamp=BlobTrack.clamp;
+  // Reading cards, date circles and disclosures use their own quiet pressed states.
+  const quiet='.history-session,.history-overview,.workout-kinds,.workout-week-link,.energy-method,.health-library,.source-link,.sleep-summary,.body-timeline,.night-chart,[data-night-stage]';
   let frame=0,last=0,pointer=null,swallow=null;
   function layer(parent,name){const n=document.createElement('span');n.className=name;n.setAttribute('aria-hidden','true');parent.append(n);return n}
 
   function create(host,driven=false){
+    if(host.closest(quiet))return null;
     if(cached.has(host))return cached.get(host);
     const input=host.matches('input'),range=input&&host.type==='range',toggle=input&&host.type==='checkbox';
     const indicator=driven?host.querySelector('.selection-pill'):null;
@@ -101,7 +104,7 @@ window.GlassResponse=(()=>{
     if(active.size)frame=requestAnimationFrame(tick);
   }
   function targetOf(target){
-    if(target.closest('.blob-track,[inert]'))return null;
+    if(target.closest('.blob-track,[inert]')||target.closest(quiet))return null;
     let node=target.closest('button,summary,a,input,[role=button]');
     if(!node){const label=target.closest('label');node=label?.querySelector('input[type=checkbox]')}
     if(!node||node.disabled||node.getAttribute('aria-disabled')==='true'||node.matches('.orb-button,.body-centre,[data-body-dial]'))return null;

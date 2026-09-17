@@ -1,0 +1,60 @@
+/* One reading per card; hold reveals only that card's size control. */
+.health-overview-intro{margin:4px 4px 18px;font-size:13px;color:var(--text-secondary)}
+.health-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:10px}
+.health-card{position:relative;min-width:0;border-radius:26px;transform-origin:0 0}
+.health-card.is-wide,.health-card:has(.oxygen-tile[open]){grid-column:1/-1}
+.health-reading{position:relative;display:flex;flex-direction:column;align-items:stretch;width:100%;min-width:0;min-height:208px;padding:18px;border:0;border-radius:26px;background:#1b1920;text-align:left;isolation:isolate;transform:scale(1);transition:transform 320ms cubic-bezier(.2,.8,.2,1)}
+.health-card>button.health-reading{height:100%}
+.health-reading:is(:active,.is-pressed){transform:scale(.965);transition-duration:100ms}
+.health-reading small{display:block;margin-top:8px;color:#b9b2c5;font-size:11px;line-height:1.45;letter-spacing:0}
+.reading-label{display:block;font-size:14px;font-weight:550;color:#e9e2f3}
+.health-reading-value{display:block;margin-top:83px;font-size:33px;font-weight:500;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.health-reading-value small{display:inline;margin:0 0 0 4px;font-size:12px;font-weight:400;letter-spacing:0}
+.reading-art{position:absolute;display:block;width:68px;height:68px;top:47px;right:18px;color:#bea4e7;overflow:visible;transform:rotate(0);transform-origin:50% 60%;transition:transform 380ms cubic-bezier(.2,.8,.2,1)}
+.reading-heart{background:#211b28}.reading-heart .reading-art{color:#c7a2ec}
+.reading-sleep{background:#242031}.reading-sleep .reading-art{color:#bea2ed}
+.reading-steps:is(:active,.is-pressed) .reading-art{transform:rotate(-14deg) translateX(-3px)}
+.reading-heart:is(:active,.is-pressed) .reading-art{transform:scale(.86) rotate(-7deg)}
+.reading-body:is(:active,.is-pressed) .reading-art{transform:rotate(10deg) translateY(2px)}
+.reading-intake:is(:active,.is-pressed) .reading-art{transform:rotate(-12deg)}
+.reading-oxygen:is(:active,.is-pressed) .reading-art{transform:translateY(-5px) rotate(9deg)}
+.reading-sleep:is(:active,.is-pressed) .reading-art{transform:rotate(-14deg)}
+.reading-extra{display:none!important}
+.sleep-ribbon{display:block;width:100%;height:10px;opacity:.9}
+.health-card:not(.is-wide) .reading-sleep .health-reading-value{font-size:31px}
+.health-card.is-wide>.health-reading,.health-card.is-wide .reading-oxygen,.health-card:has(.oxygen-tile[open]) .reading-oxygen{min-height:156px;padding:20px}
+.health-card.is-wide .health-reading-value,.health-card:has(.oxygen-tile[open]) .health-reading-value{font-size:40px;margin-top:20px;padding-right:78px}
+.health-card.is-wide .reading-art,.health-card:has(.oxygen-tile[open]) .reading-art{top:32px;right:24px;width:76px;height:76px}
+.health-card.is-wide .reading-extra{display:grid!important;gap:12px;margin-top:20px}
+.reading-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.reading-facts:has(>span:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
+.reading-facts>span{min-width:0}.reading-facts small{margin:0 0 4px;font-size:11px}
+.reading-facts strong{font-size:15px;font-weight:500;letter-spacing:-.2px;color:#e7ddf3}
+.sleep-windows{grid-template-columns:repeat(auto-fit,minmax(115px,1fr))}
+.sleep-bout{min-width:0}.sleep-bout-times{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;color:#c9bed8;font-size:11px;font-variant-numeric:tabular-nums}
+.health-card.is-wide .reading-sleep .health-reading-value{font-size:42px}
+.health-card.is-wide .reading-sleep .health-reading-value small{font-size:17px}
+.oxygen-tile{margin:0;padding:0;min-width:0;border-radius:26px;background:#1b1920}
+.health-card:has(.oxygen-tile){background:#1b1920}
+.oxygen-tile summary{background:transparent}
+.oxygen-toggle{position:absolute;right:18px;bottom:18px;width:18px;height:18px}
+.oxygen-toggle:before,.oxygen-toggle:after{content:"";position:absolute;width:10px;height:1.5px;left:4px;top:8px;background:#c3b1d9;border-radius:1px;transition:transform 220ms cubic-bezier(.2,.8,.2,1)}
+.oxygen-toggle:after{transform:rotate(90deg)}.oxygen-tile[open] .oxygen-toggle:after{transform:rotate(0)}
+.card-resize{position:absolute;z-index:3;top:4px;right:5px;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:#cbb4e7;visibility:hidden;opacity:0;transform:translateY(3px);transition:opacity 140ms,transform 180ms cubic-bezier(.2,.8,.2,1),visibility 0s 180ms}
+.card-resize svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.health-card.is-sizing>.card-resize,.screen:not(.pointer-input) .health-card:focus-within>.card-resize{visibility:visible;opacity:1;transform:translateY(0);transition-delay:0s}
+.screen:not(.pointer-input) .card-resize:focus-visible{outline:1px solid #cbb4e7;outline-offset:-8px}
+.health-card.is-sizing .reading-label{padding-right:25px}
+.health-card.is-sizing{z-index:1}.card-resize:active{opacity:.6}
+.health-library{position:relative}
+.card-dragging{z-index:1000!important;pointer-events:none;box-shadow:0 16px 32px #0005;will-change:transform}
+.card-dragging .health-reading{transform:none;transition:none}
+.health-card.card-dragging>.card-resize{visibility:hidden;opacity:0}
+.card-drop-slot{min-width:0;border-radius:26px;background:#ffffff05}
+.source-link>.health-connection-action{font-size:12px;min-height:32px;padding:8px 12px;border-radius:18px;background:#ffffff09}
+@media(max-width:360px){
+ .health-library{gap:10px}.health-reading{padding:15px;border-radius:22px;min-height:200px}.reading-label{font-size:13px}.health-reading-value{font-size:29px}.health-reading-value small{font-size:11px}
+ .reading-art{right:15px;width:63px;height:63px}.health-card:not(.is-wide) .reading-sleep .health-reading-value{font-size:28px}.health-card.is-wide .health-reading-value{font-size:38px}
+}
+@media(prefers-contrast:more){.health-reading small{color:#e1d5ed}.health-reading{outline:1px solid #857492}}
+@media(forced-colors:active){.health-reading,.oxygen-tile{background:Canvas;color:CanvasText;border:1px solid CanvasText}.reading-label,.health-reading small{color:CanvasText}.reading-art{color:CanvasText}.sleep-ribbon{forced-color-adjust:none}.card-resize{background:ButtonFace;color:ButtonText;border:1px solid ButtonText}.oxygen-toggle:before,.oxygen-toggle:after{background:CanvasText}}

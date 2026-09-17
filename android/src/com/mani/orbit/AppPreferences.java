@@ -14,7 +14,8 @@ public final class AppPreferences {
 
     static boolean allowed(String key) {
         return "orbit-profile-v1".equals(key) || "orbit-steps-goal-v1".equals(key)
-            || "orbit-reduce-motion-v1".equals(key);
+            || "orbit-reduce-motion-v1".equals(key) || "orbit-material-readability-v1".equals(key) || "orbit-health-layout-v1".equals(key)
+            || "orbit-health-order-v1".equals(key);
     }
 
     @JavascriptInterface public synchronized String read(String key) {

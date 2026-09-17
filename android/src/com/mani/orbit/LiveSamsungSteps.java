@@ -98,7 +98,7 @@ final class LiveSamsungSteps {
                 }
                 if (!day.equals(LocalDate.now())) { later(0); return; }
                 long total = 0; for (int i = 0; i < hours.length(); i++) total = Math.addExact(total, hours.getJSONObject(i).getLong("value"));
-                reading = new JSONObject().put("source", HealthRecordCodec.SOURCE).put("date", day.toString()).put("steps", total).put("hours", hours).put("at", System.currentTimeMillis());
+                reading = new JSONObject().put("source", "com.sec.android.app.shealth").put("date", day.toString()).put("steps", total).put("hours", hours).put("at", System.currentTimeMillis());
                 emit("Live from Samsung Health"); later(2000);
             } catch (Exception error) { fail(error); }
         });

@@ -3,7 +3,7 @@ import java.lang.reflect.Method;
 public final class NativeFinalCheck {
     public static void main(String[] args) throws Exception {
         if (!AppPreferences.allowed("orbit-profile-v1") || !AppPreferences.allowed("orbit-steps-goal-v1")
-                || !AppPreferences.allowed("orbit-reduce-motion-v1") || AppPreferences.allowed("workouts")
+                || !AppPreferences.allowed("orbit-health-layout-v1") || !AppPreferences.allowed("orbit-health-order-v1") || !AppPreferences.allowed("orbit-reduce-motion-v1") || AppPreferences.allowed("workouts")
                 || AppPreferences.allowed(null)) throw new AssertionError("Settings key boundary failed");
         if (!MusicSession.playbackName(7).equals("error") || !MusicSession.playbackName(6).equals("buffering")
                 || !MusicSession.playbackName(8).equals("buffering") || !MusicSession.playbackName(3).equals("playing")
