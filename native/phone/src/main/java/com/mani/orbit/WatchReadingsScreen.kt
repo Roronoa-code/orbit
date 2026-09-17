@@ -1,16 +1,30 @@
 package com.mani.orbit
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -61,12 +75,18 @@ import java.util.Locale
     val scroll = rememberLazyListState()
     ObserveHeaderScroll(scroll)
     LazyColumn(state = scroll, contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { Text(error ?: status, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        if (sources.size > 1) item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            sources.forEachIndexed { index, source -> FilterChip(selected = (selected ?: sources.first()) == source,
-                onClick = { selected = source; measurementId = null; measurement = null; rows = emptyMap() }, label = { Text("Watch ${index + 1}") }) }
+        item { Text(error ?: status, color = HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp) }
+        if (sources.size > 1) item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+            .testTag("watch-sources"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val current = selected ?: sources.first()
+            sources.forEachIndexed { index, source ->
+                WatchSourcePill("Watch ${index + 1}", source == current) {
+                    selected = source; measurementId = null; measurement = null; rows = emptyMap()
+                }
+            }
         } }
-        if (sources.isEmpty()) item { Text("Open Orbit on your watch. Saved readings arrive when the devices reconnect.") }
+        if (sources.isEmpty()) item { Text("Open Orbit on your watch. Saved readings arrive when the devices reconnect.",
+            color = Color(0xFFE9E2F3), fontSize = 14.sp, lineHeight = 20.sp) }
         measurement?.let { page -> item("sensor-result") { WatchSensorResult(page) { measurementId = it } } }
         (selected?.takeIf { it in sources } ?: sources.firstOrNull())?.let { source ->
             item("ecg-history-$source") { PhoneEcgHistory(source) }
@@ -76,13 +96,14 @@ import java.util.Locale
         if (sources.isNotEmpty()) metrics.entries.chunked(2).forEach { pair -> item(pair.first().key) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { pair.forEach { (key, label) ->
             val row = rows[key]
-            Card(Modifier.weight(1f)) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(label, style = MaterialTheme.typography.titleMedium)
+            Column(Modifier.weight(1f).background(Color(0xFF1B1920), RoundedCornerShape(24.dp)).padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(label, fontSize = 14.sp, lineHeight = 19.sp, fontWeight = FontWeight.Medium, color = Color(0xFFE9E2F3))
                 val usable = row != null && !row.isNull("value") && row.optString("quality") == "valid"
                 val value = if (key == "distance") row?.optDouble("value")?.div(1000) else row?.optDouble("value")
                 Text(if (usable) String.format(Locale.UK, if (key == "distance") "%.2f" else if (key == "floors") "%.1f" else "%,.0f", value) else "—",
-                    style = MaterialTheme.typography.headlineSmall)
-                Text(if (key == "distance") "km" else row?.optString("unit") ?: "", style = MaterialTheme.typography.bodySmall)
+                    color = Color(0xFFF7F2FC), fontSize = 33.sp, lineHeight = 39.sp, fontWeight = FontWeight(550))
+                Text(if (key == "distance") "km" else row?.optString("unit") ?: "", color = HealthSecondary, fontSize = 12.sp, lineHeight = 17.sp)
                 if (row != null) {
                     val format = DateTimeFormatter.ofPattern("d MMM · HH:mm:ss", Locale.UK).withZone(ZoneId.systemDefault())
                     Text(when {
@@ -90,10 +111,22 @@ import java.util.Locale
                         row.optBoolean("timeUncertain") || row.getLong("end") > System.currentTimeMillis() -> "Capture time uncertain"
                         else -> format.format(Instant.ofEpochMilli(row.getLong("end")))
                     },
-                        style = MaterialTheme.typography.bodySmall)
-                    if (!usable) Text("Quality: ${row.optString("quality").replace('_', ' ')}", style = MaterialTheme.typography.bodySmall)
-                } else Text("No reading received", style = MaterialTheme.typography.bodySmall)
-            } } } }
+                        color = HealthSecondary, fontSize = 11.sp, lineHeight = 16.sp)
+                    if (!usable) Text("Quality: ${row.optString("quality").replace('_', ' ')}", color = HealthSecondary, fontSize = 11.sp, lineHeight = 16.sp)
+                } else Text("No reading received", color = HealthSecondary, fontSize = 11.sp, lineHeight = 16.sp)
+            } } }
         } }
+    }
+}
+
+/** A quiet Orbit pill per paired watch; the row scrolls rather than squeezing its labels. */
+@Composable private fun WatchSourcePill(label: String, current: Boolean, choose: () -> Unit) {
+    Box(Modifier.heightIn(min = 40.dp).clip(RoundedCornerShape(20.dp))
+        .background(if (current) Color(0x33BBA1ED) else Color.Transparent)
+        .border(1.dp, if (current) Color(0x55BBA1ED) else Color(0x22FFFFFF), RoundedCornerShape(20.dp))
+        .clickable(onClick = choose).semantics { role = Role.Tab; selected = current }
+        .padding(horizontal = 16.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
+        Text(label, color = if (current) Color(0xFFF7F2FC) else HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp,
+            maxLines = 1)
     }
 }

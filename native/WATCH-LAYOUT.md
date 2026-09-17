@@ -115,3 +115,27 @@ The attention-actions checkpoint records six distinct focused local checks. Fina
 The actual sensor startup/Back test also exposed a service shutdown defect: after cancellation, returning from IO cleanup could skip the final idle transition. The entire final cleanup is now non-cancellable, including clearing foreground ownership. The test holds the real sensor connection lease, starts the actual foreground service, exits via native edge swipe, confirms the service remains active, then stops it and verifies released ownership. It supplies no synthetic sensor readings.
 
 At source `59dbf290f43aeb9c420e2d4aa2f778323cc87f26b5cd29af7c1867c928626869`, 13 focused Wear tests pass: raw sensor 3, Recovery 4, History 2, sweat 2 and heart 2. Evidence: `verification/watch-navigation/20260915T214804Z`. The earlier 44-test full run had one failure in this new shutdown check; its failure remains recorded. Do not claim a new full-suite or physical gesture pass. Exhaustive nested-route combinations, OEM edge/rotary behavior, predictive Back and accessibility remain open. Further review was deferred at the owner's wrap-up request.
+
+## Route-level ownership and rendered states — 17 September 2026
+
+The W3 matrix now runs against every mapped route rather than the shared components alone.
+`WatchRouteOwnershipTest` covers the routes that render without a service — History, Recovery and
+Today — and `WatchActivityRouteOwnershipTest` launches the real Home, workout, scalar measurement,
+ECG and continuous-sensor Activities. Each route answers a cancelled press and a vertical drag
+across its primary control with no activation, keeps its settled page through a reversed horizontal
+drag, and returns from a detail to the same selection. The workout route is exercised in whichever
+state it resumes into: its choice list has no pager, so its own scroll container owns the gesture
+there, while a live session is checked on the controls page without pausing or finishing it. None of
+these checks start a workout, a measurement or a sensor stream.
+
+`WatchRouteStatesTest` closes the rendered-state review for the two routes that were still open.
+Sleep & energy renders normal, absent, stale, failed and loading; the saved workout renders normal,
+its detail and absent. The review found one real problem: in the failure state the separate
+"Saved view" marker added a line that pushed the first Details action under the bottom fade on the
+initial render. The marker now shares the existing context line ("Samsung Health · Saved view", or
+the energy line when one is recorded), so the action stays whole. `WatchRecoveryTest` was updated to
+match that shared boundary.
+
+Optional-metric stability is asserted directly: Today keeps its step anchor, its first action and its
+reserved optional line in exactly the same positions through a complete reading set, a total optional
+dropout and reacquisition.

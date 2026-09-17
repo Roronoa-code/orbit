@@ -91,7 +91,7 @@ class WatchRecoveryTest {
         var error by mutableStateOf<String?>("Phone unavailable · saved view")
         compose.setContent { WatchRecoveryScreen(context, false, error, WatchDisplay(AmbientMode.Interactive, now, 0)) {} }
         compose.onNodeWithTag("recovery-value-0").assertTextEquals("7h 0m")
-        compose.onNodeWithText("Saved view").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Saved view", substring = true).performScrollTo().assertIsDisplayed()
         save("saved-offline")
         compose.onNodeWithTag("recovery-details-0").performScrollTo().performClick()
         compose.onNodeWithText(error!!).performScrollTo().assertIsDisplayed()
@@ -106,7 +106,7 @@ class WatchRecoveryTest {
         save("failed")
         compose.runOnIdle { context = saved; error = null }
         compose.onNodeWithTag("recovery-value-0").performScrollTo().assertTextEquals("7h 0m")
-        compose.onNodeWithText("Saved view").assertDoesNotExist()
+        compose.onAllNodesWithText("Saved view", substring = true).assertCountEquals(0)
     }
 
     @Test fun largeTextMissingDataAndRemovalStayReadable() {

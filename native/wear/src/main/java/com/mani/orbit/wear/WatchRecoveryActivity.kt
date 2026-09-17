@@ -148,11 +148,14 @@ class WatchRecoveryActivity : ComponentActivity() {
                             WatchNumber(if (day.asleepMs != null) recoveryDuration(day.asleepMs) else day.energyScore?.let(::recoveryScore) ?: "—",
                                 Modifier.testTag("recovery-value-$page"))
                             if (day.asleepMs == null) Text(if (day.energyScore != null) "Energy score / 100" else "Sleep stages not shared", fontSize = 10.sp, lineHeight = 12.sp)
-                            if (day.asleepMs != null && day.energyScore != null) Text("Energy · ${recoveryScore(day.energyScore!!)}/100", fontSize = 12.sp, lineHeight = 14.sp)
-                            else Text("Samsung Health", fontSize = 10.sp, lineHeight = 12.sp)
-                            if (context!!.importedAt > display.wall + 60_000 || context.generatedAt > display.wall + 60_000 || day.date > today)
-                                Text("Reading time uncertain", style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
-                            else if (error != null) Text("Saved view", style = MaterialTheme.typography.labelSmall)
+                            val uncertain = context!!.importedAt > display.wall + 60_000 ||
+                                context.generatedAt > display.wall + 60_000 || day.date > today
+                            // The saved-view marker shares the context line, so the first action stays clear of the fade.
+                            val saved = if (error != null && !uncertain) " · Saved view" else ""
+                            if (day.asleepMs != null && day.energyScore != null)
+                                Text("Energy · ${recoveryScore(day.energyScore!!)}/100$saved", fontSize = 12.sp, lineHeight = 14.sp, textAlign = TextAlign.Center)
+                            else Text("Samsung Health$saved", fontSize = 10.sp, lineHeight = 12.sp, textAlign = TextAlign.Center)
+                            if (uncertain) Text("Reading time uncertain", style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                             FilledTonalButton(onClick = { selected = day.date.toString(); detail = selected },
                                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("recovery-details-$page")) { Text("Details", style = MaterialTheme.typography.labelMedium) }

@@ -64,6 +64,7 @@ data class HealthScreenState(
     val liveStatus: String = "Connect for live phone and watch steps",
     val liveConnected: Boolean = false,
     val recordCount: Long? = null,
+    val firstRecord: LocalDate? = null,
     val historyAllowed: Boolean = false,
     val workouts: List<WorkoutRecord> = emptyList(),
 )
@@ -103,6 +104,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
     private var cached: NativeHealthSnapshot? = null
     private var lastSync: Long? = null
     private var recordCount: Long? = null
+    private var firstRecord: LocalDate? = null
     private var historyAllowed = false
 
     init {
@@ -124,6 +126,8 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                         cached = NativeHealthProjection.project(it, LocalDate.parse(it.getString("date")))
                         lastSync = it.optJSONObject("meta")?.optLong("lastSync")?.takeIf { time -> time > 0 }
                         recordCount = it.optJSONObject("meta")?.optLong("recordCount", -1)?.takeIf { count -> count >= 0 }
+                        firstRecord = it.optJSONObject("meta")?.optLong("firstRecord", -1)?.takeIf { at -> at > 0 }
+                            ?.let { at -> java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
                         historyAllowed = it.optJSONObject("meta")?.optBoolean("historyAllowed") == true
                     }
                     val date = LocalDate.parse(selectedDate.value)
@@ -149,7 +153,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                                 scanned = snapshot.optLong("scanned").coerceAtLeast(0),
                                 liveStatus = snapshot.optJSONObject("live")?.optString("status")?.takeIf { it.isNotBlank() } ?: "Connect for live phone and watch steps",
                                 liveConnected = snapshot.optJSONObject("live")?.optBoolean("connected") == true,
-                                recordCount = recordCount, historyAllowed = historyAllowed, workouts = cached?.workouts.orEmpty())
+                                recordCount = recordCount, firstRecord = firstRecord, historyAllowed = historyAllowed, workouts = cached?.workouts.orEmpty())
                             healthRevision = snapshot.getString("revision")
                             acceptedGeneration = generation
                         }

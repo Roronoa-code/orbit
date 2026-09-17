@@ -1,5 +1,8 @@
 # Orbit phone UI pass — resumed 17 September 2026
 
+> Continued and closed by `MILESTONES-2026-09-17.md`: the item 3 review below is finished, item 5 is
+> packaged, and the W1/W3/W5 addendum items are closed. Read that document first.
+
 Continues `UI-PARITY-PAUSED-2026-09-15.md`, which stopped mid-pass at the owner's usage limit. That
 document's "Exact next batch" items 1, 2 and 4 are now done; item 3 is partly done and item 5 is not
 started. This is a handoff, not final design acceptance.

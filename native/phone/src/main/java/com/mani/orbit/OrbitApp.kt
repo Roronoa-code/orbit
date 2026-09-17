@@ -5,7 +5,13 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,11 +26,25 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +53,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.*
 
@@ -44,6 +65,7 @@ private val White = Color(0xFFF4F4F6)
 private val DayFormat = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK)
 // The approved header reads the weekday and drops the year, like the reference date button.
 private val HeaderDayFormat = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
+private val ChosenDayFormat = DateTimeFormatter.ofPattern("EEEE d MMM", Locale.UK)
 internal val LocalOrbitReducedMotion = staticCompositionLocalOf { false }
 private fun Double?.reading(decimals: Int = 0) = this?.let { String.format(Locale.UK, "%,.${decimals}f", it) } ?: "—"
 
@@ -91,7 +113,8 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     }
     LaunchedEffect(showExplore) { if (!showExplore) exploreExpanded = false }
     fun back() {
-        if (exploreExpanded) exploreExpanded = false
+        if (datePicker) datePicker = false
+        else if (exploreExpanded) exploreExpanded = false
         else if (route == "Workouts" && workoutBack?.invoke() == true) return
         else if (!model.back()) {
             if (route == "Steps" && (homeMetric != 0 || homePeriod != 1 || health.day.date != LocalDate.now())) {
@@ -103,8 +126,12 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     LaunchedEffect(health.error) { health.error?.let { snackbar.showSnackbar(it) } }
     CompositionLocalProvider(LocalOrbitReducedMotion provides reducedMotion, LocalGlassReadability provides glassReadability) {
     val workoutPlayer = rememberWorkoutPlayer(session.active?.id)
+    // Stock containers (cards, chips) share the illustrated Health card material instead of the M3 default.
     MaterialTheme(colorScheme = darkColorScheme(primary = Lavender, background = Ink, surface = Surface,
-        onSurface = White, onBackground = White, onPrimary = Ink), typography = OrbitTypography) {
+        onSurface = White, onBackground = White, onPrimary = Ink,
+        surfaceVariant = Color(0xFF1B1920), onSurfaceVariant = HealthSecondary,
+        surfaceContainer = Color(0xFF1B1920), surfaceContainerHigh = Color(0xFF242031)),
+        typography = OrbitTypography) {
       Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().recordBackdrop(pageLayer)) {
         Box(Modifier.fillMaxSize().background(Ink))
@@ -172,23 +199,119 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
                 .navigationBarsPadding().padding(horizontal = 12.dp, vertical = 10.dp).fillMaxWidth()) { id ->
                     model.openWorkout(id)
                 }
+        if (datePicker) OrbitDateChooser(health.day.date, health.firstRecord, pageLayer,
+            Modifier.align(Alignment.TopEnd), { datePicker = false }) { model.date(it); datePicker = false }
       }
-      if (datePicker) HomeDatePicker(health.day.date, { datePicker = false }) { model.date(it); datePicker = false }
     }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+/** The header's date control expands into this panel, like the reference utility page. */
 @Composable
-private fun HomeDatePicker(date: LocalDate, dismiss: () -> Unit, select: (LocalDate) -> Unit) {
-    val today = LocalDate.now()
-    val state = rememberDatePickerState(initialSelectedDateMillis = date.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
-        yearRange = 1970..today.year, selectableDates = remember(today) { object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean = Instant.ofEpochMilli(utcTimeMillis).atZone(java.time.ZoneOffset.UTC).toLocalDate() <= today
-        } })
-    DatePickerDialog(onDismissRequest = dismiss, confirmButton = {
-        TextButton(onClick = { state.selectedDateMillis?.let { select(Instant.ofEpochMilli(it).atZone(java.time.ZoneOffset.UTC).toLocalDate()) } }, enabled = state.selectedDateMillis != null) { Text("Show day") }
-    }, dismissButton = { TextButton(onClick = dismiss) { Text("Cancel") } }) {
-        DatePicker(state, showModeToggle = false)
+internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBackdrop,
+    modifier: Modifier, dismiss: () -> Unit, select: (LocalDate) -> Unit) {
+    val today = remember { LocalDate.now() }
+    val start = remember(first, today) { first?.takeIf { it < today } ?: today.minusDays(29) }
+    val span = remember(start, today) { ChronoUnit.DAYS.between(start, today).toInt().coerceAtLeast(1) }
+    var chosen by rememberSaveable(date, start) { mutableStateOf(date.coerceIn(start, today).toString()) }
+    val choice = LocalDate.parse(chosen)
+    val reduced = LocalOrbitReducedMotion.current
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { shown = true }
+    val grow by animateFloatAsState(if (shown) 1f else 0f,
+        if (reduced) tween(0) else spring(dampingRatio = .82f, stiffness = 420f), label = "Date panel")
+    // A tap outside closes the panel, like the reference; the panel keeps its own touches.
+    Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { dismiss() } })
+    Column(modifier.statusBarsPadding().padding(start = 13.dp, top = 74.dp, end = 13.dp)
+        .fillMaxWidth().widthIn(max = 300.dp)
+        .graphicsLayer {
+            transformOrigin = TransformOrigin(1f, 0f)
+            scaleX = .84f + .16f * grow; scaleY = .84f + .16f * grow; alpha = grow
+        }
+        .clip(RoundedCornerShape(22.dp)).orbitFrost(page, 22.dp)
+        .border(1.dp, Color.White.copy(alpha = .16f), RoundedCornerShape(22.dp))
+        .pointerInput(Unit) { detectTapGestures { } }
+        .padding(start = 17.dp, top = 13.dp, end = 17.dp, bottom = 17.dp).testTag("date-chooser")) {
+        Text("Choose a day", color = White, fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight(500),
+            modifier = Modifier.semantics { heading() })
+        Text("Explore your shared health history.", color = Color(0xFFBCBCC4), fontSize = 11.sp, lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 10.dp))
+        Row(Modifier.fillMaxWidth().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            DateStep("‹", "Previous day", choice > start) { chosen = choice.minusDays(1).toString() }
+            Text(choice.format(ChosenDayFormat), color = White, fontSize = 12.sp, lineHeight = 17.sp,
+                textAlign = TextAlign.Center, modifier = Modifier.weight(1f).testTag("date-choice"))
+            DateStep("›", "Next day", choice < today) { chosen = choice.plusDays(1).toString() }
+        }
+        DateTrack(ChronoUnit.DAYS.between(start, choice).toInt(), span, choice.format(ChosenDayFormat)) {
+            chosen = start.plusDays(it.toLong()).toString()
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(start.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
+            Text(today.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
+        }
+        Row(Modifier.fillMaxWidth().padding(top = 15.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+            DateAction("Cancel", false, dismiss)
+            DateAction("View day", true) { select(choice) }
+        }
+    }
+}
+
+/** One lavender track across the actual imported coverage; the thumb stays inside the panel. */
+@Composable private fun DateTrack(position: Int, span: Int, label: String, pick: (Int) -> Unit) {
+    val radius = 9.dp
+    val fraction = (position.toFloat() / span).coerceIn(0f, 1f)
+    // The drawn track stays slim; the touch target keeps the platform minimum.
+    Canvas(Modifier.fillMaxWidth().height(48.dp).testTag("date-range")
+        .semantics {
+            contentDescription = "Choose health history day"
+            stateDescription = label
+            progressBarRangeInfo = ProgressBarRangeInfo(position.toFloat(), 0f..span.toFloat(), span - 1)
+            setProgress { value -> pick(value.roundToInt().coerceIn(0, span)); true }
+        }
+        .pointerInput(span) {
+            val inset = radius.toPx()
+            fun day(x: Float) = (((x - inset) / (size.width - 2 * inset)).coerceIn(0f, 1f) * span).roundToInt()
+            awaitEachGesture {
+                val down = awaitFirstDown()
+                pick(day(down.position.x)); down.consume()
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+                    pick(day(change.position.x)); change.consume()
+                }
+            }
+        }) {
+        val middle = size.height / 2
+        val inset = radius.toPx()
+        drawLine(Color.White.copy(alpha = .16f), Offset(inset, middle), Offset(size.width - inset, middle),
+            8.dp.toPx(), StrokeCap.Round)
+        val x = inset + (size.width - 2 * inset) * fraction
+        drawLine(Lavender, Offset(inset, middle), Offset(x, middle), 8.dp.toPx(), StrokeCap.Round)
+        drawCircle(Lavender, inset, Offset(x, middle))
+    }
+}
+
+@Composable private fun DateStep(glyph: String, label: String, enabled: Boolean, action: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Color(0x6629292F))
+        .border(1.dp, Color(0x30A8A8B0), RoundedCornerShape(14.dp))
+        .clickable(enabled = enabled) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
+        .semantics { contentDescription = label; role = Role.Button }, contentAlignment = Alignment.Center) {
+        Text(glyph, color = if (enabled) White else Muted.copy(alpha = .38f), fontSize = 20.sp, lineHeight = 24.sp)
+    }
+}
+
+@Composable private fun DateAction(label: String, primary: Boolean, action: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    Box(Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(14.dp))
+        .background(if (primary) Lavender else Color(0x6629292F))
+        .border(1.dp, if (primary) Lavender else Color(0x30A8A8B0), RoundedCornerShape(14.dp))
+        .clickable { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
+        .semantics { role = Role.Button }.padding(horizontal = 16.dp, vertical = 9.dp),
+        contentAlignment = Alignment.Center) {
+        Text(label, color = if (primary) Ink else White, fontSize = 13.sp, lineHeight = 18.sp)
     }
 }
 

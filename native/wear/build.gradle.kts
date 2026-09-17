@@ -26,8 +26,8 @@ android {
         applicationId = "com.mani.orbit"
         minSdk = 30
         targetSdk = 36
-        versionCode = 2
-        versionName = "2.0-native-dev"
+        versionCode = 3
+        versionName = "2.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }

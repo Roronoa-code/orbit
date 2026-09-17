@@ -131,6 +131,47 @@ class MeasurementsTest {
         compose.onNodeWithTag("measurement-chart").assertDoesNotExist()
     }
 
+    /** A year of frequent readings: statistics appear, every range draws, and selection stays exact. */
+    @Test fun denseYearOfReadingsKeepsEveryRangeReadable() {
+        val days = (0 until 240).map { date.minusDays((it * 1.5).toLong()) }
+        val dense = MeasurementHistory(
+            weights = days.mapIndexed { index, day -> Reading(at(day.toString()), 74.0 + (index % 17) * .15) }.reversed(),
+            fatPercent = days.filterIndexed { index, _ -> index % 3 == 0 }
+                .mapIndexed { index, day -> Reading(at(day.toString()) + 30_000, 17.0 + (index % 9) * .2) }.reversed(),
+            lean = days.filterIndexed { index, _ -> index % 5 == 0 }
+                .mapIndexed { index, day -> Reading(at(day.toString()), 60.0 + (index % 7) * .3) }.reversed(),
+        )
+        val state = mutableStateOf(HealthScreenState(day = HealthDay(date = date, measurements = dense), loading = false))
+        compose.setContent { MaterialTheme(colorScheme = darkColorScheme(background = Color(0xFF0B0A0F)), typography = OrbitTypography) {
+            Box(Modifier.fillMaxSize().background(Color(0xFF0B0A0F)).safeDrawingPadding()) { MeasurementsScreen(state.value) }
+        } }
+        val root = compose.onRoot().fetchSemanticsNode().boundsInRoot
+        for (range in listOf("7D", "30D", "3M", "1Y")) {
+            compose.onNodeWithText(range).performScrollTo().performClick()
+            compose.onNodeWithTag("measurement-trend").performScrollTo()
+            compose.onNodeWithTag("measurement-chart").assertExists()
+            val chart = compose.onNodeWithTag("measurement-chart").fetchSemanticsNode().boundsInRoot
+            assertTrue("$range chart spills out of $root: $chart", chart.left >= root.left - .5f && chart.right <= root.right + .5f)
+            compose.onNodeWithTag("measurement-statistics").assertExists()
+            capture("dense-$range")
+        }
+        // Inspection still names one recorded reading rather than an averaged point.
+        compose.onNodeWithTag("measurement-chart").performSemanticsAction(SemanticsActions.SetProgress) { assertTrue(it(1f)) }
+        val label = compose.onNodeWithTag("measurement-chart").fetchSemanticsNode()
+            .config[androidx.compose.ui.semantics.SemanticsProperties.StateDescription]
+        val recorded = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.UK)
+        assertTrue("Inspected reading: $label", label.contains(" kilograms, "))
+        assertTrue("Inspected reading $label must name a recorded day",
+            days.any { label.endsWith(it.format(recorded)) })
+        for (metric in listOf("Fat", "Muscle", "Lean mass")) {
+            compose.onNodeWithTag("measurement-metric").performScrollTo()
+            compose.onNodeWithText(metric).performClick()
+            compose.waitForIdle()
+        }
+        compose.onNodeWithTag("measurement-trend").performScrollTo()
+        capture("dense-lean")
+    }
+
     @Test fun largeTextKeepsSelectorsAndReadingReachable() {
         compose.setContent {
             val density = LocalDensity.current
