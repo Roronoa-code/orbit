@@ -1,0 +1,16 @@
+<resources>
+    <string-array name="android_wear_capabilities">
+        <item>orbit_watch_v1</item>
+        <item>orbit_protocol_v1</item>
+        <item>orbit_readings_v1</item>
+        <item>orbit_workouts_v1</item>
+        <item>orbit_workout_control_v1</item>
+        <item>orbit_health_context_v1</item>
+        <item>orbit_measurement_profile_v1</item>
+        <item>orbit_measurements_v1</item>
+        <item>orbit_ecg_v1</item>
+        <item>orbit_heart_batches_v1</item>
+        <item>orbit_raw_sensors_v1</item>
+        <item>orbit_workout_sweat_v1</item>
+    </string-array>
+</resources>

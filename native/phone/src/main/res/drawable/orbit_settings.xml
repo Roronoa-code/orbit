@@ -1,0 +1,7 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Existing Orbit settings symbol. -->
+    <group android:translateX="1" android:scaleX="0.92" android:scaleY="0.92">
+        <path android:pathData="m9.5,3 -0.7,2.5 -2.4,1 L4,5.8 1.5,10 l1.8,1.8 v2.4 L1.5,16 4,20.2 l2.4,-0.7 2.4,1 0.7,2.5 h5 l0.7,-2.5 2.4,-1 2.4,0.7 2.5,-4.2 -1.8,-1.8 v-2.4 l1.8,-1.8 L20,5.8 l-2.4,0.7 -2.4,-1 -0.7,-2.5 Z" android:fillColor="@android:color/transparent" android:strokeColor="#FFF7F4FC" android:strokeWidth="1.7" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    </group>
+    <path android:pathData="M15.2,12 a3.2,3.2 0,1 1,-6.4 0 a3.2,3.2 0,1 1,6.4 0" android:fillColor="@android:color/transparent" android:strokeColor="#FFF7F4FC" android:strokeWidth="1.7" />
+</vector>

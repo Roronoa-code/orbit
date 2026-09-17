@@ -25,3 +25,17 @@ verification/player-settings-20260912/*
 
 # Private import checkpoints and local emulator/browser output.
 verification/samsung-import/
+
+# The native Compose app's source and documentation are tracked; its local run evidence is not.
+# verification/ there holds private Samsung import checkpoints and 28 MB signed APKs.
+native/verification/
+native/*.txt
+native/*.png
+native/local.properties
+
+# Native emulator run evidence and UI-parity captures are local: large logs, a duplicate
+# source snapshot and rendered screenshots. The reference extractor itself stays tracked.
+verification/native-runs/
+verification/ui-parity-baseline-20260915/
+verification/ui-parity/*
+!verification/ui-parity/reference.py

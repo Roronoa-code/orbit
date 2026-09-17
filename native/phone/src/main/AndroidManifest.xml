@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <uses-permission android:name="android.permission.INTERNET" />
+    <queries><package android:name="com.sec.android.app.shealth" /><package android:name="com.samsung.android.wear.shealth" /></queries>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <application android:name="com.mani.orbit.OrbitApplication" android:label="Orbit" android:icon="@drawable/orbit_icon" android:theme="@style/OrbitTheme" android:allowBackup="false" android:usesCleartextTraffic="false" android:enableOnBackInvokedCallback="true">
+        <service android:name=".PhoneReadingService" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/readings" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/heart-batches" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/raw-sensors" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/workout-sweat" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/measurements" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/ecg" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/workouts" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/workout-control" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/health-context-request" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/protocol-rejected" />
+            </intent-filter>
+        </service>
+        <service android:name="com.mani.orbit.MusicSession$Access" android:label="Orbit music controls" android:exported="true" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
+            <meta-data android:name="android.service.notification.default_filter_types" android:value="ongoing" />
+            <meta-data android:name="android.service.notification.disabled_filter_types" android:value="conversations|alerting|silent" />
+        </service>
+        <service android:name="com.mani.orbit.WorkoutTrackingService" android:label="Orbit workout location" android:exported="false" android:foregroundServiceType="location" />
+        <receiver android:name="com.mani.orbit.WorkoutSession$Actions" android:exported="false" />
+        <activity android:name="com.mani.orbit.MainActivity" android:exported="true" android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+

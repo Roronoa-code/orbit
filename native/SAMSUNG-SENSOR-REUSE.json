@@ -1,0 +1,175 @@
+{
+  "description": "Selected existing Health App sensor engine, retained packages and implementation. Standalone Orbit build, no dependency on sibling checkout. Later Orbit adaptations documented in SAMSUNG-SENSOR.md.",
+  "files": [
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\sdk\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkOnDemandSource.kt",
+      "sourceSha256": "7edc8b46f423d2521450030dfd8b0e25cb6eadaab1768e503a307b1aa422b0a0",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkOnDemandSource.kt",
+      "copiedSha256": "7edc8b46f423d2521450030dfd8b0e25cb6eadaab1768e503a307b1aa422b0a0",
+      "currentSha256": "9f66a2134119b01f46a260345bfe4b16c8c2d61b7c3472c0b9ba26ed360c3aa9"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorSessionLifecycle.kt",
+      "sourceSha256": "dce4178ccbb0a37c87ae96df1c763dcdc650ee7b46dffabbcd621871acdd0504",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\SensorSessionLifecycle.kt",
+      "copiedSha256": "dce4178ccbb0a37c87ae96df1c763dcdc650ee7b46dffabbcd621871acdd0504",
+      "currentSha256": "dce4178ccbb0a37c87ae96df1c763dcdc650ee7b46dffabbcd621871acdd0504"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\ExclusiveLeaseGate.kt",
+      "sourceSha256": "4c25373f6e4a2fc069a5bb2c69701f3906beab65db00e5e5cd169cb3ac5da7e9",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\ExclusiveLeaseGate.kt",
+      "copiedSha256": "4c25373f6e4a2fc069a5bb2c69701f3906beab65db00e5e5cd169cb3ac5da7e9",
+      "currentSha256": "4c25373f6e4a2fc069a5bb2c69701f3906beab65db00e5e5cd169cb3ac5da7e9"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\EcgPointMapper.kt",
+      "sourceSha256": "021adbcaac1fd6f609a3c7eae29f636dd43ab4010ef572a8e4a757f51a9b1e49",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\EcgPointMapper.kt",
+      "copiedSha256": "021adbcaac1fd6f609a3c7eae29f636dd43ab4010ef572a8e4a757f51a9b1e49",
+      "currentSha256": "021adbcaac1fd6f609a3c7eae29f636dd43ab4010ef572a8e4a757f51a9b1e49"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\OnDemandModels.kt",
+      "sourceSha256": "032933faf3648f98056675cad10cefd5de8a11d82f0dbdb92451793187448ddf",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\OnDemandModels.kt",
+      "copiedSha256": "032933faf3648f98056675cad10cefd5de8a11d82f0dbdb92451793187448ddf",
+      "currentSha256": "032933faf3648f98056675cad10cefd5de8a11d82f0dbdb92451793187448ddf"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\SensorLeaseGate.kt",
+      "sourceSha256": "102a772511b0ed6a50221e325f152ee3beb1b725c49725e898c307ded7410124",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\core\\model\\SensorLeaseGate.kt",
+      "copiedSha256": "102a772511b0ed6a50221e325f152ee3beb1b725c49725e898c307ded7410124",
+      "currentSha256": "102a772511b0ed6a50221e325f152ee3beb1b725c49725e898c307ded7410124"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\measurement\\MeasurementSession.kt",
+      "sourceSha256": "f9d46c1416f6b5f0ce5444bdb4917dc36543c4e4512a61390679d783e5c071ea",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\core\\model\\measurement\\MeasurementSession.kt",
+      "copiedSha256": "f9d46c1416f6b5f0ce5444bdb4917dc36543c4e4512a61390679d783e5c071ea",
+      "currentSha256": "f9d46c1416f6b5f0ce5444bdb4917dc36543c4e4512a61390679d783e5c071ea"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\measurement\\EcgRaw.kt",
+      "sourceSha256": "9e86e92bb14b744ada3cd445da8918874d32b3470c196a603723140461e84765",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\model\\measurement\\EcgRaw.kt",
+      "copiedSha256": "9e86e92bb14b744ada3cd445da8918874d32b3470c196a603723140461e84765",
+      "currentSha256": "9e86e92bb14b744ada3cd445da8918874d32b3470c196a603723140461e84765"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\measurement\\EcgSignalQuality.kt",
+      "sourceSha256": "f20a6a64f9ceb7a819f379944ca901428b3370adb5317969facb48914d3333e6",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\model\\measurement\\EcgSignalQuality.kt",
+      "copiedSha256": "f20a6a64f9ceb7a819f379944ca901428b3370adb5317969facb48914d3333e6",
+      "currentSha256": "f20a6a64f9ceb7a819f379944ca901428b3370adb5317969facb48914d3333e6"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\measurement\\EcgPlayback.kt",
+      "sourceSha256": "b59461c9ae6ae7c52121cd6deae60c133bce965055d614e110cbe66b9ad1fb7d",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\model\\measurement\\EcgPlayback.kt",
+      "copiedSha256": "b59461c9ae6ae7c52121cd6deae60c133bce965055d614e110cbe66b9ad1fb7d",
+      "currentSha256": "b59461c9ae6ae7c52121cd6deae60c133bce965055d614e110cbe66b9ad1fb7d"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\privacy\\AuthenticatedEnvelope.kt",
+      "sourceSha256": "a801b4075a2ab1f1223b636759d859c400bab75eade084e8334666ab29cfa4bc",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\model\\privacy\\AuthenticatedEnvelope.kt",
+      "copiedSha256": "a801b4075a2ab1f1223b636759d859c400bab75eade084e8334666ab29cfa4bc",
+      "currentSha256": "a801b4075a2ab1f1223b636759d859c400bab75eade084e8334666ab29cfa4bc"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\protocol\\src\\main\\kotlin\\com\\mani\\health\\core\\protocol\\EcgChunkCodec.kt",
+      "sourceSha256": "17829ed8e0efd0699e20f7c306391f1b4612985c9680e63d6d631e79365c47a9",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\protocol\\EcgChunkCodec.kt",
+      "copiedSha256": "17829ed8e0efd0699e20f7c306391f1b4612985c9680e63d6d631e79365c47a9",
+      "currentSha256": "17829ed8e0efd0699e20f7c306391f1b4612985c9680e63d6d631e79365c47a9"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\database\\src\\main\\kotlin\\com\\mani\\health\\core\\database\\RawEncryptionKey.kt",
+      "sourceSha256": "38ef61fab05f34be0970dfa09db33fb3a06544eeec5c4386a44df298c7b9b8c0",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\core\\database\\RawEncryptionKey.kt",
+      "copiedSha256": "38ef61fab05f34be0970dfa09db33fb3a06544eeec5c4386a44df298c7b9b8c0",
+      "currentSha256": "b87d1b354cd8eb80ea7d168e5ecb53daba23530878377dd6a62457c7dbd511d3"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\core\\model\\src\\main\\kotlin\\com\\mani\\health\\core\\model\\heart\\HeartBeat.kt",
+      "sourceSha256": "1f4dc70485ac09bbddb9db561ccb1a9003910b22d074ef649d9cf69c312f6b6d",
+      "target": "sync/src/main/java/com/mani/health/core/model/heart/HeartBeat.kt",
+      "copiedSha256": "1f4dc70485ac09bbddb9db561ccb1a9003910b22d074ef649d9cf69c312f6b6d",
+      "currentSha256": "498774497dbc71b5c7d76dc407bc28e9470b15d4cd71b8de5c1a02c5bbcd8f78"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SamsungHeartRateBatchMapper.kt",
+      "sourceSha256": "85a106e40e917b8464ebd75db850a5c26519d783ea66cd4427e31439bc678697",
+      "target": "sync/src/main/java/com/mani/health/integration/samsungsensor/SamsungHeartRateBatchMapper.kt",
+      "copiedSha256": "85a106e40e917b8464ebd75db850a5c26519d783ea66cd4427e31439bc678697",
+      "currentSha256": "df9a84b064154e443528e8e69452e7812a1df927bf4b1da6fad7f7f6e5b79703"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkHeartRateException.kt",
+      "sourceSha256": "ce2edcb0d95e5fc3e5894963e1be157a7b575a95e468ecc44c98542be3838c6d",
+      "target": "wear/src/main/java/com/mani/health/integration/samsungsensor/SensorSdkHeartRateException.kt",
+      "copiedSha256": "ce2edcb0d95e5fc3e5894963e1be157a7b575a95e468ecc44c98542be3838c6d",
+      "currentSha256": "ce2edcb0d95e5fc3e5894963e1be157a7b575a95e468ecc44c98542be3838c6d"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\sdk\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkHeartRateSource.kt",
+      "sourceSha256": "14ff4c4e800343f770f3d348371584c9f128d85c1dcd3afce25c03c0e4120873",
+      "target": "wear/src/main/java/com/mani/health/integration/samsungsensor/SensorSdkHeartRateSource.kt",
+      "copiedSha256": "14ff4c4e800343f770f3d348371584c9f128d85c1dcd3afce25c03c0e4120873",
+      "currentSha256": "89deb9424b512e6c3488fe05d0cc79fe87ff9d1255b5cfbece299a8e47f888df"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorRawProbe.kt",
+      "sourceSha256": "35c5abfeb768288a3905a49c5fccc7e25e49bc78a305817e00f980e6b660d842",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\SensorRawProbe.kt",
+      "copiedSha256": "35c5abfeb768288a3905a49c5fccc7e25e49bc78a305817e00f980e6b660d842",
+      "currentSha256": "b95ccb83a145015de123d2a401c9ce9b6db34d245b3cb6bcd6682397f98fcee8"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\main\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SamsungRawProbeMapper.kt",
+      "sourceSha256": "8b9c44c7ee5f83c902481de4cc0114b86e5805b3024b2d16576096bfc57c96b2",
+      "target": "sync\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\SamsungRawProbeMapper.kt",
+      "copiedSha256": "8b9c44c7ee5f83c902481de4cc0114b86e5805b3024b2d16576096bfc57c96b2",
+      "currentSha256": "a3a3d2f720629436a023ddb37054e1168b078be7f3d501ecfa12678752b6a26e"
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\integration\\samsung-sensor\\src\\sdk\\kotlin\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkRawProbeSource.kt",
+      "sourceSha256": "73e00852fbef56372bd93c23c8aeee9b12ec1383a6f70fd6a400fd63c06ae286",
+      "target": "wear\\src\\main\\java\\com\\mani\\health\\integration\\samsungsensor\\SensorSdkRawProbeSource.kt",
+      "copiedSha256": "73e00852fbef56372bd93c23c8aeee9b12ec1383a6f70fd6a400fd63c06ae286",
+      "currentSha256": "ecc0aab02776f416ccc7f6f1f083eec717a8d6511b3762b6bc798d3908a00648"
+    }
+  ],
+  "adaptations": [
+    {
+      "source": "C:/HA/HEALTH APP/wear/src/main/kotlin/com/mani/health/wear/measurement/EcgRecording.kt",
+      "sourceSha256": "45c67c2593dd19e5228fb8f60c051a4c54b1bcaf4536b73951231f905220e454",
+      "target": "wear/src/main/java/com/mani/orbit/wear/WatchEcgCapture.kt",
+      "currentSha256": "95527517d4f4e48cd98b98418417a7e9f9047a035d5bd56a1b06f4d03d163d42",
+      "reuse": "Bounded callback chunking, exact metadata and completion; uses existing Orbit transactional journal and transfer queue."
+    },
+    {
+      "source": "C:/HA/HEALTH APP/core/data/src/main/kotlin/com/mani/health/core/data/EcgPlaybackReader.kt",
+      "sourceSha256": "c8f129ce28dbd7e86f9038bd7382bcbb793ffdf47f36b4e1d28b07c86c95db99",
+      "target": "sync/src/main/java/com/mani/orbit/sync/EcgJournal.kt",
+      "currentSha256": "6549a25add2444359e00c51027aadd5a8a47bcc0d8b1dd2dfc4e406ba734d62f",
+      "reuse": "Original chunk/callback completeness and quality checks; existing Orbit SQLite rather than a second Room store."
+    },
+    {
+      "source": "C:/HA/HEALTH APP/mobile/src/main/kotlin/com/mani/health/mobile/feature/EcgWaveform.kt",
+      "sourceSha256": "12c6850db23655ce9577c225eed549fbc22f667d378bcdabdaebebf1580edd48",
+      "target": "phone/src/main/java/com/mani/orbit/PhoneEcgHistory.kt",
+      "currentSha256": "2c4c46f0c6b2f9fb9e4ec005a9f53411654031382c27cdd39eac5f1d7d75888e",
+      "reuse": "Sample-index waveform, original millivolts, explicit gaps and bounded detail/overview paging."
+    },
+    {
+      "source": "C:\\HA\\HEALTH APP\\wear\\src\\main\\kotlin\\com\\mani\\health\\wear\\live\\LiveHeartService.kt",
+      "sourceSha256": "68e0784940f4fe3fade425078924964db7ac0a7071dcbdd7c41fa3cbd23c447c",
+      "target": "wear/src/main/java/com/mani/orbit/wear/WatchHeartService.kt",
+      "currentSha256": "7c9010a09bdacb3b607d1b185572fc9e57e26b96c4a485dd9403c34d3c05a97b",
+      "reuse": "Explicit foreground owner, serialized sessions, graceful flush/drain and cancellation. Existing Orbit journal/outbox replaces the old Room transport."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+<resources>
+    <item name="orbit_trace_route" type="id" />
+    <item name="orbit_trace_tier" type="id" />
+    <item name="orbit_trace_quality_reason" type="id" />
+</resources>
