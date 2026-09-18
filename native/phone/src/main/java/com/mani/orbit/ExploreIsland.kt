@@ -70,6 +70,9 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
     val setOpen by rememberUpdatedState(onExpanded)
     val density = LocalDensity.current
     var bodyPixels by remember { mutableFloatStateOf(with(density) { 72.dp.toPx() }) }
+    // Where the handle starts. Only the handle loads the spring: gathering the whole island because
+    // a finger landed on a row inside it moved those rows out from under that same finger.
+    var barTop by remember { mutableFloatStateOf(0f) }
     val bodyHeight = animateFloatAsState(bodyPixels, if (reduced) androidx.compose.animation.core.tween(0) else spring(1f, 289f), label = "Explore contents height")
     val active = session.store.optJSONObject("active")
     val watchRecord = session.watchRecords.firstOrNull { it.watch?.terminal == false }
@@ -108,7 +111,7 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
                 // The press loads the spring; the release lets it go, so one contact is one movement.
-                motion.press()
+                if (down.position.y >= barTop) motion.press()
                 com.mani.orbit.sync.DiagnosticApplication.gesture(diagnosticView, com.mani.orbit.sync.TraceGesture.TOUCH)
                 val wasOpen = open
                 val start = motion.value
@@ -234,6 +237,7 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
         val body = measurables[0].measure(loose.copy(maxHeight = (constraints.maxHeight - bar.height).coerceAtLeast(0)))
         bodyPixels = body.height.toFloat()
         val visible = bar.height + (bodyHeight.value * motion.value.coerceIn(0f, 1f)).roundToInt()
+        barTop = (visible - bar.height).toFloat()
         layout(constraints.maxWidth, visible) { body.place(0, 0); bar.place(0, visible - bar.height) }
     }
 }

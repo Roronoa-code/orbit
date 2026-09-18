@@ -152,8 +152,10 @@ no other time. Reading it from travel instead — the island from its own veloci
 from the fold's progress — made every open and close pump the material thicker and then thinner
 again with no finger involved, which is what the owner saw as the effect breaking.
 
-**A press loads the spring.** The Explore shell gathers under the press and waits there for as long
-as the contact lasts; the release lets it travel from that loaded pose. One contact is one movement.
+**A press loads the spring, and only on the handle.** The Explore shell gathers under a press on its
+bar and waits there for as long as the contact lasts; the release lets it travel from that loaded
+pose. One contact is one movement. A contact that lands on a row *inside* the shell never gathers
+it: the gather is a scale, and scaling the shell under a finger slides the rows out from under it.
 
 **A travelling cut feathers.** The Home deck's fold is a window, and while that window is moving it
 fades its content over 26dp rather than ending in a hard edge — a sweeping hard edge sliced every

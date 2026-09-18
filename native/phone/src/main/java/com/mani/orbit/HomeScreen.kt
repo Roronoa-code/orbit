@@ -36,6 +36,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -61,6 +62,9 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
     val scope = rememberCoroutineScope()
     val motion = remember { ExploreMotion(scope, expanded) }
     val scroll = rememberScrollState()
+    // Where the front card folds: the bottom of its facts block plus the card's own padding, so the
+    // fold lands in the gap under the last row instead of on its baseline.
+    var foldHeight by remember { mutableFloatStateOf(146f) }
     val haptic = LocalHapticFeedback.current
     val density = LocalDensity.current.density
     val closeLauncher by rememberUpdatedState(closeExplore)
@@ -139,8 +143,13 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
         // the recording it is drawn into.
         val hero = rememberGlassBackdrop()
         Box(Modifier.fillMaxSize().then(pointer).recordBackdrop(scene)) {
-            HomeOrb(summary, exploreOpen || busy || expanded || !rotation, reduced,
-                Modifier.fillMaxWidth().height(heroClosed).recordBackdrop(hero), { motion.value }, travel, chooseMetric, choosePeriod)
+            // The globe's recording covers the whole page, not just the globe. A layer that stops
+            // where the globe stops leaves every card below it sampling the edge of that recording
+            // rather than the page, which is why the deck and the Explore bar read as two shades.
+            Box(Modifier.fillMaxSize().recordBackdrop(hero)) {
+                HomeOrb(summary, exploreOpen || busy || expanded || !rotation, reduced,
+                    Modifier.fillMaxWidth().height(heroClosed), { motion.value }, travel, chooseMetric, choosePeriod)
+            }
             Box(Modifier.fillMaxSize().padding(top = heroOpen)) {
                 Box(Modifier.fillMaxSize().graphicsLayer { translationY = travel.toPx() * (1f - motion.value) }
                     .verticalScroll(scroll, enabled = expanded && !motion.dragging)) {
@@ -153,7 +162,7 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                         return closed + (target - closed) * q(index)
                     }
                     Layout(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp)
-                        .then(if (!expanded) Modifier.clearAndSetSemantics {} else Modifier), content = {
+                        .then(if (!expanded) Modifier.clearAndSetSemantics { testTag = "home-deck" } else Modifier), content = {
                         repeat(4) { index ->
                             // The fold clips the glass itself: the shell, its rim and its shadow are the
                             // material, so the card shows the orb through it as it opens.
@@ -161,13 +170,19 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                                 .drawWithContent {
                                 val progress = q(index)
-                                val visibleHeight = min(146.dp.toPx(), size.height) + (size.height - min(146.dp.toPx(), size.height)) * progress
+                                val fold = { i: Int, height: Float ->
+                                    val closed = min(if (i == 0) foldHeight.dp.toPx() else 146.dp.toPx(), height)
+                                    closed + (height - closed) * q(i)
+                                }
+                                val visibleHeight = fold(index, size.height)
                                 val covered = if (index == 0) 0f else {
                                     val previousHeight = heights[index - 1].dp.toPx() - 12.dp.toPx()
-                                    val shown = min(146.dp.toPx(), previousHeight) + (previousHeight - min(146.dp.toPx(), previousHeight)) * q(index - 1)
-                                    max(0f, cardY(index - 1).dp.toPx() + shown - cardY(index).dp.toPx())
+                                    max(0f, cardY(index - 1).dp.toPx() + fold(index - 1, previousHeight) - cardY(index).dp.toPx())
                                 }
                                 val top = min(covered, visibleHeight)
+                                // A card the one above still covers draws nothing at all. Stroking its
+                                // rim anyway left a stray hairline lying under the folded deck.
+                                if (visibleHeight - top < 1f) return@drawWithContent
                                 // The fold is a window onto the card, and a window has the card's own
                                 // corners: a straight cut leaves a folded card with square edges the
                                 // opened one never has.
@@ -207,7 +222,8 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                             }.orbitFrost(hero, CardCorner, { deckLift.value })) {
                                 Box(Modifier.graphicsLayer()) {
                                     when (index) {
-                                        0 -> HomeFacts(summary, { motion.value }, expanded) { if (metric == HomeMetric.Sleep) navigate("Sleep") }
+                                        0 -> HomeFacts(summary, { motion.value }, expanded,
+                                            { foldHeight = it }) { if (metric == HomeMetric.Sleep) navigate("Sleep") }
                                         1 -> HomeChart(summary.movementHeading, summary.movement, metric, true, expanded)
                                         2 -> HomeChart("Last ${summary.week.size} days", summary.week, metric, false, expanded)
                                         3 -> HomeComparisonCard(summary)
@@ -238,9 +254,14 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
 }
 
 @Composable
-private fun HomeFacts(summary: HomeSummary, progress: () -> Float, enabled: Boolean, open: () -> Unit) {
+private fun HomeFacts(summary: HomeSummary, progress: () -> Float, enabled: Boolean,
+                      reportFold: (Float) -> Unit, open: () -> Unit) {
+    val density = LocalDensity.current
     Column(Modifier.fillMaxWidth().then(if (summary.metric == HomeMetric.Sleep && enabled) Modifier.clickable(onClick = open) else Modifier)
         .padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        // The facts block plus the card's padding above and below it is where the card folds.
+        Column(Modifier.fillMaxWidth().onGloballyPositioned { reportFold(it.size.height / density.density + 36f) },
+            verticalArrangement = Arrangement.spacedBy(14.dp)) {
         summary.facts.chunked(2).forEach { pair -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             pair.forEach { fact -> Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = androidx.compose.ui.Alignment.Bottom) {
@@ -250,6 +271,7 @@ private fun HomeFacts(summary: HomeSummary, progress: () -> Float, enabled: Bool
                 Text(fact.label, color = HomeMuted, fontSize = 10.sp, lineHeight = 14.sp)
             } }
         } }
+        }
         Row(Modifier.fillMaxWidth().padding(top = 4.dp).graphicsLayer { alpha = reveal(progress(), .4f, .94f); translationY = (1f - alpha) * 7.dp.toPx() }, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             summary.footer.forEach { fact -> Column(Modifier.weight(1f)) {
                 Text(fact.value, color = HomeWhite, fontSize = 13.sp, lineHeight = 18.sp)

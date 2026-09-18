@@ -106,6 +106,44 @@ class HomeTest {
             .put("stages", JSONArray().put(JSONArray(listOf(start(date), start(date) + 60000, 4.5)))))), date) }
     }
 
+    /**
+     * The deck and the floating bar are one material, so over the same page they are one shade.
+     *
+     * They sample different recordings by necessity — a card cannot sample the recording it is drawn
+     * into — and that is exactly how they drifted apart. A folded deck sits below the globe, so when
+     * the globe's recording stopped where the globe stopped, every folded card sampled the edge of
+     * that recording rather than the page and came out lighter than the bar.
+     */
+    @Test fun theFoldedDeckAndTheFloatingBarAreOneShadeOverOnePage() {
+        val state = HealthScreenState(day = HealthDay(date, steps = 4000.0, distance = 3200.0, floors = 2.0, energy = 200.0),
+            loading = false, days = mapOf(date to HealthDay(date, steps = 4000.0)))
+        rule.setContent {
+            MaterialTheme(colorScheme = darkColorScheme(), typography = OrbitTypography) {
+                val layer = rememberGlassBackdrop()
+                Box(Modifier.width(411.dp).fillMaxHeight().background(Color(0xFF0B0A0F)).safeDrawingPadding()) {
+                    Box(Modifier.fillMaxSize().recordBackdrop(layer)) {
+                        HomeScreen(state, HomeMetric.Steps, 1, 10000, false, false, {}, {}, {}, {})
+                    }
+                    ExploreIsland("Steps", NativeWorkoutState(), false, {}, {}, { _, _, _, _ -> },
+                        layer, Modifier.align(Alignment.BottomCenter).padding(12.dp).fillMaxWidth())
+                }
+            }
+        }
+        rule.waitForIdle()
+        val root = rule.onRoot().captureToImage().asAndroidBitmap()
+        val origin = rule.onRoot().fetchSemanticsNode().boundsInRoot.topLeft
+        val density = rule.activity.resources.displayMetrics.density
+        // The folded deck clears its cards' semantics, so the front card is measured from the deck.
+        val deck = rule.onNodeWithTag("home-deck").fetchSemanticsNode().boundsInRoot.translate(-origin)
+        val bar = rule.onNodeWithTag("explore-bar").fetchSemanticsNode().boundsInRoot.translate(-origin)
+        val card = root.getPixel(deck.center.x.toInt(), (deck.top + 80 * density).toInt())
+        val island = root.getPixel(bar.center.x.toInt(), (bar.top + bar.height * .5f).toInt())
+        fun channel(pixel: Int, shift: Int) = pixel shr shift and 255
+        val drift = listOf(16, 8, 0).maxOf { kotlin.math.abs(channel(card, it) - channel(island, it)) }
+        save("one-shade.png")
+        assertTrue("The folded deck and the bar must be one shade: card=$card bar=$island drift=$drift", drift <= 4)
+    }
+
     @Test fun cardsReverseScrollAndExploreStaysOpenAboveThem() {
         val days = (0..13).associate { i -> date.minusDays(i.toLong()).let { it to HealthDay(it, steps = 4000.0 + i * 250, distance = 3200.0, floors = 2.0, energy = 200.0) } }
         val hourly = List(24) { hour -> Reading(start(date) + hour * 3600000, listOf(100, 200, 300, 600, 1200, 1000, 600).getOrNull(hour - 8)?.toDouble() ?: 0.0) }

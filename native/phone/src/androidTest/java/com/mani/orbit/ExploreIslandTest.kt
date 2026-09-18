@@ -88,6 +88,11 @@ class ExploreIslandTest {
     private fun save(name: String) = rule.onRoot().captureToImage().asAndroidBitmap().also { bitmap ->
         File(rule.activity.cacheDir, name).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
+    private fun difference(a: Int, b: Int): Int = maxOf(kotlin.math.abs((a shr 16 and 255) - (b shr 16 and 255)),
+        kotlin.math.abs((a shr 8 and 255) - (b shr 8 and 255)), kotlin.math.abs((a and 255) - (b and 255)))
+    private fun save(name: String, bitmap: Bitmap) =
+        File(rule.activity.cacheDir, name).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+
     private fun state(value: String) = rule.onNodeWithTag("explore-bar")
         .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, value))
 
@@ -317,6 +322,40 @@ class ExploreIslandTest {
         rule.waitForIdle()
         assertEquals(1, selected.size)
         save("explore-after-cancel.png")
+    }
+
+    /**
+     * Holding a choice must not gather the shell, because the gather moves the rows off the finger.
+     *
+     * Layout bounds cannot see this: the gather is a `graphicsLayer` scale, so every node keeps the
+     * bounds it had while the pixels slide out from under the contact. Only the handle loads the
+     * spring.
+     */
+    @Test fun holdingAChoiceLeavesTheShellWhereTheFingerFoundIt() {
+        show()
+        rule.onNodeWithTag("explore-bar").performClick(); rule.waitForIdle()
+        val resting = rule.onNodeWithTag("explore-bar").captureToImage().asAndroidBitmap()
+        // Capture while the finger is simply resting on a choice, before it starts to travel: that
+        // is when a gather would take the rows away from it.
+        rule.onNodeWithTag("explore-choices").performTouchInput { down(Offset(width * 5f / 6f, centerY)) }
+        rule.waitForIdle()
+        val held = rule.onNodeWithTag("explore-bar").captureToImage().asAndroidBitmap()
+        rule.onNodeWithTag("explore-choices").performTouchInput {
+            advanceEventTime(120); moveTo(Offset(width / 6f, centerY), 240)
+        }
+        // A gather is a scale, so the handle's own drawn size is the first thing it changes.
+        assertEquals("A held choice must not shrink the handle", resting.width, held.width)
+        assertEquals("A held choice must not shorten the handle", resting.height, held.height)
+        var moved = 0
+        for (y in 0 until resting.height) for (x in 0 until resting.width) {
+            if (difference(resting.getPixel(x, y), held.getPixel(x, y)) > 6) moved++
+        }
+        val fraction = moved.toFloat() / (resting.width * resting.height)
+        save("choice-hold-resting.png", resting); save("choice-hold-held.png", held)
+        rule.onNodeWithTag("explore-choices").performTouchInput { up() }
+        rule.waitForIdle()
+        assertTrue("A held choice must not move the shell: $fraction of the handle changed", fraction < .02f)
+        assertEquals(listOf("Measurements"), selected)
     }
 
     @Test fun opticalTierChangesKeepTheOwnedGestureAndForegroundGeometry() {

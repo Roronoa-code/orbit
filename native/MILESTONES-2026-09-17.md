@@ -287,3 +287,38 @@ are out.
 The sleep summary was the one panel padded on two sides instead of four, which pushed its two round
 day controls into the panel's own top corner with nothing between them and the curve. It is padded
 like every other panel now.
+
+## 14. Two shades, one page — 18 September 2026
+
+The owner's last report on the material was that the Explore bar and the deck cards were still two
+different shades, and the measurement agreed: the folded card read `#19181C` and the bar `#131215`.
+
+Neither surface was wrong about its own tint. A card cannot sample the recording it is drawn into,
+so the deck samples the globe's recording while the floating bar samples the page's — and the
+globe's recording stopped where the globe stopped. A folded deck sits *below* the globe, so every
+folded card was sampling the edge of a recording that did not reach it instead of the page behind
+it. The globe now records across the whole page, and the two surfaces measure `#151416` and
+`#131215`: a drift of 2, which is the shared top-to-bottom sheen read at two different heights.
+
+`HomeTest.theFoldedDeckAndTheFloatingBarAreOneShadeOverOnePage` holds that: it renders the real
+folded deck and the real bar over one page and requires them within 4 of each other per channel.
+Reverting the recording's bounds puts the drift back to 7 and the test fails, so it has teeth. The
+folded deck clears its cards' semantics, so the deck itself carries the tag the test measures from.
+
+The folded deck also picked up two fixes in the same pass. Its cards were stroking the material's
+hairline even when the card above still covered them completely, which left a stray line lying
+under the stack; a card with nothing visible now draws nothing at all. And the front card's fold
+was a fixed 146dp that landed on the last row's baseline — it now comes from the card's own facts
+block plus its padding, so the fold lands in the gap under the row at any text size.
+
+The press-to-load then broke the choices drag, and the owner found it immediately: holding Health
+and dragging to Workouts "bugs out". The handle's gather was firing on *any* contact inside the
+island, so resting a finger on a row shrank the whole shell and slid those rows out from under that
+same finger. Only the handle loads the spring now.
+
+Neither of the existing drag tests could see it, and the reason is worth keeping: a gather is a
+`graphicsLayer` scale, so every node keeps exactly the layout bounds it had while the pixels move.
+`holdingAChoiceLeavesTheShellWhereTheFingerFoundIt` captures the handle while a finger simply rests
+on a choice — before it travels, which is when the gather would happen — and compares that capture
+with the resting one. Without the guard the handle's own capture comes back 632px wide instead of
+678, and the test fails on the first assertion.
