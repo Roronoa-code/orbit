@@ -51,20 +51,14 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
     // Flow time runs whether or not a finger is turning the ring; only a suspended or reduced ring
     // holds still.
     var time by remember { mutableFloatStateOf(0f) }
-    var gust by remember { mutableFloatStateOf(0f) }
-    var shownValue by remember { mutableStateOf(summary.primary) }
-    LaunchedEffect(summary.primary, reduced) {
-        if (shownValue == summary.primary) return@LaunchedEffect
-        shownValue = summary.primary
-        if (!reduced) animate(1f, 0f, animationSpec = spring(1f, 30f, .001f)) { value, _ -> gust = value }
-    }
     // Every grain is one tiny quad in a single triangle mesh: one draw call a frame. Drawn as points,
     // the renderer prepared each of tens of thousands of grains as its own shape, which cost about
     // 35ms of rendering on every animated frame and held up every touch behind it.
     val grains = SheetCount * SheetSteps * SheetAcross
     val mesh = remember { FloatArray(grains * 12) }
     val tints = remember { IntArray(grains * 6) }
-    val shades = remember { IntArray(RingShades) { ringColour(it / (RingShades - 1f), .22f + .08f * it / (RingShades - 1f)) } }
+    // Dim grains: overlaps glow softly instead of burning to white, which is what made it busy.
+    val shades = remember { IntArray(RingShades) { ringColour(it / (RingShades - 1f), .22f + .18f * it / (RingShades - 1f)) } }
     // Grains add their light: where a sheet folds edge-on they pile up and burn toward white.
     val paint = remember { android.graphics.Paint().apply { blendMode = android.graphics.BlendMode.PLUS } }
     // A violet haze through the band, so the ring glows rather than sitting on black.
@@ -75,8 +69,6 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
     } }
     var angle by remember { mutableFloatStateOf(-summary.metric.ordinal * PI.toFloat() / 2) }
     var rest by remember { mutableFloatStateOf(angle) }
-    var breath by remember { mutableFloatStateOf(0f) }
-    var breathVelocity by remember { mutableFloatStateOf(0f) }
     var settling by remember { mutableStateOf(false) }
     var dragging by remember { mutableStateOf(false) }
     var velocity by remember { mutableFloatStateOf(0f) }
@@ -90,24 +82,19 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
     val period by rememberUpdatedState(choosePeriod)
     fun settle(target: Float, speed: Float = velocity) {
         animation?.cancel(); rest = target
-        if (reduced) { angle = target; breath = 0f; breathVelocity = 0f; velocity = 0f; settling = false; return }
+        if (reduced) { angle = target; velocity = 0f; settling = false; return }
         settling = true
         animation = scope.launch {
-            val breathing = launch {
-                animate(breath, 0f, initialVelocity = breathVelocity, animationSpec = spring(1f, 169f, visibilityThreshold = .0005f)) { x, v -> breath = x; breathVelocity = v }
-            }
             animate(angle, target, initialVelocity = speed, animationSpec = spring(1f, 144f, visibilityThreshold = .0005f)) { x, v -> angle = x; velocity = v }
-            breathing.join()
             settling = false; velocity = 0f
         }
     }
     fun switch(delta: Int) {
         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        breathVelocity -= 1.1f
         settle(rest - delta * PI.toFloat() / 2)
         select(HomeMetric.entries[Math.floorMod(current.ordinal + delta, HomeMetric.entries.size)])
     }
-    fun cycle() { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); breathVelocity -= 1.35f; settle(rest - .72f); period() }
+    fun cycle() { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); settle(rest - .72f); period() }
     LaunchedEffect(suspended, reduced, lifecycle) {
         if (!suspended && !reduced) lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             var previous = withInfiniteAnimationFrameNanos { it }
@@ -177,18 +164,15 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
         val drawRing: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit = remember { {
             val scale = min(size.width / RingWidth.toFloat(), size.height / RingHeight.toFloat())
             val seconds = time.toDouble()
-            // A gust swells the ring outward; the breath from a swipe or tap draws it in and lets go.
-            val swell = gust * 7.0 + breath * 24.0
             var n = 0
             for (k in 0 until SheetCount) for (i in 0 until SheetSteps) {
-                sheetSection(k, i * (2 * PI / SheetSteps), seconds, angle.toDouble(), swell, section)
+                sheetSection(k, i * (2 * PI / SheetSteps), seconds, angle.toDouble(), 0.0, section)
                 for (j in 0 until SheetAcross) {
                     sheetGrain(section, -1.0 + 2.0 * j / (SheetAcross - 1), grain)
                     val near = ((grain[2] + 1) / 2).toFloat()
-                    // Nearer grains are brighter-hued and a touch larger; glints are larger still, and white.
-                    val glint = glints(k, i, j)
-                    val h = if (glint) .55f else .22f + near * .22f
-                    val tint = if (glint) 0xB3F4F0FF.toInt() else shades[(near * (RingShades - 1)).toInt().coerceIn(0, RingShades - 1)]
+                    // Nearer grains are brighter-hued and a touch larger.
+                    val h = .24f + near * .16f
+                    val tint = shades[(near * (RingShades - 1)).toInt().coerceIn(0, RingShades - 1)]
                     val x = grain[0].toFloat(); val y = grain[1].toFloat()
                     val m = n * 12
                     mesh[m] = x - h; mesh[m + 1] = y - h; mesh[m + 2] = x + h; mesh[m + 3] = y - h; mesh[m + 4] = x + h; mesh[m + 5] = y + h
@@ -209,27 +193,21 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
                 native.restore()
             }
         } }
-        // The fold moves and shrinks a parent; the ring's own layer never changes a property. Animating
-        // the transform on the layer itself had its whole texture re-rendered on every frame of a swipe.
+        // The ring and the number shrink as one piece when the deck opens. Scaling them by different
+        // amounts slid the number into the ribbons, and scaling a stored picture of the ring blurred it
+        // into a noisy blob; the ring is redrawn, sharp, at every size instead.
         Box(Modifier.fillMaxSize().graphicsLayer {
             translationY = -deckTravel.toPx() * deckProgress() / 2
-            scaleX = 1f - .24f * deckProgress(); scaleY = scaleX
-        }) {
-            // The ring sits inside every recording the glass samples. As its own layer it is
-            // rasterised only when it changes, and each sampler composites that texture.
-            Spacer(Modifier.fillMaxSize().graphicsLayer {
-                compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
-            }.drawBehind(drawRing))
-        }
-        Column(Modifier.graphicsLayer {
-            translationY = -deckTravel.toPx() * deckProgress() / 2
-            scaleX = 1f - .14f * deckProgress(); scaleY = scaleX
-        }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            scaleX = 1f - .30f * deckProgress(); scaleY = scaleX
+        }, contentAlignment = Alignment.Center) {
+        Spacer(Modifier.fillMaxSize().drawBehind(drawRing))
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(summary.label, color = HomeMuted, fontSize = 12.sp, lineHeight = 17.sp, letterSpacing = 1.5.sp)
             if (summary.metric == HomeMetric.Sleep) Text(summary.primary, color = HomeWhite, fontSize = 48.sp)
             else OrbitDottedText(summary.primary, Modifier.fillMaxWidth(.82f).height(68.dp), HomeWhite)
             Text(summary.caption, color = HomeMuted, fontSize = 11.sp, lineHeight = 16.sp)
             Text(if (summary.period == 1) "Daily view" else "${summary.period}-day view", color = HomeAccent, fontSize = 11.sp, lineHeight = 16.sp)
+        }
         }
     }
 }

@@ -18,9 +18,12 @@ internal const val RingHeight = 300.0
 internal const val RingCentreX = RingWidth / 2
 internal const val RingCentreY = RingHeight / 2
 
-/** Centreline radius and the half width of a sheet. */
-private const val RingMean = 110.0
-private const val SheetHalfWidth = 30.0
+/**
+ * Centreline radius and the half width of a sheet. Thin strands with room between them read as a few
+ * flowing ribbons of dots; broad sheets filled the band and read as a cloud.
+ */
+private const val RingMean = 116.0
+private const val SheetHalfWidth = 14.0
 
 /** The ring leans back from the viewer by this much, so its near side reads nearer. */
 private val RingLean = 24.0 * PI / 180
@@ -31,10 +34,11 @@ private val LeanSin = sin(RingLean)
 private const val Camera = 460.0
 
 /** The centre is the number's. No grain comes closer in the ring's own plane, at any moment of the flow. */
-internal const val RingClearRadius = 64.0
+internal const val RingClearRadius = 86.0
 
-internal const val SheetSteps = 440
-internal const val SheetAcross = 34
+/** Few enough grains that each strand reads as its own dotted line. */
+internal const val SheetSteps = 360
+internal const val SheetAcross = 9
 
 private class Sheet(
     val n1: Int, val a1: Double, val w1: Double, val p1: Double,
@@ -45,12 +49,11 @@ private class Sheet(
 )
 
 // Different wave numbers and speeds per sheet keep them out of step, which is what makes the ring
-// read as flowing rather than as one shape wobbling. The twist speed moves each fold along its sheet.
+// read as flowing rather than as one shape wobbling. The speeds are slow: it should drift, not churn.
 private val Sheets = arrayOf(
-    Sheet(3, 8.0, .31, 0.0, 5, 4.0, .19, 1.3, 2, .26, .4, 2, .42, 0.0, 2, 16.0, .23, .045),
-    Sheet(4, 6.0, .24, 2.1, 2, 5.0, .28, .6, 3, .22, 1.9, 3, .35, 1.7, 3, 12.0, .31, -.035),
-    Sheet(2, 7.0, .27, 4.0, 6, 3.0, .24, 2.8, 2, .30, 3.1, 1, .48, 3.3, 1, 18.0, .19, .028),
-    Sheet(5, 5.0, .21, 1.0, 3, 4.5, .33, 4.4, 4, .25, 5.0, 2, .38, 5.1, 2, 14.0, .27, -.05),
+    Sheet(3, 8.0, .19, 0.0, 5, 4.0, .12, 1.3, 2, .16, .4, 2, .25, 0.0, 2, 14.0, .14, .028),
+    Sheet(4, 6.0, .15, 2.1, 2, 5.0, .17, .6, 3, .13, 1.9, 1, .21, 1.7, 3, 10.0, .19, -.022),
+    Sheet(2, 7.0, .16, 4.0, 6, 3.0, .14, 2.8, 2, .18, 3.1, 2, .29, 3.3, 1, 16.0, .12, .017),
 )
 internal val SheetCount get() = Sheets.size
 
@@ -97,6 +100,3 @@ internal fun ringColour(near: Float, strength: Float): Int {
     return (alpha shl 24) or (mix(0x6A, 0xC4) shl 16) or (mix(0x55, 0xAE) shl 8) or mix(0xC8, 0xF6)
 }
 
-/** A stable grain in every hundred or so catches a glint, the sparkle in the reference. */
-internal fun glints(sheet: Int, step: Int, across: Int): Boolean =
-    ((sheet * 73856093) xor (step * 19349663) xor (across * 83492791)).mod(1000) < 9

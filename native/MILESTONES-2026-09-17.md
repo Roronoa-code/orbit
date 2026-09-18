@@ -381,3 +381,12 @@ sits at 90th percentile 22 ms. At idle the ring costs a few milliseconds a frame
 
 The test emulator segfaulted three times under software rendering while tests captured real content;
 it now runs on the host GPU, where the full suite passes: 125 phone tests.
+
+The owner found the first ring too cluttered, and its shrinking and growing "horror". Both were real
+in the frames. Opening the deck scaled the ring to 76% and the number to 86%, so the number slid into
+the ribbons; the ring was also scaled as a stored picture, which minified tens of thousands of fine
+grains into a noisy blob; and it pulsed bigger and smaller on every swipe, tap and change of number.
+The ring is now three thin dotted strands with room round the number, dim enough that overlaps glow
+rather than burn white, with no glints and a slower drift. The ring and the number shrink as one
+piece, and the ring is redrawn sharp at each size. Nothing pulses: a swipe turns the ring to the next
+metric and a tap nudges it round.
