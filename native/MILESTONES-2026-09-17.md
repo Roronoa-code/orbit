@@ -121,3 +121,96 @@ navigation, no workout, no measurement, no media command, no permission change a
 Watch was touched. `../dist/Orbit.apk`, the approved HTML reference, is unchanged.
 No emulator data was wiped and the unrelated connected device was never addressed. Pre-edit copies of
 every file changed in this batch are in `verification/milestones-20260917/before/`.
+
+## 9. The material, replaced — 18 September 2026
+
+The owner pointed at their own BitChord and asked for Orbit's navigation bar, its cards and its glass
+reflection to be live and real rather than the bounded edge-bend Orbit had been drawing. BitChord
+gets that from **Kyant0/backdrop** (Apache-2.0), vendored as source; Orbit now vendors the same
+library from that copy, under `phone/src/main/java/com/mani/orbit/backdrop`, and it compiles cleanly
+against Orbit's newer Compose.
+
+`Modifier.orbitFrost` keeps its signature and composes that pipeline instead: saturation, blur, a real
+rounded-rectangle refraction with depth, a rim highlight that carries the light, and a cast shadow.
+Its `engagement` parameter became a lift. A lifted surface bends about three times as much of what is
+behind it, splits the light into colour at the rim past a third of the way up, widens that rim,
+deepens its shadow and thins its own tint so more of the page shows through — the exact amounts
+BitChord uses. The rim's light turns with the contact and returns to rest on release.
+
+Everything is on it: the Explore bar and its travelling destination lens, the header buttons, the date
+panel, the Health cards, the Home deck, the Watch-reading cards and the shared workout surface, so
+the session cards, the week card and the activity tiles refract whatever the route is showing —
+album artwork included. A filled control such as the Pause pill keeps its solid fill. Held, dragged, resized and folded
+surfaces lift; a held card thins into glass instead of pinching. Because a card cannot sample the
+recording it is drawn into, the page records a surface layer beneath the route content and Home
+records the globe on its own layer for the deck to refract as it travels over it.
+
+Two checks caught real things. The lens test asserted the interior could never change — it must now,
+because a lifted surface thins its tint, so it asserts the thinning and still forbids a page-wide
+warp beyond the shadow's reach. The rendering test found the readability tier had lost its draw
+boundary, so a ticking timer redrew the surface under it; every tier ends in that boundary again, and
+the measured invalidation counts are zero for all three.
+
+`GLASS-OPTICS.md` records the contract and the amounts. `../THIRD-PARTY-NOTICES.md` records the
+vendoring, and one thing worth the owner's attention: the integration file carries BitChord's
+arrangement and tuning, and BitChord's own glass glue is adapted from Echo-Music, which is GPL-3.0.
+No Echo or BitChord source was copied, but that file is the piece to review if Orbit is ever
+published under terms incompatible with GPL-3.0.
+
+## 10. The morphing-menu motion — 18 September 2026
+
+The owner supplied `morphing-menu.zip`, a React navigation bar that compresses into an expanded list,
+as the animation and interaction they want. Its motion model is now Orbit's, adapted where Orbit's
+own shape differs.
+
+Ported as specified:
+
+- **The shell morph is two phases.** A deliberate open or close first compresses the shell out of its
+  own footprint — toward a 280dp-wide, 32dp-tall pill, over 100ms on the reference's own easing — and
+  only then springs to its destination and fills out again, bouncier opening than closing. A
+  cancelled compression never reaches its spring, so a rapid reversal cannot resume a stale second
+  phase; `ExploreIslandTest` drives that reversal on a paused clock and checks it.
+- **The bar blurs away while the shell is compressed** — alpha to zero, 0.8 scale, 8dp blur — and
+  returns as the shell fills out. It comes back rather than staying hidden, because unlike the
+  reference's bar Orbit's is the anchor the shell grows from and carries the live workout time.
+- **The rows cascade.** Each row in the expanded body arrives from 48dp below, unblurring from 4dp, a
+  beat after the one above. The reference staggers this with fixed delays after its transition; Orbit's
+  shell is also draggable, so the stagger lives in the progress domain instead — the rows cascade
+  under a finger carrying the bar exactly as they do when it springs, and a reversal takes them back.
+- **Press scaling**: an action presses to 0.96 over 100ms on the reference's easing.
+- **Reduced motion** snaps all of it, as the reference does.
+
+Not adopted, and why: the reference's drill-down panels and its More list. Orbit's launcher has three
+destinations fixed by its own design rules — Body, Workouts and Health — so there is nothing to drill
+into, and adding a level would change navigation rather than motion.
+
+## 11. Physical qualification — 18 September 2026
+
+The owner connected their Galaxy Watch Ultra, which closed most of what had been waiting on hardware.
+Both apps are installed and signed with the same certificate, which is what lets the authenticated
+Data Layer accept the pair. Evidence: `verification/milestones-20260917/hardware-qualification.json`
+and the captures in `verification/milestones-20260917/watch/`.
+
+| Gate | Result |
+|---|---|
+| Paired Data Layer (R2) | **Qualified.** With both apps installed, the Watch's Connection page reads "No pending readings · Synced with phone", and Sync now drains and returns to it. Real delivery over the paired radio. |
+| Watch geometry and fonts (W2) | **Qualified.** The Today route renders on the real 480×480 round display — 225.9dp across, density 340 — with its heading, state line, both actions and the page indicator inside the circle. The layout tests bracket that at 192 and 228dp. |
+| Watch-face surfaces (W4) | **Qualified.** The Tile provider and both complication providers are registered on the device against the real host permissions, beside Samsung's watch-face runtime and complication helper. |
+| System edge Back (W3) | **Qualified.** With predictive back on, a real left-edge swipe out of History returns to the Orbit home Activity: the shared Back surface hands the gesture to the OS rather than competing with it. |
+| Widget host (W5) | **Closed as not applicable.** The Watch runs Wear OS 6 (API 36), new enough for the grouped widget host, but does not declare `android.software.app_widgets` and carries no widget host package. |
+| S25 frame pacing and thermal (G1/G3/R1) | **Qualified.** The full glass pipeline on the device: 1,470 frames, 3.27% janky, median 7ms, 90th 10ms, 95th 12ms, no missed vsync, AP at 51.9°C with thermal status 0. |
+| First native launch against real data | **Qualified.** The app opens on the owner's own profile and imported Samsung history — Measurements reads 84.0 kg, latest 18 August 2026. Nothing was edited. |
+
+Four things are still open, and each is open for a reason rather than for want of work:
+
+1. **Two app versions over the paired Data Layer.** Reaching it means deliberately downgrading one
+   real device below versionCode 3, which Android only allows by uninstalling — and that would
+   destroy the owner's data. Not risked.
+2. **Physical haptic feel and visual acceptance.** The owner's judgement, not a measurement.
+3. **Samsung sensor arbitration, accuracy and screen-off cadence.** These need a deliberate
+   measurement the owner starts while wearing the Watch; running one from here would write a
+   fabricated session into their real history.
+4. **Host expiry and fallback for a stale complication.** Depends on which watch face the owner puts
+   the complication on, which is theirs to choose.
+
+Nothing in the implementation is waiting on any of them.

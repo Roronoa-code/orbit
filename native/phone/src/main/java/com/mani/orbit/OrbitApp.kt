@@ -98,6 +98,7 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     val activity = androidx.activity.compose.LocalActivity.current
     val pageState = rememberSaveableStateHolder()
     val pageLayer = rememberGlassBackdrop()
+    val surfaceLayer = rememberGlassBackdrop()
     val sceneLayer = rememberGlassBackdrop()
     val headerOffsets = remember { mutableStateMapOf<String, () -> Float>() }
     val density = androidx.compose.ui.platform.LocalDensity.current
@@ -127,6 +128,7 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     CompositionLocalProvider(LocalOrbitReducedMotion provides reducedMotion, LocalGlassReadability provides glassReadability) {
     val workoutPlayer = rememberWorkoutPlayer(session.active?.id)
     // Stock containers (cards, chips) share the illustrated Health card material instead of the M3 default.
+    CompositionLocalProvider(LocalPageBackdrop provides surfaceLayer) {
     MaterialTheme(colorScheme = darkColorScheme(primary = Lavender, background = Ink, surface = Surface,
         onSurface = White, onBackground = White, onPrimary = Ink,
         surfaceVariant = Color(0xFF1B1920), onSurfaceVariant = HealthSecondary,
@@ -134,8 +136,11 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
         typography = OrbitTypography) {
       Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().recordBackdrop(pageLayer)) {
-        Box(Modifier.fillMaxSize().background(Ink))
-        if (route == "Workouts") WorkoutArtwork(track, workoutPlayer)
+        // What every in-page panel refracts: the app background and, on Workouts, the artwork.
+        Box(Modifier.fillMaxSize().recordBackdrop(surfaceLayer)) {
+            Box(Modifier.fillMaxSize().background(Ink))
+            if (route == "Workouts") WorkoutArtwork(track, workoutPlayer)
+        }
         Scaffold(containerColor = Color.Transparent, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
             Column(Modifier.fillMaxSize().padding(padding)) {
                 OrbitHeader(if (route == "Steps") HomeMetric.entries[homeMetric].title else if (route == "Workouts") workoutTitle else route,
@@ -204,6 +209,7 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
       }
     }
     }
+    }
 }
 /** The header's date control expands into this panel, like the reference utility page. */
 @Composable
@@ -213,12 +219,17 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
     val start = remember(first, today) { first?.takeIf { it < today } ?: today.minusDays(29) }
     val span = remember(start, today) { ChronoUnit.DAYS.between(start, today).toInt().coerceAtLeast(1) }
     var chosen by rememberSaveable(date, start) { mutableStateOf(date.coerceIn(start, today).toString()) }
+    var carried by remember { mutableStateOf(false) }
     val choice = LocalDate.parse(chosen)
     val reduced = LocalOrbitReducedMotion.current
     var shown by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { shown = true }
     val grow by animateFloatAsState(if (shown) 1f else 0f,
         if (reduced) tween(0) else spring(dampingRatio = .82f, stiffness = 420f), label = "Date panel")
+    // Carrying the track lifts the panel into thicker glass, and its rim light follows the thumb.
+    val panelLift by animateFloatAsState(if (carried) 1f else 0f,
+        if (reduced) tween(0) else tween(160), label = "Date panel lift")
+    val trackFocus = (ChronoUnit.DAYS.between(start, choice).toFloat() / span).coerceIn(0f, 1f)
     // A tap outside closes the panel, like the reference; the panel keeps its own touches.
     Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { dismiss() } })
     Column(modifier.statusBarsPadding().padding(start = 13.dp, top = 74.dp, end = 13.dp)
@@ -227,7 +238,8 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
             transformOrigin = TransformOrigin(1f, 0f)
             scaleX = .84f + .16f * grow; scaleY = .84f + .16f * grow; alpha = grow
         }
-        .clip(RoundedCornerShape(22.dp)).orbitFrost(page, 22.dp)
+        .clip(RoundedCornerShape(22.dp))
+        .orbitFrost(page, 22.dp, { panelLift }, { Offset(trackFocus, .5f) })
         .border(1.dp, Color.White.copy(alpha = .16f), RoundedCornerShape(22.dp))
         .pointerInput(Unit) { detectTapGestures { } }
         .padding(start = 17.dp, top = 13.dp, end = 17.dp, bottom = 17.dp).testTag("date-chooser")) {
@@ -242,9 +254,8 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
                 textAlign = TextAlign.Center, modifier = Modifier.weight(1f).testTag("date-choice"))
             DateStep("›", "Next day", choice < today) { chosen = choice.plusDays(1).toString() }
         }
-        DateTrack(ChronoUnit.DAYS.between(start, choice).toInt(), span, choice.format(ChosenDayFormat)) {
-            chosen = start.plusDays(it.toLong()).toString()
-        }
+        DateTrack(ChronoUnit.DAYS.between(start, choice).toInt(), span, choice.format(ChosenDayFormat),
+            { carried = it }) { chosen = start.plusDays(it.toLong()).toString() }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(start.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
             Text(today.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
@@ -258,7 +269,8 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
 }
 
 /** One lavender track across the actual imported coverage; the thumb stays inside the panel. */
-@Composable private fun DateTrack(position: Int, span: Int, label: String, pick: (Int) -> Unit) {
+@Composable private fun DateTrack(position: Int, span: Int, label: String, carry: (Boolean) -> Unit,
+    pick: (Int) -> Unit) {
     val radius = 9.dp
     val fraction = (position.toFloat() / span).coerceIn(0f, 1f)
     // The drawn track stays slim; the touch target keeps the platform minimum.
@@ -274,13 +286,15 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
             fun day(x: Float) = (((x - inset) / (size.width - 2 * inset)).coerceIn(0f, 1f) * span).roundToInt()
             awaitEachGesture {
                 val down = awaitFirstDown()
-                pick(day(down.position.x)); down.consume()
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed) break
-                    pick(day(change.position.x)); change.consume()
-                }
+                pick(day(down.position.x)); down.consume(); carry(true)
+                try {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                        pick(day(change.position.x)); change.consume()
+                    }
+                } finally { carry(false) }
             }
         }) {
         val middle = size.height / 2

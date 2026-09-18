@@ -33,6 +33,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
+/** Card glass keeps its weight on a near-black page and thins as the card lifts. */
+internal const val CARD_GLASS_OPACITY = .62f
 internal val HealthAccent = Color(0xFFBEA4E7)
 internal val HealthSecondary = Color(0xFFB9B2C5)
 internal fun Double?.healthNumber(precision: Int = 0): String = this?.let { String.format(Locale.UK, "%,.${precision}f", it) } ?: "—"
@@ -82,8 +84,16 @@ internal fun HealthCardContent(id: HealthCard, wide: Boolean, sizing: Boolean, m
                         CustomAccessibilityAction("Move earlier", earlier), CustomAccessibilityAction("Move later", later),
                         CustomAccessibilityAction("Show size control") { select(); true })
                 }
-    Box(modifier.then(if (id != HealthCard.Oxygen) action else Modifier).graphicsLayer { scaleX = 1f - response.value * .035f; scaleY = scaleX }
-        .clip(RoundedCornerShape(26.dp)).background(background).testTag("health-card-${id.key}")) {
+    // A held or carried card lifts into thicker glass rather than pinching: the tint thins, the
+    // refraction deepens, the rim widens and the shadow drops away from the page.
+    val backdrop = LocalPageBackdrop.current
+    val lift = { maxOf(response.value, if (moving) 1f else 0f) }
+    Box(modifier.then(if (id != HealthCard.Oxygen) action else Modifier)
+        .graphicsLayer { scaleX = 1f + response.value * .012f; scaleY = scaleX }
+        .clip(RoundedCornerShape(26.dp))
+        .then(if (backdrop != null) Modifier.orbitFrost(backdrop, 26.dp, lift, tint = background,
+            shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(background))
+        .testTag("health-card-${id.key}")) {
         Column(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().onGloballyPositioned { headerBounds(Rect(it.positionInRoot(), it.size.toSize())) }
                 .then(if (id == HealthCard.Oxygen) action else Modifier).padding(if (wide) 20.dp else 18.dp).heightIn(min = if (wide) 116.dp else 172.dp)) {

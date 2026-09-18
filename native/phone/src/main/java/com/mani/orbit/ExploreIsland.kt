@@ -1,5 +1,7 @@
 package com.mani.orbit
 
+import android.os.Build
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -81,16 +83,24 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
     val hasWorkout = active != null || watch != null
     val kind = active?.optString("kind")?.replaceFirstChar { it.titlecase(Locale.UK) } ?: watch?.kind
     val paused = if (watch != null) watch.phase == "paused" else active?.isNull("resumedAt") == true && session.startsInMs == 0L
-    LaunchedEffect(expanded, reduced) { motion.settle(expanded, reduced = reduced) }
+    LaunchedEffect(expanded, reduced) { motion.settle(expanded, reduced = reduced, morph = true) }
     BackHandler(expanded || motion.dragging) { motion.settle(false, reduced = reduced); onExpanded(false) }
     fun changeOpen(value: Boolean, speed: Float = motion.velocity) {
         motion.engage()
         if (expanded != value) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        motion.settle(value, speed, reduced)
+        motion.settle(value, speed, reduced, morph = !motion.dragging)
         onExpanded(value)
     }
     val canChoose by remember { derivedStateOf { open && !motion.dragging && motion.value > .94f } }
     Layout(modifier = modifier.testTag("explore-island")
+        .graphicsLayer {
+            val squeeze = motion.squeeze
+            if (squeeze > 0f && size.width > 0f && size.height > 0f) {
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(.5f, 1f)
+                scaleX = 1f - squeeze * (1f - (minOf(size.width, 280.dp.toPx()) / size.width))
+                scaleY = 1f - squeeze * (1f - (32.dp.toPx() / size.height).coerceAtMost(1f))
+            }
+        }
         .clip(RoundedCornerShape(31.dp)).orbitFrost(page, 31.dp, { if (motion.dragging) 1f else abs(motion.velocity).coerceIn(0f, 1f) })
         .drawWithContent {
             drawContent()
@@ -151,29 +161,46 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
             }
         }, content = {
         Column(Modifier.fillMaxWidth()
-            .graphicsLayer { alpha = reveal(motion.value, .56f, .98f); translationY = (1f - alpha) * 8.dp.toPx() }
             .drawWithContent { clipRect(bottom = size.height * motion.value.coerceIn(0f, 1f)) { this@drawWithContent.drawContent() } }
             .then(if (!canChoose) Modifier.clearAndSetSemantics {} else Modifier)
             .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 8.dp)) {
-            ExploreChoices(route, canChoose, page) { changeOpen(false); navigate(it) }
+            Box(Modifier.exploreCascade(0, { motion.value }, reduced)) {
+                ExploreChoices(route, canChoose, page) { changeOpen(false); navigate(it) }
+            }
             if (active != null) {
-                Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(IntrinsicSize.Min)
+                    .exploreCascade(1, { motion.value }, reduced), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ExploreAction(if (paused) "Resume" else "Pause", canChoose && session.startsInMs == 0L,
                         Modifier.weight(1f).fillMaxHeight()) { workoutAction(if (paused) "resume" else "pause", "", 0, false) }
                     ExploreAction("Finish & save", canChoose, Modifier.weight(1f).fillMaxHeight()) { workoutAction("finish", "", 0, false) }
                 }
-                ExploreAction("Open workout", canChoose, Modifier.fillMaxWidth().padding(top = 8.dp), plain = true) {
+                ExploreAction("Open workout", canChoose, Modifier.fillMaxWidth().padding(top = 8.dp)
+                    .exploreCascade(2, { motion.value }, reduced), plain = true) {
                     changeOpen(false); openWorkout("active")
                 }
             }
             if (watchRecord != null) {
-                if (watch != null) Box(Modifier.padding(top = 8.dp)) { WatchWorkoutControls(watchRecord, canChoose) }
-                ExploreAction("Open Watch workout", canChoose, Modifier.fillMaxWidth().padding(top = 8.dp), plain = true) {
+                if (watch != null) Box(Modifier.padding(top = 8.dp).exploreCascade(1, { motion.value }, reduced)) {
+                    WatchWorkoutControls(watchRecord, canChoose)
+                }
+                ExploreAction("Open Watch workout", canChoose, Modifier.fillMaxWidth().padding(top = 8.dp)
+                    .exploreCascade(2, { motion.value }, reduced), plain = true) {
                     changeOpen(false); openWorkout(watchRecord.id)
                 }
             }
         }
         Row(Modifier.fillMaxWidth().heightIn(min = 62.dp).testTag("explore-bar")
+            .graphicsLayer {
+                val squeeze = motion.squeeze
+                if (squeeze > 0f) {
+                    alpha = 1f - squeeze
+                    scaleX = 1f - squeeze * .2f; scaleY = scaleX
+                    if (Build.VERSION.SDK_INT >= 31) {
+                        val blur = squeeze * 8.dp.toPx()
+                        if (blur > .1f) renderEffect = androidx.compose.ui.graphics.BlurEffect(blur, blur)
+                    }
+                }
+            }
             .semantics { contentDescription = if (!hasWorkout) "Explore" else "Active workout, $kind${if (watch != null) ", Watch" else ""}"; stateDescription = if (expanded) "Expanded" else "Collapsed" }
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown && event.key in listOf(Key.DirectionUp, Key.DirectionDown)) {
@@ -215,6 +242,26 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
     }
 }
 
+
+/**
+ * Each row arrives from below a beat after the one above it, unblurring as it lands.
+ *
+ * The morphing-menu reference staggers this with fixed delays after its shell transition. Orbit's
+ * shell is also draggable, so the stagger lives in the progress domain instead: the rows cascade
+ * while a finger carries the bar as well as when it springs, and a reversal takes them back.
+ */
+private fun Modifier.exploreCascade(index: Int, progress: () -> Float, reduced: Boolean): Modifier =
+    graphicsLayer {
+        if (reduced) return@graphicsLayer
+        val arrival = reveal(progress(), .30f + index * .08f, .96f)
+        alpha = arrival
+        translationY = (1f - arrival) * 48.dp.toPx()
+        if (Build.VERSION.SDK_INT >= 31) {
+            val blur = (1f - arrival) * 4.dp.toPx()
+            if (blur > .1f) renderEffect = androidx.compose.ui.graphics.BlurEffect(blur, blur)
+        }
+    }
+
 @Composable
 private fun ExploreAction(label: String, enabled: Boolean, modifier: Modifier, plain: Boolean = false, action: () -> Unit) {
     val readability = LocalGlassReadability.current
@@ -222,8 +269,16 @@ private fun ExploreAction(label: String, enabled: Boolean, modifier: Modifier, p
     val pressed by interaction.collectIsPressedAsState()
     val contact = animateFloatAsState(if (pressed) 1f else 0f, spring(.86f, 650f), label = "Workout action contact")
     val haptic = LocalHapticFeedback.current
+    val reduced = LocalOrbitReducedMotion.current
+    // The reference presses a row to 0.96 over 100ms; the contact wash stays Orbit's own.
+    val press = animateFloatAsState(if (pressed && !reduced) .96f else 1f,
+        if (reduced) androidx.compose.animation.core.tween(0)
+        else androidx.compose.animation.core.tween(100, easing = androidx.compose.animation.core.CubicBezierEasing(.4f, 0f, .2f, 1f)),
+        label = "Workout action press")
     val shape = RoundedCornerShape(18.dp)
-    Box(modifier.heightIn(min = 48.dp).clip(shape)
+    Box(modifier.heightIn(min = 48.dp)
+        .graphicsLayer { scaleX = press.value; scaleY = press.value }
+        .clip(shape)
         .background(if (plain) Color.Transparent else Color.White.copy(alpha = .05f))
         .then(if (plain) Modifier else Modifier.border(.7.dp, Color.White.copy(alpha = .08f), shape))
         .drawWithContent { drawRect(Color.White.copy(alpha = contact.value.coerceIn(0f, 1f) * .09f)); drawContent() }

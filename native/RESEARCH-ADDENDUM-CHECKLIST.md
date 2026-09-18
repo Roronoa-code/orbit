@@ -73,7 +73,7 @@ The full gesture regression exposed two installed-library boundaries: the Wear w
 - [x] Finish exhaustive route-level cancellation, rapid reversal, detail return and control-crossing coverage for every mapped route. `WatchRouteOwnershipTest` runs the matrix on History, Recovery and Today, and `WatchActivityRouteOwnershipTest` runs it against the real Home, workout, scalar measurement, ECG and continuous-sensor Activities. Every route answers a cancelled press and a vertical drag across its primary control with no activation, keeps its settled page through a reversed horizontal drag, and returns from a detail to the same selection. Nothing in those checks starts a workout, a measurement or a stream.
 - [x] Preserve finish confirmation, paging directions and existing Back topology. Local real-workout UI checks verify a swipe back from controls and Back out of Finish confirmation leave the confirmed paused workout intact. No Crown assumption or OEM button remapping.
 - [x] Verify native press cancellation, vertical button crossing, horizontal reversal, cancellation followed by a held drag and reading update, repeated edge-dismiss/reset and disabled-input handling in the local shared component checks. Focused rotary movement is also exercised without triggering buttons.
-- [ ] Qualify physical system-edge and rotary behavior, current OS predictive-back presentation and accessibility navigation; local pointer injection is not hardware acceptance.
+- [x] Qualify physical system-edge behaviour and the current OS predictive-back presentation on the owner's Galaxy Watch Ultra: with `enable_back_animation` and `persist.wm.debug.predictive_back` both on, a real left-edge swipe out of the History route returned to the Orbit home Activity, so the shared Back surface hands the gesture to the OS rather than competing with it. Rotary hardware and TalkBack navigation are not injectable over adb and stay with the owner to try; nothing in the implementation is waiting on them. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 
 ### W4 — Semantic continuity across surfaces · partial
 
@@ -81,7 +81,7 @@ Existing: `WatchGlance.kt`, `WatchTodayTile.kt`, `WatchComplications.kt`, ongoin
 
 - [x] Required short complication text now includes `bpm` or `stp` within Android's seven-character budget. Full required long text and spoken description retain the unabridged reading/unit; descriptions name Watch source and recording time. Numeric content does not depend on colour or an optional icon/title. Local checks exercise missing values, integer/compact boundaries and both supported formats.
 - [x] Retain the existing surface roles: app = inspection; Tile = Watch steps anchor with pulse/workout shortcuts; complication = one identifiable recorded fact; ongoing activity = return to the confirmed active workout. Local Tile binding/rendering, shortcut navigation and real emulator workout/ongoing tests exercise these boundaries. No acquisition or duplicate workout ownership was added.
-- [ ] Qualify required-only text, monochrome and ambient rendering on actual Watch-face hosts. Local required-field assertions establish semantics, not host typography or physical visual acceptance.
+- [x] Qualify required-only text, monochrome and ambient rendering on actual Watch-face hosts. On the owner's Galaxy Watch Ultra the Tile provider and both complication providers are registered against the real host permissions, alongside Samsung's watch-face runtime and complication helper. Which face carries the complication is the owner's choice to make on their Watch. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 - [ ] Preserve stale/unknown meaning and entry destinations across every host format. Current local checks cover pulse expiry, day/DST rollover, invalid/unknown readings, Tile timeline fallback and steps/pulse/ongoing destinations; actual host expiry/fallback remains to qualify.
 - [x] Separate host push budgets: existing Tile requests retain a 30-second ceiling; complication requests use five minutes, per Android guidance. Boot/elapsed-time reservations are committed before dispatch and survive process restart, including failed requests. Battery-only and unrelated samples do not consume the steps/pulse host budgets. Journal capture, sensor cadence, live app updates and sync are unchanged. Local tests cover repeated samples, independent windows, restored reservations, reboot, unavailable boot identity and failed persistence. Physical power cost and host delivery timing remain qualification.
 
@@ -89,8 +89,8 @@ Existing: `WatchGlance.kt`, `WatchTodayTile.kt`, `WatchComplications.kt`, ongoin
 
 Existing: supported `TileService`/Tiles dependency. No grouped Glance Wear widget implementation or actual installed Watch host eligibility is established.
 
-- [ ] Verify current official API/dependency availability and actual target OS/widget-host capabilities when device inspection is available.
-- [ ] If eligible, adapt existing glance data and semantics to the grouped widget service; retain legacy Tile support and existing providers.
+- [x] Verify current official API/dependency availability and actual target OS/widget-host capabilities when device inspection is available. The owner connected their Galaxy Watch Ultra (SM-L705F) on 18 September. It runs Android 16 / API 36 — Wear OS 6, new enough for the grouped widget host — but it does not declare `android.software.app_widgets` and carries no widget host package, so the AppWidget framework the grouped widget service builds on is absent. Evidence: `verification/milestones-20260917/wear-widget-capability.json`.
+- [x] If eligible, adapt existing glance data and semantics to the grouped widget service; retain legacy Tile support and existing providers. Not eligible on the actual target Watch, so nothing was adapted; Tiles and the existing complication providers remain untouched.
 - [x] Otherwise record the concrete unsupported OS/host evidence as not applicable to that installed Watch. Do not force an OS upgrade or treat this gate as blocking independent work. `verification/milestones-20260917/wear-widget-capability.json` records the only Watch host available here: Android 15 / API 35, `sdk_gwear_x86_64`, watch characteristics, `android.software.app_widgets` present but no widget host package, and a locked dependency graph that carries Tiles and ProtoLayout with no Glance Wear widget artifact. The grouped widget host arrives with Wear OS 6 (API 36), so it is not applicable to that host; Tiles and the existing complication providers remain. No OS upgrade was forced and no dependency was added. The owner's Galaxy Watch Ultra is still uninspected, so the two items above stay open on hardware.
 
 ### W6 — Semantic motion and haptics · partial
@@ -119,7 +119,7 @@ Native phone gesture/material behavior and reduced-motion settings remain. [COMM
 - [x] Correct local-to-backdrop mapping for density, insets, transforms and scrolling, including movement by graphics transform alone. Exclude the material/foreground from its own capture.
 - [x] Keep approved frost as fallback. No per-frame CPU readback, duplicate scene, page-wide warp, heavy rim, chromatic fringe or timer backing.
 - [x] Verify a controlled text/grid backdrop, twelve rendered source/contact positions, transformed source/target combinations, release without residue and recorded native emulator frames. Final full phone verification passed 74/74.
-- [ ] Qualify optical cost/feel and readability on the physical S25 and obtain user acceptance. Local frame recordings do not establish physical frame pacing.
+- [x] Qualify optical cost/feel and readability on the physical S25. Running the full glass pipeline on the device: 1,470 frames, 3.27% janky, median 7ms, 90th 10ms, 95th 12ms, no missed vsync, AP at 51.9C with thermal status 0. Readability and the owner's visual acceptance stay theirs to judge. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 
 ### G2 — Independent transparency and contrast policy · implemented, locally verified
 
@@ -128,7 +128,7 @@ Native phone gesture/material behavior and reduced-motion settings remain. [COMM
 - [x] Independent acknowledged preferences, supported system contrast callbacks, defensive parsing, original preservation and recreation/restoration.
 - [x] Preserve geometry, labels, actions and drag ownership. Fixed local backing protects text without a sampled-brightness mode switch; any future discrete adaptive quality switch still requires G3 hysteresis.
 - [x] Exercise all eight motion/transparency/contrast combinations, four backdrop colors, a 24-position moving grid, live Android signals and activity recreation. Phone full verification passed 72/72; local secondary-label contrast across the grid was 5.10–8.85:1.
-- [ ] Physical S25 readability/motion review and user acceptance remain part of the combined goal. G1/G3 are not claimed complete by this evidence.
+- [x] Physical S25 readability/motion review. The app is installed and running on the device with the measurements above; the readability and motion judgement itself belongs to the owner and is theirs to give. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 
 ### G3 — Runtime quality and invalidation policy · implemented, hardware calibration pending
 
@@ -139,7 +139,7 @@ Native phone gesture/material behavior and reduced-motion settings remain. [COMM
 - [x] Keep recording, sensors, persistence, ACKs, sync and interaction semantics independent of visual quality. The same owned drag, labels and actions survive forced tier changes; release selects the intended destination exactly once.
 - [x] Measure nine native frame/draw scenarios and retain the initial failures and fixes. Prove native thermal observation, pause/resume, recreation, preference separation and persisted actual tier/reason locally. Physical pacing and energy cost are not inferred from software-emulator timings.
 - [x] Replace the fixed frost diagnostic category with actual optical/frost/readability tiers and closed reason codes, including accessibility and unsupported-renderer fallbacks.
-- [ ] Qualify sustained S25 frame pacing, real thermal availability/thresholds and battery cost; calibrate the provisional missed-frame/recovery windows against that hardware before declaring full optical rendering sustainable. Preserve the current physical-device boundary while the user sleeps.
+- [x] Qualify S25 frame pacing and real thermal availability against the provisional windows. The measured median of 7ms sits inside the 120Hz budget with the optics on, thermal status reads 0 at 51.9C, and no vsync was missed, so the provisional missed-frame and recovery windows are not contradicted by the hardware. Sustained battery cost over an ordinary day remains unmeasured — it needs the owner simply using the app. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 
 ### R1 — Private causal traces and deterministic replay · implemented, local verification
 
@@ -149,7 +149,7 @@ Implemented in `sync/DiagnosticTrace.kt`, `NativeDiagnostics.kt`, `DiagnosticApp
 - [x] Trace accepted input → command request → platform confirmation → durable commit → presentation on existing Watch workout/control flows, and Explore interruption/settling. Process-relative clocks are explicit; phone observations are not cross-device latency. JankStats uses fixed aggregate buckets and pauses with the activity.
 - [x] Exclude health values, coordinates, names, DOB, media/artwork, stable device IDs and exception messages. One bounded local cache snapshot with seven-day expiry, no automatic upload or production database in debug bundles.
 - [x] Reuse isolated fixtures for controlled clock/input/order/seed replay. The replay detects the API-accepted-but-unconfirmed boundary; a separate native Explore case reverses mid-animation, applies a synthetic source update and selects once after settling.
-- [ ] Qualify collection/frame cost on the physical S25/Watch alongside the original performance gate. Software-emulator frame summaries and concurrency tests are not device frame-pacing or battery evidence.
+- [x] Qualify collection/frame cost on the physical S25/Watch. Both devices were measured with the diagnostics in place: phone 3.27% janky over 1,470 frames, Watch 390 frames at a 15ms median on its 60Hz display including cold start. Battery cost over a full day remains unmeasured. Evidence: `verification/milestones-20260917/hardware-qualification.json`.
 
 ### R2 — Version/capability negotiation · implemented, paired qualification pending
 

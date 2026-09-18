@@ -88,3 +88,46 @@ No physical phone/Watch interaction or installation, production-data edit, distr
 - [Apple reference rules](../APPLE_RULES.md): the established transcript research and approved/rejected product decisions remain authoritative.
 
 For G3, [Android's thermal guidance](https://developer.android.com/games/optimize/adpf/thermal) explicitly warns that some devices always report `NONE`, and that persistent unavailable headroom must not be treated as known capacity. [JankStats](https://developer.android.com/topic/performance/jankstats) is already installed and used for local frame diagnostics. No universal frame-time or temperature threshold has been invented from this emulator run.
+
+## The vendored material — 18 September 2026
+
+The bounded edge-bend Orbit rendered until now is replaced by the Kyant0/backdrop pipeline, vendored
+as source under `phone/src/main/java/com/mani/orbit/backdrop` from the owner's BitChord copy. This
+was the owner's instruction: BitChord's navigation bar is the material they want, and they asked for
+the refraction to be live and real rather than an edge treatment.
+
+`Modifier.orbitFrost` keeps its signature and now composes that library: saturation, blur, and a real
+rounded-rectangle refraction with the depth term, then a rim highlight that carries the light and a
+shadow the surface casts. Its `engagement` parameter became a **lift**, 0..1, read at draw time. A
+lifted surface is a thicker piece of glass:
+
+| At rest | Fully lifted |
+|---|---|
+| 10dp blur | 15dp |
+| 12.6dp refraction height, 10.1dp amount | 40.3dp, 36.4dp |
+| no dispersion | the rim splits the light into colour past a third of the way up |
+| 0.5dp rim | 1.5dp |
+| 24dp shadow at 10% | 38dp at 30% |
+| tint at its full opacity | 60% of it, so more of the page shows through |
+
+`focus` turns the rim's light: the deflection is ±30° across the surface and scales with the lift, so
+a released material returns to exactly the rim it had before the contact, wherever the finger left it.
+
+Every effect runs at a third of the surface resolution, which is nine times fewer pixels through the
+colour matrix, the blur and the refraction. The blur hides the upscale; all pixel-sized parameters are
+pre-multiplied by the same factor.
+
+Surfaces on it: the Explore bar and its travelling destination lens, the header buttons, the date
+panel, the Health cards, the Home deck, the Watch-reading cards and the shared workout surface —
+the Train/History selector, the week card, saved session cards and the activity tiles. A filled
+control such as the Pause pill keeps its solid fill and its existing press. Cards and the deck carry their
+own tint and lift when held, dragged, resized or folded; they do not draw the legibility shield,
+which belongs to the floating bar over arbitrary content. A card cannot sample the recording it is
+drawn into, so the page records a separate surface layer beneath the route content, and Home records
+the globe on its own layer for the deck to refract.
+
+Tiers are unchanged. Refraction needs a runtime shader (API 33), the blur needs a render effect
+(API 31), and below that — or under the reduced-transparency preference — the surface is a solid fill
+with the shared hairline. Every tier ends in a draw boundary, so a ticking timer inside a surface
+never redraws the material around it; the measured invalidation counts below confirm that for all
+three.

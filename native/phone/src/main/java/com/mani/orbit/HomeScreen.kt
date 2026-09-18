@@ -118,9 +118,12 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
             }
         }
         val scene = rememberGlassBackdrop()
+        // The deck refracts the globe, so the globe is recorded on its own: a card cannot sample
+        // the recording it is drawn into.
+        val hero = rememberGlassBackdrop()
         Box(Modifier.fillMaxSize().then(pointer).recordBackdrop(scene)) {
             HomeOrb(summary, exploreOpen || busy || expanded || !rotation, reduced,
-                Modifier.fillMaxWidth().height(heroClosed), { motion.value }, travel, chooseMetric, choosePeriod)
+                Modifier.fillMaxWidth().height(heroClosed).recordBackdrop(hero), { motion.value }, travel, chooseMetric, choosePeriod)
             Box(Modifier.fillMaxSize().padding(top = heroOpen)) {
                 Box(Modifier.fillMaxSize().graphicsLayer { translationY = travel.toPx() * (1f - motion.value) }
                     .verticalScroll(scroll, enabled = expanded && !motion.dragging)) {
@@ -135,21 +138,19 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                     Layout(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp)
                         .then(if (!expanded) Modifier.clearAndSetSemantics {} else Modifier), content = {
                         repeat(4) { index ->
+                            // The fold clips the glass itself: the shell, its rim and its shadow are the
+                            // material, so the card shows the orb through it as it opens.
                             Box(Modifier.fillMaxWidth().testTag("home-card-$index").drawWithContent {
                                 val progress = q(index)
                                 val visibleHeight = min(146.dp.toPx(), size.height) + (size.height - min(146.dp.toPx(), size.height)) * progress
-                                val radius = CornerRadius(20.dp.toPx())
-                                drawRoundRect(Brush.linearGradient(listOf(Color(0xE619181D), Color(0xEE111114))), size = Size(size.width, visibleHeight), cornerRadius = radius)
-                                val edge = .8.dp.toPx()
-                                drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = .16f), Color.White.copy(alpha = .035f))),
-                                    Offset(edge / 2, edge / 2), Size(size.width - edge, visibleHeight - edge), radius, style = Stroke(edge))
                                 val covered = if (index == 0) 0f else {
                                     val previousHeight = heights[index - 1].dp.toPx() - 12.dp.toPx()
                                     val shown = min(146.dp.toPx(), previousHeight) + (previousHeight - min(146.dp.toPx(), previousHeight)) * q(index - 1)
                                     max(0f, cardY(index - 1).dp.toPx() + shown - cardY(index).dp.toPx())
                                 }
                                 clipRect(top = min(covered, visibleHeight), bottom = visibleHeight) { this@drawWithContent.drawContent() }
-                            }) {
+                            }.orbitFrost(hero, 20.dp, { q(index) }, tint = Color(0xFF15141A),
+                                shield = false, opacity = CARD_GLASS_OPACITY)) {
                                 Box(Modifier.graphicsLayer()) {
                                     when (index) {
                                         0 -> HomeFacts(summary, { motion.value }, expanded) { if (metric == HomeMetric.Sleep) navigate("Sleep") }

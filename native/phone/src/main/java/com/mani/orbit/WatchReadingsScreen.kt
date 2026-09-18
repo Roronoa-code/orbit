@@ -96,8 +96,11 @@ import java.util.Locale
         if (sources.isNotEmpty()) metrics.entries.chunked(2).forEach { pair -> item(pair.first().key) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { pair.forEach { (key, label) ->
             val row = rows[key]
-            Column(Modifier.weight(1f).background(Color(0xFF1B1920), RoundedCornerShape(24.dp)).padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            val backdrop = LocalPageBackdrop.current
+            Column(Modifier.weight(1f).clip(RoundedCornerShape(24.dp))
+                .then(if (backdrop != null) Modifier.orbitFrost(backdrop, 24.dp, tint = Color(0xFF1B1920),
+                    shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(Color(0xFF1B1920)))
+                .padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(label, fontSize = 14.sp, lineHeight = 19.sp, fontWeight = FontWeight.Medium, color = Color(0xFFE9E2F3))
                 val usable = row != null && !row.isNull("value") && row.optString("quality") == "valid"
                 val value = if (key == "distance") row?.optDouble("value")?.div(1000) else row?.optDouble("value")

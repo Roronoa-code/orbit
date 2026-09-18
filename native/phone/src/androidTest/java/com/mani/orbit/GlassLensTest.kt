@@ -45,6 +45,7 @@ class GlassLensTest {
     }
     private fun difference(a: Int, b: Int): Int = maxOf(abs((a shr 16 and 255) - (b shr 16 and 255)),
         abs((a shr 8 and 255) - (b shr 8 and 255)), abs((a and 255) - (b and 255)))
+    private fun luminance(pixel: Int): Int = (pixel shr 16 and 255) + (pixel shr 8 and 255) + (pixel and 255)
 
     @Test fun realBackdropBendsOnlyAtTheEdgeAndForegroundRemainsSharp() {
         val pressure = mutableFloatStateOf(0f)
@@ -75,7 +76,7 @@ class GlassLensTest {
             }
         }
         rule.waitForIdle()
-        assertTrue(GlassLens(rule.activity.resources.displayMetrics.density).supported)
+        assertTrue("Refraction needs a runtime shader on this device", LensSupported)
         val root = rule.onNodeWithTag("optical-fixture")
         val origin = root.fetchSemanticsNode().boundsInRoot.topLeft
         val bounds = rule.onNodeWithTag("lens").fetchSemanticsNode().boundsInRoot.translate(-origin)
@@ -83,18 +84,30 @@ class GlassLensTest {
         val idle = root.captureToImage().asAndroidBitmap()
         rule.runOnIdle { pressure.floatValue = 1f }
         val held = root.captureToImage().asAndroidBitmap()
-        val inset = 26 * rule.activity.resources.displayMetrics.density
+        val density = rule.activity.resources.displayMetrics.density
+        val inset = 26 * density
+        // A lifted surface casts a deeper shadow, so the band just outside it may darken. Beyond
+        // the shadow's own reach nothing may move: there is still no page-wide warp.
+        val shadow = bounds.inflate(40 * density)
         var changedEdges = 0
+        var idleInterior = 0L
+        var heldInterior = 0L
+        var interiorPixels = 0
         for (y in 0 until idle.height) for (x in 0 until idle.width) {
             val delta = difference(idle.getPixel(x, y), held.getPixel(x, y))
             val point = Offset(x + .5f, y + .5f)
-            if (!bounds.contains(point)) assertTrue("No screen-wide warp at $x,$y", delta <= 1)
-            else if (x > bounds.left + inset && x < bounds.right - inset && y > bounds.top + inset && y < bounds.bottom - inset)
-                assertTrue("Foreground/interior must stay fixed at $x,$y", delta <= 1)
-            else if (delta > 2) changedEdges++
+            if (!shadow.contains(point)) assertTrue("No screen-wide warp at $x,$y", delta <= 1)
+            else if (!bounds.contains(point)) continue
+            else if (x > bounds.left + inset && x < bounds.right - inset && y > bounds.top + inset && y < bounds.bottom - inset) {
+                idleInterior += luminance(idle.getPixel(x, y)); heldInterior += luminance(held.getPixel(x, y))
+                interiorPixels++
+            } else if (delta > 2) changedEdges++
         }
         save("lens-idle.png", idle); save("lens-held.png", held)
         assertTrue("The actual source must refract rather than merely blur: $changedEdges", changedEdges > 24)
+        // Lifting is a thicker piece of glass with a thinner tint, so more of the backdrop shows.
+        assertTrue("A lifted surface must thin its tint: $idleInterior vs $heldInterior",
+            interiorPixels > 0 && heldInterior > idleInterior)
         assertEquals(textBounds, rule.onNodeWithText("Keep sharp").fetchSemanticsNode().boundsInRoot)
         rule.runOnIdle { finger.value = Offset(.9f, .5f) }
         val moved = root.captureToImage().asAndroidBitmap()

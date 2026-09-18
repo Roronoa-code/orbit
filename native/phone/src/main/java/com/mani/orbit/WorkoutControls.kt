@@ -38,12 +38,21 @@ internal fun WorkoutButton(onClick: () -> Unit, modifier: Modifier = Modifier, e
     val pressed by interactions.collectIsPressedAsState()
     val focused by interactions.collectIsFocusedAsState()
     val reduced = LocalOrbitReducedMotion.current
-    val scale = animateFloatAsState(if (pressed && !reduced) .975f else 1f,
+    val backdrop = LocalPageBackdrop.current
+    // The plain workout surface is glass over whatever the route is showing, artwork included, and a
+    // press lifts it into thicker glass. A filled control keeps its solid fill and its press.
+    val glass = backdrop != null && background == WorkoutSurface
+    val scale = animateFloatAsState(if (!pressed || reduced) 1f else if (glass) 1.012f else .975f,
         if (reduced) tween(0) else spring(stiffness = 700f, dampingRatio = .85f), label = "workout press")
+    val lift = animateFloatAsState(if (pressed && !reduced) 1f else 0f,
+        if (reduced) tween(0) else spring(stiffness = 700f, dampingRatio = .85f), label = "workout lift")
     val haptic = LocalHapticFeedback.current
     val shape = RoundedCornerShape(20.dp)
     Box(modifier.heightIn(min = 48.dp).graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = if (enabled) 1f else .4f }
-        .clip(shape).background(background).then(if (focused) Modifier.border(1.dp, WorkoutPurple, shape) else Modifier)
+        .clip(shape)
+        .then(if (glass) Modifier.orbitFrost(backdrop!!, 20.dp, { lift.value }, tint = background,
+            shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(background))
+        .then(if (focused) Modifier.border(1.dp, WorkoutPurple, shape) else Modifier)
         .clickable(enabled = enabled, role = Role.Button, interactionSource = interactions, indication = null) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); onClick()
         }, contentAlignment = Alignment.Center) { content() }

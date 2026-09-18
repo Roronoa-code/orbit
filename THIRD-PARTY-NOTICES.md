@@ -10,7 +10,18 @@ Full license: `licenses/Kyant-backdrop-LICENSE.txt` (also bundled in the APK).
 Upstream: https://github.com/Kyant0/backdrop
 Reference inspected: https://github.com/Roronoa-code/BitChord/tree/70394304ee718d160cd25e41fbcbaef39c05b45c/app/src/main/java/com/music/bitchord/ui/components/backdrop
 
+The native app goes further: `native/phone/src/main/java/com/mani/orbit/backdrop` is Kyant0/backdrop v2.0.0 vendored as source, re-vendored from BitChord's copy (which had merged the KMP expect/actual declarations into one Android source set and added a backdrop resolution scale). Orbit renames the package and drops the IDE-only `@Language("AGSL")` annotations; the shaders, effects, highlight and shadow are otherwise unmodified. The Apache-2.0 licence text ships with that app at `assets/licenses/Kyant-backdrop-LICENSE.txt`. `native/phone/src/main/java/com/mani/orbit/OrbitGlass.kt` is Orbit's own code, but it is not independent work: it arranges the vendored library in the same order as BitChord's `LiquidGlass.kt` and carries the same tuning — vibrancy, blur radius, refraction height and amount, surface opacity, resolution scale, the lift multipliers and the dispersion threshold. BitChord's file is in turn adapted from EchoMusicApp/Echo-Music's `GlassEffectConfig` / `Modifier.liquidGlass`, which is **GPL-3.0**. Only the amounts and the arrangement travelled here; no Echo or BitChord source was copied. The owner has confirmed Orbit is a private sideloaded build for their own devices, not distributed, so no further licence step is outstanding; this note records the provenance rather than a caution.
+
 BitChord's `LiquidGlass.kt`, `GlassNavBar.kt` and `FloatingBottomBar.kt` informed the material values and interaction tuning: 8 dp blur, saturation 1.5, 40% dark tint, a shaded indicator, restrained edge and shadow, and a 320 / 0.72 selector spring. Orbit retains its own navigation and controller implementation. No GPL navigation or integration source is copied.
+
+## Morphing menu
+
+`morphing-menu.zip`, supplied by the owner, is a standalone adaptation of Danny Williams's site menu.
+Orbit copies none of its code: it is React and TypeScript, and Orbit's Explore island is Compose. What
+travelled is the motion model — the two-phase compress-then-spring shell morph and its constants, the
+bar's blur-and-scale departure, the row cascade with its offsets and blur, the press scale, and the
+rule that a cancelled transition never resumes its second phase. `native/phone/src/main/java/com/mani/orbit/ExploreMotion.kt`
+and `ExploreIsland.kt` carry that adaptation.
 
 ## Samsung Health Data SDK and Android dependencies
 

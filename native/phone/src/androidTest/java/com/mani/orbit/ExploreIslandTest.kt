@@ -91,6 +91,41 @@ class ExploreIslandTest {
     private fun state(value: String) = rule.onNodeWithTag("explore-bar")
         .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, value))
 
+    /** The morph is two phases, and an interrupted first phase must never reach its spring. */
+    @Test fun theShellCompressesBeforeItTravelsAndAReversalDropsThePendingSpring() {
+        lateinit var motion: ExploreMotion
+        rule.setContent {
+            val scope = rememberCoroutineScope()
+            motion = remember { ExploreMotion(scope, false) }
+        }
+        rule.mainClock.autoAdvance = false
+        rule.runOnIdle { motion.settle(true, 0f, false, morph = true) }
+        rule.mainClock.advanceTimeBy(50)
+        rule.runOnIdle {
+            assertTrue("The shell compresses first: ${motion.squeeze}", motion.squeeze > .2f)
+            assertTrue("It has not travelled yet: ${motion.value}", motion.value < .2f)
+        }
+        rule.mainClock.advanceTimeBy(1200)
+        rule.runOnIdle {
+            assertEquals("It arrives open", 1f, motion.value, .02f)
+            assertEquals("and fills out again", 0f, motion.squeeze, .02f)
+        }
+        // Reverse inside the compression, then reverse back: no stale spring may finish.
+        rule.runOnIdle { motion.settle(false, 0f, false, morph = true) }
+        rule.mainClock.advanceTimeBy(40)
+        rule.runOnIdle { motion.settle(true, 0f, false, morph = true) }
+        rule.mainClock.advanceTimeBy(1500)
+        rule.runOnIdle {
+            assertEquals("The last request owns the pose", 1f, motion.value, .02f)
+            assertEquals(0f, motion.squeeze, .02f)
+        }
+        // A grab takes the shell back to its own footprint rather than a compressed one.
+        rule.runOnIdle { motion.settle(false, 0f, false, morph = true) }
+        rule.mainClock.advanceTimeBy(40)
+        rule.runOnIdle { motion.grab(); assertEquals(0f, motion.squeeze, 0f) }
+        rule.mainClock.autoAdvance = true
+    }
+
     @Test fun readabilityModesKeepLocalContrastAndGestureOwnership() {
         pageColor.value = Color.White
         show()
