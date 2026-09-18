@@ -146,7 +146,7 @@ class HomeTest {
 
     /** The ring flows round the number and never through it, and every sheet closes without a seam. */
     @Test fun theRingKeepsTheNumbersCentreClearAndClosesOnItself() {
-        val section = DoubleArray(7); val grain = DoubleArray(4); val again = DoubleArray(7)
+        val section = DoubleArray(12); val grain = DoubleArray(4); val again = DoubleArray(12)
         var nearest = Double.MAX_VALUE
         // Across the flow, a gust at its peak, and a swipe's breath drawing the ring in.
         for (time in listOf(0.0, 3.7, 41.2, 600.0)) for (swell in listOf(-2.0, 0.0, 7.0)) for (k in 0 until SheetCount) {

@@ -29,10 +29,16 @@ internal fun HomeScrollFrost(scene: GlassBackdrop, opacity: () -> Float, modifie
         else Brush.verticalGradient(0f to Color.Transparent, .286f to ink, .52f to ink.copy(alpha = .55f), 1f to Color.Transparent)
     val mask = if (pinnedEdge) Brush.verticalGradient(0f to Color.Black, .2f to Color.Black, .65f to Color.Black.copy(alpha = .35f), 1f to Color.Transparent)
         else Brush.verticalGradient(0f to Color.Transparent, .286f to Color.Black, .48f to Color.Black, 1f to Color.Transparent)
-    // The feather masks the sampled band and its tint together, so it is applied outside both.
+    // The feather masks the sampled band and its tint together, so it is applied outside both. A band
+    // nothing has scrolled under is invisible and draws nothing at all: kept as a layer, it re-rendered
+    // its blur of the page on every frame the Home ring moved and every frame of a deck swipe.
     Box(modifier
-        .graphicsLayer { alpha = opacity(); compositingStrategy = CompositingStrategy.Offscreen }
-        .drawWithContent { drawContent(); drawRect(mask, blendMode = BlendMode.DstIn) }
+        .graphicsLayer {
+            val shown = opacity()
+            alpha = shown
+            compositingStrategy = if (shown > 0f) CompositingStrategy.Offscreen else CompositingStrategy.Auto
+        }
+        .drawWithContent { if (opacity() > 0f) { drawContent(); drawRect(mask, blendMode = BlendMode.DstIn) } }
         .then(
             if (sampleBackdrop) Modifier.drawBackdrop(
                 backdrop = scene.layer,

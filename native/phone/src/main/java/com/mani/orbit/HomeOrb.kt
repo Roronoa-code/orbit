@@ -46,7 +46,12 @@ private const val RingShades = 64
 internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean, modifier: Modifier,
                      deckProgress: () -> Float, deckTravel: Dp,
                      chooseMetric: (HomeMetric) -> Unit, choosePeriod: () -> Unit) {
-    val section = remember { DoubleArray(7) }
+    val section = remember { DoubleArray(12) }
+    // The flow the ring was last built for, and the ring itself, recorded once per step of the flow. A
+    // fold only redraws that recording at its new size: re-recording the mesh copied its 2.5 MB of
+    // vertices on every frame of every deck swipe.
+    val built = remember { FloatArray(2) { Float.NaN } }
+    val picture = remember { android.graphics.Picture() }
     val grain = remember { DoubleArray(4) }
     // Flow time runs whether or not a finger is turning the ring; only a suspended or reduced ring
     // holds still.
@@ -57,14 +62,14 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
     val grains = SheetCount * SheetSteps * SheetAcross
     val mesh = remember { FloatArray(grains * 12) }
     val tints = remember { IntArray(grains * 6) }
-    // Dim grains: overlaps glow softly instead of burning to white, which is what made it busy.
-    val shades = remember { IntArray(RingShades) { ringColour(it / (RingShades - 1f), .22f + .18f * it / (RingShades - 1f)) } }
+    // Colour and strength by how much light a grain catches: dark indigo mesh, bright lavender folds.
+    val shades = remember { IntArray(RingShades) { ringColour(it / (RingShades - 1f)) } }
     // Grains add their light: where a sheet folds edge-on they pile up and burn toward white.
     val paint = remember { android.graphics.Paint().apply { blendMode = android.graphics.BlendMode.PLUS } }
     // A violet haze through the band, so the ring glows rather than sitting on black.
     val glow = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
         shader = android.graphics.RadialGradient(RingCentreX.toFloat(), RingCentreY.toFloat(), 170f,
-            intArrayOf(0x006A55C8, 0x006A55C8, 0x386A55C8, 0x146A55C8, 0x006A55C8), floatArrayOf(0f, .36f, .62f, .82f, 1f),
+            intArrayOf(0x006A55C8, 0x006A55C8, 0x426A55C8, 0x1A6A55C8, 0x006A55C8), floatArrayOf(0f, .38f, .64f, .85f, 1f),
             android.graphics.Shader.TileMode.CLAMP)
     } }
     var angle by remember { mutableFloatStateOf(-summary.metric.ordinal * PI.toFloat() / 2) }
@@ -95,23 +100,22 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
         select(HomeMetric.entries[Math.floorMod(current.ordinal + delta, HomeMetric.entries.size)])
     }
     fun cycle() { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); settle(rest - .72f); period() }
+    // One clock for the flow and for the slow turn at rest (a full turn every ninety seconds), so both
+    // move on the same frame and the ring is rebuilt once per step rather than once for each.
     LaunchedEffect(suspended, reduced, lifecycle) {
         if (!suspended && !reduced) lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             var previous = withInfiniteAnimationFrameNanos { it }
             while (true) {
                 val now = withInfiniteAnimationFrameNanos { it }
                 val elapsed = (now - previous) / 1_000_000f
-                if (elapsed >= 1000f / 30) { time += min(elapsed, 60f) / 1000f; previous = now }
-            }
-        }
-    }
-    LaunchedEffect(suspended, reduced, dragging, settling, lifecycle) {
-        if (!suspended && !reduced && !dragging && !settling) lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            var previous = withInfiniteAnimationFrameNanos { it }
-            while (true) {
-                val now = withInfiniteAnimationFrameNanos { it }
-                val elapsed = (now - previous) / 1_000_000f
-                if (elapsed >= 1000f / 30) { rest += min(elapsed, 60f) / 90000f * PI.toFloat() * 2; angle = rest; previous = now }
+                // Thirty steps a second on any display: a frame early by a hair still counts, or a 60 Hz
+                // screen, whose two frames come to a shade under 1/30 s, waits for a third and gets 20.
+                if (elapsed >= 1000f / 30 - 3f) {
+                    val step = min(elapsed, 60f)
+                    time += step / 1000f
+                    if (!dragging && !settling) { rest += step / 90000f * PI.toFloat() * 2; angle = rest }
+                    previous = now
+                }
             }
         }
     }
@@ -164,15 +168,17 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
         val drawRing: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit = remember { {
             val scale = min(size.width / RingWidth.toFloat(), size.height / RingHeight.toFloat())
             val seconds = time.toDouble()
+            if (built[0] != time || built[1] != angle) {
             var n = 0
             for (k in 0 until SheetCount) for (i in 0 until SheetSteps) {
                 sheetSection(k, i * (2 * PI / SheetSteps), seconds, angle.toDouble(), 0.0, section)
                 for (j in 0 until SheetAcross) {
                     sheetGrain(section, -1.0 + 2.0 * j / (SheetAcross - 1), grain)
-                    val near = ((grain[2] + 1) / 2).toFloat()
-                    // Nearer grains are brighter-hued and a touch larger.
-                    val h = .24f + near * .16f
-                    val tint = shades[(near * (RingShades - 1)).toInt().coerceIn(0, RingShades - 1)]
+                    val light = grain[2]
+                    // Lit grains are larger as well as brighter; a glint is a bright point on a lit fold.
+                    val glint = glints(k, i, j, light)
+                    val h = if (glint) .62f else (.20 + light * .30).toFloat()
+                    val tint = if (glint) 0xE6F6F2FF.toInt() else shades[(light * (RingShades - 1)).toInt().coerceIn(0, RingShades - 1)]
                     val x = grain[0].toFloat(); val y = grain[1].toFloat()
                     val m = n * 12
                     mesh[m] = x - h; mesh[m + 1] = y - h; mesh[m + 2] = x + h; mesh[m + 3] = y - h; mesh[m + 4] = x + h; mesh[m + 5] = y + h
@@ -182,25 +188,39 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
                     n++
                 }
             }
+            val recording = picture.beginRecording(RingWidth.toInt(), RingHeight.toInt())
+            recording.drawCircle(RingCentreX.toFloat(), RingCentreY.toFloat(), 170f, glow)
+            recording.drawVertices(android.graphics.Canvas.VertexMode.TRIANGLES, n * 12, mesh, 0, null, 0,
+                tints, 0, null, 0, 0, paint)
+            picture.endRecording()
+            built[0] = time; built[1] = angle
+            }
             drawIntoCanvas { canvas ->
                 val native = canvas.nativeCanvas
                 native.save()
+                // The fold, applied here rather than to a stored picture of the ring, so the ring is
+                // rendered sharp at whatever size the deck gives it. It matches the number's transform.
+                val fold = 1f - .30f * deckProgress()
+                native.translate(0f, -deckTravel.toPx() * deckProgress() / 2)
+                native.scale(fold, fold, size.width / 2, size.height / 2)
                 native.translate((size.width - RingWidth.toFloat() * scale) / 2, (size.height - RingHeight.toFloat() * scale) / 2)
                 native.scale(scale, scale)
-                native.drawCircle(RingCentreX.toFloat(), RingCentreY.toFloat(), 170f, glow)
-                native.drawVertices(android.graphics.Canvas.VertexMode.TRIANGLES, n * 12, mesh, 0, null, 0,
-                    tints, 0, null, 0, 0, paint)
+                native.drawPicture(picture)
                 native.restore()
             }
         } }
-        // The ring and the number shrink as one piece when the deck opens. Scaling them by different
-        // amounts slid the number into the ribbons, and scaling a stored picture of the ring blurred it
-        // into a noisy blob; the ring is redrawn, sharp, at every size instead.
+        // The ring and the number shrink as one piece when the deck opens, by the same amount about the
+        // same point. Scaling them differently slid the number into the ribbons, and scaling a stored
+        // picture of the ring blurred it into a noisy blob, so the ring applies the fold in its own
+        // drawing and is rendered sharp at every size. Its own layer means the glass sampling it
+        // composites one texture rather than redrawing every grain.
+        Spacer(Modifier.fillMaxSize().graphicsLayer {
+            compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
+        }.drawBehind(drawRing))
         Box(Modifier.fillMaxSize().graphicsLayer {
             translationY = -deckTravel.toPx() * deckProgress() / 2
             scaleX = 1f - .30f * deckProgress(); scaleY = scaleX
         }, contentAlignment = Alignment.Center) {
-        Spacer(Modifier.fillMaxSize().drawBehind(drawRing))
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(summary.label, color = HomeMuted, fontSize = 12.sp, lineHeight = 17.sp, letterSpacing = 1.5.sp)
             if (summary.metric == HomeMetric.Sleep) Text(summary.primary, color = HomeWhite, fontSize = 48.sp)
