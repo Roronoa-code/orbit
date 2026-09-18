@@ -1,7 +1,6 @@
 package com.mani.orbit
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -36,7 +35,7 @@ import kotlin.math.abs
         val glyph = remember { Path() }
         val held by interaction.collectIsPressedAsState()
         val focused by interaction.collectIsFocusedAsState()
-        val press = animateFloatAsState(if (held && !reduced) 1f else 0f, if (reduced) tween(0) else spring(.82f, 700f), label = "transport contact")
+        val press = animateFloatAsState(if (held && !reduced) 1f else 0f, orbitEngage(reduced), label = "transport contact")
         val haptic = LocalHapticFeedback.current
         Box(Modifier.padding(horizontal = 10.dp).size(48.dp).testTag("music-$name")
             .semantics { contentDescription = label }.clickable(enabled = enabled, interactionSource = interaction, indication = null, role = Role.Button) {

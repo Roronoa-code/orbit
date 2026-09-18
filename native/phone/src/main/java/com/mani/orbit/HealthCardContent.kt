@@ -1,7 +1,6 @@
 package com.mani.orbit
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -33,8 +32,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
-/** Card glass keeps its weight on a near-black page and thins as the card lifts. */
-internal const val CARD_GLASS_OPACITY = .62f
 internal val HealthAccent = Color(0xFFBEA4E7)
 internal val HealthSecondary = Color(0xFFB9B2C5)
 internal fun Double?.healthNumber(precision: Int = 0): String = this?.let { String.format(Locale.UK, "%,.${precision}f", it) } ?: "—"
@@ -49,8 +46,7 @@ internal fun HealthCardContent(id: HealthCard, wide: Boolean, sizing: Boolean, m
     val contact = remember { MutableInteractionSource() }
     val pressed by contact.collectIsPressedAsState()
     val held = pressed && !moving
-    val response = animateFloatAsState(if (held) 1f else 0f,
-        tween(if (reduced) 0 else if (held) 100 else 320, easing = CubicBezierEasing(.2f, .8f, .2f, 1f)), label = "card contact")
+    val response = animateFloatAsState(if (held) 1f else 0f, orbitEngage(reduced), label = "card contact")
     val day = state.day
     val value = when (id) {
         HealthCard.Sleep -> day.asleepMinutes?.roundToInt()?.let { "${it / 60} h ${it % 60} m" } ?: "—"
@@ -69,7 +65,6 @@ internal fun HealthCardContent(id: HealthCard, wide: Boolean, sizing: Boolean, m
         HealthCard.Intake -> if (day.meals.isEmpty()) "No meals shared" else "${day.meals.size} ${if (day.meals.size == 1) "meal" else "meals"} recorded"
         HealthCard.Oxygen -> if (day.oxygen == null) "No oxygen shared" else "Latest recorded"
     }
-    val background = when (id) { HealthCard.Sleep -> Color(0xFF242031); HealthCard.Heart -> Color(0xFF211B28); else -> Color(0xFF1B1920) }
     val density = LocalDensity.current
     val action = Modifier.onPreviewKeyEvent { event -> when {
                     event.type != KeyEventType.KeyDown -> false
@@ -86,13 +81,11 @@ internal fun HealthCardContent(id: HealthCard, wide: Boolean, sizing: Boolean, m
                 }
     // A held or carried card lifts into thicker glass rather than pinching: the tint thins, the
     // refraction deepens, the rim widens and the shadow drops away from the page.
-    val backdrop = LocalPageBackdrop.current
     val lift = { maxOf(response.value, if (moving) 1f else 0f) }
     Box(modifier.then(if (id != HealthCard.Oxygen) action else Modifier)
         .graphicsLayer { scaleX = 1f + response.value * .012f; scaleY = scaleX }
         .clip(RoundedCornerShape(26.dp))
-        .then(if (backdrop != null) Modifier.orbitFrost(backdrop, 26.dp, lift, tint = background,
-            shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(background))
+        .orbitPanel(26.dp, lift)
         .testTag("health-card-${id.key}")) {
         Column(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().onGloballyPositioned { headerBounds(Rect(it.positionInRoot(), it.size.toSize())) }

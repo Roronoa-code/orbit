@@ -3,7 +3,6 @@ package com.mani.orbit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
@@ -20,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -75,16 +75,15 @@ internal fun SettingsInput(value: String, change: (String) -> Unit, label: Strin
 @Composable
 internal fun SettingsAction(text: String, enabled: Boolean = true, primary: Boolean = false, action: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
     val focused by interaction.collectIsFocusedAsState()
     val haptic = LocalHapticFeedback.current
-    Box(Modifier.heightIn(min = if (primary) 48.dp else 44.dp).clip(RoundedCornerShape(24.dp))
-        .background(if (primary) (if (pressed) Color(0xFFAD94DF) else if (focused) Color(0xFFD2BCFC) else SettingsPurple).copy(alpha = if (enabled) 1f else .35f)
-            else Color(if (pressed || focused) 0xFF393143 else 0xFF302B3B).copy(alpha = if (enabled) 1f else .4f))
+    Box(Modifier.heightIn(min = if (primary) 48.dp else 44.dp).graphicsLayer { alpha = if (enabled) 1f else .4f }
+        .orbitControl(24.dp, interaction, enabled,
+            if (primary) (if (focused) Color(0xFFD2BCFC) else SettingsPurple) else if (focused) ControlSelectedFill else ControlFill)
         .clickable(enabled = enabled, interactionSource = interaction, indication = null) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action()
         }.semantics { role = Role.Button }.padding(horizontal = if (primary) 22.dp else 18.dp, vertical = 11.dp), contentAlignment = Alignment.Center) {
-        Text(text, color = if (primary) Color(0xFF151019) else SettingsInk.copy(alpha = if (enabled) 1f else .45f), fontSize = 14.sp)
+        Text(text, color = if (primary) Color(0xFF151019) else SettingsInk, fontSize = 14.sp)
     }
 }
 

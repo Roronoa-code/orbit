@@ -1,6 +1,5 @@
 package com.mani.orbit
 
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
@@ -26,12 +25,17 @@ internal class ExploreMotion(private val scope: CoroutineScope, initial: Boolean
     var phase by mutableStateOf(TraceGesture.IDLE)
         private set
 
+    /** A finger is on the shell and has not asked it to go anywhere yet. */
+    var pressing by mutableStateOf(false)
+        private set
+
     /**
-     * How far the shell is squeezed out of its own footprint, 0..1.
+     * How far the shell has gathered itself, 0..1.
      *
-     * The morph is two phases: the shell compresses into a small pill, then springs from there to
-     * its destination and fills out again. A cancelled compression never reaches its spring, so a
-     * rapid reversal cannot resume a stale second phase.
+     * This is squash and stretch on a single travel, not a stage before it: the gather runs
+     * alongside the journey, peaks early and fills out again as the shell arrives. Running it first
+     * and the travel second is what made one gesture read as two states. A cancelled gather never
+     * reaches its spring, so a rapid reversal cannot resume a stale one.
      */
     var squeeze by mutableFloatStateOf(0f)
         private set
@@ -43,9 +47,29 @@ internal class ExploreMotion(private val scope: CoroutineScope, initial: Boolean
     fun dispose() { animation?.cancel(); NativeDiagnostics.mark(operation, TraceStage.CANCELLED) }
     fun cancel() { NativeDiagnostics.mark(operation, TraceStage.CANCELLED) }
 
-    fun grab() { engage(); animation?.cancel(); dragging = true; squeeze = 0f; phase = TraceGesture.DRAG }
+    /**
+     * The shell gathers under the finger and waits there.
+     *
+     * A press loads the spring; the release lets it go. The travel then continues from the pose the
+     * finger left rather than starting from rest, so one contact reads as one movement.
+     */
+    fun press() {
+        if (dragging) return
+        engage(); animation?.cancel(); pressing = true
+        animation = scope.launch { animate(squeeze, 1f, animationSpec = tween(120, easing = OrbitPressEasing)) { v, _ -> squeeze = v } }
+    }
+
+    /** The finger left without moving the shell and without asking it to travel. */
+    fun relax() {
+        if (!pressing) return
+        pressing = false
+        animation?.cancel()
+        animation = scope.launch { animate(squeeze, 0f, animationSpec = orbitSettle()) { v, _ -> squeeze = v } }
+    }
+
+    fun grab() { engage(); animation?.cancel(); pressing = false; dragging = true; squeeze = 0f; phase = TraceGesture.DRAG }
     fun snap(open: Boolean) {
-        animation?.cancel(); dragging = false; value = if (open) 1f else 0f; velocity = 0f; squeeze = 0f
+        animation?.cancel(); pressing = false; dragging = false; value = if (open) 1f else 0f; velocity = 0f; squeeze = 0f
         phase = TraceGesture.IDLE; settledOperation = operation
     }
     fun move(position: Float, speed: Float) { value = position.coerceIn(0f, 1f); velocity = speed.coerceIn(-4f, 4f) }
@@ -53,17 +77,17 @@ internal class ExploreMotion(private val scope: CoroutineScope, initial: Boolean
         NativeDiagnostics.mark(operation, TraceStage.COMMAND_REQUESTED)
         if (reduced) { snap(open); return }
         animation?.cancel()
+        pressing = false
         dragging = false
         phase = TraceGesture.SETTLING
         val settling = operation
         animation = scope.launch {
-            if (morph) {
-                animate(squeeze, 1f, animationSpec = tween(100, easing = CubicBezierEasing(.4f, 0f, .2f, 1f))) { v, _ -> squeeze = v }
-                launch { animate(squeeze, 0f, animationSpec = spring(if (open) .76f else .85f, 289f, .001f)) { v, _ -> squeeze = v } }
+            if (morph) launch {
+                animate(squeeze, 1f, animationSpec = tween(90, easing = OrbitPressEasing)) { v, _ -> squeeze = v }
+                animate(squeeze, 0f, animationSpec = orbitSettle(open)) { v, _ -> squeeze = v }
             }
             animate(value, if (open) 1f else 0f, initialVelocity = speed,
-                animationSpec = spring(dampingRatio = if (morph) (if (open) .76f else .85f) else 1f,
-                    stiffness = 289f, visibilityThreshold = .001f)) { pose, rate ->
+                animationSpec = if (morph) orbitSettle(open) else spring(1f, 289f, .001f)) { pose, rate ->
                 value = pose; velocity = rate
             }
             phase = TraceGesture.IDLE; settledOperation = settling
@@ -103,7 +127,7 @@ internal class ExploreContact(private val scope: CoroutineScope) {
         animation?.cancel(); dragging = false
         if (reduced) { position = slot; velocity = 0f; return }
         animation = scope.launch {
-            animate(position, slot, initialVelocity = speed, animationSpec = spring(.72f, 320f, visibilityThreshold = .001f)) { x, v ->
+            animate(position, slot, initialVelocity = speed, animationSpec = orbitSettle(opening = true)) { x, v ->
                 position = x; velocity = v
             }
         }

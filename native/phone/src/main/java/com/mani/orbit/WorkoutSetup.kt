@@ -74,7 +74,7 @@ internal fun WorkoutSetup(kind: String, busy: Boolean, ready: Boolean, error: St
         }
         WorkoutButton({ focus.clearFocus(); start(requireNotNull(target), kind != "Strength" && gps) },
             Modifier.fillMaxWidth().padding(top = 12.dp).testTag("workout-start"), enabled = ready && !busy && target != null,
-            background = Color(0xFFB69CFF)) {
+            background = WorkoutPurple) {
             Text(if (busy) "Starting…" else "Start ${kind.lowercase()}", color = Color(0xFF18131F), fontSize = 16.sp,
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp))
         }

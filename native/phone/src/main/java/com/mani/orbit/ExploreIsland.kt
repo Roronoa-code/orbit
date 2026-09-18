@@ -6,13 +6,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -22,10 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -92,27 +86,29 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
         onExpanded(value)
     }
     val canChoose by remember { derivedStateOf { open && !motion.dragging && motion.value > .94f } }
+    // Lift is contact, not travel. Driving it from velocity made the glass thicken on the way out
+    // and thin again on arrival, so every open and close pulsed the material.
+    val lift = animateFloatAsState(if (motion.pressing || motion.dragging) 1f else 0f, orbitEngage(reduced),
+        label = "Island lift")
     Layout(modifier = modifier.testTag("explore-island")
         .graphicsLayer {
-            val squeeze = motion.squeeze
-            if (squeeze > 0f && size.width > 0f && size.height > 0f) {
+            // Squash and stretch across one travel: the shell gathers itself a little as it leaves
+            // and fills out as it lands. Collapsing to a pill first read as a separate state.
+            val gather = motion.squeeze
+            if (gather > 0f) {
                 transformOrigin = androidx.compose.ui.graphics.TransformOrigin(.5f, 1f)
-                scaleX = 1f - squeeze * (1f - (minOf(size.width, 280.dp.toPx()) / size.width))
-                scaleY = 1f - squeeze * (1f - (32.dp.toPx() / size.height).coerceAtMost(1f))
+                scaleX = 1f - gather * .03f
+                scaleY = 1f - gather * .07f
             }
         }
-        .clip(RoundedCornerShape(31.dp)).orbitFrost(page, 31.dp, { if (motion.dragging) 1f else abs(motion.velocity).coerceIn(0f, 1f) })
-        .drawWithContent {
-            drawContent()
-            val radius = (31f - 3f * motion.value.coerceIn(0f, 1f)).dp.toPx()
-            val stroke = 1.dp.toPx()
-            drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = .18f), Color.White.copy(alpha = .04f))),
-                Offset(stroke / 2, stroke / 2), Size(size.width - stroke, size.height - stroke),
-                CornerRadius(radius, radius), style = Stroke(stroke))
-        }
+        // The material's own rim is the only rim. A second stroke on this one surface is exactly
+        // the kind of local decision that made the app read as two materials.
+        .clip(RoundedCornerShape(31.dp)).orbitFrost(page, 31.dp, { lift.value })
         .pointerInput(Unit) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
+                // The press loads the spring; the release lets it go, so one contact is one movement.
+                motion.press()
                 com.mani.orbit.sync.DiagnosticApplication.gesture(diagnosticView, com.mani.orbit.sync.TraceGesture.TOUCH)
                 val wasOpen = open
                 val start = motion.value
@@ -156,6 +152,8 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
                     }
                 } finally {
                     if (claimed && !released) { motion.cancel(); motion.settle(wasOpen, 0f, reduced); setOpen(wasOpen) }
+                    // Still pressing means the contact ended without asking the shell to travel.
+                    motion.relax()
                     com.mani.orbit.sync.DiagnosticApplication.gesture(diagnosticView, motion.phase)
                 }
             }
@@ -165,7 +163,7 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
             .then(if (!canChoose) Modifier.clearAndSetSemantics {} else Modifier)
             .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 8.dp)) {
             Box(Modifier.exploreCascade(0, { motion.value }, reduced)) {
-                ExploreChoices(route, canChoose, page) { changeOpen(false); navigate(it) }
+                ExploreChoices(route, canChoose) { changeOpen(false); navigate(it) }
             }
             if (active != null) {
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(IntrinsicSize.Min)
@@ -191,14 +189,12 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
         }
         Row(Modifier.fillMaxWidth().heightIn(min = 62.dp).testTag("explore-bar")
             .graphicsLayer {
-                val squeeze = motion.squeeze
-                if (squeeze > 0f) {
-                    alpha = 1f - squeeze
-                    scaleX = 1f - squeeze * .2f; scaleY = scaleX
-                    if (Build.VERSION.SDK_INT >= 31) {
-                        val blur = squeeze * 8.dp.toPx()
-                        if (blur > .1f) renderEffect = androidx.compose.ui.graphics.BlurEffect(blur, blur)
-                    }
+                // The bar stays the handle throughout; it leans into the gather rather than
+                // departing under a blur, which read as a state of its own.
+                val gather = motion.squeeze
+                if (gather > 0f) {
+                    alpha = 1f - gather * .18f
+                    scaleX = 1f - gather * .04f; scaleY = scaleX
                 }
             }
             .semantics { contentDescription = if (!hasWorkout) "Explore" else "Active workout, $kind${if (watch != null) ", Watch" else ""}"; stateDescription = if (expanded) "Expanded" else "Collapsed" }
@@ -244,20 +240,22 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
 
 
 /**
- * Each row arrives from below a beat after the one above it, unblurring as it lands.
+ * Each row arrives from below just behind the one above it, unblurring as it lands.
  *
  * The morphing-menu reference staggers this with fixed delays after its shell transition. Orbit's
  * shell is also draggable, so the stagger lives in the progress domain instead: the rows cascade
- * while a finger carries the bar as well as when it springs, and a reversal takes them back.
+ * while a finger carries the bar as well as when it springs, and a reversal takes them back. They
+ * start early and overlap heavily, so the cascade belongs to the shell's travel rather than
+ * following it as a second act.
  */
 private fun Modifier.exploreCascade(index: Int, progress: () -> Float, reduced: Boolean): Modifier =
     graphicsLayer {
         if (reduced) return@graphicsLayer
-        val arrival = reveal(progress(), .30f + index * .08f, .96f)
+        val arrival = reveal(progress(), .12f + index * .05f, .92f)
         alpha = arrival
-        translationY = (1f - arrival) * 48.dp.toPx()
+        translationY = (1f - arrival) * 28.dp.toPx()
         if (Build.VERSION.SDK_INT >= 31) {
-            val blur = (1f - arrival) * 4.dp.toPx()
+            val blur = (1f - arrival) * 3.dp.toPx()
             if (blur > .1f) renderEffect = androidx.compose.ui.graphics.BlurEffect(blur, blur)
         }
     }
@@ -266,22 +264,9 @@ private fun Modifier.exploreCascade(index: Int, progress: () -> Float, reduced: 
 private fun ExploreAction(label: String, enabled: Boolean, modifier: Modifier, plain: Boolean = false, action: () -> Unit) {
     val readability = LocalGlassReadability.current
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val contact = animateFloatAsState(if (pressed) 1f else 0f, spring(.86f, 650f), label = "Workout action contact")
     val haptic = LocalHapticFeedback.current
-    val reduced = LocalOrbitReducedMotion.current
-    // The reference presses a row to 0.96 over 100ms; the contact wash stays Orbit's own.
-    val press = animateFloatAsState(if (pressed && !reduced) .96f else 1f,
-        if (reduced) androidx.compose.animation.core.tween(0)
-        else androidx.compose.animation.core.tween(100, easing = androidx.compose.animation.core.CubicBezierEasing(.4f, 0f, .2f, 1f)),
-        label = "Workout action press")
-    val shape = RoundedCornerShape(18.dp)
     Box(modifier.heightIn(min = 48.dp)
-        .graphicsLayer { scaleX = press.value; scaleY = press.value }
-        .clip(shape)
-        .background(if (plain) Color.Transparent else Color.White.copy(alpha = .05f))
-        .then(if (plain) Modifier else Modifier.border(.7.dp, Color.White.copy(alpha = .08f), shape))
-        .drawWithContent { drawRect(Color.White.copy(alpha = contact.value.coerceIn(0f, 1f) * .09f)); drawContent() }
+        .orbitControl(18.dp, interaction, enabled, if (plain) Color.Transparent else ControlFill)
         .clickable(enabled = enabled, interactionSource = interaction, indication = null, role = Role.Button) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action()
         }.padding(horizontal = 12.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {

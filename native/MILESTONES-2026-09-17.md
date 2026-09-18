@@ -214,3 +214,76 @@ Four things are still open, and each is open for a reason rather than for want o
    the complication on, which is theirs to choose.
 
 Nothing in the implementation is waiting on any of them.
+
+## 12. The material pass — 18 September 2026
+
+The owner sent a photograph of the Steps route with three complaints: the folded card was clipped,
+the app's glass and animation were inconsistent across routes, and the Explore bar was not real
+liquid glass. Sampling the live screen settled all three at once — the card was exactly `#15141A`
+and the bar exactly `#28262E`, which are the two *readability fallback fills*. No glass was
+rendering at all on a signed build on an S25 Ultra, and the two fallback colours were the two
+shades they could see.
+
+Three defects, each fixed at its source:
+
+1. **The quality policy parked the app in the no-glass tier.** Three late frames dropped it from
+   frost to readability, and full optics were gated on a thermal *headroom* forecast that Samsung
+   does not provide, so the lens was unreachable on the target phone. Measured conditions now never
+   reach readability: heat and frame pressure cost the refraction and leave the glass. Readability
+   belongs to the owner's Reduce transparency preference, to a platform with no blur, and to their
+   own battery saver. The policy also opens at the best supported tier instead of climbing to it
+   after five seconds of evidence.
+2. **Every surface decided its own look.** `orbitFrost` took a tint, an opacity and a legibility
+   shield, and eight call sites passed eight different combinations. Those parameters are gone.
+   There is one shade, one hairline, one fallback fill, one `orbitPanel` for panels and one
+   `orbitControl` for everything that sits on them, and one motion vocabulary in `OrbitMotion.kt`.
+   Panels lift; controls press. The flat panels that were never glass — the sleep summary and stage
+   breakdown, the workout week, empty-day and section panels, the segmented selectors — are on the
+   material now.
+3. **The fold cut the card with a rectangle.** A folded card showed square corners the opened one
+   never has. The fold is a window with the card's own corners, and both cut edges carry the same
+   hairline as every other edge.
+
+Removing the bar's opaque backing broke two accessibility checks, and they were right to break: a
+chart passing under the bar dropped its caption to 3.6:1. The replacement is a multiplicative dim of
+the sampled backdrop rather than a plate over it — 30% of the backdrop's brightness reaches every
+surface, which tames a bright page, leaves a dark one alone, and keeps the structure the refraction
+bends. That holds at least 5:1 over anything, pure white included, and the contrast preference adds
+a backing on top for 7:1. The same measurement showed that lift was growing the blur faster than it
+thinned the tint, so picking a surface up showed *less* of the page than leaving it at rest; lift no
+longer touches the blur.
+
+The owner then reported that the Explore island opened "like a couple of different states one after
+another" and that the bar's own animation was too strong. Both came from the same place: the shell
+compressed for 100ms *before* it travelled, so nothing moved during the first beat, and the bar left
+under an 8dp blur. The gather now runs alongside the journey as squash and stretch on one travel, at
+a third of its former depth; the bar leans into it instead of departing; the rows start at 12% of
+the travel instead of 30% and overlap. The island's bespoke second rim is gone — the material's own
+rim is the only rim on every surface.
+
+## 13. The fold and the loaded spring — 18 September 2026
+
+Three more reports from the owner, all about motion rather than colour:
+
+**"When opening and closing cards or the explore it thickens then thins itself, breaking the
+effect."** Lift was being driven by *travel*: the island read it from `abs(velocity)` and the deck
+cards from the fold's own progress, so every open and close pumped the glass thicker and then
+thinner again with no finger involved. Lift now means contact and nothing else — a finger pressing
+or carrying a surface. A surface that is merely unfolding is the same piece of glass it was at rest.
+
+**"When pressing the explore the card should start its animation process, like a spring hold and
+then release and it animates and goes up."** The shell now gathers under the press and waits there
+for as long as the finger stays, and the release lets it travel from that loaded pose. One contact
+reads as one movement instead of a tap followed by a separate animation.
+
+**"The opening and closing of the 4 cards is really buggy."** Two defects, both visible frame by
+frame in a screen recording of the fold. The growing window was a hard edge sweeping down through
+the card, so it sliced every line of text it passed through the middle; a travelling cut now feathers
+over 26dp and only a cut that is standing still carries the material's hairline. And the cards behind
+the front one were drawn as 30%-alpha ghosts of themselves, which read as grey slabs appearing from
+nowhere; they are solid objects the whole way now, and the card above simply clips them until they
+are out.
+
+The sleep summary was the one panel padded on two sides instead of four, which pushed its two round
+day controls into the panel's own top corner with nothing between them and the curve. It is padded
+like every other panel now.

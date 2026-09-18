@@ -121,18 +121,24 @@ internal fun SleepScreen(day: SleepDay, loading: Boolean, error: String?, reduce
             } finally {
                 val commit = complete && owned && abs(dx) >= 48.dp.toPx() && abs(dx) > abs(dy) * 1.2f
                 if (commit) moveNow(if (dx < 0) 1 else -1)
-                settle = scope.launch { if (reduced || commit) offset = 0f else animate(offset, 0f, animationSpec = tween(180, easing = CubicBezierEasing(.2f, .7f, .2f, 1f))) { value, _ -> offset = value } }
+                // A swipe that did not commit returns on the app's one settle, like every other release.
+                settle = scope.launch { if (reduced || commit) offset = 0f else animate(offset, 0f, animationSpec = orbitSettle()) { value, _ -> offset = value } }
             }
         }
     }.verticalScroll(scroll).graphicsLayer { translationX = offset }
         .padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 112.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Color(0xFF19181E)).padding(horizontal = 16.dp)
-            .testTag("sleep-summary")) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically) {
+        // The day controls sit inside the panel's own corner, so the panel is padded on all four
+        // sides like every other one. Only this card was padded horizontally, which pushed two
+        // round controls into the top corner with nothing between them and the curve.
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).orbitPanel(22.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp).testTag("sleep-summary")) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(day.date.format(SleepDate), color = SleepWhite, fontSize = 13.sp, modifier = Modifier.weight(1f))
                 WorkoutArrow("Previous day", -1, day.date > day.firstDate) { moveDate(-1) }
                 WorkoutArrow("Next day", 1, day.date < LocalDate.now()) { moveDate(1) }
             }
+            Spacer(Modifier.height(10.dp))
             HorizontalDivider(color = Color.White.copy(alpha = .05f))
             FlowRow(Modifier.fillMaxWidth().padding(top = 15.dp, bottom = 20.dp), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.spacedBy(12.dp), itemVerticalAlignment = Alignment.CenterVertically) {
@@ -177,7 +183,7 @@ internal fun SleepScreen(day: SleepDay, loading: Boolean, error: String?, reduce
                 }
                 SleepChart(day, selection, inspect)
             }
-            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFF19191C)).padding(6.dp).testTag("sleep-breakdown")) {
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).orbitPanel(18.dp).padding(6.dp).testTag("sleep-breakdown")) {
                 day.lanes.forEach { stage ->
                     val interaction = remember { MutableInteractionSource() }
                     val pressed by interaction.collectIsPressedAsState()

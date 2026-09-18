@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,8 +76,11 @@ import java.util.Locale
     val scroll = rememberLazyListState()
     ObserveHeaderScroll(scroll)
     LazyColumn(state = scroll, contentPadding = PaddingValues(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 100.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { Text(error ?: status, color = HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp) }
-        if (sources.size > 1) item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+        // Every row is keyed. The poll below adds and removes items while the list is measuring,
+        // and an unkeyed item that shifts position under a measure in flight is asked for an index
+        // its interval list no longer has.
+        item("status") { Text(error ?: status, color = HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp) }
+        if (sources.size > 1) item("sources") { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
             .testTag("watch-sources"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val current = selected ?: sources.first()
             sources.forEachIndexed { index, source ->
@@ -85,7 +89,7 @@ import java.util.Locale
                 }
             }
         } }
-        if (sources.isEmpty()) item { Text("Open Orbit on your watch. Saved readings arrive when the devices reconnect.",
+        if (sources.isEmpty()) item("empty") { Text("Open Orbit on your watch. Saved readings arrive when the devices reconnect.",
             color = Color(0xFFE9E2F3), fontSize = 14.sp, lineHeight = 20.sp) }
         measurement?.let { page -> item("sensor-result") { WatchSensorResult(page) { measurementId = it } } }
         (selected?.takeIf { it in sources } ?: sources.firstOrNull())?.let { source ->
@@ -96,10 +100,7 @@ import java.util.Locale
         if (sources.isNotEmpty()) metrics.entries.chunked(2).forEach { pair -> item(pair.first().key) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { pair.forEach { (key, label) ->
             val row = rows[key]
-            val backdrop = LocalPageBackdrop.current
-            Column(Modifier.weight(1f).clip(RoundedCornerShape(24.dp))
-                .then(if (backdrop != null) Modifier.orbitFrost(backdrop, 24.dp, tint = Color(0xFF1B1920),
-                    shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(Color(0xFF1B1920)))
+            Column(Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).orbitPanel(24.dp)
                 .padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(label, fontSize = 14.sp, lineHeight = 19.sp, fontWeight = FontWeight.Medium, color = Color(0xFFE9E2F3))
                 val usable = row != null && !row.isNull("value") && row.optString("quality") == "valid"
@@ -124,10 +125,11 @@ import java.util.Locale
 
 /** A quiet Orbit pill per paired watch; the row scrolls rather than squeezing its labels. */
 @Composable private fun WatchSourcePill(label: String, current: Boolean, choose: () -> Unit) {
-    Box(Modifier.heightIn(min = 40.dp).clip(RoundedCornerShape(20.dp))
-        .background(if (current) Color(0x33BBA1ED) else Color.Transparent)
-        .border(1.dp, if (current) Color(0x55BBA1ED) else Color(0x22FFFFFF), RoundedCornerShape(20.dp))
-        .clickable(onClick = choose).semantics { role = Role.Tab; selected = current }
+    val interaction = remember { MutableInteractionSource() }
+    Box(Modifier.heightIn(min = 40.dp)
+        .orbitControl(20.dp, interaction, fill = if (current) ControlSelectedFill else ControlFill)
+        .clickable(interactionSource = interaction, indication = null, onClick = choose)
+        .semantics { role = Role.Tab; selected = current }
         .padding(horizontal = 16.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
         Text(label, color = if (current) Color(0xFFF7F2FC) else HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp,
             maxLines = 1)

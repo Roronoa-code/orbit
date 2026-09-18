@@ -1,7 +1,6 @@
 package com.mani.orbit
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -83,7 +82,7 @@ internal fun OrbitHeader(title: String, date: String?, showBack: Boolean, back: 
     val pressed by interaction.collectIsPressedAsState()
     val focused by interaction.collectIsFocusedAsState()
     val reduced = LocalOrbitReducedMotion.current
-    val contact = animateFloatAsState(if (pressed) 1f else 0f, tween(if (reduced) 0 else if (pressed) 70 else 160), label = "Header contact")
+    val contact = animateFloatAsState(if (pressed) 1f else 0f, orbitEngage(reduced), label = "Header contact")
     var light by remember { mutableStateOf(Offset(.5f, .5f)) }
     val haptic = LocalHapticFeedback.current
     Box(Modifier.size(48.dp).testTag("header-${label.lowercase()}").clip(CircleShape).orbitFrost(scene, 24.dp, { contact.value }, { light })

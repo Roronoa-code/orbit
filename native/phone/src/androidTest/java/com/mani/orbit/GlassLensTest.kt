@@ -47,6 +47,16 @@ class GlassLensTest {
         abs((a shr 8 and 255) - (b shr 8 and 255)), abs((a and 255) - (b and 255)))
     private fun luminance(pixel: Int): Int = (pixel shr 16 and 255) + (pixel shr 8 and 255) + (pixel and 255)
 
+    /**
+     * How far a drawn pixel sits from the material's flat tint.
+     *
+     * Thinning the tint lets more of the page through, and that is a move away from the tint
+     * whichever side of it the page happens to sit on. Reading it as "gets brighter" only holds
+     * while the page is brighter than the tint, which the backdrop dim no longer guarantees.
+     */
+    private fun fromTint(pixel: Int): Int = abs((pixel shr 16 and 255) - 0x15) +
+        abs((pixel shr 8 and 255) - 0x14) + abs((pixel and 255) - 0x1A)
+
     @Test fun realBackdropBendsOnlyAtTheEdgeAndForegroundRemainsSharp() {
         val pressure = mutableFloatStateOf(0f)
         val finger = mutableStateOf(Offset(.1f, .5f))
@@ -85,7 +95,9 @@ class GlassLensTest {
         rule.runOnIdle { pressure.floatValue = 1f }
         val held = root.captureToImage().asAndroidBitmap()
         val density = rule.activity.resources.displayMetrics.density
-        val inset = 26 * density
+        // The lifted lens refracts 40dp deep, so "interior" has to clear that on both captures;
+        // 26dp put the sample inside the lifted refraction, where the depth term does the talking.
+        val inset = 46 * density
         // A lifted surface casts a deeper shadow, so the band just outside it may darken. Beyond
         // the shadow's own reach nothing may move: there is still no page-wide warp.
         val shadow = bounds.inflate(40 * density)
@@ -99,14 +111,14 @@ class GlassLensTest {
             if (!shadow.contains(point)) assertTrue("No screen-wide warp at $x,$y", delta <= 1)
             else if (!bounds.contains(point)) continue
             else if (x > bounds.left + inset && x < bounds.right - inset && y > bounds.top + inset && y < bounds.bottom - inset) {
-                idleInterior += luminance(idle.getPixel(x, y)); heldInterior += luminance(held.getPixel(x, y))
+                idleInterior += fromTint(idle.getPixel(x, y)); heldInterior += fromTint(held.getPixel(x, y))
                 interiorPixels++
             } else if (delta > 2) changedEdges++
         }
         save("lens-idle.png", idle); save("lens-held.png", held)
         assertTrue("The actual source must refract rather than merely blur: $changedEdges", changedEdges > 24)
         // Lifting is a thicker piece of glass with a thinner tint, so more of the backdrop shows.
-        assertTrue("A lifted surface must thin its tint: $idleInterior vs $heldInterior",
+        assertTrue("A lifted surface must thin its tint: $idleInterior vs $heldInterior from the tint",
             interiorPixels > 0 && heldInterior > idleInterior)
         assertEquals(textBounds, rule.onNodeWithText("Keep sharp").fetchSemanticsNode().boundsInRoot)
         rule.runOnIdle { finger.value = Offset(.9f, .5f) }

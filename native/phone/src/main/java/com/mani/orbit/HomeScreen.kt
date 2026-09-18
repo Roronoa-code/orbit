@@ -18,11 +18,17 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -39,6 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.*
+
+/** The deck's own corner, shared by the material and by the fold that cuts it. */
+private val CardCorner = 20.dp
+
+/** How far a travelling cut fades its content, so no line of text is ever sliced in half. */
+private val CardFeather = 26.dp
 
 @Composable
 internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: Int, goal: Int?, reduced: Boolean,
@@ -117,6 +129,11 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                 } finally { if (claimed && !completed) motion.settle(wasOpen, 0f) }
             }
         }
+        // Lift is contact, not travel: a card carried by a finger is thicker glass, and a card that
+        // is merely unfolding is not. Driving it from the fold made every open and close pulse the
+        // material thicker and then thinner again.
+        val deckLift = androidx.compose.animation.core.animateFloatAsState(
+            if (motion.dragging) 1f else 0f, orbitEngage(reduced), label = "Deck lift")
         val scene = rememberGlassBackdrop()
         // The deck refracts the globe, so the globe is recorded on its own: a card cannot sample
         // the recording it is drawn into.
@@ -140,7 +157,9 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                         repeat(4) { index ->
                             // The fold clips the glass itself: the shell, its rim and its shadow are the
                             // material, so the card shows the orb through it as it opens.
-                            Box(Modifier.fillMaxWidth().testTag("home-card-$index").drawWithContent {
+                            Box(Modifier.fillMaxWidth().testTag("home-card-$index")
+                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                .drawWithContent {
                                 val progress = q(index)
                                 val visibleHeight = min(146.dp.toPx(), size.height) + (size.height - min(146.dp.toPx(), size.height)) * progress
                                 val covered = if (index == 0) 0f else {
@@ -148,9 +167,44 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                                     val shown = min(146.dp.toPx(), previousHeight) + (previousHeight - min(146.dp.toPx(), previousHeight)) * q(index - 1)
                                     max(0f, cardY(index - 1).dp.toPx() + shown - cardY(index).dp.toPx())
                                 }
-                                clipRect(top = min(covered, visibleHeight), bottom = visibleHeight) { this@drawWithContent.drawContent() }
-                            }.orbitFrost(hero, 20.dp, { q(index) }, tint = Color(0xFF15141A),
-                                shield = false, opacity = CARD_GLASS_OPACITY)) {
+                                val top = min(covered, visibleHeight)
+                                // The fold is a window onto the card, and a window has the card's own
+                                // corners: a straight cut leaves a folded card with square edges the
+                                // opened one never has.
+                                val radius = CornerRadius(CardCorner.toPx(), CardCorner.toPx())
+                                val window = Path().apply {
+                                    addRoundRect(RoundRect(Rect(0f, top, size.width, visibleHeight), radius, radius, radius, radius))
+                                }
+                                clipPath(window) { this@drawWithContent.drawContent() }
+                                // A cut that is standing still is an edge and carries the material's
+                                // hairline. A cut that is travelling is a reveal, and it feathers:
+                                // a hard edge sweeping through the card sliced every line of text it
+                                // passed, which is what read as the fold being broken.
+                                val settled = 1f - min(1f, progress / .1f)
+                                val feather = CardFeather.toPx() * (1f - settled)
+                                if (feather > .5f) {
+                                    if (visibleHeight < size.height - .5f) drawRect(
+                                        Brush.verticalGradient(listOf(Color.Black, Color.Transparent),
+                                            startY = visibleHeight - feather, endY = visibleHeight),
+                                        topLeft = Offset(0f, visibleHeight - feather),
+                                        size = Size(size.width, feather), blendMode = BlendMode.DstIn)
+                                    if (top > .5f) drawRect(
+                                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black),
+                                            startY = top, endY = top + feather),
+                                        topLeft = Offset(0f, top), size = Size(size.width, feather),
+                                        blendMode = BlendMode.DstIn)
+                                }
+                                val band = CardCorner.toPx()
+                                val rim = GlassEdgeColor.copy(alpha = GlassEdgeColor.alpha * settled)
+                                if (settled > .01f) {
+                                    if (visibleHeight < size.height - .5f) clipRect(top = visibleHeight - band, bottom = visibleHeight) {
+                                        drawPath(window, rim, style = Stroke(GlassEdgeWidth.toPx()))
+                                    }
+                                    if (top > .5f) clipRect(top = top, bottom = top + band) {
+                                        drawPath(window, rim, style = Stroke(GlassEdgeWidth.toPx()))
+                                    }
+                                }
+                            }.orbitFrost(hero, CardCorner, { deckLift.value })) {
                                 Box(Modifier.graphicsLayer()) {
                                     when (index) {
                                         0 -> HomeFacts(summary, { motion.value }, expanded) { if (metric == HomeMetric.Sleep) navigate("Sleep") }
@@ -166,12 +220,10 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                         cards.forEachIndexed { i, card -> heights[i] = card.height.toDp().value + 12f }
                         val contentHeight = cards.sumOf { it.height + 12.dp.roundToPx() } + 100.dp.roundToPx()
                         layout(constraints.maxWidth, contentHeight) {
-                            for (i in cards.indices.reversed()) cards[i].placeWithLayer(0,
-                                cardY(i).dp.toPx().roundToInt()) {
-                                transformOrigin = TransformOrigin(.5f, 0f)
-                                scaleX = 1f - i * .025f * (1f - q(i))
-                                alpha = if (i == 0) 1f else .3f + .7f * q(i)
-                            }
+                            // Cards emerge from behind the one above rather than fading up from a
+                            // ghost of themselves: they are solid objects the whole way, and the card
+                            // above already clips them until they are out.
+                            for (i in cards.indices.reversed()) cards[i].place(0, cardY(i).dp.toPx().roundToInt())
                         }
                     }
                 }

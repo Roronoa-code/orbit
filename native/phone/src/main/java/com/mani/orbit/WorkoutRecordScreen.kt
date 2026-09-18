@@ -1,6 +1,5 @@
 package com.mani.orbit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -101,7 +100,7 @@ internal fun WorkoutRecordScreen(record: WorkoutRecord, busy: Boolean, error: St
 
 @Composable
 private fun WorkoutSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth().background(WorkoutSurface, RoundedCornerShape(24.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(Modifier.fillMaxWidth().orbitPanel(24.dp).padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Text(title, color = WorkoutWhite, fontSize = 16.sp); content()
     }
 }

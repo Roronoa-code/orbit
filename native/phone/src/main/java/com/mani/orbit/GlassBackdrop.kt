@@ -10,8 +10,11 @@ import com.mani.orbit.backdrop.backdrops.LayerBackdrop
 import com.mani.orbit.backdrop.backdrops.layerBackdrop
 import com.mani.orbit.backdrop.backdrops.rememberLayerBackdrop
 
-/** The page colour the recording is laid on, so no glass surface ever samples transparency. */
-private val PageFloor = Color(0xFF0A0A0C)
+/**
+ * The one page colour: what the app paints, what a recording is laid on so no glass surface ever
+ * samples transparency, and what every scrim fades to. Three near-identical blacks read as three.
+ */
+internal val PageInk = Color(0xFF0A0A0C)
 
 /**
  * The page surface every in-page glass panel samples: the app background and, on Workouts, the
@@ -31,7 +34,7 @@ internal class GlassBackdrop(internal val layer: LayerBackdrop)
  * nothing to bend and the sharp screen behind it would read straight through the material.
  */
 @Composable internal fun rememberGlassBackdrop(): GlassBackdrop {
-    val paint: ContentDrawScope.() -> Unit = remember { { drawRect(PageFloor); drawContent() } }
+    val paint: ContentDrawScope.() -> Unit = remember { { drawRect(PageInk); drawContent() } }
     val layer = rememberLayerBackdrop(onDraw = paint)
     return remember(layer) { GlassBackdrop(layer) }
 }

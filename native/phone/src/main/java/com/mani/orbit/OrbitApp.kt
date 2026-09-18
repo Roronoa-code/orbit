@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -57,8 +58,8 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.*
 
-private val Ink = Color(0xFF0A0A0C)
-private val Surface = Color(0xFF201D27)
+private val Ink = PageInk
+private val Surface = GlassOpaqueFill
 private val Lavender = Color(0xFFBBA1ED)
 private val Muted = Color(0xFFB3AEBE)
 private val White = Color(0xFFF4F4F6)
@@ -131,8 +132,8 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     CompositionLocalProvider(LocalPageBackdrop provides surfaceLayer) {
     MaterialTheme(colorScheme = darkColorScheme(primary = Lavender, background = Ink, surface = Surface,
         onSurface = White, onBackground = White, onPrimary = Ink,
-        surfaceVariant = Color(0xFF1B1920), onSurfaceVariant = HealthSecondary,
-        surfaceContainer = Color(0xFF1B1920), surfaceContainerHigh = Color(0xFF242031)),
+        surfaceVariant = GlassOpaqueFill, onSurfaceVariant = HealthSecondary,
+        surfaceContainer = GlassOpaqueFill, surfaceContainerHigh = GlassOpaqueFill),
         typography = OrbitTypography) {
       Box(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().recordBackdrop(pageLayer)) {
@@ -240,7 +241,6 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
         }
         .clip(RoundedCornerShape(22.dp))
         .orbitFrost(page, 22.dp, { panelLift }, { Offset(trackFocus, .5f) })
-        .border(1.dp, Color.White.copy(alpha = .16f), RoundedCornerShape(22.dp))
         .pointerInput(Unit) { detectTapGestures { } }
         .padding(start = 17.dp, top = 13.dp, end = 17.dp, bottom = 17.dp).testTag("date-chooser")) {
         Text("Choose a day", color = White, fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight(500),
@@ -309,9 +309,10 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
 
 @Composable private fun DateStep(glyph: String, label: String, enabled: Boolean, action: () -> Unit) {
     val haptic = LocalHapticFeedback.current
-    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Color(0x6629292F))
-        .border(1.dp, Color(0x30A8A8B0), RoundedCornerShape(14.dp))
-        .clickable(enabled = enabled) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
+    val interaction = remember { MutableInteractionSource() }
+    Box(Modifier.size(44.dp).orbitControl(14.dp, interaction, enabled)
+        .clickable(enabled = enabled, interactionSource = interaction, indication = null) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
         .semantics { contentDescription = label; role = Role.Button }, contentAlignment = Alignment.Center) {
         Text(glyph, color = if (enabled) White else Muted.copy(alpha = .38f), fontSize = 20.sp, lineHeight = 24.sp)
     }
@@ -319,10 +320,11 @@ internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBac
 
 @Composable private fun DateAction(label: String, primary: Boolean, action: () -> Unit) {
     val haptic = LocalHapticFeedback.current
-    Box(Modifier.heightIn(min = 44.dp).clip(RoundedCornerShape(14.dp))
-        .background(if (primary) Lavender else Color(0x6629292F))
-        .border(1.dp, if (primary) Lavender else Color(0x30A8A8B0), RoundedCornerShape(14.dp))
-        .clickable { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
+    val interaction = remember { MutableInteractionSource() }
+    Box(Modifier.heightIn(min = 44.dp)
+        .orbitControl(14.dp, interaction, fill = if (primary) Lavender else ControlFill)
+        .clickable(interactionSource = interaction, indication = null) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
         .semantics { role = Role.Button }.padding(horizontal = 16.dp, vertical = 9.dp),
         contentAlignment = Alignment.Center) {
         Text(label, color = if (primary) Ink else White, fontSize = 13.sp, lineHeight = 18.sp)

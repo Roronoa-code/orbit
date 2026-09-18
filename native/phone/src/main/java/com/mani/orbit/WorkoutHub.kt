@@ -94,7 +94,7 @@ internal fun WorkoutHub(records: List<WorkoutRecord>, ready: Boolean, error: Str
             }
         } else {
             item {
-                Column(Modifier.background(WorkoutSurface, RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
+                Column(Modifier.orbitPanel(24.dp).padding(16.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             Text(if (start == workoutWeek(today)) "This week" else "Training week", color = WorkoutWhite, fontSize = 16.sp)
@@ -111,7 +111,7 @@ internal fun WorkoutHub(records: List<WorkoutRecord>, ready: Boolean, error: Str
                 Text(date.format(DateTimeFormatter.ofPattern("EEEE d MMM", Locale.UK)), color = WorkoutWhite, fontSize = 13.sp, modifier = Modifier.weight(1f))
                 Text("${selectedRecords.size} ${if (selectedRecords.size == 1) "workout" else "workouts"}", fontSize = 12.sp, color = WorkoutMuted)
             } }
-            if (selectedRecords.isEmpty()) item { Column(Modifier.fillMaxWidth().background(WorkoutSurface, RoundedCornerShape(20.dp)).padding(28.dp),
+            if (selectedRecords.isEmpty()) item { Column(Modifier.fillMaxWidth().orbitPanel(20.dp).padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(if (ready) "No workouts this day" else "Loading saved workouts…", color = WorkoutWhite, fontSize = 14.sp)
                 Text("Choose a marked date to see a session.", color = WorkoutMuted, fontSize = 12.sp)
@@ -127,7 +127,7 @@ internal fun WorkoutHub(records: List<WorkoutRecord>, ready: Boolean, error: Str
 
 @Composable
 internal fun WorkoutArrow(label: String, direction: Int, enabled: Boolean, action: () -> Unit) {
-    WorkoutButton(action, Modifier.size(44.dp).semantics { contentDescription = label }, enabled, Color.White.copy(alpha = .024f)) {
+    WorkoutButton(action, Modifier.size(44.dp).semantics { contentDescription = label }, enabled) {
         Canvas(Modifier.size(18.dp)) {
             val path = Path().apply { moveTo(size.width * (.5f - direction * .16f), size.height * .2f)
                 lineTo(size.width * (.5f + direction * .16f), size.height * .5f); lineTo(size.width * (.5f - direction * .16f), size.height * .8f) }

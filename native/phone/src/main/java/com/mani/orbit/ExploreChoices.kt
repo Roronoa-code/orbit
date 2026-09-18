@@ -37,7 +37,7 @@ import kotlin.math.roundToInt
 
 /** The approved transient track has no permanent second selection surface underneath it. */
 @Composable
-internal fun ExploreChoices(route: String, enabled: Boolean, backdrop: GlassBackdrop, select: (String) -> Unit) {
+internal fun ExploreChoices(route: String, enabled: Boolean, select: (String) -> Unit) {
     val readability = LocalGlassReadability.current
     val reduced by rememberUpdatedState(LocalOrbitReducedMotion.current)
     val labels = listOf("Body", "Workouts", "Health")
@@ -52,7 +52,7 @@ internal fun ExploreChoices(route: String, enabled: Boolean, backdrop: GlassBack
     var finger by remember { mutableFloatStateOf(0f) }
     var speed by remember { mutableFloatStateOf(0f) }
     var light by remember { mutableFloatStateOf(.5f) }
-    val engagement = animateFloatAsState(if (held) 1f else 0f, if (reduced) androidx.compose.animation.core.tween(0) else spring(.86f, 650f), label = "Explore contact")
+    val engagement = animateFloatAsState(if (held) 1f else 0f, orbitEngage(reduced), label = "Explore contact")
     val stretch = animateFloatAsState(if (held && dragging && !reduced) speed.coerceIn(0f, 1f) * .16f else 0f,
         if (reduced) androidx.compose.animation.core.tween(0) else spring(1f, 500f), label = "Explore flex")
     val flexing by remember { derivedStateOf { held && dragging && !reduced && speed > .001f } }
@@ -130,9 +130,11 @@ internal fun ExploreChoices(route: String, enabled: Boolean, backdrop: GlassBack
             scaleY = if (reduced) 1f else 1f + lift * .20f - stretch.value * .5f
             val extra = slot.toPx() * (scaleX - 1f) / 2f
             translationX = (contact.position * slot.toPx()).coerceIn(extra, slot.toPx() * 2 - extra)
-        }.clip(shape).orbitFrost(backdrop, 18.dp, { engagement.value }, { Offset(light, .5f) })
-            .background(Brush.linearGradient(listOf(Color(0x805C5866), Color(0x4D302D39))), shape)
-            .border(.7.dp, Color(0x558F899C), shape)) {
+        // The pill rides on the island, and the island is the glass. A second material here would
+        // sample the page the island already hides, so the pill wears the shared control surface
+        // and carries the light instead.
+        }.clip(shape).background(ControlSelectedFill, shape)
+            .border(GlassEdgeWidth, ControlEdge, shape)) {
             Box(Modifier.matchParentSize().graphicsLayer { translationX = (light - .5f) * size.width * .5f }
                 .background(Brush.radialGradient(listOf(Color.White.copy(alpha = .07f), Color.Transparent)), shape))
         }

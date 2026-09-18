@@ -1,8 +1,6 @@
 package com.mani.orbit
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -30,28 +27,18 @@ internal val WorkoutMuted = Color(0xFFB9B2C5)
 internal val WorkoutPurple = Color(0xFFCBB3F3)
 internal val WorkoutSurface = Color(0xFF19181E)
 
-/** Content presses stay within the same quiet surface; navigation glass is a separate retained plane. */
+/** A workout control is a control: it wears the shared surface and the shared press, like every other. */
 @Composable
 internal fun WorkoutButton(onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
     background: Color = WorkoutSurface, content: @Composable () -> Unit) {
     val interactions = remember { MutableInteractionSource() }
-    val pressed by interactions.collectIsPressedAsState()
     val focused by interactions.collectIsFocusedAsState()
-    val reduced = LocalOrbitReducedMotion.current
-    val backdrop = LocalPageBackdrop.current
-    // The plain workout surface is glass over whatever the route is showing, artwork included, and a
-    // press lifts it into thicker glass. A filled control keeps its solid fill and its press.
-    val glass = backdrop != null && background == WorkoutSurface
-    val scale = animateFloatAsState(if (!pressed || reduced) 1f else if (glass) 1.012f else .975f,
-        if (reduced) tween(0) else spring(stiffness = 700f, dampingRatio = .85f), label = "workout press")
-    val lift = animateFloatAsState(if (pressed && !reduced) 1f else 0f,
-        if (reduced) tween(0) else spring(stiffness = 700f, dampingRatio = .85f), label = "workout lift")
     val haptic = LocalHapticFeedback.current
     val shape = RoundedCornerShape(20.dp)
-    Box(modifier.heightIn(min = 48.dp).graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = if (enabled) 1f else .4f }
-        .clip(shape)
-        .then(if (glass) Modifier.orbitFrost(backdrop!!, 20.dp, { lift.value }, tint = background,
-            shield = false, opacity = CARD_GLASS_OPACITY) else Modifier.background(background))
+    // WorkoutSurface is this route's name for "a resting control"; anything else is a chosen accent.
+    val fill = if (background == WorkoutSurface) ControlFill else background
+    Box(modifier.heightIn(min = 48.dp).graphicsLayer { alpha = if (enabled) 1f else .4f }
+        .orbitControl(20.dp, interactions, enabled, fill)
         .then(if (focused) Modifier.border(1.dp, WorkoutPurple, shape) else Modifier)
         .clickable(enabled = enabled, role = Role.Button, interactionSource = interactions, indication = null) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); onClick()

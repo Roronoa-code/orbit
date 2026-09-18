@@ -38,14 +38,14 @@ class GlassQualityPolicyTest {
                 Thread.sleep(250)
                 assertEquals("Background windows must not keep their thermal observer active", paused, monitor.state.value)
                 scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED)
-                fun severe() = monitor.state.value == GlassQualityState(GlassQuality.READABILITY, TraceQualityReason.THERMAL)
+                fun severe() = monitor.state.value == GlassQualityState(GlassQuality.FROST, TraceQualityReason.THERMAL)
                 await("Resume must apply the actual public thermal signal", ::severe)
                 val trace = java.io.File(instrumentation.targetContext.cacheDir, "diagnostics/trace.json")
                 val run = com.mani.orbit.sync.NativeDiagnostics.trace.snapshot().getString("run")
                 await("The chosen rendering tier/reason must persist without another navigation action") {
                     if (!trace.isFile) false else org.json.JSONObject(trace.readText()).let {
                         val rendering = it.optJSONObject("rendering")
-                        it.optString("run") == run && rendering?.optString("tier") == TraceTier.PHONE_READABILITY.name &&
+                        it.optString("run") == run && rendering?.optString("tier") == TraceTier.PHONE_RETAINED_FROST.name &&
                             rendering.optString("reason") == TraceQualityReason.THERMAL.name
                     }
                 }
@@ -78,29 +78,34 @@ class GlassQualityPolicyTest {
         assertEquals("Alternating deadline pressure must not oscillate", GlassQuality.FROST, policy.state.value.quality)
         frames(60, interval = 100_000_000L)
         assertEquals("Recovery follows elapsed successful rendering, not a presumed 60Hz count", GlassQuality.OPTICAL, policy.state.value.quality)
-        frames(3, late = true); frames(3, late = true)
-        assertEquals(GlassQuality.READABILITY, policy.state.value.quality)
+        // Sustained pressure costs the refraction once and stops there. Measured rendering may never
+        // replace the material with a flat fill: that tier belongs to the owner's own preference,
+        // to a platform without blur and to their battery saver.
+        repeat(8) { frames(3, late = true) }
+        assertEquals(GlassQualityState(GlassQuality.FROST, TraceQualityReason.FRAME_PRESSURE), policy.state.value)
         policy.pause(); time += 20_000_000_000L; frames(1)
-        assertEquals("Idle/background time is not healthy rendering evidence", GlassQuality.READABILITY, policy.state.value.quality)
-        frames(330)
-        assertEquals("Recover one tier at a time", GlassQuality.FROST, policy.state.value.quality)
+        assertEquals("Idle/background time is not healthy rendering evidence", GlassQuality.FROST, policy.state.value.quality)
         frames(330)
         assertEquals(GlassQuality.OPTICAL, policy.state.value.quality)
     }
 
     @Test fun missingSignalsPreferencesCorruptFramesAndUrgentPressureRemainConservative() {
         val policy = GlassQualityPolicy(true)
+        // A device that reports its thermal status but no headroom forecast still earns full optics.
+        // Withholding the material for a missing forecast is how this app shipped without its glass.
         policy.conditions(0, false, false)
         var time = 1_000_000_000L
         repeat(600) { time += 16_666_667; policy.frame(time, 1_000_000, 16_666_667, TraceTier.PHONE_RETAINED_FROST) }
-        assertEquals(GlassQualityState(GlassQuality.FROST, TraceQualityReason.THERMAL_UNKNOWN), policy.state.value)
+        assertEquals(GlassQualityState(GlassQuality.OPTICAL, TraceQualityReason.THERMAL_UNKNOWN), policy.state.value)
+        policy.conditions(null, false, false)
+        assertEquals("No thermal signal at all still holds back the refraction", GlassQuality.FROST, policy.state.value.quality)
         policy.conditions(0, true, false)
         repeat(600) { time += 16_666_667; policy.frame(time, 1_000_000, 16_666_667, TraceTier.PHONE_READABILITY) }
         assertEquals("Cheap opaque override frames cannot qualify full optics", GlassQuality.FROST, policy.state.value.quality)
         repeat(600) { time += 16_666_667; policy.frame(time, -1, 0, TraceTier.PHONE_RETAINED_FROST) }
         assertEquals(GlassQuality.FROST, policy.state.value.quality)
         policy.touch(true); policy.conditions(3, true, false)
-        assertEquals("Urgent heat can remove optics without waiting for release", GlassQuality.READABILITY, policy.state.value.quality)
+        assertEquals("Heat costs the refraction, and not under an owned finger", GlassQuality.FROST, policy.state.value.quality)
         policy.touch(false); policy.conditions(0, true, true)
         assertEquals(TraceQualityReason.POWER_SAVER, policy.state.value.reason)
         policy.conditions(1, true, false)

@@ -24,7 +24,7 @@ internal fun HomeScrollFrost(scene: GlassBackdrop, opacity: () -> Float, modifie
     val sampleBackdrop = LocalGlassQuality.current.quality != GlassQuality.READABILITY &&
         !LocalGlassReadability.current.opaque && BlurSupported
     val blurPx = with(density) { 16.dp.toPx() } * GlassResolution
-    val ink = Color(0xFF0B0A0F)
+    val ink = PageInk
     val tint = if (pinnedEdge) Brush.verticalGradient(0f to ink, .15f to ink.copy(alpha = .96f), .6f to ink.copy(alpha = .3f), 1f to Color.Transparent)
         else Brush.verticalGradient(0f to Color.Transparent, .286f to ink, .52f to ink.copy(alpha = .55f), 1f to Color.Transparent)
     val mask = if (pinnedEdge) Brush.verticalGradient(0f to Color.Black, .2f to Color.Black, .65f to Color.Black.copy(alpha = .35f), 1f to Color.Transparent)

@@ -32,9 +32,10 @@ G3 now uses the runtime policy below. Local software-emulator timings do not qua
 
 `GlassQualityMonitor.kt` observes the visible phone window. `GlassQualityPolicy.kt` owns three appearances of the same material: optical, approved frost, and readability. No new gesture owner or page tree is introduced. `MainActivity` provides the chosen quality; the Watch retains its native renderer.
 
-- Start with frost. Full optics require platform support, known thermal headroom and sustained timely rendering. API 31–32 retain frost; unavailable headroom caps quality at frost. Missing data is never treated as unlimited capacity.
-- Android's actual total frame duration and deadline decide whether a frame was late, independently of refresh rate. Three consecutive misses request one lower tier. A normal change waits for release if a finger owns the window. Recovery requires five seconds of timely rendered frames and at least 30 samples; any miss, pause, or gap over half a second resets that evidence. Restore only one tier at a time.
-- Supported thermal status/headroom and power saver impose ceilings. Light or moderate thermal pressure caps at frost. Severe pressure and power saver remove expensive optics immediately while preserving the held gesture and target geometry. Cooling does not instantly restore optics.
+- Start at the best tier the platform supports. Opening cheap and climbing after five seconds of evidence meant the owner watched the material change under their hands, which is the opposite of the point.
+- Android's actual total frame duration and deadline decide whether a frame was late, independently of refresh rate. Three consecutive misses cost the refraction. A normal change waits for release if a finger owns the window. Recovery requires five seconds of timely rendered frames and at least 30 samples; any miss, pause, or gap over half a second resets that evidence.
+- **Measured conditions never reach readability.** That tier belongs to the owner's own Reduce transparency preference, to a platform with no blur, and to their own battery saver. Heat and frame pressure remove the lens and leave the glass. This is not a preference about performance: a surface that silently becomes a painted rectangle is a different app, and until 18 September 2026 that is what shipped — three late frames dropped a signed build on an S25 Ultra to flat `#28262E` and `#15141A` fills, which is what the owner photographed and called two different shades.
+- Thermal headroom is a forecast, not the signal. A device that reports its thermal status but no headroom — Samsung among them — still earns full optics; without any thermal signal at all the refraction is held back. Requiring the forecast is why the lens never once ran on the owner's own phone.
 - Query public headroom no more than once per ten seconds, preserving that rate limit across recreation. Use vendor-provided headroom thresholds where available and Android's documented severe normalization. Unsupported, stale or invalid readings remain unknown. Listeners and polling stop on pause and reattach on resume.
 - Optical strength settles over 180ms without replacing the surface; Reduce motion makes that change immediate. Readability skips the source sampler and decorative scroll blur and suspends optional globe rotation. Labels, values, navigation, selection, recording controls and the saved rotation preference survive.
 - Each drawn surface reports its actual tier and a closed reason enum through the existing private diagnostics. A transparency preference can therefore report readability even when the quality policy permits optics. Frames drawn under that cheaper override cannot qualify full optical recovery.
@@ -103,12 +104,17 @@ lifted surface is a thicker piece of glass:
 
 | At rest | Fully lifted |
 |---|---|
-| 10dp blur | 15dp |
 | 12.6dp refraction height, 10.1dp amount | 40.3dp, 36.4dp |
 | no dispersion | the rim splits the light into colour past a third of the way up |
 | 0.5dp rim | 1.5dp |
 | 24dp shadow at 10% | 38dp at 30% |
 | tint at its full opacity | 60% of it, so more of the page shows through |
+
+The blur is deliberately not on that list. Blur models frosting rather than thickness, and growing
+it while the tint thins washed the page out faster than the thinner tint let it through — measurably,
+in `GlassLensTest`: picking a surface up showed *less* of what was behind it than leaving it at rest,
+which is backwards. Lift says "thicker" through the refraction, the rim, the dispersion, the shadow
+and the tint.
 
 `focus` turns the rim's light: the deflection is ±30° across the surface and scales with the lift, so
 a released material returns to exactly the rim it had before the contact, wherever the finger left it.
@@ -117,14 +123,58 @@ Every effect runs at a third of the surface resolution, which is nine times fewe
 colour matrix, the blur and the refraction. The blur hides the upscale; all pixel-sized parameters are
 pre-multiplied by the same factor.
 
-Surfaces on it: the Explore bar and its travelling destination lens, the header buttons, the date
-panel, the Health cards, the Home deck, the Watch-reading cards and the shared workout surface —
-the Train/History selector, the week card, saved session cards and the activity tiles. A filled
-control such as the Pause pill keeps its solid fill and its existing press. Cards and the deck carry their
-own tint and lift when held, dragged, resized or folded; they do not draw the legibility shield,
-which belongs to the floating bar over arbitrary content. A card cannot sample the recording it is
+### One material, one control, one motion
+
+The pass on 18 September 2026 removed every local decision about the material, because the owner's
+verdict on the previous state was that the app looked like two apps. `orbitFrost` no longer takes a
+tint, an opacity or a legibility shield: there is one shade (`GlassTint` at 42%), one hairline, one
+fallback fill, and a route that wants a panel calls `Modifier.orbitPanel`, which finds the page
+recording itself. The permanent opaque backing the floating bar used to paint under its labels is
+gone; a backing appears only under an explicit Increase contrast preference, because a plate that
+hides the backdrop is not glass.
+
+Legibility is a **multiplicative dim of the sampled backdrop**, not a plate over it. The material
+keeps 30% of the backdrop's own brightness, so a bright page is tamed while a dark one is untouched
+and the structure the refraction bends survives either way. Measured against the muted caption ink,
+that holds at least 5:1 over anything a surface can be over, including pure white, while a chart
+passing under the Explore bar still reads through it — the opaque backing it used to paint under its
+labels bought the same number by hiding the backdrop, and only on that one surface. An explicit
+Increase contrast preference adds a backing on top of the dim and reaches 7:1.
+
+Panels are glass and controls are not, and that is a rule rather than an omission. A button sits on a
+panel; glass samples the page *behind* the panel, so a glass button would show what the panel is
+hiding and read as a hole punched through it. Every control — the Explore rows, the date stepper and
+its actions, the workout buttons, the settings actions, the segmented selectors and the Explore
+selection pill — wears `Modifier.orbitControl`: one fill, one rim, and one press.
+
+**Lift is contact.** A surface is thicker glass while a finger is pressing or carrying it, and at
+no other time. Reading it from travel instead — the island from its own velocity, the deck cards
+from the fold's progress — made every open and close pump the material thicker and then thinner
+again with no finger involved, which is what the owner saw as the effect breaking.
+
+**A press loads the spring.** The Explore shell gathers under the press and waits there for as long
+as the contact lasts; the release lets it travel from that loaded pose. One contact is one movement.
+
+**A travelling cut feathers.** The Home deck's fold is a window, and while that window is moving it
+fades its content over 26dp rather than ending in a hard edge — a sweeping hard edge sliced every
+line of text it passed through the middle. Only a cut that is standing still carries the material's
+hairline.
+
+Motion is three named timings in `OrbitMotion.kt` and nothing else: `orbitSettle` for a surface
+returning to rest, `orbitEngage` for a surface answering contact, and the reference's own 100ms press
+to .96. Compose springs are normalised, so the same stiffness takes the same time whether a surface
+travels the width of the screen or four dp — a small pill and a whole panel arrive together.
+
+Panels lift and controls press. Surfaces on the material: the Explore island, the header buttons, the
+date panel, the Health cards, the Home deck, the Watch-reading cards, the sleep summary and stage
+breakdown, and the workout week, session and section panels. A card cannot sample the recording it is
 drawn into, so the page records a separate surface layer beneath the route content, and Home records
-the globe on its own layer for the deck to refract.
+the globe on its own layer for the deck to refract. The island samples the whole page, so the deck's
+cards and charts genuinely bend as they pass under it.
+
+The Home deck's fold is a window onto a card rather than a straight cut: it carries the card's own
+corners and the same hairline on both cut edges. A rectangular clip left a folded card with square
+corners the opened one never has, which is the clipping the owner reported.
 
 Tiers are unchanged. Refraction needs a runtime shader (API 33), the blur needs a render effect
 (API 31), and below that — or under the reduced-transparency preference — the surface is a solid fill

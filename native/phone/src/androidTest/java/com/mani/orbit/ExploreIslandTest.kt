@@ -92,7 +92,7 @@ class ExploreIslandTest {
         .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, value))
 
     /** The morph is two phases, and an interrupted first phase must never reach its spring. */
-    @Test fun theShellCompressesBeforeItTravelsAndAReversalDropsThePendingSpring() {
+    @Test fun theShellGathersWhileItTravelsAndAReversalDropsThePendingSpring() {
         lateinit var motion: ExploreMotion
         rule.setContent {
             val scope = rememberCoroutineScope()
@@ -102,8 +102,9 @@ class ExploreIslandTest {
         rule.runOnIdle { motion.settle(true, 0f, false, morph = true) }
         rule.mainClock.advanceTimeBy(50)
         rule.runOnIdle {
-            assertTrue("The shell compresses first: ${motion.squeeze}", motion.squeeze > .2f)
-            assertTrue("It has not travelled yet: ${motion.value}", motion.value < .2f)
+            // One gesture, not two states: the gather and the journey are under way together.
+            assertTrue("The shell gathers: ${motion.squeeze}", motion.squeeze > .2f)
+            assertTrue("and is already travelling: ${motion.value}", motion.value > .02f)
         }
         rule.mainClock.advanceTimeBy(1200)
         rule.runOnIdle {
@@ -123,6 +124,42 @@ class ExploreIslandTest {
         rule.runOnIdle { motion.settle(false, 0f, false, morph = true) }
         rule.mainClock.advanceTimeBy(40)
         rule.runOnIdle { motion.grab(); assertEquals(0f, motion.squeeze, 0f) }
+        rule.mainClock.autoAdvance = true
+    }
+
+    /** A press loads the spring and holds it; the release is what lets the shell go. */
+    @Test fun aPressLoadsTheShellAndHoldsItUntilTheContactEnds() {
+        lateinit var motion: ExploreMotion
+        rule.setContent {
+            val scope = rememberCoroutineScope()
+            motion = remember { ExploreMotion(scope, false) }
+        }
+        rule.mainClock.autoAdvance = false
+        rule.runOnIdle { motion.press() }
+        rule.mainClock.advanceTimeBy(160)
+        rule.runOnIdle {
+            assertEquals("The press gathers the shell", 1f, motion.squeeze, .05f)
+            assertEquals("and it waits there rather than travelling", 0f, motion.value, .001f)
+        }
+        rule.mainClock.advanceTimeBy(1200)
+        rule.runOnIdle { assertEquals("A held shell stays loaded", 1f, motion.squeeze, .05f) }
+        rule.runOnIdle { motion.settle(true, 0f, false, morph = true) }
+        rule.mainClock.advanceTimeBy(60)
+        rule.runOnIdle { assertTrue("The release travels from the loaded pose: ${motion.value}", motion.value > .02f) }
+        rule.mainClock.advanceTimeBy(1500)
+        rule.runOnIdle {
+            assertEquals("It arrives open", 1f, motion.value, .02f)
+            assertEquals("and fills out again", 0f, motion.squeeze, .02f)
+        }
+        // A contact that ends without asking for anything fills back out instead of staying gathered.
+        rule.runOnIdle { motion.press() }
+        rule.mainClock.advanceTimeBy(160)
+        rule.runOnIdle { assertEquals(1f, motion.squeeze, .05f); motion.relax() }
+        rule.mainClock.advanceTimeBy(1500)
+        rule.runOnIdle {
+            assertEquals("A released press fills back out", 0f, motion.squeeze, .02f)
+            assertEquals("without moving the shell", 1f, motion.value, .001f)
+        }
         rule.mainClock.autoAdvance = true
     }
 

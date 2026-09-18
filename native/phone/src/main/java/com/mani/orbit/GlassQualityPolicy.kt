@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /** UI-only policy. Frame deadlines come from Android, never a presumed display refresh rate. */
 internal class GlassQualityPolicy(private val opticalSupported: Boolean, private val frostSupported: Boolean = true) {
-    private val initial = if (frostSupported) GlassQuality.FROST else GlassQuality.READABILITY
+    // Open at the best tier the platform supports and let evidence lower it. Starting cheap and
+    // climbing after five seconds means the owner watches the material change under their hands.
+    private val initial = if (!frostSupported) GlassQuality.READABILITY
+        else if (opticalSupported) GlassQuality.OPTICAL else GlassQuality.FROST
     private val value = MutableStateFlow(GlassQualityState(initial, TraceQualityReason.OBSERVING))
     val state = value.asStateFlow()
     private var maximum = initial
@@ -19,17 +22,28 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
     private var goodFrames = 0
     private var missedRun = 0
 
+    /**
+     * The material is the app. Nothing measured here may replace it with a flat fill.
+     *
+     * READABILITY is the accessibility and unsupported-platform tier: the owner's own reduce
+     * transparency preference, a platform with no blur, or their own battery saver. Heat and frame
+     * pressure cost the refraction and leave the glass, because a surface that silently turns into
+     * a painted rectangle is the inconsistency, not a saving.
+     *
+     * Thermal headroom is a forecast, not the signal. A device that reports its thermal status but
+     * no headroom (Samsung among them) still carries enough evidence for full optics; without the
+     * forecast the policy simply relies on the status and on the frame evidence below.
+     */
     @Synchronized fun conditions(thermalStatus: Int?, headroomKnown: Boolean, powerSaver: Boolean) {
         val cap: GlassQuality
         val reason: TraceQualityReason
         when {
             !frostSupported -> { cap = GlassQuality.READABILITY; reason = TraceQualityReason.UNSUPPORTED }
             powerSaver -> { cap = GlassQuality.READABILITY; reason = TraceQualityReason.POWER_SAVER }
-            thermalStatus != null && thermalStatus >= 3 -> { cap = GlassQuality.READABILITY; reason = TraceQualityReason.THERMAL }
-            thermalStatus != null && thermalStatus >= 1 -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL }
-            !headroomKnown || thermalStatus == null -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL_UNKNOWN }
             !opticalSupported -> { cap = GlassQuality.FROST; reason = TraceQualityReason.UNSUPPORTED }
-            else -> { cap = GlassQuality.OPTICAL; reason = TraceQualityReason.MEASURED }
+            thermalStatus != null && thermalStatus >= 1 -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL }
+            thermalStatus == null -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL_UNKNOWN }
+            else -> { cap = GlassQuality.OPTICAL; reason = if (headroomKnown) TraceQualityReason.MEASURED else TraceQualityReason.THERMAL_UNKNOWN }
         }
         if (cap != maximum || reason != boundaryReason) { maximum = cap; boundaryReason = reason; clearEvidence(); pending = null }
         if (value.value.quality.ordinal < cap.ordinal) request(cap, reason, urgent = cap == GlassQuality.READABILITY)
@@ -51,12 +65,10 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
         lastFrame = start
         if (total >= deadline) {
             goodSince = 0; goodFrames = 0; missedRun++
+            // Frame pressure costs the refraction and stops there. Dropping the blur as well would
+            // swap the material for a painted rectangle mid-gesture, which is worse than a late frame.
             if (missedRun >= 3) {
-                val lower = when (value.value.quality) {
-                    GlassQuality.OPTICAL -> GlassQuality.FROST
-                    else -> GlassQuality.READABILITY
-                }
-                request(lower, TraceQualityReason.FRAME_PRESSURE)
+                if (value.value.quality == GlassQuality.OPTICAL) request(GlassQuality.FROST, TraceQualityReason.FRAME_PRESSURE)
                 missedRun = 0
             }
         } else {

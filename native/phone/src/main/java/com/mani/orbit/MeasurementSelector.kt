@@ -42,13 +42,13 @@ internal fun MeasurementSelector(labels: List<String>, selected: Int, name: Stri
     var dragging by remember { mutableStateOf(false) }
     var finger by remember { mutableFloatStateOf(selected.toFloat()) }
     val position = animateFloatAsState(if (dragging) finger else selected.toFloat(),
-        if (reduced) androidx.compose.animation.core.tween(0) else spring(dampingRatio = .88f, stiffness = if (dragging) 1400f else 480f), label = "selection position")
-    val lift = animateFloatAsState(if (engaged && !reduced) 1f else 0f, if (reduced) androidx.compose.animation.core.tween(0) else spring(stiffness = 600f), label = "selection engagement")
+        if (reduced) androidx.compose.animation.core.tween(0) else if (dragging) spring(.88f, 1400f) else orbitSettle(),
+        label = "selection position")
+    val lift = animateFloatAsState(if (engaged && !reduced) 1f else 0f, orbitEngage(reduced), label = "selection engagement")
     val quiet = name == "measurement-period"
     val shape = RoundedCornerShape(if (quiet) 16.dp else 28.dp)
     BoxWithConstraints(Modifier.fillMaxWidth().testTag(name).selectableGroup()
-        .background(if (quiet) Color(0x06FFFFFF) else Color(0xFF0D0D10), shape)
-        .then(if (quiet) Modifier else Modifier.border(.7.dp, Color(0xFF29262F), shape))
+        .background(ControlFill, shape).border(GlassEdgeWidth, ControlEdge, shape)
         .pointerInput(labels) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
@@ -84,9 +84,9 @@ internal fun MeasurementSelector(labels: List<String>, selected: Int, name: Stri
             translationX = (if (dragging) finger else position.value) * slot.toPx()
             scaleX = 1f + lift.value * .018f
             scaleY = 1f + lift.value * .025f
-        }.background(if (quiet) Color(0x20C1A8ED) else Color(0xFF08080A), RoundedCornerShape(if (quiet) 13.dp else 24.dp))
-            .then(if (quiet) Modifier else Modifier.background(Brush.verticalGradient(listOf(
-                Color.White.copy(alpha = lift.value * .12f), Color.White.copy(alpha = lift.value * .025f))), RoundedCornerShape(24.dp))))
+        }.background(ControlSelectedFill, RoundedCornerShape(if (quiet) 13.dp else 24.dp))
+            .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = lift.value * .12f),
+                Color.White.copy(alpha = lift.value * .025f))), RoundedCornerShape(if (quiet) 13.dp else 24.dp)))
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             labels.forEachIndexed { index, label ->
