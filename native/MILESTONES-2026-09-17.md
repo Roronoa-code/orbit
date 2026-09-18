@@ -322,3 +322,62 @@ Neither of the existing drag tests could see it, and the reason is worth keeping
 on a choice — before it travels, which is when the gather would happen — and compares that capture
 with the resting one. Without the guard the handle's own capture comes back 632px wide instead of
 678, and the test fails on the first assertion.
+
+## 15. Sleep, the crash, the ring and the lag — 18 September 2026
+
+**Why the 16th and 17th had no sleep.** Samsung Health had both nights; Orbit's import never reached
+them. The heart decoder rejected a whole record over ordinary sensor noise — a series sample whose
+timing ran past its own record — and one rejected record aborted the entire import, so every type
+read after heart (sleep, nutrition, water, body, oxygen, exercise) stopped arriving. The catch-all
+status line hid which record it was; the failure is now logged with its stack, and the log named
+`SamsungRecordCodec.kt:38` at once. The heart decoder keeps readings by their start, sorts a series,
+drops only samples that carry no reading, and widens a bound that sits on the wrong side of its own
+average. And one unreadable record is now that record's problem: it is skipped, logged and counted,
+and the import carries on. On the owner's phone the next import read past heart, skipped one malformed
+oxygen record and two energy-score records, and finished — the 16th, the 17th and that morning's
+sleep all appeared, with full stages.
+
+**Why the app then crashed on launch.** Fixing the import let oxygen arrive for the first time, and
+the watch stores oxygen a row per minute through every night. The projection sent every row raw to
+the screen: roughly fifty megabytes of string built on the main thread, and an OutOfMemoryError on
+every launch. The screens only ever use each day's low, high and latest reading, so that is all that
+crosses now — one row per day. On the owner's data the whole payload is 4.1 MB (oxygen 347 rows),
+and a check warns by type if it ever grows past 12 MB again.
+
+**Live heart rate.** Heart now reaches the phone again (72 bpm on the owner's phone after the fix).
+Samsung Health delivers the watch's heart rate on Samsung's own schedule, often most of an hour late,
+so the phone now shows whichever is newer: Samsung's latest, or the latest valid reading Orbit's own
+watch app has delivered, checked every five seconds while the app is open. On the owner's watch,
+Orbit's app was delivering steps but no heart rate: its background heart collection needs the heart
+rate and background health access granted to Orbit on the watch.
+
+**The ring.** The owner replaced the dotted globe with a reference image: broad sheets of particles
+folding round the number. The Home orb is now that — four closed sheets in 3D, each undulating in
+radius and depth, breathing in width and twisting along its length, leaned back with perspective and
+drawn additively, so the bright crests are simply where a sheet turns edge-on and its grains pile up.
+The dot-matrix number, the swipe-for-metric and tap-for-period gestures and the swell on a new number
+all carry over. `theRingKeepsTheNumbersCentreClearAndClosesOnItself` holds that no grain ever enters
+the number's centre and that every sheet closes on itself without a seam.
+
+**The lag.** The owner reported swiping up and down was still laggy, and it measured badly: 30–34% of
+frames janky, 90th percentile 54–83 ms. Guessing was wrong once (the shadow re-rasterising was real but
+small), so every step after that came from a trace of the phone's render thread:
+
+1. The ring rendered as tens of thousands of individual point shapes — about 35 ms of rendering on
+   every animated frame, idle or not. Every grain is now one quad in a single triangle mesh: a frame
+   that took 46 ms to render takes 6.
+2. Each deck card rendered itself offscreen, glass and all, on every frame of a swipe, only so its fold
+   could feather. The feather now fades the card's content in a light layer that exists only while the
+   fold moves, and the glass renders straight to screen with a crisp edge.
+3. A shadow and a rim that animated with lift were re-rasterised as blurred masks every frame. The
+   shadow is rasterised once at a fixed spread and deepens through its layer alpha; the rim, under a
+   pixel wide, no longer carries a blur at all. The vendored library also no longer re-records a
+   shadow when only its alpha changes.
+4. A fresh draw lambda on every recomposition forced a full ring rebuild at the start and end of every
+   swipe; the ring's draw block is stable now.
+
+Deck swipes went from 90th percentile 54 ms and worst 78 ms to 19 ms and 35 ms; the Explore bar drag
+sits at 90th percentile 22 ms. At idle the ring costs a few milliseconds a frame.
+
+The test emulator segfaulted three times under software rendering while tests captured real content;
+it now runs on the host GPU, where the full suite passes: 125 phone tests.

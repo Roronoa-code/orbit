@@ -24,6 +24,10 @@ final class HealthProjection {
         long from = date.minusDays(366).atStartOfDay(zone).toInstant().toEpochMilli();
         long until = date.plusDays(2).atStartOfDay(zone).toInstant().toEpochMilli();
         JSONArray rows = new JSONArray(); Map<String, JSONObject> heart = new TreeMap<>();
+        // A watch that samples saturation through the night stores a row per minute, which is a year
+        // of nights once it has been worn. The screens read each day's low, high and latest reading,
+        // so one row per day is what crosses; the originals stay in SQLite.
+        Map<String, JSONObject> oxygen = new TreeMap<>();
         try (Cursor cursor = store.window(from, until)) {
             while (cursor.moveToNext()) {
                 JSONObject row = new JSONObject(cursor.getString(0)); String type = row.getString("type");
@@ -46,10 +50,26 @@ final class HealthProjection {
                     }
                     } }
                     if (row.has("_counts") && count != row.getJSONObject("_counts").getInt("samples")) throw new IllegalStateException("Heart samples are incomplete");
+                } else if ("oxygen".equals(type)) {
+                    long at = row.getLong("start"); double value = row.getDouble("value");
+                    double low = row.optDouble("low", value), high = row.optDouble("high", value);
+                    String day = row.has("date") && !row.isNull("date") ? row.getString("date")
+                        : Instant.ofEpochMilli(at).atZone(zone).toLocalDate().toString();
+                    JSONObject bucket = oxygen.get(day);
+                    if (bucket == null) {
+                        bucket = new JSONObject().put("type", "oxygen").put("id", "day:" + day).put("date", day)
+                            .put("source", row.getString("source")).put("start", at).put("end", row.getLong("end"))
+                            .put("value", value).put("low", low).put("high", high);
+                        oxygen.put(day, bucket);
+                    } else {
+                        bucket.put("low", Math.min(bucket.getDouble("low"), low)).put("high", Math.max(bucket.getDouble("high"), high));
+                        if (at >= bucket.getLong("start")) bucket.put("start", at).put("end", row.getLong("end")).put("value", value);
+                    }
                 } else rows.put(store.hydrate(row));
             }
         }
         for (JSONObject bucket : heart.values()) rows.put(bucket);
+        for (JSONObject bucket : oxygen.values()) rows.put(bucket);
         JSONArray workouts = new JSONArray();
         try (Cursor cursor = store.workouts()) { while (cursor.moveToNext()) {
             JSONObject row = new JSONObject(cursor.getString(0));

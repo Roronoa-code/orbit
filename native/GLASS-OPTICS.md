@@ -107,7 +107,7 @@ lifted surface is a thicker piece of glass:
 | 12.6dp refraction height, 10.1dp amount | 40.3dp, 36.4dp |
 | no dispersion | the rim splits the light into colour past a third of the way up |
 | 0.5dp rim | 1.5dp |
-| 24dp shadow at 10% | 38dp at 30% |
+| shadow at 10% | the same 30dp shadow at 30% |
 | tint at its full opacity | 60% of it, so more of the page shows through |
 
 The blur is deliberately not on that list. Blur models frosting rather than thickness, and growing
@@ -183,3 +183,17 @@ Tiers are unchanged. Refraction needs a runtime shader (API 33), the blur needs 
 with the shared hairline. Every tier ends in a draw boundary, so a ticking timer inside a surface
 never redraws the material around it; the measured invalidation counts below confirm that for all
 three.
+
+### What a moving surface costs — 18 September 2026
+
+Measured on the owner's S25 Ultra with the render thread traced, not estimated:
+
+- A shadow is rasterised once at a fixed 30dp spread; lift deepens it through the layer's alpha, which
+  the vendored library now applies without re-recording. Growing its radius re-rasterised a full-size
+  blurred mask on every frame a lifted surface moved.
+- The rim carries no blur. At under a pixel wide a blur cannot be seen, and a blurred stroke is a mask
+  re-rasterised on every frame the rim's width animates.
+- A Home deck card never renders its glass offscreen. The fold's feather fades only the card's content,
+  in a layer that exists only while the fold is travelling.
+- Anything drawn inside a recording the glass samples is replayed by every sampler. The Home ring is
+  therefore a single triangle mesh, one draw call, rather than tens of thousands of point shapes.

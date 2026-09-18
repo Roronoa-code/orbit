@@ -83,8 +83,9 @@ internal const val GlassResolution = .33f
 private const val LIFT_LENS_HEIGHT = 2.2f
 private const val LIFT_LENS_AMOUNT = 2.6f
 private const val LIFT_RIM_DP = 1f
-private const val LIFT_SHADOW_DP = 14f
-private const val LIFT_SHADOW_ALPHA = .20f
+private const val SHADOW_DP = 30f
+private const val SHADOW_REST_ALPHA = .10f
+private const val SHADOW_LIFTED_ALPHA = .30f
 private const val LIFT_THINNING = .4f
 
 /** Past this much lift the rim splits the light into colour, as a thick lens does. */
@@ -168,15 +169,21 @@ internal fun Modifier.orbitFrost(page: GlassBackdrop, corner: Dp, engagement: ()
         },
         highlight = {
             val lifted = lift(engagement, reduced)
+            // No blur on the rim: under a pixel it cannot be seen, and a blurred stroke is a mask the
+            // renderer re-rasterises on every frame the rim's width animates.
             Highlight(
                 width = (GlassEdgeWidth.value + LIFT_RIM_DP * lifted).dp,
+                blurRadius = 0.dp,
                 style = HighlightStyle.Default(angle = lightAngle(focus, lifted)),
             )
         },
+        // The shadow is rasterised once at a fixed spread and lift deepens it through its layer alpha.
+        // Growing its radius with lift re-rasterised a full-resolution blurred mask on every frame of
+        // every moving card, which is most of what made dragging the deck stutter.
         shadow = {
             val lifted = lift(engagement, reduced)
-            Shadow(radius = (24f + LIFT_SHADOW_DP * lifted).dp,
-                color = Color.Black.copy(alpha = .10f + LIFT_SHADOW_ALPHA * lifted))
+            Shadow(radius = SHADOW_DP.dp, color = Color.Black.copy(alpha = SHADOW_LIFTED_ALPHA),
+                alpha = (SHADOW_REST_ALPHA + (SHADOW_LIFTED_ALPHA - SHADOW_REST_ALPHA) * lifted) / SHADOW_LIFTED_ALPHA)
         },
         onDrawSurface = {
             val lifted = lift(engagement, reduced)

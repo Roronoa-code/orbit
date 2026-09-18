@@ -144,6 +144,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                             && hours.all { it.value == kotlin.math.floor(it.value) } && hours.sumOf { it.value } == steps)
                         day = day.copy(steps = steps, hourlySteps = hours)
                     }
+                    day = withWatchHeart(day)
                     withContext(Dispatchers.Main.immediate) {
                         if (generation == sourceGeneration && selectedDate.value == date.toString()) {
                             mutableHealth.value = HealthScreenState(day, next == null, snapshot.optBoolean("syncing"),
@@ -195,6 +196,36 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
     }
     fun revisionFor(generation: Long): String = if (generation == acceptedGeneration) healthRevision else ""
     fun acceptHealth(generation: Long, raw: String) { if (generation == sourceGeneration) snapshots.trySend(generation to raw) }
+
+    /**
+     * The newest valid heart reading Orbit's own watch app has delivered: bpm and when it was taken.
+     *
+     * Samsung Health reaches the phone on Samsung's own schedule, often most of an hour behind the
+     * watch. Orbit's watch app delivers its readings as they are collected, so whichever of the two is
+     * newer is the heart rate today shows.
+     */
+    @Volatile private var watchHeart: Pair<Double, Long>? = null
+
+    fun refreshWatchHeart(journal: java.io.File) {
+        val latest = try {
+            com.mani.orbit.sync.ReadingJournal(journal).use { it.latest("heart") }
+        } catch (_: Exception) { null } ?: return
+        val bpm = latest.optDouble("value", Double.NaN)
+        val at = latest.optLong("end", 0)
+        if (latest.optString("quality") != "valid" || latest.optBoolean("timeUncertain") || !bpm.isFinite() || bpm <= 0 ||
+            at <= 0 || at > System.currentTimeMillis()) return
+        if (watchHeart?.second == at) return
+        watchHeart = bpm to at
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            mutableHealth.value = mutableHealth.value.let { it.copy(day = withWatchHeart(it.day)) }
+        }
+    }
+
+    private fun withWatchHeart(day: HealthDay): HealthDay {
+        val (bpm, at) = watchHeart ?: return day
+        if (day.date != LocalDate.now() || at <= (day.heartAt ?: 0L)) return day
+        return day.copy(heart = bpm, heartAt = at)
+    }
     fun openWorkout(id: String = "active") { saved["workoutRequest"] = id; navigate("Workouts") }
     fun workoutOpened(id: String?) { if (requestedWorkout.value == id) saved["workoutRequest"] = null }
     fun navigate(destination: String) {

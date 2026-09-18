@@ -43,6 +43,7 @@ internal object SamsungDataImport {
             LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault()).toInstant() else Instant.EPOCH
         val until = Instant.now()
         var count = 0
+        var skipped = 0
         store.beginImport()
         for (key in allowed) {
             currentCoroutineContext().ensureActive()
@@ -67,7 +68,15 @@ internal object SamsungDataImport {
                         // Keep only one decoded source record alive, even when a page contains long routes/series.
                         for (point in page.dataList) {
                             currentCoroutineContext().ensureActive()
-                            val rows = SamsungRecordCodec.encode(key, point)
+                            // One record Orbit cannot read is that record's problem, not the import's.
+                            // Letting it throw stopped every later type: a single odd heart record kept
+                            // the owner's sleep out of the app for days. It is skipped, and said so.
+                            val rows = try { SamsungRecordCodec.encode(key, point) }
+                            catch (unreadable: IllegalArgumentException) {
+                                skipped++
+                                android.util.Log.w("OrbitImport", "Skipped an unreadable Samsung $key record", unreadable)
+                                continue
+                            }
                             store.stage(JSONArray(rows)); count = Math.addExact(count, rows.size)
                         }
                         progress(count)
@@ -82,6 +91,7 @@ internal object SamsungDataImport {
         val stillGranted = withTimeout(12_000) { sdk.getGrantedPermissions(permissions.values.toSet()) }
         require(allowed.all { permissions.getValue(it) in stillGranted }) { "Samsung Health access changed" }
         currentCoroutineContext().ensureActive()
+        if (skipped > 0) android.util.Log.w("OrbitImport", "Samsung import finished with $skipped unreadable records skipped")
         store.finishImport(kinds(allowed), from.toEpochMilli(), until.toEpochMilli(), true, "samsung_sdk")
     }
 

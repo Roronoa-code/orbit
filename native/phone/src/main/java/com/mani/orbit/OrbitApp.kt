@@ -57,6 +57,11 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
 private val Ink = PageInk
 private val Surface = GlassOpaqueFill
@@ -126,6 +131,18 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     }
     BackHandler { back() }
     LaunchedEffect(health.error) { health.error?.let { snackbar.showSnackbar(it) } }
+    // Orbit's own watch readings land on the phone as they are collected; look for a newer heart rate
+    // every few seconds while the app is open, and not at all while it is not.
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val watchJournal = LocalContext.current.getDatabasePath("watch-readings.db")
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) {
+                withContext(Dispatchers.IO) { if (watchJournal.exists()) model.refreshWatchHeart(watchJournal) }
+                delay(5_000)
+            }
+        }
+    }
     CompositionLocalProvider(LocalOrbitReducedMotion provides reducedMotion, LocalGlassReadability provides glassReadability) {
     val workoutPlayer = rememberWorkoutPlayer(session.active?.id)
     // Stock containers (cards, chips) share the illustrated Health card material instead of the M3 default.

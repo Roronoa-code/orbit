@@ -31,18 +31,22 @@ internal object SamsungRecordCodec {
             }
         }
         "heart" -> {
+            // A series is Samsung's own sampling, timed by its own clock, and it arrives with ordinary
+            // sensor noise: samples out of order, a sample whose end runs past the record's, a 0bpm
+            // dropout, an average a rounding step outside its own min and max. Rejecting the record for
+            // any of that threw away real readings, and because one bad record aborted the whole import,
+            // every type after heart — sleep among them — stopped arriving. A sample is kept by its
+            // start, which is all that is stored, and dropped only when it carries no reading.
             val samples = JSONArray()
-            val series = point.getValue(HeartRateType.SERIES_DATA).orEmpty()
-            var previous = point.startTime
-            for (entry in series) {
-                require(entry.startTime >= previous && entry.endTime >= entry.startTime && !entry.endTime.isAfter(point.endTime ?: point.startTime))
-                val value = number(entry.heartRate); require(value > 0)
-                samples.put(sample(entry.startTime, value, entry.min, entry.max))
-                previous = entry.startTime
+            val first = point.startTime
+            val last = point.endTime ?: point.startTime
+            for (entry in point.getValue(HeartRateType.SERIES_DATA).orEmpty().sortedBy { it.startTime }) {
+                if (entry.startTime.isBefore(first) || entry.startTime.isAfter(last)) continue
+                heartSample(entry.startTime, entry.heartRate, entry.min, entry.max)?.let(samples::put)
             }
-            if (series.isEmpty()) point.getValue(HeartRateType.HEART_RATE)?.let {
-                val value = number(it); require(value > 0)
-                samples.put(sample(point.startTime, value, point.getValue(HeartRateType.MIN_HEART_RATE), point.getValue(HeartRateType.MAX_HEART_RATE)))
+            if (samples.length() == 0) point.getValue(HeartRateType.HEART_RATE)?.let {
+                heartSample(point.startTime, it, point.getValue(HeartRateType.MIN_HEART_RATE),
+                    point.getValue(HeartRateType.MAX_HEART_RATE))?.let(samples::put)
             }
             listOf(base(point, type).put("samples", samples))
         }
@@ -145,12 +149,16 @@ internal object SamsungRecordCodec {
         else -> error("Unsupported Samsung record: $type")
     }
 
-    private fun sample(at: Instant, value: Double, low: Number?, high: Number?): JSONArray {
-        val min = low?.let(::number)?.takeIf { it > 0 } ?: value
-        val max = high?.let(::number)?.takeIf { it > 0 } ?: value
-        require(value in min..max)
-        return JSONArray().put(at.toEpochMilli()).put(value).put(min).put(max)
+    /** One heart reading, or nothing when the sensor reported no reading at all. */
+    private fun heartSample(at: Instant, rate: Number?, low: Number?, high: Number?): JSONArray? {
+        val value = rate?.toDouble()?.takeIf { it.isFinite() && it > 0 } ?: return null
+        val min = low?.toDouble()?.takeIf { it.isFinite() && it > 0 }
+        val max = high?.toDouble()?.takeIf { it.isFinite() && it > 0 }
+        // A bound on the wrong side of its own average is rounding, not a second reading: widen to it.
+        return JSONArray().put(at.toEpochMilli()).put(value)
+            .put(minOf(min ?: value, value)).put(maxOf(max ?: value, value))
     }
+
     private fun oxygen(row: JSONObject, value: Double, low: Number?, high: Number?): JSONObject {
         val min = low?.let(::number) ?: value; val max = high?.let(::number) ?: value
         require(value in min..max && max <= 100)

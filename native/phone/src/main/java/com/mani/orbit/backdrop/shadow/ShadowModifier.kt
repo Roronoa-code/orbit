@@ -102,7 +102,12 @@ internal class ShadowNode(
 
             shadowLayer.alpha = shadow.alpha
             shadowLayer.blendMode = shadow.blendMode
-            if (recordedShadow != shadow || recordedOutline != outline || recordedDensity != density.density ||
+            // Orbit: alpha and blend mode are layer properties applied above on every frame, so a
+            // change to either alone must not re-rasterise a full-resolution blurred mask. Comparing
+            // the whole Shadow did exactly that for every frame a lifted surface's shadow faded.
+            val recorded = recordedShadow
+            if (recorded == null || recorded.radius != shadow.radius || recorded.offset != shadow.offset ||
+                recorded.color != shadow.color || recordedOutline != outline || recordedDensity != density.density ||
                 outline is androidx.compose.ui.graphics.Outline.Generic) {
                 configurePaint(shadow)
                 shadowLayer.record(shadowSize) {

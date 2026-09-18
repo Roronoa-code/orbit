@@ -65,6 +65,61 @@ class SamsungDirectTest {
         assertTrue(encoded.all { it.getString("transport") == "samsung_sdk" && it.getString("id").startsWith("sdk:") })
     }
 
+    /**
+     * Samsung's own heart series arrives with ordinary sensor noise. Rejecting the record for it threw
+     * away real readings, and because one rejected record aborted the whole import, every type read
+     * after heart — the owner's sleep among them — stopped arriving for days.
+     */
+    @Test fun aNoisyHeartSeriesKeepsItsReadingsInsteadOfStoppingTheImport() {
+        val m = { minutes: Long -> start.plusSeconds(minutes * 60) }
+        val heart = point("noisy-heart") { addFieldData(HeartRateType.SERIES_DATA, listOf(
+            HeartRate.of(70f, 65f, 75f, m(10), m(11)),
+            HeartRate.of(0f, 0f, 0f, m(5), m(6)),                  // a dropout: no reading at all
+            HeartRate.of(80f, 82f, 85f, m(2), end.plusSeconds(300)), // average under its own min, ends past the record
+        )) }
+        val row = SamsungRecordCodec.encode("heart", heart).single()
+        val samples = row.getJSONArray("samples")
+        assertEquals("The dropout is the only sample dropped", 2, samples.length())
+        assertEquals("Samples are kept in time order", m(2).toEpochMilli(), samples.getJSONArray(0).getLong(0))
+        assertEquals(m(10).toEpochMilli(), samples.getJSONArray(1).getLong(0))
+        val widened = samples.getJSONArray(0)
+        assertEquals("A bound on the wrong side of its average widens to it", 80.0, widened.getDouble(2), 0.0)
+        assertEquals(85.0, widened.getDouble(3), 0.0)
+    }
+
+    /**
+     * A watch that samples saturation through the night stores a row per minute. Once those rows
+     * reached the screen payload raw, a year of nights became a ~50 MB string built on the main
+     * thread and the app died of OutOfMemoryError on every launch. Each day crosses as one row.
+     */
+    @Test fun aNightOfMinuteByMinuteOxygenCrossesAsOneRowPerDay() = store { records ->
+        val zone = ZoneId.systemDefault()
+        val days = 30
+        val rows = JSONArray()
+        for (d in 0 until days) {
+            val night = date.minusDays(d.toLong()).atTime(1, 0).atZone(zone).toInstant()
+            for (m in 0 until 480) {
+                val at = night.plusSeconds(m * 60L).toEpochMilli()
+                val value = 92.0 + (m % 7)
+                rows.put(JSONObject().put("type", "oxygen").put("id", "sdk:o$d:$m").put("source", "com.sec.android.app.shealth")
+                    .put("transport", "samsung_sdk").put("start", at).put("end", at + 60_000).put("value", value)
+                    .put("low", value - 1).put("high", value + 1))
+            }
+        }
+        records.beginImport(); records.stage(rows)
+        records.finishImport(listOf("oxygen"), 0, Instant.now().toEpochMilli(), true, "samsung_sdk")
+        val projection = HealthProjection.read(records, date, true)
+        val oxygen = (0 until projection.getJSONArray("rows").length()).map { projection.getJSONArray("rows").getJSONObject(it) }
+            .filter { it.getString("type") == "oxygen" }
+        assertEquals("One row per day, not one per sample", days, oxygen.size)
+        assertTrue("The payload stays small: ${projection.toString().length}", projection.toString().length < 200_000)
+        // The day's statistics survive the aggregation exactly.
+        val day = NativeHealthProjection.read(projection, date)
+        assertEquals(91.0, day.oxygenLow!!, 0.0)
+        assertEquals(99.0, day.oxygenHigh!!, 0.0)
+        assertEquals("Latest reading of the night", 92.0 + (479 % 7), day.oxygen!!, 0.0)
+    }
+
     @Test fun sleepWindowNeverBecomesInventedTimeAsleep() {
         val stages = listOf(SleepSession.SleepStage.of(start, start.plusSeconds(600), SleepType.StageType.AWAKE),
             SleepSession.SleepStage.of(start.plusSeconds(600), end, SleepType.StageType.LIGHT))

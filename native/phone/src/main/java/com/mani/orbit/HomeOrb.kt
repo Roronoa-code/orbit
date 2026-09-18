@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,17 +35,44 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.*
 
-/** Same 646-point projection as signal-orb.js, batched into sixteen native paths. */
+/** Colour steps by depth, looked up per grain rather than computed. */
+private const val RingShades = 64
+
+/**
+ * The Home ring: twisted particle ribbons flowing round the number. A swipe spins it to the next
+ * metric, a tap cycles the period, and a change of number is a gust that swells it and lets it settle.
+ */
 @Composable
 internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean, modifier: Modifier,
                      deckProgress: () -> Float, deckTravel: Dp,
                      chooseMetric: (HomeMetric) -> Unit, choosePeriod: () -> Unit) {
-    val points = remember { Array(646) { i ->
-        val lat = (i / 34 / 18.0 - .5) * PI; val lon = i % 34 / 34.0 * PI * 2
-        doubleArrayOf(cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon))
+    val section = remember { DoubleArray(7) }
+    val grain = remember { DoubleArray(4) }
+    // Flow time runs whether or not a finger is turning the ring; only a suspended or reduced ring
+    // holds still.
+    var time by remember { mutableFloatStateOf(0f) }
+    var gust by remember { mutableFloatStateOf(0f) }
+    var shownValue by remember { mutableStateOf(summary.primary) }
+    LaunchedEffect(summary.primary, reduced) {
+        if (shownValue == summary.primary) return@LaunchedEffect
+        shownValue = summary.primary
+        if (!reduced) animate(1f, 0f, animationSpec = spring(1f, 30f, .001f)) { value, _ -> gust = value }
+    }
+    // Every grain is one tiny quad in a single triangle mesh: one draw call a frame. Drawn as points,
+    // the renderer prepared each of tens of thousands of grains as its own shape, which cost about
+    // 35ms of rendering on every animated frame and held up every touch behind it.
+    val grains = SheetCount * SheetSteps * SheetAcross
+    val mesh = remember { FloatArray(grains * 12) }
+    val tints = remember { IntArray(grains * 6) }
+    val shades = remember { IntArray(RingShades) { ringColour(it / (RingShades - 1f), .22f + .08f * it / (RingShades - 1f)) } }
+    // Grains add their light: where a sheet folds edge-on they pile up and burn toward white.
+    val paint = remember { android.graphics.Paint().apply { blendMode = android.graphics.BlendMode.PLUS } }
+    // A violet haze through the band, so the ring glows rather than sitting on black.
+    val glow = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        shader = android.graphics.RadialGradient(RingCentreX.toFloat(), RingCentreY.toFloat(), 170f,
+            intArrayOf(0x006A55C8, 0x006A55C8, 0x386A55C8, 0x146A55C8, 0x006A55C8), floatArrayOf(0f, .36f, .62f, .82f, 1f),
+            android.graphics.Shader.TileMode.CLAMP)
     } }
-    val bands = remember { Array(16) { android.graphics.Path() } }
-    val paint = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFE8E8EE.toInt() } }
     var angle by remember { mutableFloatStateOf(-summary.metric.ordinal * PI.toFloat() / 2) }
     var rest by remember { mutableFloatStateOf(angle) }
     var breath by remember { mutableFloatStateOf(0f) }
@@ -80,6 +108,16 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
         select(HomeMetric.entries[Math.floorMod(current.ordinal + delta, HomeMetric.entries.size)])
     }
     fun cycle() { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); breathVelocity -= 1.35f; settle(rest - .72f); period() }
+    LaunchedEffect(suspended, reduced, lifecycle) {
+        if (!suspended && !reduced) lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            var previous = withInfiniteAnimationFrameNanos { it }
+            while (true) {
+                val now = withInfiniteAnimationFrameNanos { it }
+                val elapsed = (now - previous) / 1_000_000f
+                if (elapsed >= 1000f / 30) { time += min(elapsed, 60f) / 1000f; previous = now }
+            }
+        }
+    }
     LaunchedEffect(suspended, reduced, dragging, settling, lifecycle) {
         if (!suspended && !reduced && !dragging && !settling) lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             var previous = withInfiniteAnimationFrameNanos { it }
@@ -133,27 +171,55 @@ internal fun HomeOrb(summary: HomeSummary, suspended: Boolean, reduced: Boolean,
             } finally { dragging = false; if (!completed) settle(rest, 0f) }
         }
     }.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, role = Role.Button) { cycle() }, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxWidth().height(290.dp).graphicsLayer {
-            translationY = -deckTravel.toPx() * deckProgress() / 2
-            scaleX = 1f - .24f * deckProgress(); scaleY = scaleX
-        }) {
-            val scale = min(size.width / 340, size.height / 260)
-            val cosine = cos(angle.toDouble()); val sine = sin(angle.toDouble())
-            for (path in bands) path.rewind()
-            for (point in points) {
-                val x = point[0] * cosine + point[2] * sine
-                val depth = -point[0] * sine + point[2] * cosine
-                val perspective = 1 / (1 - depth * .12)
-                val band = floor((depth + 1) / 2 * bands.size).toInt().coerceIn(bands.indices)
-                bands[band].addCircle((170 + x * 120 * perspective * (1 + breath)).toFloat(), (130 + point[1] * 111 * perspective * (1 + breath)).toFloat(),
-                    (.65 + (depth + 1) * .5).toFloat(), android.graphics.Path.Direction.CW)
+        // The ring takes the whole hero area and fits itself to it, so its outer sheets have room.
+        // One stable draw block. Handing the Canvas a fresh lambda on every recomposition made each
+        // one — the start and end of every swipe among them — rebuild and re-render the whole ring.
+        val drawRing: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit = remember { {
+            val scale = min(size.width / RingWidth.toFloat(), size.height / RingHeight.toFloat())
+            val seconds = time.toDouble()
+            // A gust swells the ring outward; the breath from a swipe or tap draws it in and lets go.
+            val swell = gust * 7.0 + breath * 24.0
+            var n = 0
+            for (k in 0 until SheetCount) for (i in 0 until SheetSteps) {
+                sheetSection(k, i * (2 * PI / SheetSteps), seconds, angle.toDouble(), swell, section)
+                for (j in 0 until SheetAcross) {
+                    sheetGrain(section, -1.0 + 2.0 * j / (SheetAcross - 1), grain)
+                    val near = ((grain[2] + 1) / 2).toFloat()
+                    // Nearer grains are brighter-hued and a touch larger; glints are larger still, and white.
+                    val glint = glints(k, i, j)
+                    val h = if (glint) .55f else .22f + near * .22f
+                    val tint = if (glint) 0xB3F4F0FF.toInt() else shades[(near * (RingShades - 1)).toInt().coerceIn(0, RingShades - 1)]
+                    val x = grain[0].toFloat(); val y = grain[1].toFloat()
+                    val m = n * 12
+                    mesh[m] = x - h; mesh[m + 1] = y - h; mesh[m + 2] = x + h; mesh[m + 3] = y - h; mesh[m + 4] = x + h; mesh[m + 5] = y + h
+                    mesh[m + 6] = x - h; mesh[m + 7] = y - h; mesh[m + 8] = x + h; mesh[m + 9] = y + h; mesh[m + 10] = x - h; mesh[m + 11] = y + h
+                    val c = n * 6
+                    tints[c] = tint; tints[c + 1] = tint; tints[c + 2] = tint; tints[c + 3] = tint; tints[c + 4] = tint; tints[c + 5] = tint
+                    n++
+                }
             }
             drawIntoCanvas { canvas ->
                 val native = canvas.nativeCanvas
-                native.save(); native.translate((size.width - 340 * scale) / 2, (size.height - 260 * scale) / 2); native.scale(scale, scale)
-                for (i in bands.indices) { paint.alpha = ((.1 + (i + .5) / 16 * .66) * 255).roundToInt(); native.drawPath(bands[i], paint) }
+                native.save()
+                native.translate((size.width - RingWidth.toFloat() * scale) / 2, (size.height - RingHeight.toFloat() * scale) / 2)
+                native.scale(scale, scale)
+                native.drawCircle(RingCentreX.toFloat(), RingCentreY.toFloat(), 170f, glow)
+                native.drawVertices(android.graphics.Canvas.VertexMode.TRIANGLES, n * 12, mesh, 0, null, 0,
+                    tints, 0, null, 0, 0, paint)
                 native.restore()
             }
+        } }
+        // The fold moves and shrinks a parent; the ring's own layer never changes a property. Animating
+        // the transform on the layer itself had its whole texture re-rendered on every frame of a swipe.
+        Box(Modifier.fillMaxSize().graphicsLayer {
+            translationY = -deckTravel.toPx() * deckProgress() / 2
+            scaleX = 1f - .24f * deckProgress(); scaleY = scaleX
+        }) {
+            // The ring sits inside every recording the glass samples. As its own layer it is
+            // rasterised only when it changes, and each sampler composites that texture.
+            Spacer(Modifier.fillMaxSize().graphicsLayer {
+                compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
+            }.drawBehind(drawRing))
         }
         Column(Modifier.graphicsLayer {
             translationY = -deckTravel.toPx() * deckProgress() / 2

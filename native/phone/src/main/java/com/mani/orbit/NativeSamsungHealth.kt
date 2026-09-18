@@ -93,7 +93,16 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
             try {
                 val next = withContext(Dispatchers.IO) { cache().use { HealthProjection.read(it, date, true) } }
                 if (closed || date != selected) return@launch
-                data = next.toString(); revision++; changed()
+                data = next.toString()
+                // This payload crosses to the screen on every change. Per-minute oxygen once took it
+                // past 50 MB and the app died of OutOfMemoryError on launch; if any type grows like
+                // that again, say which one instead of only crashing.
+                if (data.length > PAYLOAD_WARNING_CHARS) {
+                    val rows = next.getJSONArray("rows"); val counts = sortedMapOf<String, Int>()
+                    for (i in 0 until rows.length()) rows.getJSONObject(i).optString("type").let { counts[it] = (counts[it] ?: 0) + 1 }
+                    android.util.Log.w("OrbitImport", "Screen payload is ${data.length} chars: $counts")
+                }
+                revision++; changed()
                 if (visible && SamsungDataImport.permissions["steps"] in granted) {
                     try {
                         val hours = withContext(Dispatchers.IO) { SamsungDataImport.hours(store(), date) }
@@ -117,6 +126,9 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
         }
     }
     private fun failure(error: Exception) {
+        // The status line is deliberately general; the cause must still be recoverable, or a single
+        // bad record can stop every later type importing with nothing to say which one.
+        android.util.Log.w("OrbitImport", "Samsung Health import failed", error)
         val code = (error as? HealthDataException)?.errorCode
         if (code in setOf(ErrorCode.ERR_NO_USER_PERMISSION, ErrorCode.ERR_ACCESS_CONTROL, ErrorCode.ERR_INVALID_CALLER)) granted = emptySet()
         if (code in setOf(ErrorCode.ERR_PLATFORM_NOT_INSTALLED, ErrorCode.ERR_PLATFORM_DISABLED, ErrorCode.ERR_OLD_VERSION_PLATFORM)) available = false
@@ -126,6 +138,8 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
         closed = true; visible = false; polling?.cancel(); importing?.cancel(); loading?.cancel(); live.close()
     }
     companion object {
+        /** Today's full year is about 4 MB; three times that means a type has stopped aggregating. */
+        private const val PAYLOAD_WARNING_CHARS = 12_000_000
         internal fun message(error: Exception): String = when ((error as? HealthDataException)?.errorCode) {
             ErrorCode.ERR_PLATFORM_NOT_INSTALLED -> "Install Samsung Health to connect your readings"
             ErrorCode.ERR_OLD_VERSION_PLATFORM -> "Update Samsung Health to connect"

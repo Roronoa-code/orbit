@@ -166,20 +166,25 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                         repeat(4) { index ->
                             // The fold clips the glass itself: the shell, its rim and its shadow are the
                             // material, so the card shows the orb through it as it opens.
-                            Box(Modifier.fillMaxWidth().testTag("home-card-$index")
-                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                .drawWithContent {
-                                val progress = q(index)
-                                val fold = { i: Int, height: Float ->
-                                    val closed = min(if (i == 0) foldHeight.dp.toPx() else 146.dp.toPx(), height)
-                                    closed + (height - closed) * q(i)
+                            // How much of this card shows, in its own pixels: from the top to the bottom.
+                            fun androidx.compose.ui.unit.Density.window(height: Float): Pair<Float, Float> {
+                                val fold = { i: Int, full: Float ->
+                                    val closed = min(if (i == 0) foldHeight.dp.toPx() else 146.dp.toPx(), full)
+                                    closed + (full - closed) * q(i)
                                 }
-                                val visibleHeight = fold(index, size.height)
+                                val bottom = fold(index, height)
                                 val covered = if (index == 0) 0f else {
                                     val previousHeight = heights[index - 1].dp.toPx() - 12.dp.toPx()
                                     max(0f, cardY(index - 1).dp.toPx() + fold(index - 1, previousHeight) - cardY(index).dp.toPx())
                                 }
-                                val top = min(covered, visibleHeight)
+                                return min(covered, bottom) to bottom
+                            }
+                            // A cut that is travelling feathers; one standing still is an edge.
+                            fun settled() = 1f - min(1f, q(index) / .1f)
+                            Box(Modifier.fillMaxWidth().testTag("home-card-$index")
+                                .drawWithContent {
+                                val (top, visibleHeight) = window(size.height)
+                                val settled = settled()
                                 // A card the one above still covers draws nothing at all. Stroking its
                                 // rim anyway left a stray hairline lying under the folded deck.
                                 if (visibleHeight - top < 1f) return@drawWithContent
@@ -191,24 +196,8 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                                     addRoundRect(RoundRect(Rect(0f, top, size.width, visibleHeight), radius, radius, radius, radius))
                                 }
                                 clipPath(window) { this@drawWithContent.drawContent() }
-                                // A cut that is standing still is an edge and carries the material's
-                                // hairline. A cut that is travelling is a reveal, and it feathers:
-                                // a hard edge sweeping through the card sliced every line of text it
-                                // passed, which is what read as the fold being broken.
-                                val settled = 1f - min(1f, progress / .1f)
-                                val feather = CardFeather.toPx() * (1f - settled)
-                                if (feather > .5f) {
-                                    if (visibleHeight < size.height - .5f) drawRect(
-                                        Brush.verticalGradient(listOf(Color.Black, Color.Transparent),
-                                            startY = visibleHeight - feather, endY = visibleHeight),
-                                        topLeft = Offset(0f, visibleHeight - feather),
-                                        size = Size(size.width, feather), blendMode = BlendMode.DstIn)
-                                    if (top > .5f) drawRect(
-                                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black),
-                                            startY = top, endY = top + feather),
-                                        topLeft = Offset(0f, top), size = Size(size.width, feather),
-                                        blendMode = BlendMode.DstIn)
-                                }
+                                // A cut standing still is an edge and carries the material's hairline.
+                                // The content under a travelling cut feathers instead; see below.
                                 val band = CardCorner.toPx()
                                 val rim = GlassEdgeColor.copy(alpha = GlassEdgeColor.alpha * settled)
                                 if (settled > .01f) {
@@ -220,7 +209,30 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
                                     }
                                 }
                             }.orbitFrost(hero, CardCorner, { deckLift.value })) {
-                                Box(Modifier.graphicsLayer()) {
+                                // A hard edge sweeping through the card sliced every line of text it
+                                // passed. The content, never the glass, fades across a travelling cut,
+                                // in a layer of its own that exists only while the fold moves: masking
+                                // the whole card had it rendered offscreen, glass and all, on every
+                                // frame of every swipe.
+                                Box(Modifier.graphicsLayer {
+                                    compositingStrategy = if (settled() < .99f) CompositingStrategy.Offscreen else CompositingStrategy.Auto
+                                }.drawWithContent {
+                                    drawContent()
+                                    val feather = CardFeather.toPx() * (1f - settled())
+                                    if (feather > .5f) {
+                                        val (top, visibleHeight) = window(size.height)
+                                        if (visibleHeight < size.height - .5f) drawRect(
+                                            Brush.verticalGradient(listOf(Color.Black, Color.Transparent),
+                                                startY = visibleHeight - feather, endY = visibleHeight),
+                                            topLeft = Offset(0f, visibleHeight - feather),
+                                            size = Size(size.width, feather), blendMode = BlendMode.DstIn)
+                                        if (top > .5f) drawRect(
+                                            Brush.verticalGradient(listOf(Color.Transparent, Color.Black),
+                                                startY = top, endY = top + feather),
+                                            topLeft = Offset(0f, top), size = Size(size.width, feather),
+                                            blendMode = BlendMode.DstIn)
+                                    }
+                                }) {
                                     when (index) {
                                         0 -> HomeFacts(summary, { motion.value }, expanded,
                                             { foldHeight = it }) { if (metric == HomeMetric.Sleep) navigate("Sleep") }
