@@ -50,6 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import com.mani.orbit.sync.LiveWire
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -131,16 +134,32 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     }
     BackHandler { back() }
     LaunchedEffect(health.error) { health.error?.let { snackbar.showSnackbar(it) } }
-    // Orbit's own watch readings land on the phone as they are collected; look for a newer heart rate
-    // every few seconds while the app is open, and not at all while it is not.
+    // Live heart rate while Orbit is on screen. The watch is asked for its attention every twenty
+    // seconds; it answers with its newest reading and then pushes each new one as it is captured.
+    // Readings that come through the journal are picked up the moment they are committed. Leaving the
+    // screen releases the watch, and its lease lapses on its own if that message never arrives.
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
-    val watchJournal = LocalContext.current.getDatabasePath("watch-readings.db")
+    val context = LocalContext.current
+    val watchJournal = context.getDatabasePath("watch-readings.db")
     LaunchedEffect(lifecycle) {
         lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-            while (true) {
-                withContext(Dispatchers.IO) { if (watchJournal.exists()) model.refreshWatchHeart(watchJournal) }
-                delay(5_000)
+            // An answer from an earlier visit says nothing about the watch now; the next one comes within seconds.
+            launch { PhoneLive.updates.collect { update ->
+                update?.takeIf { System.currentTimeMillis() - it.sent < LiveWire.LEASE_MS }?.let(model::acceptLive)
+            } }
+            launch {
+                PhoneLive.journalChanges.onStart { emit(Unit) }.collect {
+                    withContext(Dispatchers.IO) { if (watchJournal.exists()) model.refreshWatch(watchJournal) }
+                }
             }
+            try {
+                while (true) {
+                    try { PhoneLive.request(context, System.currentTimeMillis() + LiveWire.LEASE_MS) }
+                    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                    catch (error: Exception) { android.util.Log.w("OrbitSync", "Live heart request incomplete: ${error.javaClass.simpleName}") }
+                    delay(LiveWire.RENEW_MS)
+                }
+            } finally { try { PhoneLive.release(context) } catch (_: Exception) { } }
         }
     }
     CompositionLocalProvider(LocalOrbitReducedMotion provides reducedMotion, LocalGlassReadability provides glassReadability) {

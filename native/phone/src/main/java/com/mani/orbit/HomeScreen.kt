@@ -57,7 +57,7 @@ private val CardFeather = 26.dp
 internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: Int, goal: Int?, reduced: Boolean,
                         exploreOpen: Boolean, closeExplore: () -> Unit, chooseMetric: (HomeMetric) -> Unit,
                         choosePeriod: () -> Unit, navigate: (String) -> Unit, rotation: Boolean = true) {
-    val summary = remember(state.day, state.days, state.liveStepsAt, metric, period, goal) { HomeSummary.from(state, metric, period, goal) }
+    val summary = remember(state.day, state.days, state.liveStepsAt, state.watchHeartState, metric, period, goal) { HomeSummary.from(state, metric, period, goal) }
     var expanded by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val motion = remember { ExploreMotion(scope, expanded) }

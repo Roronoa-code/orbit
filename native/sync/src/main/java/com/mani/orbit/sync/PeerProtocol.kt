@@ -16,7 +16,8 @@ enum class WireFamily(val capability: String, val label: String, val path: Strin
     ECG("orbit_ecg_v1", "ECG recordings", EcgWire.PATH),
     HEART("orbit_heart_batches_v1", "heart rate and beat intervals", HeartWire.PATH),
     SWEAT("orbit_workout_sweat_v1", "running sweat estimates", SweatWire.PATH),
-    RAW("orbit_raw_sensors_v1", "sensor recordings", RawSensorWire.PATH)
+    RAW("orbit_raw_sensors_v1", "sensor recordings", RawSensorWire.PATH),
+    LIVE("orbit_live_v1", "live heart rate", LiveWire.PATH)
 }
 
 data class PeerSupport(val families: Set<WireFamily>, val advertised: Boolean, val newer: Set<WireFamily>) {

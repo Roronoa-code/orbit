@@ -69,10 +69,26 @@ internal data class HomeSummary(
                 }
                 HomeMetric.Heart -> {
                     label = if (period == 1) "Heart rate" else "Average heart rate"
-                    caption = "bpm · " + if (period == 1) "latest reading" else "recorded average"
+                    val fromWatch = period == 1 && selected.heartFromWatch
+                    // Resting: the calmest hour's average, a day at a time, averaged over the period.
+                    val resting = mean(rows.map { day -> day.hourlyHeart.minOfOrNull { it.value } })
+                    caption = "bpm · " + when {
+                        period != 1 -> "recorded average"
+                        fromWatch && state.watchHeartState == "streaming" -> "live from your watch"
+                        fromWatch -> "from your watch"
+                        else -> "latest reading"
+                    }
                     facts = listOf(HomeFact("Average", homeNumber(heartMean), "bpm"), HomeFact("Lowest", homeNumber(rows.mapNotNull { it.heartLow }.minOrNull()), "bpm"),
-                        HomeFact("Highest", homeNumber(rows.mapNotNull { it.heartHigh }.maxOrNull()), "bpm"), HomeFact("Readings", homeNumber(count.toDouble()), "samples"))
-                    footer = listOf(HomeFact("Recorded readings", "Samsung Health"), HomeFact("Latest recorded", selected.heartAt?.let(::homeTime) ?: "—"))
+                        HomeFact("Highest", homeNumber(rows.mapNotNull { it.heartHigh }.maxOrNull()), "bpm"), HomeFact("Resting", homeNumber(resting), "bpm"))
+                    // Where today's reading came from, or what keeps the watch from sending it live.
+                    val today = period == 1 && selected.date == LocalDate.now()
+                    val source = when {
+                        fromWatch -> HomeFact("Recorded readings", "Galaxy Watch")
+                        today && state.watchHeartState == "needs_access" -> HomeFact("Live from watch", "Allow heart access")
+                        today && state.watchHeartState == "off" -> HomeFact("Live from watch", "Turned off on watch")
+                        else -> HomeFact("Recorded readings", "Samsung Health")
+                    }
+                    footer = listOf(source, HomeFact("Latest recorded", selected.heartAt?.let(::homeTime) ?: "—"))
                     heading = if (period == 1) "Heart rate through the day" else "Daily average heart rate"
                 }
                 HomeMetric.Sleep -> {

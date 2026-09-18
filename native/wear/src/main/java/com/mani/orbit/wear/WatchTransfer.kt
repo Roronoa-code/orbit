@@ -108,14 +108,21 @@ class WatchSyncWorker(context: Context, params: WorkerParameters) : CoroutineWor
 
 class WatchTransferService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
-        if (event.path !in setOf(ReadingWire.ACK_PATH, WorkoutControlWire.PATH, PeerProtocol.REJECTION_PATH) || event.data.size > WorkoutControlWire.MAX_BYTES) return
+        if (event.path !in setOf(ReadingWire.ACK_PATH, WorkoutControlWire.PATH, PeerProtocol.REJECTION_PATH, LiveWire.PATH) ||
+            event.data.size > WorkoutControlWire.MAX_BYTES) return
         try {
             val store = WatchStore(this)
-            require(event.sourceNodeId == store.status("phone")) { "Receipt from another phone" }
+            val paired = store.status("phone")
+            // A live request can come before this watch has ever synced; the phone role is still checked below.
+            require(event.sourceNodeId == paired || event.path == LiveWire.PATH && paired.isEmpty()) { "Receipt from another phone" }
             val peers = Tasks.await(Wearable.getCapabilityClient(this).getCapability(
                 ReadingWire.PHONE_CAPABILITY, CapabilityClient.FILTER_REACHABLE), 10, TimeUnit.SECONDS).nodes
             require(peers.any { it.id == event.sourceNodeId }) { "Unexpected peer role" }
-            if (event.path == PeerProtocol.REJECTION_PATH) {
+            if (event.path == LiveWire.PATH) {
+                // Live updates are best effort: a request this build cannot read is simply not answered.
+                val request = try { LiveWire.decodeRequest(event.data) } catch (_: UnsupportedWire) { return }
+                WatchLive.request(this, event.sourceNodeId, request)
+            } else if (event.path == PeerProtocol.REJECTION_PATH) {
                 WatchSyncWorker.rejected = ProtocolRejection.decode(event.data)
             } else if (event.path == WorkoutControlWire.PATH) {
                 val message = try { WorkoutControlWire.decode(event.data) } catch (unsupported: UnsupportedWire) {

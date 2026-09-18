@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 class PhoneReadingService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
         if (event.path !in setOf(ReadingWire.PATH, MeasurementWire.PATH, EcgWire.PATH, HeartWire.PATH, RawSensorWire.PATH, SweatWire.PATH, WorkoutWire.PATH, WorkoutControlWire.PATH, HealthContextWire.REQUEST_PATH,
-                PeerProtocol.REJECTION_PATH) || event.data.size > ReadingWire.MAX_BYTES) return
+                PeerProtocol.REJECTION_PATH, LiveWire.PATH) || event.data.size > ReadingWire.MAX_BYTES) return
         // WearableListenerService dispatches on its background handler, never the UI thread.
         try {
             val peers = Tasks.await(Wearable.getCapabilityClient(this).getCapability(
@@ -21,6 +21,11 @@ class PhoneReadingService : WearableListenerService() {
             require(peers.nodes.any { it.id == event.sourceNodeId }) { "Unexpected peer role" }
             if (event.path == PeerProtocol.REJECTION_PATH) {
                 WatchWorkoutControl.reject(event.sourceNodeId, ProtocolRejection.decode(event.data))
+                return
+            }
+            if (event.path == LiveWire.PATH) {
+                // Display-only and best effort: a newer watch's update this build cannot read is dropped.
+                try { PhoneLive.receive(LiveWire.decodeUpdate(event.data)) } catch (_: UnsupportedWire) { }
                 return
             }
             if (event.path == HealthContextWire.REQUEST_PATH) {
@@ -46,6 +51,7 @@ class PhoneReadingService : WearableListenerService() {
                     .putString("status", "Watch readings received")
                 if (event.path == WorkoutWire.PATH) status.putString("node:${WorkoutWire.decode(event.data).installation}", event.sourceNodeId)
                 check(status.commit())
+                if (event.path == ReadingWire.PATH || event.path == HeartWire.PATH) PhoneLive.journalChanged()
                 val ack = ReadingWire.encodeReceipt(receipt)
                 Tasks.await(Wearable.getMessageClient(this).sendMessage(event.sourceNodeId, ReadingWire.ACK_PATH, ack), 10, TimeUnit.SECONDS)
             } catch (unsupported: UnsupportedWire) {

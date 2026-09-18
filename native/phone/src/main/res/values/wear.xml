@@ -12,5 +12,6 @@
         <item>orbit_heart_batches_v1</item>
         <item>orbit_raw_sensors_v1</item>
         <item>orbit_workout_sweat_v1</item>
+        <item>orbit_live_v1</item>
     </string-array>
 </resources>

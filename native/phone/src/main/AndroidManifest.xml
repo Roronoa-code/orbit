@@ -23,6 +23,7 @@
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/workout-control" />
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/health-context-request" />
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/protocol-rejected" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/live" />
             </intent-filter>
         </service>
         <service android:name="com.mani.orbit.MusicSession$Access" android:label="Orbit music controls" android:exported="true" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">

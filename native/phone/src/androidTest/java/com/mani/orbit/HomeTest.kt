@@ -75,7 +75,8 @@ class HomeTest {
         assertNull(steps.comparison.previous)
         val pulse = HomeSummary.from(state, HomeMetric.Heart, 7, 10000)
         assertEquals("82", pulse.primary) // 1720/21, not an average of two daily means (100).
-        assertEquals("21", pulse.facts.last().value)
+        // Resting is each day's calmest hour, averaged over the days that have one: (80 + 120) / 2.
+        assertEquals(HomeFact("Resting", "100", "bpm"), pulse.facts.last())
         val food = HomeSummary.from(state, HomeMetric.Intake, 30, 10000)
         assertEquals("400", food.primary)
         assertEquals("25", food.facts.first().value)

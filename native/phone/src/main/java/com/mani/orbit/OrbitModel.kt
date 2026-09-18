@@ -42,6 +42,10 @@ data class HealthDay(
     val heartLow: Double? = null,
     val heartHigh: Double? = null,
     val heartAt: Long? = null,
+    /** Today's heart rate is the newest reading from Orbit's watch app rather than Samsung Health's. */
+    val heartFromWatch: Boolean = false,
+    /** Today's steps include steps Orbit's watch app has counted that Samsung Health has not reported yet. */
+    val stepsFromWatch: Boolean = false,
     val hourlyHeart: List<Reading> = emptyList(),
     val nights: List<SleepNight> = emptyList(),
     val sleepStages: Map<String, Double?> = emptyMap(),
@@ -67,6 +71,8 @@ data class HealthScreenState(
     val firstRecord: LocalDate? = null,
     val historyAllowed: Boolean = false,
     val workouts: List<WorkoutRecord> = emptyList(),
+    /** What Orbit's watch app last said it can offer for live heart rate; see [LiveUpdate]. */
+    val watchHeartState: String? = null,
 )
 
 class OrbitModel(application: Application, private val saved: SavedStateHandle) : AndroidViewModel(application) {
@@ -144,7 +150,8 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                             && hours.all { it.value == kotlin.math.floor(it.value) } && hours.sumOf { it.value } == steps)
                         day = day.copy(steps = steps, hourlySteps = hours)
                     }
-                    day = withWatchHeart(day)
+                    samsungDay = day
+                    day = withWatch(day)
                     withContext(Dispatchers.Main.immediate) {
                         if (generation == sourceGeneration && selectedDate.value == date.toString()) {
                             mutableHealth.value = HealthScreenState(day, next == null, snapshot.optBoolean("syncing"),
@@ -154,7 +161,8 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                                 scanned = snapshot.optLong("scanned").coerceAtLeast(0),
                                 liveStatus = snapshot.optJSONObject("live")?.optString("status")?.takeIf { it.isNotBlank() } ?: "Connect for live phone and watch steps",
                                 liveConnected = snapshot.optJSONObject("live")?.optBoolean("connected") == true,
-                                recordCount = recordCount, firstRecord = firstRecord, historyAllowed = historyAllowed, workouts = cached?.workouts.orEmpty())
+                                recordCount = recordCount, firstRecord = firstRecord, historyAllowed = historyAllowed, workouts = cached?.workouts.orEmpty(),
+                                watchHeartState = mutableHealth.value.watchHeartState)
                             healthRevision = snapshot.getString("revision")
                             acceptedGeneration = generation
                         }
@@ -205,26 +213,99 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
      * newer is the heart rate today shows.
      */
     @Volatile private var watchHeart: Pair<Double, Long>? = null
+    private val stepLead = WatchStepLead()
+    /** The selected day as Samsung Health last reported it, before anything from the watch is laid over it. */
+    @Volatile private var samsungDay: HealthDay? = null
 
-    fun refreshWatchHeart(journal: java.io.File) {
-        val latest = try {
-            com.mani.orbit.sync.ReadingJournal(journal).use { it.latest("heart") }
-        } catch (_: Exception) { null } ?: return
-        val bpm = latest.optDouble("value", Double.NaN)
-        val at = latest.optLong("end", 0)
-        if (latest.optString("quality") != "valid" || latest.optBoolean("timeUncertain") || !bpm.isFinite() || bpm <= 0 ||
-            at <= 0 || at > System.currentTimeMillis()) return
-        if (watchHeart?.second == at) return
-        watchHeart = bpm to at
-        viewModelScope.launch(Dispatchers.Main.immediate) {
-            mutableHealth.value = mutableHealth.value.let { it.copy(day = withWatchHeart(it.day)) }
+    /** Pick up the newest heart reading and step count Orbit's watch app has delivered through the journal. */
+    fun refreshWatch(journal: java.io.File) {
+        val (heart, steps) = try {
+            com.mani.orbit.sync.ReadingJournal(journal).use { it.latest("heart") to it.latest("steps") }
+        } catch (_: Exception) { return }
+        val now = System.currentTimeMillis()
+        heart?.let { latest ->
+            val bpm = latest.optDouble("value", Double.NaN)
+            val at = latest.optLong("end", 0)
+            if (latest.optString("quality") == "valid" && !latest.optBoolean("timeUncertain") && bpm.isFinite() && bpm > 0 &&
+                at > 0 && at <= now) offerWatchHeart(bpm, at)
         }
+        steps?.let { latest ->
+            val count = latest.optDouble("value", Double.NaN)
+            val at = latest.optLong("end", 0)
+            // A daily count starts at midnight and is flagged time-uncertain after any clock correction
+            // since; its count and the moment it was taken are still sound.
+            if (latest.optString("semantics") == "daily" && latest.optString("quality") == "valid" &&
+                count.isFinite() && count >= 0 && at > 0 && at <= now) offerWatchSteps(count, at)
+        }
+    }
+
+    /**
+     * What Orbit's watch app answered while this screen holds its attention: what it can offer, and its
+     * newest valid heart reading, pushed the moment the watch captures it.
+     */
+    fun acceptLive(update: com.mani.orbit.sync.LiveUpdate) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            if (mutableHealth.value.watchHeartState != update.state) mutableHealth.value = mutableHealth.value.copy(watchHeartState = update.state)
+        }
+        // The watch keeps its own clock; a reading a little ahead of the phone's is still the latest.
+        val latest = System.currentTimeMillis() + 60_000
+        val steps = update.steps
+        val stepsAt = update.stepsAt
+        if (steps != null && stepsAt != null && stepsAt <= latest) offerWatchSteps(steps, stepsAt)
+        val bpm = update.bpm ?: return
+        val at = update.at ?: return
+        if (at <= latest) offerWatchHeart(bpm, at)
+    }
+
+    private fun offerWatchSteps(steps: Double, at: Long) {
+        val date = java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        if (date != LocalDate.now()) return
+        stepLead.watch(steps, at, date)
+        publishWatch()
+    }
+
+    /** Lay the watch over the day Samsung Health last reported, never over a day it is already laid over. */
+    private fun publishWatch() {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            val current = mutableHealth.value
+            val base = samsungDay?.takeIf { it.date == current.day.date } ?: current.day
+            mutableHealth.value = current.copy(day = withWatch(base))
+        }
+    }
+
+    private fun withWatch(day: HealthDay) = withWatchSteps(withWatchHeart(day))
+
+    /**
+     * Today's steps with what the watch has counted that Samsung Health has not reported yet (see
+     * [WatchStepLead]), and never fewer than the watch's own count. The extra lands in the hour the watch
+     * counted it, so the day's hours still add up to the day.
+     */
+    private fun withWatchSteps(day: HealthDay): HealthDay {
+        if (day.date != LocalDate.now()) return day
+        val samsung = day.steps ?: 0.0
+        val (lead, watch, at) = stepLead.lead(samsung, day.date) ?: return day
+        val total = maxOf(samsung + lead, watch)
+        if (total <= samsung) return day
+        val zone = java.time.ZoneId.systemDefault()
+        val hour = java.time.Instant.ofEpochMilli(at).atZone(zone).truncatedTo(java.time.temporal.ChronoUnit.HOURS).toInstant().toEpochMilli()
+        val hours = day.hourlySteps.associateByTo(LinkedHashMap()) { it.at }
+        hours[hour] = Reading(hour, (hours[hour]?.value ?: 0.0) + total - samsung)
+        return day.copy(steps = total, hourlySteps = hours.values.sortedBy { it.at }, stepsFromWatch = true)
+    }
+
+    /** Readings arrive by two paths, live and journal, in either order; the heart rate only moves forward. */
+    private fun offerWatchHeart(bpm: Double, at: Long) {
+        synchronized(this) {
+            if (watchHeart?.let { at <= it.second } == true) return
+            watchHeart = bpm to at
+        }
+        publishWatch()
     }
 
     private fun withWatchHeart(day: HealthDay): HealthDay {
         val (bpm, at) = watchHeart ?: return day
         if (day.date != LocalDate.now() || at <= (day.heartAt ?: 0L)) return day
-        return day.copy(heart = bpm, heartAt = at)
+        return day.copy(heart = bpm, heartAt = at, heartFromWatch = true)
     }
     fun openWorkout(id: String = "active") { saved["workoutRequest"] = id; navigate("Workouts") }
     fun workoutOpened(id: String?) { if (requestedWorkout.value == id) saved["workoutRequest"] = null }

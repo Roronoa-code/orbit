@@ -390,3 +390,71 @@ The ring is now three thin dotted strands with room round the number, dim enough
 rather than burn white, with no glints and a slower drift. The ring and the number shrink as one
 piece, and the ring is redrawn sharp at each size. Nothing pulses: a swipe turns the ring to the next
 metric and a tap nudges it round.
+
+## 16. A ring like the reference, and live heart rate and steps — 18 September 2026
+
+**The ring.** The calm three-strand ring was calm, but the owner held it against the reference and it
+looked nothing like it. What makes the reference read as volume rather than clutter is light: most of
+each band faces the viewer and is a faint dotted mesh in deep indigo, and only where a band turns
+edge-on does it catch the light as a bright lavender ridge. The ring is now four broad bands lit that
+way — a rim light by how edge-on the surface is, a little key light from the upper left, additive
+grains so a fold's own density brightens it, and a few glints only on lit folds. The number stays dot
+matrix, and the ring and number still shrink as one piece, redrawn sharp at every size.
+
+**What it cost, and what was fixed.** Measured on the owner's S25 Ultra with the render thread traced
+(the phone was warm and charging at the time, so it ran at 60 Hz and the frost tier):
+
+1. Every grain of a band's cross-section faces the same way, so the light is now worked out once per
+   cross-section rather than once per grain.
+2. The fold had the ring re-recorded on every frame of a deck swipe, copying its 2.5 MB of vertices
+   each time. The ring is now recorded once per step of its flow, and a fold redraws that recording at
+   its new size: the swipe's UI-thread work fell from 4.1 to 1.9 ms a frame.
+3. The flow clock asked for a step every 1/30 s exactly; two 60 Hz frames come to a hair under that,
+   so it waited for a third and the ring flowed at 20 frames a second. It now flows at 30.
+4. The Home scroll frost, invisible until the open deck is scrolled, still rendered a full-width layer
+   and a blur of the page on every frame the ring moved and every frame of a swipe. An invisible frost
+   now draws nothing.
+
+Deck swipes: legacy janky frames 7.4% → 2.7%, GPU time per frame p50 10.3 → 9.0 ms. The ring's idle
+step costs 4.5 ms on the UI thread and about 8 ms of GPU, thirty times a second; the frames that open
+the deck still sit near 14 ms of GPU, inside a 60 Hz frame but not a 120 Hz one.
+
+**Live heart rate.** Orbit's phone now asks the watch for live heart rate while it is on screen. The
+new `orbit_live_v1` family (see [PROTOCOL-COMPATIBILITY.md](PROTOCOL-COMPATIBILITY.md)) holds a
+45-second lease on the watch, renewed every 20 seconds and released when Orbit leaves the screen. The
+watch answers at once with its newest valid heart reading and what it can offer, flushes Health
+Services so anything it has measured since its last batch is delivered, and while the lease holds
+pushes each new valid heart reading the moment it is captured — every second or two while a live
+recording runs on the watch. The phone no longer polls: journal commits and live pushes both update
+today's heart rate the moment they land, and the reading only ever moves forward, whichever path
+brings it. The Home heart card says whether the reading is Samsung Health's or the watch's, and if
+Orbit on the watch lacks heart or background health access it says so ("Live from watch · Allow heart
+access") instead of silently showing an hour-old number.
+
+**Nobody presses record.** The owner, wearing the watch, asked that it simply happen. Opening Orbit
+on the phone now starts the watch's live heart recording by itself — Android allowed the health
+foreground service to start from the phone's message on the owner's Galaxy Watch Ultra (Wear OS 6) —
+and it streams to the phone and records nothing. Leaving Orbit stops it within about five seconds
+(the release message, or the lease lapsing within 45 s if that is lost); coming back restarts it in
+about one. Stopping it on the watch keeps it stopped until the phone lets go. On the owner's phone the
+Home heart rate read "106 bpm · live from your watch" and moved 106 → 102 → 103 without the watch being
+touched.
+
+**Live steps.** The owner then walked with the watch and left the phone behind: the watch counted,
+the phone stood at 917. Samsung Health merges phone and watch steps but hears from the watch on
+Samsung's schedule. The watch now pushes its own count since midnight with every answer and every
+passive capture, and the phone adds the steps the watch has counted since Samsung last caught up to
+Samsung's total ([WatchStepLead](phone/src/main/java/com/mani/orbit/WatchStepLead.kt)): any rise in
+Samsung's total covers the oldest of those steps first, so carrying both devices counts nothing twice
+and Samsung catching up never makes the number go back. One more fault hid behind it: a daily count
+starts at midnight, before any clock correction since boot, so the watch flags it time-uncertain once
+its clock has been nudged, and the live path had been discarding every step count for it. On the
+owner's phone, walking with the phone left behind: 1,093 → 1,114 → 1,127 → 1,135 → 1,167 → 1,185 in
+three minutes.
+
+The heart card's "Readings · samples" fact is now **Resting**: each day's calmest hour, averaged over
+the period.
+
+Verified on the owner's phone and watch as above, and on the emulators: the wire format, lease bounds,
+auto-start and decline rules, push rules, the step lead and forward-only ordering (phone 17/17 and
+watch 8/8 targeted).

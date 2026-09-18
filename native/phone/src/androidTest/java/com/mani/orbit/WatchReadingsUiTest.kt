@@ -35,18 +35,54 @@ class WatchReadingsUiTest {
         }
         fun today() = model.health.value.day
         deliver(91.0, now - 60_000)
-        model.refreshWatchHeart(journal)
+        model.refreshWatch(journal)
         rule.waitUntil(5000) { today().heart == 91.0 }
         org.junit.Assert.assertEquals(now - 60_000, today().heartAt)
         // A newer reading replaces it.
         deliver(95.0, now - 20_000)
-        model.refreshWatchHeart(journal)
+        model.refreshWatch(journal)
         rule.waitUntil(5000) { today().heart == 95.0 }
         // A reading the watch could not stand behind does not.
         deliver(40.0, now - 5_000, quality = "no_contact")
-        model.refreshWatchHeart(journal)
+        model.refreshWatch(journal)
         Thread.sleep(300)
         org.junit.Assert.assertEquals(95.0, today().heart!!, 0.0)
+        journal.delete()
+    }
+
+    /**
+     * Live heart rate reaches the phone by two paths, a push from the watch and the journal, in either
+     * order. Today's reading only ever moves forward, and the watch's answer about what it can offer
+     * survives the next Samsung Health refresh.
+     */
+    @Test fun aLiveReadingFromTheWatchMovesTodaysHeartRateForwardOnly() {
+        check(Build.HARDWARE in setOf("ranchu", "goldfish"))
+        val app = rule.activity.application
+        val model = OrbitModel(app, androidx.lifecycle.SavedStateHandle())
+        val now = System.currentTimeMillis()
+        fun today() = model.health.value.day
+        model.acceptLive(LiveUpdate("passive", 88.0, now - 30_000, now))
+        rule.waitUntil(5000) { today().heart == 88.0 && model.health.value.watchHeartState == "passive" }
+        org.junit.Assert.assertTrue(today().heartFromWatch)
+        // An older reading, live or from the journal, never takes today back.
+        model.acceptLive(LiveUpdate("passive", 80.0, now - 60_000, now + 1))
+        val journal = java.io.File(app.cacheDir, "watch-live-check.db").also { it.delete() }
+        val installation = UUID.nameUUIDFromBytes("Orbit live check watch".toByteArray()).toString()
+        ReadingJournal(journal).use {
+            it.receive(ReadingWire.encode(ReadingBatch(UUID.randomUUID().toString(), installation, listOf(
+                WatchReading(UUID.randomUUID().toString(), 1, now - 45_000, now - 45_000, 0, "heart", 77.0, "bpm", "valid", "instant",
+                    UUID.randomUUID().toString(), 1000)))), now)
+        }
+        model.refreshWatch(journal)
+        Thread.sleep(300)
+        org.junit.Assert.assertEquals(88.0, today().heart!!, 0.0)
+        // A newer one does.
+        model.acceptLive(LiveUpdate("streaming", 92.0, now - 2_000, now + 2))
+        rule.waitUntil(5000) { today().heart == 92.0 && model.health.value.watchHeartState == "streaming" }
+        // An answer without a reading still says what the watch can offer, and leaves the reading be.
+        model.acceptLive(LiveUpdate("needs_access", null, null, now + 3))
+        rule.waitUntil(5000) { model.health.value.watchHeartState == "needs_access" }
+        org.junit.Assert.assertEquals(92.0, today().heart!!, 0.0)
         journal.delete()
     }
 

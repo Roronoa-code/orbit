@@ -60,7 +60,11 @@ object WatchSamples {
             daily("energy", data.getData(DataType.CALORIES_DAILY))
             daily("floors", data.getData(DataType.FLOORS_DAILY))
         }
-        return try { store.save(readings) } finally { WatchSyncWorker.schedule(context) }
+        val saved = try { store.save(readings) } finally { WatchSyncWorker.schedule(context) }
+        // A phone showing Orbit gets the newest heart reading now, not with the next queued transfer.
+        try { WatchLive.offer(context, readings) }
+        catch (error: Exception) { Log.w("OrbitWatch", "Live heart offer incomplete: ${error.javaClass.simpleName}") }
+        return saved
     }
     fun battery(context: Context) {
         val battery = context.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return

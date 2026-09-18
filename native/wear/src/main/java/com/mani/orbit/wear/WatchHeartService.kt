@@ -31,14 +31,20 @@ class WatchHeartService : Service() {
     private var sensor: SensorSdkHeartRateSource? = null
     private var rawSensor: SensorSdkRawProbeSource? = null
     private var stopping = false
+    /**
+     * Started by the phone rather than by the wearer: it streams to the phone and records nothing, and
+     * lives exactly as long as the phone keeps watching. See [WatchLive].
+     */
+    private var forPhone = false
     private val prefs by lazy { getSharedPreferences("samsung-heart", MODE_PRIVATE) }
     override fun onBind(intent: Intent?): IBinder? = null
     override fun onCreate() { super.onCreate(); owner = this }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            STOP -> stopCapture()
+            STOP -> { if (forPhone) WatchLive.decline(this); stopCapture() }
             START -> if (job?.isCompleted != false) {
+                forPhone = intent.getBooleanExtra("phone", false)
                 val name = intent.getStringExtra("probe")
                 val probe = SensorRawProbe.entries.firstOrNull { it.name == name }
                 if (name != null && probe == null) { stopSelfResult(startId); return START_NOT_STICKY }
@@ -103,16 +109,23 @@ class WatchHeartService : Service() {
             frames.collect { frame ->
                 if (!recordingPermissions(probe).all { WatchPermissions.granted(this, it) }) throw SecurityException("Sensor access changed")
                 val elapsed = frame.receivedElapsed
+                // The phone stopped watching, or let go: a stream it started ends with it.
+                if (forPhone && WatchLive.leased(this) == null) { stopCapture(); return@collect }
                 // Once delivered, persist the whole callback even if Stop arrives during the transaction.
                 val reading = withContext(NonCancellable + Dispatchers.IO) {
-                    check(filesDir.usableSpace >= 16L * 1024 * 1024) { "Watch storage is nearly full" }
-                    store.journal().use {
-                        when (frame) {
-                            is HeartFrame -> HeartJournal(it).capture(frame)
-                            is RawSensorFrame -> RawSensorJournal(it).capture(frame)
+                    if (!forPhone) {
+                        check(filesDir.usableSpace >= 16L * 1024 * 1024) { "Watch storage is nearly full" }
+                        store.journal().use {
+                            when (frame) {
+                                is HeartFrame -> HeartJournal(it).capture(frame)
+                                is RawSensorFrame -> RawSensorJournal(it).capture(frame)
+                            }
                         }
                     }
-                    if (elapsed - lastSync >= 5000) {
+                    // A phone showing Orbit follows the recording as it happens. Never at the recording's expense.
+                    if (frame is HeartFrame) try { WatchLive.offer(this@WatchHeartService, frame.readings()) }
+                        catch (_: Exception) { }
+                    if (!forPhone && elapsed - lastSync >= 5000) {
                         requestMeasurementSync(this@WatchHeartService)
                         if (probe == null || probe == SensorRawProbe.SKIN_TEMPERATURE_CONTINUOUS) WatchGlanceUpdates.request(this@WatchHeartService)
                         lastSync = elapsed
@@ -185,7 +198,8 @@ class WatchHeartService : Service() {
         val open = PendingIntent.getActivity(this, 0, Intent(this, WatchHeartActivity::class.java).putExtra("probe", mutableState.value.probe?.name), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val stop = PendingIntent.getService(this, 0, Intent(this, WatchHeartService::class.java).setAction(STOP), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val notice = Notification.Builder(this, "orbit-live-heart").setSmallIcon(R.drawable.orbit_icon)
-            .setContentTitle(recordingTitle(mutableState.value.probe)).setContentText("Recording on your Watch").setContentIntent(open)
+            .setContentTitle(recordingTitle(mutableState.value.probe))
+            .setContentText(if (forPhone) "Showing on your phone while Orbit is open" else "Recording on your Watch").setContentIntent(open)
             .setOngoing(true).setVisibility(Notification.VISIBILITY_PRIVATE)
             .addAction(Notification.Action.Builder(null, "Stop", stop).build()).build()
         if (Build.VERSION.SDK_INT >= 34) startForeground(104, notice, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH) else startForeground(104, notice)
@@ -207,10 +221,11 @@ class WatchHeartService : Service() {
         internal val state = mutableState.asStateFlow()
         const val START = "com.mani.orbit.START_LIVE_HEART"
         const val STOP = "com.mani.orbit.STOP_LIVE_HEART"
-        fun start(context: Context, probe: SensorRawProbe? = null) {
+        fun start(context: Context, probe: SensorRawProbe? = null, forPhone: Boolean = false) {
             if (mutableState.value.active) return
             mutableState.value = WatchHeartState("starting", probe = probe)
-            try { context.startForegroundService(Intent(context, WatchHeartService::class.java).setAction(START).putExtra("probe", probe?.name)) }
+            try { context.startForegroundService(Intent(context, WatchHeartService::class.java).setAction(START)
+                .putExtra("probe", probe?.name).putExtra("phone", forPhone)) }
             catch (error: Exception) { mutableState.value = WatchHeartState(probe = probe); throw error }
         }
         fun stop(context: Context) = context.startService(Intent(context, WatchHeartService::class.java).setAction(STOP))

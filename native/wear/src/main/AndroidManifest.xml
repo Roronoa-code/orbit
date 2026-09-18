@@ -57,6 +57,7 @@
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/readings-ack" />
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/workout-control" />
                 <data android:scheme="wear" android:host="*" android:path="/orbit/v1/protocol-rejected" />
+                <data android:scheme="wear" android:host="*" android:path="/orbit/v1/live" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
