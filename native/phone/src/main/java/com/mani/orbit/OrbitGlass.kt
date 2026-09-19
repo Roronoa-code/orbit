@@ -78,7 +78,7 @@ internal const val GlassResolution = .33f
  * The blur is not on this list, and that is measured rather than assumed. Blur models frosting, not
  * thickness: growing it while the tint thins washed the page out faster than the thinner tint let it
  * through, so picking a surface up showed *less* of what was behind it than leaving it at rest. Lift
- * says "thicker" through the refraction, the rim, the dispersion, the shadow and the tint instead.
+ * says "thicker" through the refraction, the rim, the shadow and the tint instead.
  */
 private const val LIFT_LENS_HEIGHT = 2.2f
 private const val LIFT_LENS_AMOUNT = 2.6f
@@ -88,8 +88,6 @@ private const val SHADOW_REST_ALPHA = .10f
 private const val SHADOW_LIFTED_ALPHA = .30f
 private const val LIFT_THINNING = .4f
 
-/** Past this much lift the rim splits the light into colour, as a thick lens does. */
-private const val LIFT_DISPERSION_FROM = .3f
 
 /** The hairline that stands in for the glass rim wherever the glass itself is not drawn. */
 internal val GlassEdgeWidth = .5.dp
@@ -107,7 +105,7 @@ internal val BlurSupported: Boolean get() = Build.VERSION.SDK_INT >= 31
  *
  * [engagement] is how far this surface has lifted off the page, 0..1, read at draw time so it can
  * be an animation. A lifted surface is a thicker piece of glass: it bends more of what is behind
- * it, deeper in, splits the light at its rim once it is well up, carries a wider rim and a deeper
+ * it, deeper in, carries a wider rim and a deeper
  * shadow, and thins its own tint so more of the page shows through. [focus] is where the contact
  * is inside the surface; the rim's light turns with it, the way light moves around real glass as
  * the glass moves.
@@ -165,7 +163,8 @@ internal fun Modifier.orbitFrost(page: GlassBackdrop, corner: Dp, engagement: ()
                     refractionHeight = lensHeightPx * optics.value * (1f + LIFT_LENS_HEIGHT * lifted),
                     refractionAmount = lensAmountPx * optics.value * (1f + LIFT_LENS_AMOUNT * lifted),
                     depthEffect = true,
-                    chromaticAberration = lifted >= LIFT_DISPERSION_FROM,
+                    // No rainbow at the rim: the owner rejected the colour fringe on 19 September 2026.
+                    chromaticAberration = false,
                 )
             }
         },

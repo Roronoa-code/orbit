@@ -33,8 +33,8 @@ G3 now uses the runtime policy below. Local software-emulator timings do not qua
 `GlassQualityMonitor.kt` observes the visible phone window. `GlassQualityPolicy.kt` owns three appearances of the same material: optical, approved frost, and readability. No new gesture owner or page tree is introduced. `MainActivity` provides the chosen quality; the Watch retains its native renderer.
 
 - Start at the best tier the platform supports. Opening cheap and climbing after five seconds of evidence meant the owner watched the material change under their hands, which is the opposite of the point.
-- Android's actual total frame duration and deadline decide whether a frame was late, independently of refresh rate. Three consecutive misses cost the refraction. A normal change waits for release if a finger owns the window. Recovery requires five seconds of timely rendered frames and at least 30 samples; any miss, pause, or gap over half a second resets that evidence.
-- **Measured conditions never reach readability.** That tier belongs to the owner's own Reduce transparency preference, to a platform with no blur, and to their own battery saver. Heat and frame pressure remove the lens and leave the glass. This is not a preference about performance: a surface that silently becomes a painted rectangle is a different app, and until 18 September 2026 that is what shipped — three late frames dropped a signed build on an S25 Ultra to flat `#28262E` and `#15141A` fills, which is what the owner photographed and called two different shades.
+- Android's actual total frame duration and deadline decide whether a frame was late, independently of refresh rate. Since 19 September 2026 a late frame costs nothing: three consecutive misses used to cost the refraction, and the owner saw the effect "randomly disappear" whenever a gesture ran a few frames late. A slow frame is now fixed where it is slow. A tier lowered by severe heat climbs back only after five seconds of timely rendered frames and at least 30 samples; any miss, pause, or gap over half a second resets that evidence, and a normal change waits for release if a finger owns the window.
+- **Measured conditions never reach readability.** That tier belongs to the owner's own Reduce transparency preference, to a platform with no blur, and to their own battery saver. Only severe heat (Android's SEVERE thermal status or above) removes the lens, and it leaves the glass. This is not a preference about performance: a surface that silently becomes a painted rectangle is a different app, and until 18 September 2026 that is what shipped — three late frames dropped a signed build on an S25 Ultra to flat `#28262E` and `#15141A` fills, which is what the owner photographed and called two different shades.
 - Thermal headroom is a forecast, not the signal. A device that reports its thermal status but no headroom — Samsung among them — still earns full optics; without any thermal signal at all the refraction is held back. Requiring the forecast is why the lens never once ran on the owner's own phone.
 - Query public headroom no more than once per ten seconds, preserving that rate limit across recreation. Use vendor-provided headroom thresholds where available and Android's documented severe normalization. Unsupported, stale or invalid readings remain unknown. Listeners and polling stop on pause and reattach on resume.
 - Optical strength settles over 180ms without replacing the surface; Reduce motion makes that change immediate. Readability skips the source sampler and decorative scroll blur and suspends optional globe rotation. Labels, values, navigation, selection, recording controls and the saved rotation preference survive.
@@ -105,7 +105,7 @@ lifted surface is a thicker piece of glass:
 | At rest | Fully lifted |
 |---|---|
 | 12.6dp refraction height, 10.1dp amount | 40.3dp, 36.4dp |
-| no dispersion | the rim splits the light into colour past a third of the way up |
+| no dispersion | still no dispersion: the owner rejected the rainbow rim on 19 September 2026 |
 | 0.5dp rim | 1.5dp |
 | shadow at 10% | the same 30dp shadow at 30% |
 | tint at its full opacity | 60% of it, so more of the page shows through |
@@ -113,7 +113,7 @@ lifted surface is a thicker piece of glass:
 The blur is deliberately not on that list. Blur models frosting rather than thickness, and growing
 it while the tint thins washed the page out faster than the thinner tint let it through — measurably,
 in `GlassLensTest`: picking a surface up showed *less* of what was behind it than leaving it at rest,
-which is backwards. Lift says "thicker" through the refraction, the rim, the dispersion, the shadow
+which is backwards. Lift says "thicker" through the refraction, the rim, the shadow
 and the tint.
 
 `focus` turns the rim's light: the deflection is ±30° across the surface and scales with the lift, so

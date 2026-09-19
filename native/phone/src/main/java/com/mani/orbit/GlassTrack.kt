@@ -357,7 +357,7 @@ private fun TrackLens(state: GlassTrackState, box: FloatArray, backdrop: Backdro
             if (refracts && lifted > 0f) {
                 lens(refractionHeight = min(size.minDimension * .38f, deepest) * lifted,
                     refractionAmount = min(size.minDimension * .45f, furthest) * lifted,
-                    depthEffect = true, chromaticAberration = lifted >= .3f)
+                    depthEffect = true, chromaticAberration = false)
             }
         },
         // The rim is the lens's own edge, lit from a light that swings as it crosses the rail.

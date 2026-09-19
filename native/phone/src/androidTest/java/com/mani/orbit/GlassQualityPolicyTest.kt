@@ -58,7 +58,12 @@ class GlassQualityPolicyTest {
         } finally { shell(restore) }
     }
 
-    @Test fun actualDeadlinesLowerQualityAtReleaseAndRecoveryCannotFlutter() {
+    /**
+     * Late frames never take the glass away: the owner saw the refraction vanish at random whenever
+     * a few frames ran late. Only severe heat sets the refraction aside, and it comes back only after
+     * timely rendering, which a late frame resets.
+     */
+    @Test fun lateFramesNeverTakeTheGlassAndHeatRecoveryNeedsTimelyFrames() {
         val policy = GlassQualityPolicy(true)
         policy.conditions(0, true, false)
         var time = 1_000_000_000L
@@ -70,19 +75,20 @@ class GlassQualityPolicyTest {
         }
         frames(330)
         assertEquals(GlassQuality.OPTICAL, policy.state.value.quality)
-        policy.touch(true); frames(3, late = true)
-        assertEquals("No normal tier replacement under an owned finger", GlassQuality.OPTICAL, policy.state.value.quality)
-        policy.touch(false)
-        assertEquals(GlassQualityState(GlassQuality.FROST, TraceQualityReason.FRAME_PRESSURE), policy.state.value)
-        repeat(20) { frames(20); frames(1, late = true) }
-        assertEquals("Alternating deadline pressure must not oscillate", GlassQuality.FROST, policy.state.value.quality)
+        policy.touch(true); frames(30, late = true); policy.touch(false)
+        assertEquals("A run of late frames under a finger keeps the glass", GlassQuality.OPTICAL, policy.state.value.quality)
+        repeat(20) { frames(3, late = true); frames(1) }
+        assertEquals("and so does sustained pressure", GlassQuality.OPTICAL, policy.state.value.quality)
+        policy.conditions(2, true, false)
+        assertEquals("Moderate warmth keeps it too", GlassQuality.OPTICAL, policy.state.value.quality)
+        policy.conditions(SevereThermal, true, false)
+        assertEquals(GlassQualityState(GlassQuality.FROST, TraceQualityReason.THERMAL), policy.state.value)
+        policy.conditions(0, true, false)
+        frames(100); frames(1, late = true); frames(200)
+        assertEquals("A late frame resets the way back", GlassQuality.FROST, policy.state.value.quality)
         frames(60, interval = 100_000_000L)
         assertEquals("Recovery follows elapsed successful rendering, not a presumed 60Hz count", GlassQuality.OPTICAL, policy.state.value.quality)
-        // Sustained pressure costs the refraction once and stops there. Measured rendering may never
-        // replace the material with a flat fill: that tier belongs to the owner's own preference,
-        // to a platform without blur and to their battery saver.
-        repeat(8) { frames(3, late = true) }
-        assertEquals(GlassQualityState(GlassQuality.FROST, TraceQualityReason.FRAME_PRESSURE), policy.state.value)
+        policy.conditions(SevereThermal, true, false); policy.conditions(0, true, false)
         policy.pause(); time += 20_000_000_000L; frames(1)
         assertEquals("Idle/background time is not healthy rendering evidence", GlassQuality.FROST, policy.state.value.quality)
         frames(330)
@@ -108,7 +114,7 @@ class GlassQualityPolicyTest {
         assertEquals("Heat costs the refraction, and not under an owned finger", GlassQuality.FROST, policy.state.value.quality)
         policy.touch(false); policy.conditions(0, true, true)
         assertEquals(TraceQualityReason.POWER_SAVER, policy.state.value.reason)
-        policy.conditions(1, true, false)
+        policy.conditions(SevereThermal - 1, true, false)
         assertEquals("Cooling does not instantly restore expensive effects", GlassQuality.READABILITY, policy.state.value.quality)
         val unsupported = GlassQualityPolicy(false, false)
         unsupported.conditions(0, true, false)

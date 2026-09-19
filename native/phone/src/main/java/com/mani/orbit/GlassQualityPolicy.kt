@@ -5,6 +5,9 @@ import com.mani.orbit.sync.TraceTier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/** Android's thermal status from which the refraction is set aside: severe throttling, not warmth. */
+internal const val SevereThermal = 3
+
 /** UI-only policy. Frame deadlines come from Android, never a presumed display refresh rate. */
 internal class GlassQualityPolicy(private val opticalSupported: Boolean, private val frostSupported: Boolean = true) {
     // Open at the best tier the platform supports and let evidence lower it. Starting cheap and
@@ -20,15 +23,15 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
     private var lastFrame = 0L
     private var goodSince = 0L
     private var goodFrames = 0
-    private var missedRun = 0
 
     /**
      * The material is the app. Nothing measured here may replace it with a flat fill.
      *
      * READABILITY is the accessibility and unsupported-platform tier: the owner's own reduce
-     * transparency preference, a platform with no blur, or their own battery saver. Heat and frame
-     * pressure cost the refraction and leave the glass, because a surface that silently turns into
-     * a painted rectangle is the inconsistency, not a saving.
+     * transparency preference, a platform with no blur, or their own battery saver. Only severe heat
+     * costs the refraction, and it leaves the glass. Frame pressure costs nothing: the owner saw the
+     * refraction vanish "randomly" whenever three frames ran late, so a slow frame is fixed where it
+     * is slow, never by quietly taking the effect away.
      *
      * Thermal headroom is a forecast, not the signal. A device that reports its thermal status but
      * no headroom (Samsung among them) still carries enough evidence for full optics; without the
@@ -41,7 +44,7 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
             !frostSupported -> { cap = GlassQuality.READABILITY; reason = TraceQualityReason.UNSUPPORTED }
             powerSaver -> { cap = GlassQuality.READABILITY; reason = TraceQualityReason.POWER_SAVER }
             !opticalSupported -> { cap = GlassQuality.FROST; reason = TraceQualityReason.UNSUPPORTED }
-            thermalStatus != null && thermalStatus >= 1 -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL }
+            thermalStatus != null && thermalStatus >= SevereThermal -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL }
             thermalStatus == null -> { cap = GlassQuality.FROST; reason = TraceQualityReason.THERMAL_UNKNOWN }
             else -> { cap = GlassQuality.OPTICAL; reason = if (headroomKnown) TraceQualityReason.MEASURED else TraceQualityReason.THERMAL_UNKNOWN }
         }
@@ -64,15 +67,10 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
         if (lastFrame > 0 && start - lastFrame > 500_000_000L) clearEvidence()
         lastFrame = start
         if (total >= deadline) {
-            goodSince = 0; goodFrames = 0; missedRun++
-            // Frame pressure costs the refraction and stops there. Dropping the blur as well would
-            // swap the material for a painted rectangle mid-gesture, which is worse than a late frame.
-            if (missedRun >= 3) {
-                if (value.value.quality == GlassQuality.OPTICAL) request(GlassQuality.FROST, TraceQualityReason.FRAME_PRESSURE)
-                missedRun = 0
-            }
+            // A late frame is not a reason to take the glass away; it only resets the evidence a
+            // tier lowered by heat needs before it may climb back.
+            goodSince = 0; goodFrames = 0
         } else {
-            missedRun = 0
             if (goodSince == 0L) goodSince = start
             goodFrames = (goodFrames + 1).coerceAtMost(30)
             // Deliberately asymmetric: a sustained missed-deadline run lowers fidelity; recovery needs
@@ -95,5 +93,5 @@ internal class GlassQualityPolicy(private val opticalSupported: Boolean, private
             value.value = GlassQualityState(quality, reason); clearEvidence()
         }
     }
-    private fun clearEvidence() { goodSince = 0; goodFrames = 0; missedRun = 0 }
+    private fun clearEvidence() { goodSince = 0; goodFrames = 0 }
 }
