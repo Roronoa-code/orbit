@@ -542,6 +542,14 @@ than 32/255 around 657 letter pixels (`theLettersUnderTheLensBendWithIt`).
 - **The date chooser.** It grows out of the header's date and closes back into it: laid out at full size,
   shown through an outline growing from exactly the date's bounds, with a traced edge and a 2% bounce.
 
+**Then, on the owner's word.**
+
+- The rainbow fringe is gone from every lens and lifted surface.
+- Late frames no longer switch the refraction off. Three used to, and the owner saw the effect
+  "randomly disappear"; only Android's severe heat status sets it aside now.
+- Every glass control but the island draws in 5% under its lifted lens, and in-page lenses lift twice
+  as far (6 dp), rising clear of their rails.
+
 **A wrong turn.** The first version replaced the island with a four-tab bar and docked the workout above
 it. The owner rejected it the same day: the island is Orbit's navigation, and a design request restyles
 it; it does not replace it. That version is gone.

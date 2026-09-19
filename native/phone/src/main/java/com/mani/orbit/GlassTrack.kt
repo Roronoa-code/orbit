@@ -124,6 +124,11 @@ internal data class TrackStyle(
     val round: Dp = 0.dp,
     val inset: Dp? = null,
     val labelWeight: FontWeight = FontWeight(560),
+    /**
+     * Whether the track draws in 5% about a lifted lens, so the glass reads as rising off it. Every
+     * track does but the Explore island's, which the owner keeps exactly as it moves today.
+     */
+    val recedes: Boolean = true,
     /** Whether a track that cannot be used right now shows it; one hidden while it opens need not. */
     val dims: Boolean = true,
 )
@@ -134,7 +139,8 @@ private val TrackRailRim = Brush.verticalGradient(listOf(Color.White.copy(alpha 
 
 /** How far a lifted lens reaches past its pill on every side. BitChord's hold: it rises clear of the rail. */
 private val NavigationReach = 8.dp
-private val SegmentReach = 3.dp
+/** In a page the lens lifts clear of its rail too, a little less than the navigation's. */
+private val SegmentReach = 6.dp
 /** A finger moves this far before it carries the selection rather than pressing a slot. */
 private val CarryAfter = 6.dp
 
@@ -204,7 +210,7 @@ internal fun GlassTrack(
     }
     val box = remember { FloatArray(4) }
     val showPill by remember(state) { derivedStateOf { state.hasPill } }
-    val recedes = navigation && optics && style.rail
+    val recedes = optics && style.recedes
     val ink = readability.foreground(style.ink)
     val chosen = readability.foreground(style.chosenInk)
     // As wide as its container unless given a width of its own: the slots share whatever it has.
@@ -214,7 +220,8 @@ internal fun GlassTrack(
         .onSizeChanged {
             with(density) {
                 state.layout(it, inset.toPx(), gap.toPx(), (if (navigation) NavigationReach else SegmentReach).toPx(),
-                    CarryAfter.toPx(), contained = !navigation, round = style.round.toPx())
+                    // A round pill with no rail keeps its lens over its own row; a railed one may rise past its rail.
+                    CarryAfter.toPx(), contained = !navigation && !style.rail, round = style.round.toPx())
             }
         }
         .trackGestures(state, enabled, !yieldVertical)
@@ -411,12 +418,13 @@ internal fun GlassSwitch(checked: Boolean, enabled: Boolean, change: (Boolean) -
     val shape = remember { RoundedCornerShape(percent = 50) }
     Box(modifier.size(58.dp, 32.dp)
         .onSizeChanged {
-            with(density) { state.layout(it, 3.dp.toPx(), 0f, 4.dp.toPx(), CarryAfter.toPx(), contained = false) }
+            with(density) { state.layout(it, 3.dp.toPx(), 0f, 6.dp.toPx(), CarryAfter.toPx(), contained = false) }
         }
         .trackGestures(state, enabled, floating = true)
         .clearAndSetSemantics {}
         .graphicsLayer { alpha = if (enabled) 1f else .4f }) {
-        Box(Modifier.matchParentSize().then(if (optics) Modifier.layerBackdrop(layer) else Modifier).drawBehind {
+        // The rail draws in beneath the lifted thumb, as every track's does.
+        Box(Modifier.matchParentSize().then(if (optics) Modifier.layerBackdrop(layer) else Modifier).recede(state, optics).drawBehind {
             state.presentation(box)
             val across = ((box[0] + box[2] / 2 - size.height / 2) / (size.width - size.height)).coerceIn(0f, 1f)
             drawRoundRect(lerp(SwitchOff, SettingsPurple, across), cornerRadius = CornerRadius(size.height / 2))

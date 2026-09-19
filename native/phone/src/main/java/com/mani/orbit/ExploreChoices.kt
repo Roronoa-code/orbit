@@ -38,7 +38,7 @@ internal fun ExploreChoices(route: String, enabled: Boolean, page: GlassBackdrop
         GlassTrack(labels, current, { currentSelect(routes[it]) }, "explore-choices", Modifier.fillMaxWidth(),
             TrackRole.Navigation, page, enabled = enabled, slotHeight = if (vertical) 60.dp else 44.dp, labelSize = 13.sp,
             reselect = true, style = TrackStyle(rail = false, ink = Color(0xFFDED9E5), chosenInk = Color.White, inset = 4.dp,
-                dims = false), icons = icons, iconTint = readability.foreground(Color(0xFFC8B5EE)), stacked = vertical,
+                dims = false, recedes = false), icons = icons, iconTint = readability.foreground(Color(0xFFC8B5EE)), stacked = vertical,
             yieldVertical = true, under = island)
     }
 }

@@ -221,3 +221,7 @@ At rest there is no lens and no optical edge, only the flat pill.
   on, with the control's faint lift so the capsule still reads on them.
 - Refraction needs the optical tier. On frost the lens keeps its rim, sheen and shadow without bending;
   under reduce transparency or reduce motion the selection stays a flat pill.
+- Every track but the Explore island draws in 5% about its lifted lens, rail and labels together, so the
+  glass reads as rising off it; the island is kept exactly as it moves. In a page a lens lifts 6 dp past
+  its pill and may rise clear of its rail (the day picker's round lens stays over its own row), and a
+  switch's thumb lifts 6 dp over its drawing-in track.
