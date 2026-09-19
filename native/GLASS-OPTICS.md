@@ -195,8 +195,8 @@ Measured on the owner's S25 Ultra with the render thread traced, not estimated:
   re-rasterised on every frame the rim's width animates.
 - A Home deck card never renders its glass offscreen. The fold's feather fades only the card's content,
   in a layer that exists only while the fold is travelling.
-- Anything drawn inside a recording the glass samples is replayed by every sampler. The Home ring is
-  therefore a single triangle mesh, one draw call, rather than tens of thousands of point shapes, and
-  it is recorded once per step of its flow: a fold redraws that recording, it never re-records it.
+- Anything drawn inside a recording the glass samples is replayed by every sampler. The Home storm is
+  therefore one glow and one particle mesh, built off the main thread and recorded once per step; a
+  fold redraws that recording, it never re-records it.
 - A glass surface nobody can see draws nothing. The Home scroll frost at zero opacity still rendered a
   full-width layer and a blur of the page on every frame the ring moved.

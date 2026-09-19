@@ -458,3 +458,39 @@ the period.
 Verified on the owner's phone and watch as above, and on the emulators: the wire format, lease bounds,
 auto-start and decline rules, push rules, the step lead and forward-only ordering (phone 17/17 and
 watch 8/8 targeted).
+
+## 17. The storm — 18 September 2026
+
+**Why the imitations failed.** Every procedural ring built from waves, tubes, ribbons or rope missed
+something the owner could see in their reference. Unrolled into a strip (angle across, radius down),
+the reference turned out to be a particle landscape: stacked cloud humps of fine dots on dotted rows,
+lit along their crests, with faint mesh lines and a soft violet glow, wrapped into a ring. The owner's
+brief for its life was "a thunderstorm approaching in dark clouds".
+
+**Built from the reference itself.** The reference (supplied by the owner) was split into its parts:
+8,544 dots, each with its own position, colour and strength, and a residual glow holding the soft light
+and faint mesh lines. Its text was removed: the hole is rebuilt from its own radial glow, and where the
+text crossed the ring, the ring's texture is carried through from the same radius beside it. The flow
+of its sheets was read off the image (a structure-tensor orientation field, turned to run round the
+ring). These ship as `assets/storm/` (glow.png, dots.bin, field.bin, 520 KB). If the app is ever
+published, the rights to that reference image need confirming.
+
+**Alive, not a turned picture.** Turning and bending the picture looked like a GIF. Now 9,000
+particles are born at the reference's dots and stream along its sheets, each at its own pace, fading in
+and out over a few seconds; the storm keeps the reference's shape while nothing in it stands still,
+and the form itself turns once in four minutes. The purple light comes and goes like lightning: the
+cloud is dark but for a faint stir, and every couple of seconds a strike flashes, flickers and dies
+away somewhere round the ring, lighting the glow and flaring the particles there. It no longer pauses
+while the deck moves or is open.
+
+**Touch.** A swipe spins the storm with momentum that coasts to a stop (no snapping to fixed
+quarter-turns), sets off lightning where the finger let go, and slides the new figure in from that
+side. The fold lifts the ring's own layer, so its top is no longer cut off, and the storm keeps a
+margin from the screen's edges.
+
+**Cost.** The storm is built off the main thread into one of two frames while the other is on screen;
+the main thread only records the finished frame. On the owner's S25 Ultra at 120 Hz: at idle the main
+thread spends 0.4 ms a frame on it (6.1 ms before), janky frames fell from 73% to 7%, and the storm
+steps at a steady 60 fps; deck swipes run mostly at 120 fps with 90th-percentile latency 12.6 ms.
+`theStormKeepsTheNumbersCentreClearFlowsAndFlashes` holds that no particle enters the number's
+centre, that the storm moves, and that its light strikes and returns to dark.

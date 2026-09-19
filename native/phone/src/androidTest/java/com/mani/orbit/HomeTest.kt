@@ -145,25 +145,41 @@ class HomeTest {
         assertTrue("The folded deck and the bar must be one shade: card=$card bar=$island drift=$drift", drift <= 4)
     }
 
-    /** The ring flows round the number and never through it, and every sheet closes without a seam. */
-    @Test fun theRingKeepsTheNumbersCentreClearAndClosesOnItself() {
-        val section = DoubleArray(12); val grain = DoubleArray(4); val again = DoubleArray(12)
-        var nearest = Double.MAX_VALUE
-        // Across the flow, a gust at its peak, and a swipe's breath drawing the ring in.
-        for (time in listOf(0.0, 3.7, 41.2, 600.0)) for (swell in listOf(-2.0, 0.0, 7.0)) for (k in 0 until SheetCount) {
-            for (i in 0 until SheetSteps step 5) {
-                sheetSection(k, i * (2 * Math.PI / SheetSteps), time, 1.3, swell, section)
-                for (j in 0 until SheetAcross) {
-                    sheetGrain(section, -1.0 + 2.0 * j / (SheetAcross - 1), grain)
-                    nearest = minOf(nearest, grain[3])
-                }
+    /**
+     * The storm flows round the number and never through it, it is never still, and its purple light
+     * comes and goes: strikes light the cloud and die away.
+     */
+    @Test fun theStormKeepsTheNumbersCentreClearFlowsAndFlashes() {
+        val storm = Storm.load(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext.assets)
+        val radii = FloatArray(storm.count)
+        val start = storm.shown.dotMesh.copyOf()
+        var drawn = 0
+        var t = 0.0
+        while (t < 3.0) {
+            t += 1 / 60.0
+            storm.advance(t)
+            storm.build(t, storm.shown, radii)
+            for (r in radii) if (r >= 0) {
+                drawn++
+                assertTrue("A particle entered the number's centre: $r", r >= RingClearRadius)
+                assertTrue("A particle left the storm: $r", r <= 246f)  // the reference's own outermost dots reach 241.6
             }
-            // A seam would show where the sheet meets itself at a full turn.
-            sheetSection(k, 0.0, time, 1.3, swell, section)
-            sheetSection(k, 2 * Math.PI, time, 1.3, swell, again)
-            for (n in section.indices) assertEquals("Sheet $k closes on itself (value $n)", section[n], again[n], 1e-9)
         }
-        assertTrue("No grain enters the number's centre: nearest $nearest", nearest >= RingClearRadius)
+        assertTrue(drawn > storm.count)
+        val moved = start.indices.count { kotlin.math.abs(start[it] - storm.shown.dotMesh[it]) > .5f }
+        assertTrue("The storm stood still: $moved of ${start.size}", moved > start.size / 2)
+        val light = FloatArray(LightSteps); val at = DoubleArray(1)
+        var brightest = 0.0; var darkest = Double.MAX_VALUE
+        var s = 0.0
+        while (s < 12.0) {
+            val peak = stormLight(s, light, at)
+            brightest = maxOf(brightest, peak)
+            if (peak == 0.0) darkest = minOf(darkest, light.max().toDouble())
+            for (v in light) assertTrue(v.isFinite() && v >= 0f && v <= 1.25f)
+            s += .05
+        }
+        assertTrue("No strike lit the storm: $brightest", brightest > .6)
+        assertTrue("Between strikes the cloud stays dark: $darkest", darkest < .3)
     }
 
     @Test fun cardsReverseScrollAndExploreStaysOpenAboveThem() {

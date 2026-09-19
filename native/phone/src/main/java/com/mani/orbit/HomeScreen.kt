@@ -68,7 +68,6 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
     val haptic = LocalHapticFeedback.current
     val density = LocalDensity.current.density
     val closeLauncher by rememberUpdatedState(closeExplore)
-    val busy by remember { derivedStateOf { motion.dragging || abs(motion.value - if (expanded) 1f else 0f) > .001f } }
     fun unfold(value: Boolean, speed: Float = motion.velocity) {
         if (value != expanded) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         if (value) closeLauncher()
@@ -147,7 +146,9 @@ internal fun HomeScreen(state: HealthScreenState, metric: HomeMetric, period: In
             // where the globe stops leaves every card below it sampling the edge of that recording
             // rather than the page, which is why the deck and the Explore bar read as two shades.
             Box(Modifier.fillMaxSize().recordBackdrop(hero)) {
-                HomeOrb(summary, exploreOpen || busy || expanded || !rotation, reduced,
+                // The storm lives through everything: a fold, an open deck, the Explore island. Pausing it
+                // while the deck moved left a still picture shrinking and growing.
+                HomeOrb(summary, !rotation, reduced,
                     Modifier.fillMaxWidth().height(heroClosed), { motion.value }, travel, chooseMetric, choosePeriod)
             }
             Box(Modifier.fillMaxSize().padding(top = heroOpen)) {
