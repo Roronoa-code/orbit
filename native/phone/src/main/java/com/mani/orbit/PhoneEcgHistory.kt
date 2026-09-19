@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -67,7 +68,7 @@ private data class EcgView(val record: EcgRecord, val older: String?, val newer:
 @Composable internal fun EcgHistoryCard(record: EcgRecord, older: String?, newer: String?, playback: EcgPlayback?, expanded: Boolean,
     error: Boolean = false, orderingUncertain: Boolean = false, expand: () -> Unit, select: (String) -> Unit) {
     val haptic = LocalHapticFeedback.current
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    OrbitCard(Modifier.fillMaxWidth()) {
         Column(Modifier.then(if (LocalOrbitReducedMotion.current) Modifier else Modifier.animateContentSize()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("ECG", Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
@@ -88,7 +89,7 @@ private data class EcgView(val record: EcgRecord, val older: String?, val newer:
             if (expanded) {
                 if (playback == null) Text("Loading waveform…") else EcgWaveform(record.id, playback)
             }
-            TextButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); expand() }) { Text(if (expanded) "Close waveform" else "View waveform") }
+            OrbitTextAction(if (expanded) "Close waveform" else "View waveform") { expand() }
             Text("Samsung Watch sensor · No rhythm diagnosis", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -128,7 +129,9 @@ private data class EcgWavePoint(val millivolts: Float, val gap: Boolean)
     val range = "Samples ${first + 1}–${first + shown.size} of ${points.size}"
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(range, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall)
-        TextButton(onClick = { overview = !overview; page = first / if (overview) 2000 else 500 }) { Text(if (overview) "Detail" else "Overview") }
+        GlassTrack(listOf("Detail", "Overview"), if (overview) 1 else 0, { next ->
+            page = first / if (next == 1) 2000 else 500; overview = next == 1 }, "ecg-view", Modifier.width(196.dp),
+            slotHeight = 32.dp, labelSize = 12.sp)
     }
     val foreground = MaterialTheme.colorScheme.primary
     val grid = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .12f)

@@ -114,7 +114,9 @@ internal val BlurSupported: Boolean get() = Build.VERSION.SDK_INT >= 31
  */
 @Composable
 internal fun Modifier.orbitFrost(page: GlassBackdrop, corner: Dp, engagement: () -> Float = { 0f },
-    focus: () -> Offset = { Offset(.5f, .5f) }): Modifier {
+    focus: () -> Offset = { Offset(.5f, .5f) },
+    /** Where this surface's finished glass is also recorded, for a lens lifted off it to bend. */
+    export: com.mani.orbit.backdrop.backdrops.LayerBackdrop? = null): Modifier {
     val density = LocalDensity.current
     val readability = LocalGlassReadability.current
     val reduced = LocalOrbitReducedMotion.current
@@ -194,6 +196,7 @@ internal fun Modifier.orbitFrost(page: GlassBackdrop, corner: Dp, engagement: ()
             if (backing > 0f) drawRect(GlassTint.copy(alpha = backing))
         },
         backdropScale = GlassResolution,
+        exportedBackdrop = export,
     // The final draw boundary isolates foreground invalidation from this material's own drawing:
     // a timer ticking inside the surface must not redraw the glass it sits on.
     ).graphicsLayer()
@@ -236,7 +239,8 @@ private fun lightAngle(focus: () -> Offset, lifted: Float): Float {
  * A button sits on a panel. Glass samples the page behind the panel, so a glass button would show
  * what the panel is already hiding and read as a hole punched through it. Every control in the app
  * therefore shares one fill, one rim and one press: they sit on the material, and the material is
- * what floats.
+ * what floats. The one exception is a selection being held or carried, which lifts off its control
+ * into a lens that bends the control itself (see GlassTrack.kt), never the page behind the panel.
  */
 internal val ControlFill = Color.White.copy(alpha = .05f)
 
@@ -258,14 +262,26 @@ internal fun Modifier.orbitControl(corner: Dp, interaction: MutableInteractionSo
     val shape = remember(corner) { RoundedCornerShape(corner) }
     val plain = fill == Color.Transparent
     val edge = if (fill == ControlFill || fill == ControlSelectedFill) ControlEdge else fill
-    val press = animateFloatAsState(if (down && !reduced) OrbitPressScale else 1f,
-        if (reduced) tween(0) else tween(OrbitPressMillis, easing = OrbitPressEasing), label = "Control press")
+    val press = animateFloatAsState(if (down && !reduced) 1f else 0f,
+        if (reduced) tween(0) else if (down) tween(OrbitPressMillis, easing = OrbitPressEasing) else orbitRelease(),
+        label = "Control press")
     val contact = animateFloatAsState(if (down) 1f else 0f, orbitEngage(reduced), label = "Control contact")
-    return graphicsLayer { scaleX = press.value; scaleY = press.value }
+    return graphicsLayer {
+        val lifted = press.value
+        scaleX = 1f + (OrbitPressScale - 1f) * lifted; scaleY = scaleX
+        translationY = -OrbitPressLiftDp.dp.toPx() * lifted
+        // Reduced motion keeps the answer to a finger without the movement.
+        alpha = if (reduced && down) .78f else 1f
+    }
         .clip(shape)
         .then(if (plain) Modifier else Modifier.background(fill, shape).border(GlassEdgeWidth, edge, shape))
         .drawWithContent {
             drawRect(Color.White.copy(alpha = contact.value.coerceIn(0f, 1f) * .09f))
             drawContent()
+            // The lit top edge brightens as the control comes up to meet the finger.
+            val lit = press.value.coerceIn(0f, 1f)
+            if (lit > .01f && !plain) drawRoundRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = .22f * lit),
+                Color.Transparent), endY = size.height * .5f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(corner.toPx()),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx()))
         }
 }

@@ -494,3 +494,70 @@ thread spends 0.4 ms a frame on it (6.1 ms before), janky frames fell from 73% t
 steps at a steady 60 fps; deck swipes run mostly at 120 fps with 90th-percentile latency 12.6 ms.
 `theStormKeepsTheNumbersCentreClearFlowsAndFlashes` holds that no particle enters the number's
 centre, that the storm moves, and that its light strikes and returns to dark.
+
+## 18. The US navigation, everywhere — 19 September 2026
+
+**The brief.** The owner asked for the navigation bar of their US app, with BitChord as the second
+reference, and for its design everywhere in Orbit rather than only in the main bar. US's bar is
+`components/useBlobTrack.ts`, `lib/blob-travel.ts`, `lib/glass-pickup.ts` and `app/liquid-glass.css`;
+BitChord carries it into Compose (`ui/components/blobtrack`) with the owner's own hold: the lens rises
+past the bar on every side and the bar draws in beneath it.
+
+**One control for every choice.** `GlassTrack` (`GlassTrack.kt`, `GlassTrackMotion.kt`):
+
+- At rest the selection is a flat pill. A finger holding or carrying it, and every journey, lifts it
+  into a lens of real glass; one value, the pickup, drives the lens's size, light, shadow and
+  refraction.
+- A committed journey takes 0.36 s on a quadratic ease-out. The pickup gains glass near departure,
+  descends while still moving, and is flat on the arrival frame.
+- A press on a neighbour leans the pill 5% of its own width toward it, and stays flat.
+- A carry follows the finger, stretching with its speed and giving like rubber at either end. A flick
+  projects 0.12 s ahead.
+- Sliding well off the track lets go without choosing. A cancelled touch does too.
+- Each label is one rendering of its text, coloured per pixel: accent where the pill is over it.
+
+**The letters bend with the glass.** The lens samples the labels with what lies under them, so lettering
+bends at its rim. US's four-image check proves it: text shown or hidden, each with refraction on and
+off. With the refraction's effect on the page and rail cancelled out, 783 pixels still change by more
+than 32/255 around 657 letter pixels (`theLettersUnderTheLensBendWithIt`).
+
+**Where it is.**
+
+- **The Explore island's Body · Workouts · Health.** The island itself is unchanged: open and close,
+  gather, cascade and the live workout. On Home, where no section is chosen, the lens rises from nothing
+  under the finger. It bends the island's own glass, exported by its material, so the page never shows
+  through it.
+- **Every segmented control:**
+  - Body's metric and range;
+  - Train/History, the workout target and the workout and Watch charts;
+  - Elapsed/Remaining (a label that flipped until now) and ECG Detail/Overview;
+  - the sensor channel, Female/Male (tap again to clear) and the Watch sources;
+  - the week-day picker, a round lavender pill.
+
+  Their rails are glass too: the page's ground frosted, bent at the curved edge and lit along the rim.
+- **Switches.** The thumb is the pill, and lifts into a lens that bends the rail beneath it.
+- **Buttons.** Every button and the header's lift on press (1.035, 1.5 dp up over 90 ms, a
+  near-critical spring back) instead of sinking to 0.96. The stock Material text buttons and cards are
+  now Orbit's control and material.
+- **The date chooser.** It grows out of the header's date and closes back into it: laid out at full size,
+  shown through an outline growing from exactly the date's bounds, with a traced edge and a 2% bounce.
+
+**A wrong turn.** The first version replaced the island with a four-tab bar and docked the workout above
+it. The owner rejected it the same day: the island is Orbit's navigation, and a design request restyles
+it; it does not replace it. That version is gone.
+
+**Verified.** On the API 36 emulator on the host GPU, every affected class passed, each run under three
+minutes:
+
+- `GlassTrackTest` (10);
+- `ExploreIslandTest` and `HomeTest` (16);
+- `MeasurementsTest`, `WorkoutTest` and `SettingsTest`;
+- `HeaderTest` and `DateChooserTest`, with new checks for the lift and for the panel growing out of the
+  date;
+- the Workouts, Sleep, Health, readability, migration, ECG, sensor and Watch UI suites;
+- `GlassRenderingTest` and `GlassLensTest`.
+
+With glass selectors on screen and nothing moving, Orbit drew no frames in three seconds.
+
+**Not yet seen on the phone.** It was disconnected before this was installed, so its look on the S25 and
+its frame cost there are still to check. The Watch app is unchanged.

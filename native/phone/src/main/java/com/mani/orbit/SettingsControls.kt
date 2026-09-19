@@ -98,9 +98,7 @@ internal fun SettingsSwitch(label: String, checked: Boolean, enabled: Boolean = 
             Text(label, color = SettingsInk.copy(alpha = if (enabled) 1f else .4f), fontSize = 13.sp, lineHeight = 20.sp)
             if (description != null) Text(description, color = Color(0xFFB9B2C5), fontSize = 12.sp, lineHeight = 18.sp)
         }
-        Switch(checked, onCheckedChange = null, enabled = enabled,
-            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = SettingsPurple,
-                uncheckedThumbColor = Color(0xFFD5CFDF), uncheckedTrackColor = Color(0xFF242129), uncheckedBorderColor = Color.Transparent))
+        GlassSwitch(checked, enabled, change)
     }
 }
 

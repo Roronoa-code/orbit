@@ -93,6 +93,8 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
     // and thin again on arrival, so every open and close pulsed the material.
     val lift = animateFloatAsState(if (motion.pressing || motion.dragging) 1f else 0f, orbitEngage(reduced),
         label = "Island lift")
+    // The island's own glass, for the choices' lens to bend: a piece of the island lifted off it.
+    val islandGlass = com.mani.orbit.backdrop.backdrops.rememberLayerBackdrop()
     Layout(modifier = modifier.testTag("explore-island")
         .graphicsLayer {
             // Squash and stretch across one travel: the shell gathers itself a little as it leaves
@@ -106,7 +108,7 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
         }
         // The material's own rim is the only rim. A second stroke on this one surface is exactly
         // the kind of local decision that made the app read as two materials.
-        .clip(RoundedCornerShape(31.dp)).orbitFrost(page, 31.dp, { lift.value })
+        .clip(RoundedCornerShape(31.dp)).orbitFrost(page, 31.dp, { lift.value }, export = islandGlass)
         .pointerInput(Unit) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
@@ -166,7 +168,7 @@ internal fun ExploreIsland(route: String, session: NativeWorkoutState, expanded:
             .then(if (!canChoose) Modifier.clearAndSetSemantics {} else Modifier)
             .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 8.dp)) {
             Box(Modifier.exploreCascade(0, { motion.value }, reduced)) {
-                ExploreChoices(route, canChoose) { changeOpen(false); navigate(it) }
+                ExploreChoices(route, canChoose, page, islandGlass) { changeOpen(false); navigate(it) }
             }
             if (active != null) {
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(IntrinsicSize.Min)

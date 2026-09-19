@@ -80,15 +80,12 @@ import java.util.Locale
         // and an unkeyed item that shifts position under a measure in flight is asked for an index
         // its interval list no longer has.
         item("status") { Text(error ?: status, color = HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp) }
-        if (sources.size > 1) item("sources") { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-            .testTag("watch-sources"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (sources.size > 1) item("sources") {
             val current = selected ?: sources.first()
-            sources.forEachIndexed { index, source ->
-                WatchSourcePill("Watch ${index + 1}", source == current) {
-                    selected = source; measurementId = null; measurement = null; rows = emptyMap()
-                }
-            }
-        } }
+            GlassTrack(sources.indices.map { "Watch ${it + 1}" }, sources.indexOf(current), { index ->
+                selected = sources[index]; measurementId = null; measurement = null; rows = emptyMap()
+            }, "watch-sources", Modifier.fillMaxWidth())
+        }
         if (sources.isEmpty()) item("empty") { Text("Open Orbit on your watch. Saved readings arrive when the devices reconnect.",
             color = Color(0xFFE9E2F3), fontSize = 14.sp, lineHeight = 20.sp) }
         measurement?.let { page -> item("sensor-result") { WatchSensorResult(page) { measurementId = it } } }
@@ -123,15 +120,3 @@ import java.util.Locale
     }
 }
 
-/** A quiet Orbit pill per paired watch; the row scrolls rather than squeezing its labels. */
-@Composable private fun WatchSourcePill(label: String, current: Boolean, choose: () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    Box(Modifier.heightIn(min = 40.dp)
-        .orbitControl(20.dp, interaction, fill = if (current) ControlSelectedFill else ControlFill)
-        .clickable(interactionSource = interaction, indication = null, onClick = choose)
-        .semantics { role = Role.Tab; selected = current }
-        .padding(horizontal = 16.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
-        Text(label, color = if (current) Color(0xFFF7F2FC) else HealthSecondary, fontSize = 13.sp, lineHeight = 18.sp,
-            maxLines = 1)
-    }
-}

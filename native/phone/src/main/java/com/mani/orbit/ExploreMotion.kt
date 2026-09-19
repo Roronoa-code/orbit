@@ -95,45 +95,6 @@ internal class ExploreMotion(private val scope: CoroutineScope, initial: Boolean
     }
 }
 
-/** Direct finger tracking plus a decaying grab offset preserves an interrupted lens's pose. */
-internal class ExploreContact(private val scope: CoroutineScope) {
-    var position by mutableFloatStateOf(0f)
-        private set
-    private var velocity = 0f
-    private var raw = 0f
-    private var correction = 0f
-    private var dragging = false
-    private var animation: Job? = null
-    fun press(slot: Float, visible: Boolean, reduced: Boolean = false) {
-        animation?.cancel(); dragging = false
-        if (!visible) { position = slot; velocity = 0f }
-        settle(slot, velocity, reduced)
-    }
-    fun move(finger: Float, speed: Float, reduced: Boolean = false) {
-        if (reduced) { animation?.cancel(); dragging = true; position = finger; raw = finger; correction = 0f; velocity = 0f; return }
-        raw = finger
-        if (!dragging) {
-            animation?.cancel(); dragging = true
-            correction = position - finger
-            animation = scope.launch {
-                animate(correction, 0f, animationSpec = spring(1f, 650f, visibilityThreshold = .001f)) { offset, _ ->
-                    correction = offset; position = raw + correction
-                }
-            }
-        }
-        position = raw + correction; velocity = speed
-    }
-    fun settle(slot: Float, speed: Float = 0f, reduced: Boolean = false) {
-        animation?.cancel(); dragging = false
-        if (reduced) { position = slot; velocity = 0f; return }
-        animation = scope.launch {
-            animate(position, slot, initialVelocity = speed, animationSpec = orbitSettle(opening = true)) { x, v ->
-                position = x; velocity = v
-            }
-        }
-    }
-}
-
 internal fun exploreRelease(position: Float, velocity: Float, distance: Float, wasOpen: Boolean): Boolean =
     if (kotlin.math.abs(distance) < 24f) wasOpen else position + velocity.coerceIn(-4f, 4f) * .16f > .5f
 

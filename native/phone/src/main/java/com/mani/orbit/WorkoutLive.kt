@@ -72,10 +72,9 @@ import kotlin.math.*
                     OrbitDotNumber(workoutClock(if (remaining) (record.target - record.elapsed).coerceAtLeast(0) else record.elapsed),
                         Modifier.widthIn(max = 260.dp).fillMaxWidth(.76f).height(63.dp).testTag("workout-timer"), WorkoutWhite)
                 }
-                if (record.target > 0) Row(Modifier.align(Alignment.TopCenter).then(moving(clockStart + 89.dp, clockEnd + 87.dp))) {
-                    WorkoutButton({ remaining = !remaining }, Modifier.testTag("workout-clock-mode"), background = Color.Transparent) {
-                        Text(if (remaining) "Remaining" else "Elapsed", fontSize = 12.sp, color = WorkoutMuted, modifier = Modifier.padding(horizontal = 16.dp))
-                    }
+                if (record.target > 0) Box(Modifier.align(Alignment.TopCenter).then(moving(clockStart + 89.dp, clockEnd + 87.dp))) {
+                    GlassTrack(listOf("Elapsed", "Remaining"), if (remaining) 1 else 0, { remaining = it == 1 }, "workout-clock-mode",
+                        Modifier.width(212.dp), slotHeight = 32.dp, labelSize = 12.sp)
                 }
                 Column(Modifier.fillMaxWidth().offset(y = compactDetailsY).padding(horizontal = 24.dp)
                     .graphicsLayer { alpha = 1f - reveal(phase(), 0f, .22f) }

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -82,24 +83,20 @@ import java.util.Locale
     }
     val haptic = LocalHapticFeedback.current
     fun feedback() = haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-    Card(Modifier.fillMaxWidth().testTag("raw-sensor-card"), shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    OrbitCard(Modifier.fillMaxWidth().testTag("raw-sensor-card")) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(chunk.receivedAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM · HH:mm:ss", Locale.UK)),
                 style = MaterialTheme.typography.bodySmall)
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                channels.forEachIndexed { index, name -> FilterChip(selected = channel == index,
-                    onClick = { feedback(); channel = index }, label = { Text(name) }) }
-            }
+            GlassTrack(channels, channel, { channel = it }, "raw-sensor-channel", Modifier.fillMaxWidth(), slotHeight = 36.dp, labelSize = 12.sp)
             RawSensorWaveform(chunk, channel, samplePage, unit) { feedback(); samplePage = it }
             if (error) Text("Refresh failed · showing saved data", style = MaterialTheme.typography.bodySmall)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = { feedback(); select(current.older) }, enabled = current.older != null) { Text("Older") }
-                TextButton(onClick = { feedback(); select(null) }, enabled = pinned) { Text("Latest") }
-                TextButton(onClick = { feedback(); select(current.newer) }, enabled = current.newer != null) { Text("Newer") }
+                OrbitTextAction("Older", enabled = current.older != null) { select(current.older) }
+                OrbitTextAction("Latest", enabled = pinned) { select(null) }
+                OrbitTextAction("Newer", enabled = current.newer != null) { select(current.newer) }
             }
-            TextButton(onClick = { feedback(); details = !details }) { Text(if (details) "Less" else "Recording details") }
+            OrbitTextAction(if (details) "Less" else "Recording details") { details = !details }
             if (details) {
                 val quality = chunk.quality
                 Text("${chunk.samples.size} samples · ${chunk.issues.size} capture flags", style = MaterialTheme.typography.bodySmall)

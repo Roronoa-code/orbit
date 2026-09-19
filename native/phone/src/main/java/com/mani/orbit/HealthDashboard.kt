@@ -234,9 +234,8 @@ internal fun HealthDashboard(state: HealthScreenState, layout: HealthCardLayout,
                         }
                     }, { step(id, -1) }, { step(id, 1) }, { headers[id] = it.translate(-origin) })
             }
-            TextButton(onClick = settings, modifier = Modifier.padding(top = 6.dp).testTag("health-source")) {
-                Text(if (state.error != null) "Connection needs attention" else "Samsung Health · connection", color = HealthSecondary, fontSize = 12.sp)
-            }
+            OrbitTextAction(if (state.error != null) "Connection needs attention" else "Samsung Health · connection",
+                Modifier.padding(top = 6.dp).testTag("health-source"), ink = HealthSecondary, size = 12.sp, onClick = settings)
         }
         drag?.let { held ->
             Canvas(Modifier.offset { (settling?.value ?: (drag!!.finger - held.grab)).round() }

@@ -25,7 +25,13 @@ internal fun orbitSettle(opening: Boolean = false): AnimationSpec<Float> =
 internal fun orbitEngage(reduced: Boolean = false): AnimationSpec<Float> =
     if (reduced) tween(0) else spring(.86f, 650f)
 
-/** The morphing-menu reference's own press: 100ms on a standard curve, to .96. */
-internal const val OrbitPressScale = .96f
-internal const val OrbitPressMillis = 100
+/**
+ * The owner's US app's press: glass lifts toward the finger instead of sinking into the page, a
+ * little larger and a little higher, over 90ms, and springs back almost without a wobble.
+ */
+internal const val OrbitPressScale = 1.035f
+internal const val OrbitPressLiftDp = 1.5f
+internal const val OrbitPressMillis = 90
 internal val OrbitPressEasing = CubicBezierEasing(.4f, 0f, .2f, 1f)
+internal fun orbitRelease(reduced: Boolean = false): AnimationSpec<Float> =
+    if (reduced) tween(0) else spring(.945f, 914f)

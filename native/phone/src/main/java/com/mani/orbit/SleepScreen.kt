@@ -165,7 +165,7 @@ internal fun SleepScreen(day: SleepDay, loading: Boolean, error: String?, reduce
         }
         if (error != null) Column {
             Text(error, color = SleepMuted, fontSize = 13.sp, lineHeight = 19.sp)
-            TextButton(onClick = retry) { Text("Try again") }
+            OrbitTextAction("Try again", onClick = retry)
         }
         if (day.segments.isEmpty()) {
             if (!loading && error == null) Text("No sleep recorded for this day.", color = SleepMuted, fontSize = 13.sp,

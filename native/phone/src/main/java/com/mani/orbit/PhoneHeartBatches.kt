@@ -56,8 +56,6 @@ import java.util.Locale
 
 @Composable internal fun HeartBatchCard(current: HeartPage, pinned: Boolean, expanded: Boolean, error: Boolean,
     expand: () -> Unit, select: (String?) -> Unit) {
-    val haptic = LocalHapticFeedback.current
-    fun move(id: String?) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); select(id) }
     val stats = remember(current.frame.id) {
         val points = current.frame.batch.points
         val all = points.sumOf { it.rawIbiMillis?.size ?: 0 }
@@ -69,8 +67,7 @@ import java.util.Locale
         }
         Triple(all, valid.size, valid.takeIf { it.isNotEmpty() }?.let { "${it.min()}–${it.max()} ms" })
     }
-    Card(Modifier.fillMaxWidth().testTag("heart-batch-card"), shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    OrbitCard(Modifier.fillMaxWidth().testTag("heart-batch-card")) {
         Column(Modifier.then(if (LocalOrbitReducedMotion.current) Modifier else Modifier.animateContentSize()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Beat intervals", style = MaterialTheme.typography.titleMedium)
             Text(stats.third ?: "No qualified intervals", style = MaterialTheme.typography.headlineSmall)
@@ -78,16 +75,16 @@ import java.util.Locale
             Text(current.frame.batch.receivedAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM · HH:mm:ss", Locale.UK)),
                 style = MaterialTheme.typography.bodySmall)
             if (error) Text("Refresh failed · showing saved data")
-            TextButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); expand() }) { Text(if (expanded) "Less" else "Recording details") }
+            OrbitTextAction(if (expanded) "Less" else "Recording details") { expand() }
             if (expanded) {
                 Text("Samsung Watch sensor · ${current.frame.batch.points.size} pulse samples · ${current.frame.batch.issues.size} capture flags",
                     style = MaterialTheme.typography.bodySmall)
                 Text("Range uses Samsung’s normal-status intervals. Individual beat times were not supplied.", style = MaterialTheme.typography.bodySmall)
                 if (current.frame.clockUncertain) Text("Capture clock changed · times need care", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = { move(current.older) }, enabled = current.older != null) { Text("Older") }
-                    TextButton(onClick = { move(null) }, enabled = pinned) { Text("Latest") }
-                    TextButton(onClick = { move(current.newer) }, enabled = current.newer != null) { Text("Newer") }
+                    OrbitTextAction("Older", enabled = current.older != null) { select(current.older) }
+                    OrbitTextAction("Latest", enabled = pinned) { select(null) }
+                    OrbitTextAction("Newer", enabled = current.newer != null) { select(current.newer) }
                 }
             }
         }

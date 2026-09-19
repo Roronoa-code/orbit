@@ -200,3 +200,24 @@ Measured on the owner's S25 Ultra with the render thread traced, not estimated:
   fold redraws that recording, it never re-records it.
 - A glass surface nobody can see draws nothing. The Home scroll frost at zero opacity still rendered a
   full-width layer and a blur of the page on every frame the ring moved.
+
+### The selection lens — 19 September 2026
+
+"Controls are not glass" keeps one exception: a selection being held, carried or travelling lifts off its
+control into a lens (`GlassTrack`). The lens samples what lies under it, so it never shows the page a
+panel hides:
+
+- in a page, the control's own recording over a base shade;
+- in the Explore island, the island's finished glass, exported by `orbitFrost(export = ...)`;
+- the labels in every case.
+
+At rest there is no lens and no optical edge, only the flat pill.
+
+- The lens runs at full resolution, because letters must stay sharp under it. It exists only while the
+  pickup is above zero.
+- The track's recording is re-drawn only while its selection moves. A finger holding still lets the
+  frame clock sleep.
+- In-page rails are `orbitPanel` glass over the page's ground, the same material as the cards they sit
+  on, with the control's faint lift so the capsule still reads on them.
+- Refraction needs the optical tier. On frost the lens keeps its rim, sheen and shadow without bending;
+  under reduce transparency or reduce motion the selection stays a flat pill.

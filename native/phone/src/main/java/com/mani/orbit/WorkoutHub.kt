@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
@@ -136,55 +137,28 @@ internal fun WorkoutArrow(label: String, direction: Int, enabled: Boolean, actio
     }
 }
 
+/**
+ * The week's days, on the same glass track as every other choice in the app: the chosen day is a
+ * lavender disc that lifts into a lens as a finger holds or carries it across the week.
+ */
 @Composable
 private fun WorkoutDays(start: LocalDate, selected: LocalDate, today: LocalDate, grouped: Map<LocalDate, List<WorkoutRecord>>, choose: (LocalDate) -> Unit) {
-    val selection = (selected.toEpochDay() - start.toEpochDay()).toFloat()
-    var finger by remember { mutableStateOf<Float?>(null) }
-    val chooseNow by rememberUpdatedState(choose)
-    val haptic = LocalHapticFeedback.current
-    val reduced = LocalOrbitReducedMotion.current
-    val animated = animateFloatAsState(finger ?: selection, if (reduced || finger != null) tween(0) else spring(.9f, 550f), label = "workout day")
-    Box(Modifier.fillMaxWidth().selectableGroup().testTag("workout-days").pointerInput(start, today) {
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            var crossed = selection.roundToInt()
-            try {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    if (event.changes.count { it.pressed } > 1) break
-                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                    if (!change.pressed) { if (finger != null && !change.isConsumed) { chooseNow(start.plusDays(finger!!.roundToInt().toLong())); change.consume() }; break }
-                    if (change.isConsumed) break
-                    val delta = change.position - down.position
-                    if (finger == null && abs(delta.y) > viewConfiguration.touchSlop && abs(delta.y) > abs(delta.x)) break
-                    if (abs(delta.x) > viewConfiguration.touchSlop || finger != null) {
-                        val max = minOf(6f, (today.toEpochDay() - start.toEpochDay()).toFloat())
-                        finger = (change.position.x / (size.width / 7f) - .5f).coerceIn(0f, max)
-                        val next = finger!!.roundToInt()
-                        if (next != crossed) { crossed = next; haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove) }
-                        change.consume()
-                    }
-                }
-            } finally { finger = null }
-        }
-    }) {
-        Canvas(Modifier.matchParentSize()) {
-            val slot = size.width / 7; val center = (finger ?: animated.value) * slot + slot / 2
-            drawCircle(Color(0xFFD5C2F5), min(20.dp.toPx(), slot / 2 - 1.dp.toPx()), Offset(center, size.height - 24.dp.toPx()))
-        }
-        Row(Modifier.fillMaxWidth()) { (0L..6).forEach { day ->
-            val date = start.plusDays(day); val picked = date == selected; val hasRecords = !grouped[date].isNullOrEmpty()
-            Column(Modifier.weight(1f).selectable(picked, enabled = date <= today, role = Role.Tab,
-                interactionSource = remember { MutableInteractionSource() }, indication = null,
-                onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); choose(date) })
-                .semantics { contentDescription = "${date.format(WorkoutDate)}, ${grouped[date].orEmpty().size} workouts" }, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.titlecase() }, color = WorkoutMuted.copy(alpha = if (date <= today) 1f else .35f), fontSize = 10.sp)
-                Box(Modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.Center) {
-                    Box(Modifier.size(34.dp).then(if (hasRecords && !picked) Modifier.border(1.dp, WorkoutPurple.copy(alpha = .35f), CircleShape) else Modifier))
-                    Text(date.dayOfMonth.toString(), color = if (picked) Color(0xFF261938) else WorkoutWhite.copy(alpha = if (date <= today) 1f else .3f), fontSize = 16.sp)
-                }
-            }
+    val days = remember(start) { (0L..6).map { start.plusDays(it) } }
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth()) { days.forEach { date ->
+            Text(date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.titlecase() }, color = WorkoutMuted.copy(alpha = if (date <= today) 1f else .35f),
+                fontSize = 10.sp, textAlign = TextAlign.Center, modifier = Modifier.weight(1f).clearAndSetSemantics {})
         } }
+        GlassTrack(days.map { it.dayOfMonth.toString() }, days.indexOf(selected),
+            { choose(days[it]) }, "workout-days", Modifier.fillMaxWidth(), slotHeight = 48.dp, labelSize = 16.sp,
+            style = TrackStyle(rail = false, flatFill = Color(0xFFD5C2F5), ink = WorkoutWhite, chosenInk = Color(0xFF261938),
+                round = 40.dp, inset = 0.dp, labelWeight = FontWeight.Normal),
+            allowed = { days[it] <= today },
+            describe = { "${days[it].format(WorkoutDate)}, ${grouped[days[it]].orEmpty().size} workouts" },
+            mark = { index ->
+                if (!grouped[days[index]].isNullOrEmpty() && days[index] != selected)
+                    Box(Modifier.size(34.dp).border(1.dp, WorkoutPurple.copy(alpha = .35f), CircleShape))
+            })
     }
 }
 

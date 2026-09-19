@@ -25,8 +25,7 @@ import java.util.Locale
     val labels = mapOf("BODY_FAT" to "Body fat", "BODY_FAT_MASS" to "Fat mass", "BODY_WATER" to "Body water",
         "SKELETAL_MUSCLE_MASS" to "Muscle", "FAT_FREE_MASS" to "Lean mass", "BASAL_METABOLIC_RATE" to "Resting energy",
         "SPO2" to "Blood oxygen", "SKIN_TEMPERATURE" to "Skin temperature", "AMBIENT_TEMPERATURE" to "Surroundings")
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    OrbitCard(Modifier.fillMaxWidth()) {
         Column(Modifier.then(if (LocalOrbitReducedMotion.current) Modifier else Modifier.animateContentSize()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -50,9 +49,7 @@ import java.util.Locale
                     if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
-            if (result.values.size > 1) TextButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.SegmentTick); details = !details }) {
-                Text(if (details) "Less detail" else "Full result")
-            }
+            if (result.values.size > 1) OrbitTextAction(if (details) "Less detail" else "Full result") { details = !details }
             Text("Samsung Watch sensor", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

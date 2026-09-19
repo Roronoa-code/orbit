@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -30,6 +31,9 @@ class DateChooserTest {
     private val today: LocalDate = LocalDate.now()
     private val chosen = mutableListOf<LocalDate>()
     private var dismissed = 0
+    private var closed = 0
+    private var pageFill = Color.Transparent
+    private val open = androidx.compose.runtime.mutableStateOf(true)
 
     @Before fun emulatorOnly() { check(android.os.Build.HARDWARE in setOf("ranchu", "goldfish")) }
 
@@ -44,8 +48,10 @@ class DateChooserTest {
                 MaterialTheme(colorScheme = darkColorScheme(), typography = OrbitTypography) {
                     val layer = rememberGlassBackdrop()
                     Box(Modifier.width(width.dp).fillMaxHeight().background(Color(0xFF0B0A0F)).safeDrawingPadding()) {
-                        Box(Modifier.fillMaxSize().recordBackdrop(layer))
-                        OrbitDateChooser(date, first, layer, Modifier.align(Alignment.TopEnd), { dismissed++ }) { chosen += it }
+                        Box(Modifier.fillMaxSize().recordBackdrop(layer).background(pageFill))
+                        // Where the header's date sits: the panel grows out of exactly this.
+                        val anchor = with(LocalDensity.current) { androidx.compose.ui.geometry.Rect(14.dp.toPx(), 9.dp.toPx(), 160.dp.toPx(), 63.dp.toPx()) }
+                        OrbitDateChooser(open.value, anchor, date, first, layer, { closed++ }, { dismissed++ }) { chosen += it }
                     }
                 }
             }
@@ -90,6 +96,31 @@ class DateChooserTest {
         rule.onNodeWithText("Cancel").performClick()
         assertTrue(chosen.isEmpty())
         assertEquals(1, dismissed)
+    }
+
+    /** The panel comes out of the date that opened it, and goes back into it when it closes. */
+    @Test fun thePanelGrowsOutOfTheDateAndGoesBackIntoIt() {
+        pageFill = Color(0xFF218AE8)
+        rule.mainClock.autoAdvance = false
+        show(today.minusDays(40), today)
+        rule.mainClock.advanceTimeBy(48)
+        val early = rule.onRoot().captureToImage().asAndroidBitmap()
+        rule.mainClock.advanceTimeBy(900)
+        val formed = rule.onRoot().captureToImage().asAndroidBitmap()
+        val panel = rule.onNodeWithTag("date-chooser").fetchSemanticsNode().boundsInRoot
+        // Far from the date, the panel's corner is not there yet, then it is.
+        val x = (panel.right - 20 * rule.density.density).toInt(); val y = (panel.bottom - 20 * rule.density.density).toInt()
+        fun apart(a: Int, b: Int) = listOf(16, 8, 0).maxOf { kotlin.math.abs((a shr it and 255) - (b shr it and 255)) }
+        val page = pageFill.toArgb()
+        assertTrue("The far corner is still page while the panel grows", apart(page, early.getPixel(x, y)) <= 6)
+        assertTrue("and glass once it has formed", apart(page, formed.getPixel(x, y)) > 40)
+        rule.runOnIdle { open.value = false }
+        rule.mainClock.advanceTimeBy(120)
+        assertEquals("Closing takes the way it came", 0, closed)
+        rule.mainClock.advanceTimeBy(600)
+        rule.mainClock.autoAdvance = true
+        rule.waitForIdle()
+        assertEquals("and hands back once it is inside the date again", 1, closed)
     }
 
     @Test fun narrowWidthAndLargeTextKeepEveryControlReachable() {

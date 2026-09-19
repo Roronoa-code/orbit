@@ -148,12 +148,10 @@ internal fun ProfileEditor(profile: JSONObject?, readError: String?, reload: () 
             }
             SettingsDisclosure("Body composition", sex?.replaceFirstChar { it.uppercase() } ?: "Optional", reduced = reduced) {
                 SettingsNote("Samsung’s body composition sensor uses sex, age, height and weight from this profile.")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("female", "male").forEach { option ->
-                        FilterChip(selected = sex == option, enabled = !busy, onClick = { sex = if (sex == option) null else option; edited() },
-                            label = { Text(option.replaceFirstChar { it.uppercase() }) })
-                    }
-                }
+                val options = listOf("female", "male")
+                GlassTrack(options.map { it.replaceFirstChar { c -> c.uppercase() } }, options.indexOf(sex), { index ->
+                    sex = if (sex == options[index]) null else options[index]; edited()
+                }, "profile-sex", Modifier.fillMaxWidth(), enabled = !busy, slotRole = Role.RadioButton, reselect = true)
             }
             SettingsMessage(feedback, error = !saved)
             Spacer(Modifier.height(18.dp))

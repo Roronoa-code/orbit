@@ -73,8 +73,7 @@ private val Muted = Color(0xFFB3AEBE)
 private val White = Color(0xFFF4F4F6)
 private val DayFormat = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK)
 // The approved header reads the weekday and drops the year, like the reference date button.
-private val HeaderDayFormat = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
-private val ChosenDayFormat = DateTimeFormatter.ofPattern("EEEE d MMM", Locale.UK)
+internal val HeaderDayFormat = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
 internal val LocalOrbitReducedMotion = staticCompositionLocalOf { false }
 private fun Double?.reading(decimals: Int = 0) = this?.let { String.format(Locale.UK, "%,.${decimals}f", it) } ?: "—"
 
@@ -102,6 +101,10 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
     var homeMetric by rememberSaveable { mutableIntStateOf(0) }
     var homePeriod by rememberSaveable { mutableIntStateOf(1) }
     var datePicker by rememberSaveable { mutableStateOf(false) }
+    // The chooser stays on screen while it closes back into the date it came out of.
+    var dateChooserShown by remember { mutableStateOf(false) }
+    var dateAnchor by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    LaunchedEffect(datePicker) { if (datePicker) dateChooserShown = true }
     val requestedWorkout by model.requestedWorkout.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val activity = androidx.activity.compose.LocalActivity.current
@@ -183,7 +186,7 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
                 OrbitHeader(if (route == "Steps") HomeMetric.entries[homeMetric].title else if (route == "Workouts") workoutTitle else route,
                     if (route == "Steps") health.day.date.format(HeaderDayFormat) else null,
                     route != "Steps" || model.canGoBack() || homeMetric != 0 || homePeriod != 1 || health.day.date != LocalDate.now(),
-                    ::back, { exploreExpanded = false; datePicker = true }, { model.navigate("Settings") }, sceneLayer)
+                    ::back, { exploreExpanded = false; datePicker = true }, { model.navigate("Settings") }, sceneLayer) { dateAnchor = it }
                 Box(Modifier.weight(1f)) {
                 Box(Modifier.fillMaxSize().recordBackdrop(sceneLayer)) {
                 // Pages share fixed bounds. Avoid size/lookahead transitions while live list data changes.
@@ -241,132 +244,13 @@ internal fun OrbitApp(model: OrbitModel, workout: StateFlow<NativeWorkoutState>,
                 .navigationBarsPadding().padding(horizontal = 12.dp, vertical = 10.dp).fillMaxWidth()) { id ->
                     model.openWorkout(id)
                 }
-        if (datePicker) OrbitDateChooser(health.day.date, health.firstRecord, pageLayer,
-            Modifier.align(Alignment.TopEnd), { datePicker = false }) { model.date(it); datePicker = false }
+        if (dateChooserShown || datePicker) OrbitDateChooser(datePicker, dateAnchor, health.day.date, health.firstRecord, pageLayer,
+            { dateChooserShown = false }, { datePicker = false }) { model.date(it); datePicker = false }
       }
     }
     }
     }
 }
-/** The header's date control expands into this panel, like the reference utility page. */
-@Composable
-internal fun OrbitDateChooser(date: LocalDate, first: LocalDate?, page: GlassBackdrop,
-    modifier: Modifier, dismiss: () -> Unit, select: (LocalDate) -> Unit) {
-    val today = remember { LocalDate.now() }
-    val start = remember(first, today) { first?.takeIf { it < today } ?: today.minusDays(29) }
-    val span = remember(start, today) { ChronoUnit.DAYS.between(start, today).toInt().coerceAtLeast(1) }
-    var chosen by rememberSaveable(date, start) { mutableStateOf(date.coerceIn(start, today).toString()) }
-    var carried by remember { mutableStateOf(false) }
-    val choice = LocalDate.parse(chosen)
-    val reduced = LocalOrbitReducedMotion.current
-    var shown by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { shown = true }
-    val grow by animateFloatAsState(if (shown) 1f else 0f,
-        if (reduced) tween(0) else spring(dampingRatio = .82f, stiffness = 420f), label = "Date panel")
-    // Carrying the track lifts the panel into thicker glass, and its rim light follows the thumb.
-    val panelLift by animateFloatAsState(if (carried) 1f else 0f,
-        if (reduced) tween(0) else tween(160), label = "Date panel lift")
-    val trackFocus = (ChronoUnit.DAYS.between(start, choice).toFloat() / span).coerceIn(0f, 1f)
-    // A tap outside closes the panel, like the reference; the panel keeps its own touches.
-    Box(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { dismiss() } })
-    Column(modifier.statusBarsPadding().padding(start = 13.dp, top = 74.dp, end = 13.dp)
-        .fillMaxWidth().widthIn(max = 300.dp)
-        .graphicsLayer {
-            transformOrigin = TransformOrigin(1f, 0f)
-            scaleX = .84f + .16f * grow; scaleY = .84f + .16f * grow; alpha = grow
-        }
-        .clip(RoundedCornerShape(22.dp))
-        .orbitFrost(page, 22.dp, { panelLift }, { Offset(trackFocus, .5f) })
-        .pointerInput(Unit) { detectTapGestures { } }
-        .padding(start = 17.dp, top = 13.dp, end = 17.dp, bottom = 17.dp).testTag("date-chooser")) {
-        Text("Choose a day", color = White, fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight(500),
-            modifier = Modifier.semantics { heading() })
-        Text("Explore your shared health history.", color = Color(0xFFBCBCC4), fontSize = 11.sp, lineHeight = 16.sp,
-            modifier = Modifier.padding(top = 10.dp))
-        Row(Modifier.fillMaxWidth().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            DateStep("‹", "Previous day", choice > start) { chosen = choice.minusDays(1).toString() }
-            Text(choice.format(ChosenDayFormat), color = White, fontSize = 12.sp, lineHeight = 17.sp,
-                textAlign = TextAlign.Center, modifier = Modifier.weight(1f).testTag("date-choice"))
-            DateStep("›", "Next day", choice < today) { chosen = choice.plusDays(1).toString() }
-        }
-        DateTrack(ChronoUnit.DAYS.between(start, choice).toInt(), span, choice.format(ChosenDayFormat),
-            { carried = it }) { chosen = start.plusDays(it.toLong()).toString() }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(start.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
-            Text(today.format(HeaderDayFormat), color = Muted, fontSize = 10.sp, lineHeight = 14.sp)
-        }
-        Row(Modifier.fillMaxWidth().padding(top = 15.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
-            DateAction("Cancel", false, dismiss)
-            DateAction("View day", true) { select(choice) }
-        }
-    }
-}
-
-/** One lavender track across the actual imported coverage; the thumb stays inside the panel. */
-@Composable private fun DateTrack(position: Int, span: Int, label: String, carry: (Boolean) -> Unit,
-    pick: (Int) -> Unit) {
-    val radius = 9.dp
-    val fraction = (position.toFloat() / span).coerceIn(0f, 1f)
-    // The drawn track stays slim; the touch target keeps the platform minimum.
-    Canvas(Modifier.fillMaxWidth().height(48.dp).testTag("date-range")
-        .semantics {
-            contentDescription = "Choose health history day"
-            stateDescription = label
-            progressBarRangeInfo = ProgressBarRangeInfo(position.toFloat(), 0f..span.toFloat(), span - 1)
-            setProgress { value -> pick(value.roundToInt().coerceIn(0, span)); true }
-        }
-        .pointerInput(span) {
-            val inset = radius.toPx()
-            fun day(x: Float) = (((x - inset) / (size.width - 2 * inset)).coerceIn(0f, 1f) * span).roundToInt()
-            awaitEachGesture {
-                val down = awaitFirstDown()
-                pick(day(down.position.x)); down.consume(); carry(true)
-                try {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (!change.pressed) break
-                        pick(day(change.position.x)); change.consume()
-                    }
-                } finally { carry(false) }
-            }
-        }) {
-        val middle = size.height / 2
-        val inset = radius.toPx()
-        drawLine(Color.White.copy(alpha = .16f), Offset(inset, middle), Offset(size.width - inset, middle),
-            8.dp.toPx(), StrokeCap.Round)
-        val x = inset + (size.width - 2 * inset) * fraction
-        drawLine(Lavender, Offset(inset, middle), Offset(x, middle), 8.dp.toPx(), StrokeCap.Round)
-        drawCircle(Lavender, inset, Offset(x, middle))
-    }
-}
-
-@Composable private fun DateStep(glyph: String, label: String, enabled: Boolean, action: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
-    val interaction = remember { MutableInteractionSource() }
-    Box(Modifier.size(44.dp).orbitControl(14.dp, interaction, enabled)
-        .clickable(enabled = enabled, interactionSource = interaction, indication = null) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
-        .semantics { contentDescription = label; role = Role.Button }, contentAlignment = Alignment.Center) {
-        Text(glyph, color = if (enabled) White else Muted.copy(alpha = .38f), fontSize = 20.sp, lineHeight = 24.sp)
-    }
-}
-
-@Composable private fun DateAction(label: String, primary: Boolean, action: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
-    val interaction = remember { MutableInteractionSource() }
-    Box(Modifier.heightIn(min = 44.dp)
-        .orbitControl(14.dp, interaction, fill = if (primary) Lavender else ControlFill)
-        .clickable(interactionSource = interaction, indication = null) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); action() }
-        .semantics { role = Role.Button }.padding(horizontal = 16.dp, vertical = 9.dp),
-        contentAlignment = Alignment.Center) {
-        Text(label, color = if (primary) Ink else White, fontSize = 13.sp, lineHeight = 18.sp)
-    }
-}
-
 @Composable
 private fun HealthScreen(page: String, state: HealthScreenState, navigate: (String) -> Unit, selectDate: (LocalDate) -> Unit) {
     val day = state.day
@@ -376,10 +260,8 @@ private fun HealthScreen(page: String, state: HealthScreenState, navigate: (Stri
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(day.date.format(DayFormat), color = Muted, modifier = Modifier.weight(1f))
-                TextButton(onClick = { selectDate(day.date.minusDays(1)) }, enabled = day.date > LocalDate.of(1970, 1, 1),
-                    modifier = Modifier.semantics { contentDescription = "Previous day" }) { Text("‹", fontSize = 26.sp) }
-                TextButton(onClick = { selectDate(day.date.plusDays(1)) }, enabled = day.date < LocalDate.now(),
-                    modifier = Modifier.semantics { contentDescription = "Next day" }) { Text("›", fontSize = 26.sp) }
+                WorkoutArrow("Previous day", -1, day.date > LocalDate.of(1970, 1, 1)) { selectDate(day.date.minusDays(1)) }
+                WorkoutArrow("Next day", 1, day.date < LocalDate.now()) { selectDate(day.date.plusDays(1)) }
             }
         }
         if (state.loading || state.syncing) item {

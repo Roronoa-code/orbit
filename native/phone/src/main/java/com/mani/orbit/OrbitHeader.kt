@@ -25,8 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -55,12 +58,14 @@ internal val LocalHeaderScroll = staticCompositionLocalOf<((() -> Float)?) -> Un
 /** Native title and controls keep their own hit area above the page's feathered scroll edge. */
 @Composable
 internal fun OrbitHeader(title: String, date: String?, showBack: Boolean, back: () -> Unit,
-    chooseDate: () -> Unit, settings: () -> Unit, scene: GlassBackdrop) {
+    chooseDate: () -> Unit, settings: () -> Unit, scene: GlassBackdrop, dateBounds: (androidx.compose.ui.geometry.Rect) -> Unit = {}) {
     val haptic = LocalHapticFeedback.current
     Row(Modifier.fillMaxWidth().heightIn(min = 74.dp).padding(start = 14.dp, end = 14.dp, top = 9.dp, bottom = 8.dp)
         .testTag("orbit-header"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         if (showBack) HeaderButton("Back", true, back, scene)
         if (date != null) Column(Modifier.weight(1f).heightIn(min = 54.dp)
+            // The date chooser grows out of exactly this control and goes back into it.
+            .onGloballyPositioned { dateBounds(it.boundsInRoot()) }
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); chooseDate()
             }.semantics { contentDescription = "Choose date"; role = Role.Button }, verticalArrangement = Arrangement.Center) {
@@ -83,9 +88,17 @@ internal fun OrbitHeader(title: String, date: String?, showBack: Boolean, back: 
     val focused by interaction.collectIsFocusedAsState()
     val reduced = LocalOrbitReducedMotion.current
     val contact = animateFloatAsState(if (pressed) 1f else 0f, orbitEngage(reduced), label = "Header contact")
+    // The US press: the glass comes up to meet the finger.
+    val lift = animateFloatAsState(if (pressed && !reduced) 1f else 0f,
+        if (reduced) androidx.compose.animation.core.tween(0) else if (pressed)
+            androidx.compose.animation.core.tween(OrbitPressMillis, easing = OrbitPressEasing) else orbitRelease(),
+        label = "Header press")
     var light by remember { mutableStateOf(Offset(.5f, .5f)) }
     val haptic = LocalHapticFeedback.current
-    Box(Modifier.size(48.dp).testTag("header-${label.lowercase()}").clip(CircleShape).orbitFrost(scene, 24.dp, { contact.value }, { light })
+    Box(Modifier.size(48.dp).testTag("header-${label.lowercase()}").graphicsLayer {
+            scaleX = 1f + (OrbitPressScale - 1f) * lift.value; scaleY = scaleX
+            translationY = -OrbitPressLiftDp.dp.toPx() * lift.value
+        }.clip(CircleShape).orbitFrost(scene, 24.dp, { contact.value }, { light })
         .pointerInput(Unit) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)

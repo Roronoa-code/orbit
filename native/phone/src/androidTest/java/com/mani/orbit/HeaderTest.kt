@@ -57,9 +57,15 @@ class HeaderTest {
             rule.onNodeWithText("Steps", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.bottom)
         back.performTouchInput { down(center) }
         rule.mainClock.advanceTimeBy(100)
-        assertEquals(bounds, back.fetchSemanticsNode().boundsInRoot)
+        // The press lifts the glass toward the finger, a little larger and higher, never away from it.
+        val pressed = back.fetchSemanticsNode().boundsInRoot
+        assertTrue("Lifted: $pressed from $bounds", pressed.width > bounds.width && pressed.width <= bounds.width * 1.04f + 1f)
+        assertTrue("and raised, not sunk: $pressed", pressed.center.y < bounds.center.y && pressed.center.y > bounds.center.y - 3 * rule.density.density)
+        assertEquals(bounds.center.x, pressed.center.x, 1f)
         capture("header-contact-large.png")
         back.performTouchInput { moveTo(Offset(-100f, -100f)); up() }
+        rule.waitForIdle()
+        assertEquals(bounds, back.fetchSemanticsNode().boundsInRoot)
         assertEquals(0, backCalls)
         back.performClick(); assertEquals(1, backCalls)
         rule.runOnIdle { home = false; title = "Measurements" }

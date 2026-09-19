@@ -1,104 +1,18 @@
 package com.mani.orbit
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
-/** One retained selection surface; taps, holds and horizontal drags all retarget its position. */
+/**
+ * The app's segmented control: the navigation bar's own track, inside a page, so every choice among
+ * a few in the app looks and moves like the bar does.
+ */
 @Composable
 internal fun MeasurementSelector(labels: List<String>, selected: Int, name: String, select: (Int) -> Unit) {
-    val reduced = LocalOrbitReducedMotion.current
-    val haptic = LocalHapticFeedback.current
-    val currentSelect by rememberUpdatedState(select)
-    val currentSelection by rememberUpdatedState(selected)
-    var engaged by remember { mutableStateOf(false) }
-    var dragging by remember { mutableStateOf(false) }
-    var finger by remember { mutableFloatStateOf(selected.toFloat()) }
-    val position = animateFloatAsState(if (dragging) finger else selected.toFloat(),
-        if (reduced) androidx.compose.animation.core.tween(0) else if (dragging) spring(.88f, 1400f) else orbitSettle(),
-        label = "selection position")
-    val lift = animateFloatAsState(if (engaged && !reduced) 1f else 0f, orbitEngage(reduced), label = "selection engagement")
     val quiet = name == "measurement-period"
-    val shape = RoundedCornerShape(if (quiet) 16.dp else 28.dp)
-    BoxWithConstraints(Modifier.fillMaxWidth().testTag(name).selectableGroup()
-        .background(ControlFill, shape).border(GlassEdgeWidth, ControlEdge, shape)
-        .pointerInput(labels) {
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false)
-                engaged = true
-                var crossed = currentSelection
-                try {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (!change.pressed) {
-                            if (dragging && !change.isConsumed) { change.consume(); currentSelect(finger.roundToInt().coerceIn(labels.indices)) }
-                            break
-                        }
-                        val delta = change.position - down.position
-                        if (!dragging && (change.isConsumed || abs(delta.y) > viewConfiguration.touchSlop && abs(delta.y) > abs(delta.x))) break
-                        if (abs(delta.x) > viewConfiguration.touchSlop) dragging = true
-                        if (dragging) {
-                            val inset = 4.dp.toPx()
-                            val slot = (size.width - inset * 2) / labels.size
-                            finger = ((change.position.x - inset) / slot - .5f).coerceIn(0f, labels.lastIndex.toFloat())
-                            val next = finger.roundToInt()
-                            if (next != crossed) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); crossed = next }
-                            change.consume()
-                        }
-                    }
-                } finally { engaged = false; dragging = false }
-            }
-        }.padding(4.dp)) {
-        val slot = maxWidth / labels.size
-        Box(Modifier.matchParentSize()) {
-        Box(Modifier.width(slot).fillMaxHeight().testTag("$name-indicator").graphicsLayer {
-            // Track the finger directly; the retained spring only settles after release.
-            translationX = (if (dragging) finger else position.value) * slot.toPx()
-            scaleX = 1f + lift.value * .018f
-            scaleY = 1f + lift.value * .025f
-        }.background(ControlSelectedFill, RoundedCornerShape(if (quiet) 13.dp else 24.dp))
-            .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = lift.value * .12f),
-                Color.White.copy(alpha = lift.value * .025f))), RoundedCornerShape(if (quiet) 13.dp else 24.dp)))
-        }
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            labels.forEachIndexed { index, label ->
-                Box(Modifier.weight(1f).heightIn(min = if (quiet) 40.dp else 48.dp).selectable(selected == index,
-                    interactionSource = remember { MutableInteractionSource() }, indication = null, role = Role.Tab,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentSelect(index) })
-                    .padding(horizontal = 3.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
-                    BasicText(label, style = MaterialTheme.typography.bodySmall.copy(color = if (selected == index) Color(0xFFF5F1FC) else Color(0xFFB4ADBE),
-                        fontSize = 12.sp, textAlign = TextAlign.Center), maxLines = if (' ' in label) 2 else 1,
-                        autoSize = TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = 12.sp, stepSize = .5.sp))
-                }
-            }
-        }
-    }
+    GlassTrack(labels, selected, select, name, Modifier.fillMaxWidth(),
+        slotHeight = if (quiet) 36.dp else 44.dp, labelSize = if (quiet) 12.sp else 13.sp)
 }
