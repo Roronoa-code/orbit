@@ -102,7 +102,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
     private val mutableCardLayout = MutableStateFlow<HealthCardLayout?>(null)
     internal val cardLayout = mutableCardLayout.asStateFlow()
     private val layoutWrite = Mutex()
-    private val snapshots = Channel<Pair<Long, String>>(Channel.CONFLATED)
+    private val snapshots = Channel<Pair<Long, HealthUpdate>>(Channel.CONFLATED)
     @Volatile private var healthRevision = ""
     @Volatile private var sourceGeneration = 0L
     @Volatile private var acceptedGeneration = -1L
@@ -123,22 +123,25 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
             mutableCardLayout.value = HealthCardLayout(order, wide)
         }
         viewModelScope.launch(Dispatchers.IO) {
-            for ((generation, raw) in snapshots) {
+            for ((generation, update) in snapshots) {
                 if (generation != sourceGeneration) continue
                 try {
-                    val snapshot = JSONObject(raw)
+                    val snapshot = update.info
                     require(!snapshot.has("error"))
-                    snapshot.optJSONObject("data")?.let {
-                        cached = NativeHealthProjection.project(it, LocalDate.parse(it.getString("date")))
-                        lastSync = it.optJSONObject("meta")?.optLong("lastSync")?.takeIf { time -> time > 0 }
-                        recordCount = it.optJSONObject("meta")?.optLong("recordCount", -1)?.takeIf { count -> count >= 0 }
-                        firstRecord = it.optJSONObject("meta")?.optLong("firstRecord", -1)?.takeIf { at -> at > 0 }
+                    update.readings?.let { cached = it }
+                    snapshot.optJSONObject("meta")?.let {
+                        lastSync = it.optLong("lastSync").takeIf { time -> time > 0 }
+                        recordCount = it.optLong("recordCount", -1).takeIf { count -> count >= 0 }
+                        firstRecord = it.optLong("firstRecord", -1).takeIf { at -> at > 0 }
                             ?.let { at -> java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault()).toLocalDate() }
-                        historyAllowed = it.optJSONObject("meta")?.optBoolean("historyAllowed") == true
+                        historyAllowed = it.optBoolean("historyAllowed")
                     }
                     val date = LocalDate.parse(selectedDate.value)
                     val next = cached?.day?.takeIf { it.date == date }
                     var day = next ?: HealthDay(date)
+                    // Today's hours travel on their own, so fetching them never re-sends the year.
+                    if (snapshot.optString("stepHoursDate") == date.toString())
+                        day = day.copy(hourlySteps = NativeHealthProjection.hours(snapshot.getJSONArray("stepHours")))
                     val live = snapshot.optJSONObject("live")?.optJSONObject("reading")
                     val liveAt = live?.optLong("at")?.takeIf { it > 0 }
                     val current = live != null && date == LocalDate.now() && live.optString("date") == date.toString()
@@ -156,6 +159,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                         if (generation == sourceGeneration && selectedDate.value == date.toString()) {
                             mutableHealth.value = HealthScreenState(day, next == null, snapshot.optBoolean("syncing"),
                                 snapshot.optString("status"), lastSync = lastSync,
+                                error = if (snapshot.optBoolean("loadFailed")) "Readings could not be loaded. Your saved data is unchanged." else null,
                                 liveStepsAt = if (current) liveAt else null,
                                 days = cached?.days.orEmpty(), available = snapshot.optBoolean("available"), permitted = snapshot.optBoolean("permitted"),
                                 scanned = snapshot.optLong("scanned").coerceAtLeast(0),
@@ -163,7 +167,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
                                 liveConnected = snapshot.optJSONObject("live")?.optBoolean("connected") == true,
                                 recordCount = recordCount, firstRecord = firstRecord, historyAllowed = historyAllowed, workouts = cached?.workouts.orEmpty(),
                                 watchHeartState = mutableHealth.value.watchHeartState)
-                            healthRevision = snapshot.getString("revision")
+                            healthRevision = update.revision
                             acceptedGeneration = generation
                         }
                     }
@@ -203,7 +207,7 @@ class OrbitModel(application: Application, private val saved: SavedStateHandle) 
         } }
     }
     fun revisionFor(generation: Long): String = if (generation == acceptedGeneration) healthRevision else ""
-    fun acceptHealth(generation: Long, raw: String) { if (generation == sourceGeneration) snapshots.trySend(generation to raw) }
+    internal fun acceptHealth(generation: Long, update: HealthUpdate) { if (generation == sourceGeneration) snapshots.trySend(generation to update) }
 
     /**
      * The newest valid heart reading Orbit's own watch app has delivered: bpm and when it was taken.

@@ -34,6 +34,8 @@ final class LiveSamsungSteps {
     private AsyncSingleFuture<?> pending;
     private boolean visible, closed, consent, granted;
     private int generation;
+    /** Failures in a row that may pass by themselves; each waits twice as long, up to 30 seconds. */
+    private int failures;
     private JSONObject reading;
     private volatile String snapshot = "{\"status\":\"Connect live steps\",\"connected\":false}";
     private final Runnable poll = this::check;
@@ -99,7 +101,7 @@ final class LiveSamsungSteps {
                 if (!day.equals(LocalDate.now())) { later(0); return; }
                 long total = 0; for (int i = 0; i < hours.length(); i++) total = Math.addExact(total, hours.getJSONObject(i).getLong("value"));
                 reading = new JSONObject().put("source", "com.sec.android.app.shealth").put("date", day.toString()).put("steps", total).put("hours", hours).put("at", System.currentTimeMillis());
-                emit("Live from Samsung Health"); later(2000);
+                failures = 0; emit("Live from Samsung Health"); later(2000);
             } catch (Exception error) { fail(error); }
         });
     }
@@ -108,11 +110,20 @@ final class LiveSamsungSteps {
         pending = null; handler.removeCallbacks(timeout);
         int code = error instanceof HealthDataException && ((HealthDataException) error).getErrorCode() != null ? ((HealthDataException) error).getErrorCode() : -1;
         String status;
+        long wait = 30000;
         if (code == 2000) { granted = false; reading = null; status = "Allow live steps in Samsung Health"; }
         else if (code >= 1000 && code <= 2005) { granted = false; status = "Samsung direct access needs developer setup"; }
         else if (code >= 3000 && code <= 3003) status = "Install, update or open Samsung Health first";
-        else status = "Live steps delayed · retrying";
-        emit(status); later(30000);
+        else {
+            // A slow or failed read usually passes: try again in 2 seconds, then 4, 8, 16, then every 30.
+            // A flat 30-second wait froze the step count for half a minute after any one bad read.
+            status = "Live steps delayed · retrying";
+            wait = Math.min(30000, 2000L << Math.min(failures, 4));
+            failures++;
+        }
+        // Say why, so a stalled count can be traced; the status line on screen stays general.
+        android.util.Log.w("OrbitHealth", "Live steps: " + status, error);
+        emit(status); later(wait);
     }
     private void emit(String status) {
         try { snapshot = new JSONObject().put("status", status).put("connected", granted).put("reading", reading == null ? JSONObject.NULL : reading).toString(); changed.run(); }

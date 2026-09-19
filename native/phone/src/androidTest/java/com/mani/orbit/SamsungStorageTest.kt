@@ -142,4 +142,63 @@ class SamsungStorageTest {
             assertEquals(2, readImportedWorkout(file, summary.id)!!.points.size)
         } finally { compose.activityRule.scenario.close(); context.deleteDatabase(file.name) }
     }
+
+    /**
+     * The owner's history stopped loading because Orbit's own readers and its Samsung refresh each had
+     * a connection and locked one another out: a year-long read held the write lock past Android's 2.5
+     * second wait, and the import gave up with "database is locked". A read that outlasts that wait must
+     * now leave an import free to commit, keep its own snapshot, and let a second reader in beside it.
+     */
+    @Test fun aLongReadNeitherBlocksNorBreaksAnImport() {
+        val file = context.getDatabasePath("samsung-shared-read-check.db"); context.deleteDatabase(file.name)
+        fun steps(value: Int) = JSONArray().put(row("stepsDay", "day").put("date", date.toString()).put("value", value))
+        fun count(store: HealthRecordStore) = store.window(0, start + 86_400_000).use { it.count }
+        try {
+            HealthRecordStore(file).use { it.beginImport(); it.stage(steps(100)); it.finishImport(listOf("stepsDay"), 0, start + 86_400_001, true, "samsung_sdk") }
+            val reading = java.util.concurrent.CountDownLatch(1)
+            val seen = java.util.concurrent.atomic.AtomicReference<Pair<Int, Int>>()
+            val reader = Thread {
+                HealthRecordStore(file).use { store ->
+                    store.beginRead()
+                    try {
+                        val before = count(store)
+                        reading.countDown()
+                        Thread.sleep(3_500)
+                        seen.set(before to count(store))
+                    } finally { store.endRead() }
+                }
+            }.apply { start() }
+            assertTrue(reading.await(5, java.util.concurrent.TimeUnit.SECONDS))
+            val began = System.nanoTime()
+            HealthRecordStore(file).use { store ->
+                store.beginImport()
+                store.stage(steps(200).put(row("floorsDay", "day").put("date", date.toString()).put("value", 3)))
+                store.finishImport(listOf("stepsDay", "floorsDay"), 0, start + 86_400_001, true, "samsung_sdk")
+            }
+            val waited = (System.nanoTime() - began) / 1_000_000
+            HealthRecordStore(file).use { other -> other.beginRead(); try { assertEquals(2, count(other)) } finally { other.endRead() } }
+            reader.join(10_000)
+            assertTrue("The import committed while the long read still held its snapshot, in $waited ms", waited < 2_000)
+            assertEquals("and the read kept that snapshot to the end", 1 to 1, seen.get())
+        } finally { context.deleteDatabase(file.name) }
+    }
+
+    /** A refresh that brings nothing new must say so, so the screen is spared re-reading the year. */
+    @Test fun anImportSaysWhetherItChangedTheRecords() {
+        val file = context.getDatabasePath("samsung-changed-check.db"); context.deleteDatabase(file.name)
+        fun day(id: String, value: Int) = row("stepsDay", id).put("date", date.toString()).put("value", value)
+        try { HealthRecordStore(file).use { store ->
+            fun commit(vararg rows: JSONObject): Boolean {
+                store.beginImport(); store.stage(JSONArray(rows.toList()))
+                return store.finishImport(listOf("stepsDay"), 0, start + 86_400_001, true, "samsung_sdk")
+            }
+            assertTrue("New records", commit(day("a", 10), day("b", 20)))
+            assertFalse("The same scan again", commit(day("a", 10), day("b", 20)))
+            assertTrue("An edited value", commit(day("a", 11), day("b", 20)))
+            assertTrue("A record Samsung no longer has", commit(day("a", 11)))
+            assertFalse(commit(day("a", 11)))
+            assertFalse("Today's total restamped to the time of the scan, same count", commit(day("a", 11).put("end", start + 60_000)))
+            assertTrue("and a new count", commit(day("a", 12).put("end", start + 120_000)))
+        } } finally { context.deleteDatabase(file.name) }
+    }
 }

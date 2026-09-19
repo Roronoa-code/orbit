@@ -569,3 +569,58 @@ With glass selectors on screen and nothing moving, Orbit drew no frames in three
 
 **Not yet seen on the phone.** It was disconnected before this was installed, so its look on the S25 and
 its frame cost there are still to check. The Watch app is unchanged.
+
+## 19. When the readings stopped updating — 19 September 2026
+
+The owner sent a screen recording. Day, 7-day and 30-day all showed the same 234 steps, and every
+average, sleep and intake figure was blank. Settings read "Saved readings could not be loaded", then
+"Samsung Health could not refresh", and "Refreshing Samsung Health…" sat unchanged for six seconds.
+Only the live figures were on screen; none of the saved history had loaded.
+
+**Cause.** Orbit locked itself out of its own health database.
+
+- The screen's loader, the 30-second Samsung refresh, the watch summary job and the Sleep screen each
+  opened their own connection to `samsung-health.db`.
+- Reads took the database's single write lock, because `beginRead` used `BEGIN IMMEDIATE`.
+- The loader re-read a whole year each time and held that lock for about 2 s (6 s at start-up).
+- Android waits 2.5 s for a lock, then throws "database is locked".
+- Each refresh started the watch job just before reloading, so every refresh collided with itself.
+
+The phone's log showed `SQLiteDatabaseLockedException` in the refresh and in the watch job within
+seconds of opening Orbit. The recorded build and the current one had identical code here.
+
+**Lag.** After every refresh, the loader turned the year into a few megabytes of text twice on the
+thread that draws the screen. The screen then parsed that text back.
+
+**Fixed.**
+
+- Every store on a file shares one database. The database uses write-ahead logging, and from
+  Android 15 a read is a read-only snapshot. Reads and imports no longer wait on each other, and
+  nothing gives up with "database is locked".
+- An import reports whether it changed anything. A daily total that Samsung only restamped to the time
+  of the scan does not count as a change. The year is re-read only on a real change, a date change, a
+  start, or after a failed read.
+- The year reaches the screen as objects, with no text round trip. Today's hourly steps travel on their
+  own instead of re-sending the year.
+- A failed read is logged with its cause and shown as an error. It used to appear only in Settings.
+- Live steps log why a read failed and retry after 2, 4, 8 and 16 s, then every 30 s. The old flat
+  30-second wait froze the step count.
+
+**Verified.**
+
+- A new test holds a read open past Android's 2.5 s wait while an import commits. On the old code it
+  failed with `database is locked (code 5 SQLITE_BUSY)`, the phone's error. On the new code the import
+  commits in under 2 s and the read keeps its snapshot.
+- `SamsungStorageTest`, `PhoneHealthContextTest` and `SamsungDirectTest` passed (15), as did
+  `NativeMigrationTest`, `PhoneResponsiveTest` and `PhoneVisualParityTest` (5) and `SleepTest` (4).
+- On the S25, each build was cold-started and left on Home for 75 s:
+
+| | Old build | New build |
+|---|---|---|
+| "Database is locked" failures | 2 (the watch job, twice) | none |
+| Worst frames | 53, 61, 81, 93, 113 ms | none over 36 ms |
+| Garbage collection after a refresh | 34 MB | none logged |
+| Year re-read after an idle refresh | every time | never |
+
+**Still open.** On Home, the storm ring and glass take about 10 ms a frame on the S25. That is too
+slow for 120 Hz, so Home draws at 60 fps. It is drawing cost and unrelated to these bugs.

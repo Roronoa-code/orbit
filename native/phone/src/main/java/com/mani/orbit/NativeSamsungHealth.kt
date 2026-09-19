@@ -8,8 +8,16 @@ import com.samsung.android.sdk.health.data.error.HealthDataException
 import com.samsung.android.sdk.health.data.permission.Permission
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
+import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+
+/**
+ * What the Samsung source hands the screen: the small facts every time, and the projected year only
+ * when the screen does not have it yet. The year crosses as objects. It used to cross as text, turned
+ * into a few megabytes of it twice a refresh on the thread that draws the screen and parsed back again.
+ */
+internal class HealthUpdate(val revision: String, val info: JSONObject, val readings: NativeHealthSnapshot?)
 
 /** Native lifecycle owner for read-only Samsung SDK access and the existing committed cache. */
 internal class NativeSamsungHealth(private val activity: MainActivity) : AutoCloseable {
@@ -23,7 +31,11 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
     private var importing: Job? = null
     private var loading: Job? = null
     private var selected = LocalDate.now()
-    private var data = "null"
+    private var readings: NativeHealthSnapshot? = null
+    private var meta: JSONObject? = null
+    private var stepHours: JSONArray? = null
+    private var stepHoursDate: LocalDate? = null
+    private var loadFailed = false
     private var revision = 0L
     private var status = "Connecting to Samsung Health…"
     private var available = false
@@ -33,11 +45,14 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
     private fun cache() = HealthRecordStore(activity.getDatabasePath("samsung-health.db"))
     private fun changed() { if (!closed) activity.healthChanged() }
 
-    fun snapshot(known: String): String {
-        val info = JSONObject().put("revision", revision.toString()).put("status", status)
+    fun snapshot(known: String): HealthUpdate {
+        val info = JSONObject().put("status", status)
             .put("syncing", importing?.isActive == true || consent).put("scanned", scanned)
-            .put("available", available).put("permitted", SamsungDataImport.hasReadingsPermission(granted)).put("live", JSONObject(live.snapshot())).toString()
-        return info.dropLast(1) + ",\"data\":" + (if (known == revision.toString()) "null" else data) + "}"
+            .put("available", available).put("permitted", SamsungDataImport.hasReadingsPermission(granted))
+            .put("live", JSONObject(live.snapshot())).put("loadFailed", loadFailed)
+        meta?.let { info.put("meta", it) }
+        stepHours?.let { info.put("stepHours", it).put("stepHoursDate", stepHoursDate.toString()) }
+        return HealthUpdate(revision.toString(), info, readings.takeIf { known != revision.toString() })
     }
 
     fun connect() {
@@ -68,16 +83,21 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
                 available = true
                 if (!SamsungDataImport.hasReadingsPermission(granted)) { status = "Connect Samsung Health"; return@launch }
                 status = if (recent) "Refreshing Samsung Health…" else "Importing Samsung Health…"; changed()
-                withContext(Dispatchers.IO) {
+                val (updated, latest) = withContext(Dispatchers.IO) {
                     SamsungDataImport.importLock.withLock {
-                        cache().use { records -> SamsungDataImport.sync(store(), records, granted, recent) { count ->
-                            activity.runOnUiThread { if (!closed) { scanned = count; changed() } }
-                        } }
+                        cache().use { records ->
+                            SamsungDataImport.sync(store(), records, granted, recent) { count ->
+                                activity.runOnUiThread { if (!closed) { scanned = count; changed() } }
+                            } to records.metadata()
+                        }
                     }
                 }
                 status = "Samsung Health saved on this phone"
+                meta = latest
                 PhoneHealthContextWorker.schedule(activity)
-                load(selected.toString())
+                // The year is read again only when the import changed it, or the last read did not
+                // arrive. Reading it after every 30-second refresh was most of Orbit's work while open.
+                if (updated || (readings == null || loadFailed) && loading?.isActive != true) load(selected.toString())
             } catch (timeout: TimeoutCancellationException) { failure(timeout) }
             catch (cancelled: CancellationException) { throw cancelled }
             catch (error: Exception) { failure(error) }
@@ -91,28 +111,26 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
         selected = date; loading?.cancel()
         loading = activity.lifecycleScope.launch {
             try {
-                val next = withContext(Dispatchers.IO) { cache().use { HealthProjection.read(it, date, true) } }
-                if (closed || date != selected) return@launch
-                data = next.toString()
-                // This payload crosses to the screen on every change. Per-minute oxygen once took it
-                // past 50 MB and the app died of OutOfMemoryError on launch; if any type grows like
-                // that again, say which one instead of only crashing.
-                if (data.length > PAYLOAD_WARNING_CHARS) {
-                    val rows = next.getJSONArray("rows"); val counts = sortedMapOf<String, Int>()
-                    for (i in 0 until rows.length()) rows.getJSONObject(i).optString("type").let { counts[it] = (counts[it] ?: 0) + 1 }
-                    android.util.Log.w("OrbitImport", "Screen payload is ${data.length} chars: $counts")
+                val (next, latest) = withContext(Dispatchers.IO) {
+                    val year = cache().use { HealthProjection.read(it, date, true) }
+                    warnIfOversized(year.getJSONArray("rows"))
+                    NativeHealthProjection.project(year, date) to year.getJSONObject("meta")
                 }
-                revision++; changed()
+                if (closed || date != selected) return@launch
+                readings = next; meta = latest; loadFailed = false; revision++; changed()
                 if (visible && SamsungDataImport.permissions["steps"] in granted) {
                     try {
                         val hours = withContext(Dispatchers.IO) { SamsungDataImport.hours(store(), date) }
-                        if (!closed && date == selected) { next.put("stepHours", hours); data = next.toString(); revision++; changed() }
+                        if (!closed && date == selected) { stepHours = hours; stepHoursDate = date; changed() }
                     } catch (timeout: TimeoutCancellationException) { status = "Hourly steps could not be refreshed"; changed() }
                     catch (cancelled: CancellationException) { throw cancelled }
                     catch (_: Exception) { status = "Hourly steps could not be refreshed"; changed() }
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { status = "Saved readings could not be loaded. Your records are preserved."; changed() }
+            catch (error: Exception) {
+                android.util.Log.w("OrbitImport", "Saved readings could not be loaded", error)
+                loadFailed = true; status = "Saved readings could not be loaded. Your records are preserved."; changed()
+            }
         }
     }
 
@@ -138,8 +156,17 @@ internal class NativeSamsungHealth(private val activity: MainActivity) : AutoClo
         closed = true; visible = false; polling?.cancel(); importing?.cancel(); loading?.cancel(); live.close()
     }
     companion object {
-        /** Today's full year is about 4 MB; three times that means a type has stopped aggregating. */
-        private const val PAYLOAD_WARNING_CHARS = 12_000_000
+        /**
+         * A year is a few tens of thousands of rows. Per-minute oxygen once made it far more and the app
+         * died of OutOfMemoryError on launch; if any type grows like that again, say which one.
+         */
+        private const val ROWS_WARNING = 100_000
+        private fun warnIfOversized(rows: JSONArray) {
+            if (rows.length() <= ROWS_WARNING) return
+            val counts = sortedMapOf<String, Int>()
+            for (i in 0 until rows.length()) rows.getJSONObject(i).optString("type").let { counts[it] = (counts[it] ?: 0) + 1 }
+            android.util.Log.w("OrbitImport", "The year holds ${rows.length()} rows: $counts")
+        }
         internal fun message(error: Exception): String = when ((error as? HealthDataException)?.errorCode) {
             ErrorCode.ERR_PLATFORM_NOT_INSTALLED -> "Install Samsung Health to connect your readings"
             ErrorCode.ERR_OLD_VERSION_PLATFORM -> "Update Samsung Health to connect"

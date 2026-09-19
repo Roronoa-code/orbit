@@ -79,11 +79,10 @@ class PhoneResponsiveTest {
         val model = OrbitModel(rule.activity.application, SavedStateHandle(mapOf("date" to date.toString())))
         val owner = ViewModelStore().apply { put("narrow", model) }
         try {
-            model.acceptHealth(model.attachHealthSource(), JSONObject().put("revision", "narrow")
+            model.acceptHealth(model.attachHealthSource(), HealthUpdate("narrow", JSONObject()
                 .put("available", true).put("permitted", true).put("status", "Samsung Health")
-                .put("data", JSONObject().put("schema", 1).put("date", date.toString())
-                    .put("meta", JSONObject().put("firstRecord", start - 120L * 86400000L))
-                    .put("rows", rows)).toString())
+                .put("meta", JSONObject().put("firstRecord", start - 120L * 86400000L)),
+                NativeHealthProjection.project(JSONObject().put("schema", 1).put("date", date.toString()).put("rows", rows), date)))
             rule.waitUntil(5000) { !model.health.value.loading && model.cardLayout.value != null }
             val record = WorkoutRecord("narrow-walk", "Walking", start + 10 * 3600000, start + 11 * 3600000,
                 1800000, 1800000, weight = 75.8, distance = 2100.0)

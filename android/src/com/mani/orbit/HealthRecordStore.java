@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
@@ -11,19 +12,58 @@ import java.util.Collection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-/** Imported originals stay private. An incomplete scan never replaces the last completed import. */
+/**
+ * Imported originals stay private. An incomplete scan never replaces the last completed import.
+ *
+ * Every store open on the same file shares one database, so the screen, the Samsung refresh, the
+ * watch summary and the Sleep screen queue for it instead of failing. Each used to open its own
+ * connection, and a reader holding the write lock through a year-long read made the others give up
+ * after Android's 2.5 second wait with "database is locked": the owner's history stopped loading and
+ * the refresh failed, on and off, on 19 September 2026.
+ */
 final class HealthRecordStore implements AutoCloseable {
+    private static final Map<String, Shared> OPEN = new HashMap<>();
+    private static final class Shared {
+        final SQLiteDatabase db;
+        int users;
+        Shared(SQLiteDatabase db) { this.db = db; }
+    }
+    private final String key;
+    private final Shared shared;
     private final SQLiteDatabase db;
+    private boolean closed;
     private static final int PART_CHARS = 65536;
     private static final Set<String> ARRAYS = new HashSet<>(Arrays.asList("samples", "stages", "route", "logs", "laps", "segments"));
 
     HealthRecordStore(File path) {
+        key = path.getAbsolutePath();
+        synchronized (OPEN) {
+            Shared current = OPEN.get(key);
+            if (current != null) db = current.db;
+            else {
+                db = open(path);
+                prepare();
+                current = new Shared(db);
+                OPEN.put(key, current);
+            }
+            current.users++;
+            shared = current;
+        }
+    }
+
+    // Write-ahead logging lets a read keep its snapshot on a connection of its own while an import writes.
+    private static SQLiteDatabase open(File path) {
         File parent = path.getParentFile();
         if (!parent.isDirectory() && !parent.mkdirs()) throw new IllegalStateException("Cannot create health storage");
-        db = SQLiteDatabase.openOrCreateDatabase(path, null);
+        return SQLiteDatabase.openDatabase(path.getPath(), null, SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING);
+    }
+
+    private void prepare() {
         db.execSQL("CREATE TABLE IF NOT EXISTS records (kind TEXT NOT NULL,id TEXT NOT NULL,start INTEGER NOT NULL,end INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(kind,id))");
         db.execSQL("CREATE INDEX IF NOT EXISTS health_time ON records(start,end)");
         db.execSQL("CREATE TABLE IF NOT EXISTS staging (kind TEXT NOT NULL,id TEXT NOT NULL,start INTEGER NOT NULL,end INTEGER NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(kind,id))");
@@ -42,8 +82,14 @@ final class HealthRecordStore implements AutoCloseable {
         try { db.delete("staging_parts", null, null); db.delete("staging", null, null); db.setTransactionSuccessful(); }
         finally { db.endTransaction(); }
     }
-    // Hold one SQLite snapshot across rows, workouts and metadata, even during an import commit.
-    void beginRead() { db.beginTransactionNonExclusive(); }
+    /**
+     * Hold one SQLite snapshot across rows, workouts and metadata, even during an import commit. From
+     * Android 15 it is a read-only transaction, so a long read and an import no longer wait for each
+     * other; before that Android queues it behind the writer on the shared database.
+     */
+    void beginRead() {
+        if (Build.VERSION.SDK_INT >= 35) db.beginTransactionReadOnly(); else db.beginTransactionNonExclusive();
+    }
     void endRead() { db.endTransaction(); }
 
     void stage(JSONArray rows) throws Exception {
@@ -194,15 +240,25 @@ final class HealthRecordStore implements AutoCloseable {
         }
     }
 
-    void finishImport(Collection<String> kinds, long start, long end, boolean history) throws Exception {
-        finishImport(kinds, start, end, history, "health_connect");
+    boolean finishImport(Collection<String> kinds, long start, long end, boolean history) throws Exception {
+        return finishImport(kinds, start, end, history, "health_connect");
     }
 
-    void finishImport(Collection<String> kinds, long start, long end, boolean history, String transport) throws Exception {
+    /** Commit the staged scan. True when the committed records differ afterwards, so readers know to reload. */
+    boolean finishImport(Collection<String> kinds, long start, long end, boolean history, String transport) throws Exception {
         if (!"health_connect".equals(transport) && !"samsung_sdk".equals(transport)) throw new IllegalArgumentException("Unknown import transport");
         db.beginTransaction();
         try {
             JSONObject previous = metadata();
+            // A record that is new or edited, or one the replaced window had that the scan no longer does.
+            boolean changed = false;
+            try (Cursor rows = db.rawQuery("SELECT s.kind,s.payload,r.payload FROM staging s LEFT JOIN records r ON r.kind=s.kind AND r.id=s.id"
+                    + " WHERE r.payload IS NULL OR r.payload<>s.payload", null)) {
+                while (!changed && rows.moveToNext()) changed = rows.isNull(2) || !rows.getString(0).endsWith("Day")
+                    || differentDay(new JSONObject(rows.getString(1)), new JSONObject(rows.getString(2)));
+            }
+            for (String kind : kinds) if (!changed) changed = exists("SELECT 1 FROM records r WHERE r.kind=? AND r.start>=? AND r.start<?"
+                + " AND NOT EXISTS (SELECT 1 FROM staging s WHERE s.kind=r.kind AND s.id=r.id) LIMIT 1", new String[]{kind, Long.toString(start), Long.toString(end)});
             for (String kind : kinds) db.delete("records", "kind=? AND start>=? AND start<?", new String[]{kind, Long.toString(start), Long.toString(end)});
             db.execSQL("DELETE FROM record_parts WHERE EXISTS (SELECT 1 FROM staging s WHERE s.kind=record_parts.kind AND s.id=record_parts.id)");
             db.execSQL("INSERT OR REPLACE INTO records SELECT * FROM staging");
@@ -224,7 +280,17 @@ final class HealthRecordStore implements AutoCloseable {
             db.delete("staging", null, null);
             db.delete("staging_parts", null, null);
             db.setTransactionSuccessful();
+            return changed;
         } finally { db.endTransaction(); }
+    }
+
+    /** Today's running total is restamped to the time of every scan; only its day and value say it changed. */
+    private static boolean differentDay(JSONObject staged, JSONObject kept) throws Exception {
+        return staged.getLong("start") != kept.getLong("start") || Double.compare(staged.optDouble("value"), kept.optDouble("value")) != 0;
+    }
+
+    private boolean exists(String sql, String[] args) {
+        try (Cursor row = db.rawQuery(sql, args)) { return row.moveToFirst(); }
     }
 
     JSONObject metadata() throws Exception {
@@ -242,5 +308,12 @@ final class HealthRecordStore implements AutoCloseable {
 
     Cursor workouts() { return db.rawQuery("SELECT payload FROM records WHERE kind='exercise' ORDER BY start DESC,id", null); }
     Cursor pendingWorkouts() { return db.rawQuery("SELECT payload FROM staging WHERE kind='exercise' ORDER BY start,id", null); }
-    @Override public void close() { db.close(); }
+    /** The shared database closes when its last store does. */
+    @Override public void close() {
+        synchronized (OPEN) {
+            if (closed) return;
+            closed = true;
+            if (--shared.users == 0) { OPEN.remove(key); db.close(); }
+        }
+    }
 }

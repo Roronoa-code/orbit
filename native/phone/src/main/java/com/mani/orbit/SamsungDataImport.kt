@@ -33,8 +33,9 @@ internal object SamsungDataImport {
         else -> listOf(it)
     } }
 
+    /** Import what Samsung has into the store. True when the committed records changed. */
     suspend fun sync(sdk: HealthDataStore, store: HealthRecordStore, granted: Set<Permission>, recent: Boolean,
-                     progress: (Int) -> Unit) {
+                     progress: (Int) -> Unit): Boolean {
         val allowed = permissions.filterValues(granted::contains).keys
         require(hasReadingsPermission(granted)) { "Allow Samsung Health read access" }
         val meta = store.metadata()
@@ -92,7 +93,7 @@ internal object SamsungDataImport {
         require(allowed.all { permissions.getValue(it) in stillGranted }) { "Samsung Health access changed" }
         currentCoroutineContext().ensureActive()
         if (skipped > 0) android.util.Log.w("OrbitImport", "Samsung import finished with $skipped unreadable records skipped")
-        store.finishImport(kinds(allowed), from.toEpochMilli(), until.toEpochMilli(), true, "samsung_sdk")
+        return store.finishImport(kinds(allowed), from.toEpochMilli(), until.toEpochMilli(), true, "samsung_sdk")
     }
 
     internal fun canRefreshRecent(meta: JSONObject, kinds: List<String>, now: Long): Boolean {
