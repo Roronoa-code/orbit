@@ -6,7 +6,7 @@ import zipfile
 
 
 def prepare(build):
-    archive = Path(os.environ.get('SAMSUNG_HEALTH_SDK', str(Path.home() / 'Downloads/samsung-health-data-sdk-1.1.0.zip')))
+    archive = Path(os.environ.get('SAMSUNG_HEALTH_SDK', 'D:/07 - Projects & Prototypes/02 - Orbit/samsung-health-data-sdk-1.1.0.zip'))
     cache = Path(os.environ.get('GRADLE_USER_HOME', str(Path.home() / '.gradle'))) / 'caches/modules-2/files-2.1'
     dependencies = [('org.jetbrains.kotlin', 'kotlin-stdlib', '2.2.21'),
                     ('org.jetbrains.kotlin', 'kotlin-parcelize-runtime', '1.9.22'),
@@ -20,7 +20,7 @@ def prepare(build):
             raise SystemExit(f'Missing installed Samsung SDK dependency: {group}:{name}:{version}')
         jars.append(matches[0])
     if not archive.is_file():
-        raise SystemExit('Download Samsung Health Data SDK 1.1.0 to Downloads, or set SAMSUNG_HEALTH_SDK to its zip path.')
+        raise SystemExit('Samsung Health Data SDK 1.1.0 is expected in D:/07 - Projects & Prototypes/02 - Orbit; or set SAMSUNG_HEALTH_SDK to its zip path.')
     with zipfile.ZipFile(archive) as sdk:
         with zipfile.ZipFile(io.BytesIO(sdk.read('1.1.0/libs/samsung-health-data-api-1.1.0.aar'))) as aar:
             library = build / 'samsung-health.jar'

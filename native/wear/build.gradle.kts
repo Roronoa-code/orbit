@@ -5,8 +5,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 val samsungSensorSdk = tasks.register<Copy>("extractSamsungSensorSdk") {
+    // The owner keeps Samsung's SDK archives with the Orbit project files on D:, not in Downloads.
     val archive = providers.environmentVariable("SAMSUNG_SENSOR_SDK")
-        .orElse("${System.getProperty("user.home")}/Downloads/samsung-health-sensor-sdk-v1.4.1.zip")
+        .orElse("D:/07 - Projects & Prototypes/02 - Orbit/samsung-health-sensor-sdk-v1.4.1.zip")
     from(zipTree(archive)) {
         include("1.4.1/libs/samsung-health-sensor-api-1.4.1.aar")
         eachFile { path = name }

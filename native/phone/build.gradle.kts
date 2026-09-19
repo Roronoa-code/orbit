@@ -4,8 +4,9 @@ plugins {
 }
 
 val samsungSdk = tasks.register<Copy>("extractSamsungSdk") {
+    // The owner keeps Samsung's SDK archives with the Orbit project files on D:, not in Downloads.
     val archive = providers.environmentVariable("SAMSUNG_HEALTH_SDK")
-        .orElse("${System.getProperty("user.home")}/Downloads/samsung-health-data-sdk-1.1.0.zip")
+        .orElse("D:/07 - Projects & Prototypes/02 - Orbit/samsung-health-data-sdk-1.1.0.zip")
     from(zipTree(archive)) {
         include("1.1.0/libs/samsung-health-data-api-1.1.0.aar")
         eachFile { path = name }

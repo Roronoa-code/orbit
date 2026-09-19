@@ -63,7 +63,7 @@ The [Samsung Sensor SDK distribution process](https://developer.samsung.com/heal
 
 Build the Wear module with the same package/signing identity, Health Services capability/permission flow, real measurement/workout services and durable sender/ACK/reconnect scheduling. Extend the shared model for workout ownership/state, recovery/sleep context and richer sensor payloads while keeping source identity and provenance. Read the remaining official watch design/workout/current-motion transcripts before the watch UI. Then complete native phone feature/motion parity, background imports, received-watch projections and final device qualification. Keep the goal active.
 
-Build with JDK 17 and `gradlew.bat`; configure the Android SDK via `local.properties` or the normal Android environment. Samsung Health Data SDK 1.1.0 is read from `SAMSUNG_HEALTH_SDK` or its existing Downloads archive. Local command: `./verify.ps1 -Serial emulator-5580`. Build/test logs and screenshots are ignored local artifacts.
+Build with JDK 17 and `gradlew.bat`; configure the Android SDK via `local.properties` or the normal Android environment. Samsung Health Data SDK 1.1.0 and Sensor SDK 1.4.1 are read from `SAMSUNG_HEALTH_SDK` and `SAMSUNG_SENSOR_SDK`, or else from their archives in `D:/07 - Projects & Prototypes/02 - Orbit`. Local command: `./verify.ps1 -Serial emulator-5580`. Build/test logs and screenshots are ignored local artifacts.
 
 ## Native Measurements checkpoint — 14 September 2026
 

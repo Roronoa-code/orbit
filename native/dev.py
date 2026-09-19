@@ -95,6 +95,10 @@ def capture(command, timeout=30, env=None):
     return result.stdout.strip()
 
 
+# The owner keeps Samsung's SDK archives with the Orbit project files on D:, not in Downloads.
+SAMSUNG_ARCHIVES = "D:/07 - Projects & Prototypes/02 - Orbit"
+
+
 def toolchain():
     jdk = Path(os.environ.get("JAVA_HOME", "C:/HA/HEALTH APP/.local/toolchains/jdk-17.0.20.1+1"))
     local = ROOT / "local.properties"
@@ -103,8 +107,8 @@ def toolchain():
                os.environ.get("ANDROID_HOME", str(Path.home() / "AppData/Local/Android/Sdk")))
     java = jdk / "bin" / ("java.exe" if os.name == "nt" else "java")
     adb = sdk / "platform-tools" / ("adb.exe" if os.name == "nt" else "adb")
-    sdk_zip = Path(os.environ.get("SAMSUNG_HEALTH_SDK", str(Path.home() / "Downloads/samsung-health-data-sdk-1.1.0.zip")))
-    sensor_zip = Path(os.environ.get("SAMSUNG_SENSOR_SDK", str(Path.home() / "Downloads/samsung-health-sensor-sdk-v1.4.1.zip")))
+    sdk_zip = Path(os.environ.get("SAMSUNG_HEALTH_SDK", SAMSUNG_ARCHIVES + "/samsung-health-data-sdk-1.1.0.zip"))
+    sensor_zip = Path(os.environ.get("SAMSUNG_SENSOR_SDK", SAMSUNG_ARCHIVES + "/samsung-health-sensor-sdk-v1.4.1.zip"))
     if not sensor_zip.is_file():
         raise RuntimeError("Missing Samsung Sensor SDK archive (SAMSUNG_SENSOR_SDK)")
     verification = ROOT / "gradle/verification-metadata.xml"
